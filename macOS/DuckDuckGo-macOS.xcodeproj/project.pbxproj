@@ -2986,6 +2986,8 @@
 		BBC3F8FA2D668AFD003F4910 /* FocusModePreferenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC3F8F82D668AF4003F4910 /* FocusModePreferenceView.swift */; };
 		BBC3F8FC2D677E6E003F4910 /* duck-quack.wav in Resources */ = {isa = PBXBuildFile; fileRef = BBC3F8FB2D677E6E003F4910 /* duck-quack.wav */; };
 		BBC3F8FD2D677E6E003F4910 /* duck-quack.wav in Resources */ = {isa = PBXBuildFile; fileRef = BBC3F8FB2D677E6E003F4910 /* duck-quack.wav */; };
+		BBC3F8FF2D67C751003F4910 /* AllowedDomains.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC3F8FE2D67C748003F4910 /* AllowedDomains.swift */; };
+		BBC3F9002D67C751003F4910 /* AllowedDomains.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC3F8FE2D67C748003F4910 /* AllowedDomains.swift */; };
 		BBCD467A2C8643EC004DB483 /* XCUIApplicationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBCD46792C8643EC004DB483 /* XCUIApplicationExtension.swift */; };
 		BBE013EA2C5BFD660025F2C6 /* BookmarksEmptyStateContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE013E92C5BFD660025F2C6 /* BookmarksEmptyStateContent.swift */; };
 		BBE013EB2C5BFD660025F2C6 /* BookmarksEmptyStateContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBE013E92C5BFD660025F2C6 /* BookmarksEmptyStateContent.swift */; };
@@ -5050,6 +5052,7 @@
 		BBC3F8F52D65195F003F4910 /* FocusSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusSessionCoordinator.swift; sourceTree = "<group>"; };
 		BBC3F8F82D668AF4003F4910 /* FocusModePreferenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusModePreferenceView.swift; sourceTree = "<group>"; };
 		BBC3F8FB2D677E6E003F4910 /* duck-quack.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "duck-quack.wav"; sourceTree = "<group>"; };
+		BBC3F8FE2D67C748003F4910 /* AllowedDomains.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowedDomains.swift; sourceTree = "<group>"; };
 		BBCD46792C8643EC004DB483 /* XCUIApplicationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XCUIApplicationExtension.swift; sourceTree = "<group>"; };
 		BBE013E92C5BFD660025F2C6 /* BookmarksEmptyStateContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarksEmptyStateContent.swift; sourceTree = "<group>"; };
 		BBFB727E2C48047C0088884C /* SortBookmarksViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortBookmarksViewModel.swift; sourceTree = "<group>"; };
@@ -9854,6 +9857,7 @@
 		BBC3F8F42D651952003F4910 /* FocusSession */ = {
 			isa = PBXGroup;
 			children = (
+				BBC3F8FE2D67C748003F4910 /* AllowedDomains.swift */,
 				BBC3F8F82D668AF4003F4910 /* FocusModePreferenceView.swift */,
 				BBC3F8F52D65195F003F4910 /* FocusSessionCoordinator.swift */,
 			);
@@ -12046,6 +12050,7 @@
 				3706FB74293F65D500E42796 /* FaviconHostReference.swift in Sources */,
 				B69A14F32B4D6FE800B9417D /* AddBookmarkFolderPopoverViewModel.swift in Sources */,
 				371BBC5F2D00CA3E008FA0C7 /* NewTabPageWebViewModel.swift in Sources */,
+				BBC3F9002D67C751003F4910 /* AllowedDomains.swift in Sources */,
 				4B67854B2AA8DE76008A5004 /* VPNFeatureGatekeeper.swift in Sources */,
 				C168B9AD2B31DC7F001AFAD9 /* AutofillNeverPromptWebsitesManager.swift in Sources */,
 				37CBCA9B2A8966E60050218F /* SyncSettingsAdapter.swift in Sources */,
@@ -14311,6 +14316,7 @@
 				FD23FD2D2886A81D007F6985 /* AutoconsentManagement.swift in Sources */,
 				9FBB0C052CBD223D0006B6A6 /* ViewHighlighter.swift in Sources */,
 				4B4D60D32A0C84F700BCD287 /* UserText+NetworkProtection.swift in Sources */,
+				BBC3F8FF2D67C751003F4910 /* AllowedDomains.swift in Sources */,
 				843D73BB2C786E5400E4F9DC /* BookmarkListPopover.swift in Sources */,
 				B6B2400E28083B49001B8F3A /* WebViewContainerView.swift in Sources */,
 				3173072D2CD2490700C492AB /* AutofillToolbarOnboardingView.swift in Sources */,

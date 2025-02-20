@@ -27,8 +27,6 @@ extension Preferences {
         @ObservedObject private var focusModeCoordinator: FocusSessionCoordinator = .shared
         @State var test = false // TODO: This needs to be replaced to a storage var
 
-
-
         var body: some View {
             PreferencePane("Focus Mode", spacing: 4) {
 
@@ -47,7 +45,7 @@ extension Preferences {
 
                     PreferencePaneSubSection {
                         Button("Manage Allowed Sites...") {
-                            // TODO: Manage allowed sites
+                            self.showAllowedSites()
                         }
                     }
                 }
@@ -61,6 +59,19 @@ extension Preferences {
                     }
                 }
             }
+        }
+
+        @MainActor private func showAllowedSites() {
+            let windowController = ExcludedDomainsViewController.create(model: focusModeCoordinator.allowedSitesViewModel).wrappedInWindowController()
+
+            guard let window = windowController.window,
+                  let parentWindowController = WindowControllersManager.shared.lastKeyMainWindowController
+            else {
+                assertionFailure("Failed to present ExcludedDomainsViewController")
+                return
+            }
+
+            parentWindowController.window?.beginSheet(window)
         }
     }
 }

@@ -56,7 +56,7 @@ struct FocusModeNavigationBarPopover: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Image(.daxResponse)
+            Image(.hourglassBlocked128)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.bottom, 8)
 
@@ -120,6 +120,7 @@ final class FocusSessionCoordinator: ObservableObject {
     static let shared = FocusSessionCoordinator() // Singleton instance
 
     private let notificationCenter: NotificationCenter
+    let allowedSitesViewModel: ExcludedDomainsViewModel
 
     private var persistor: FocusModePreferencesPersistor
     private var timer: Timer?
@@ -144,12 +145,14 @@ final class FocusSessionCoordinator: ObservableObject {
     }
 
     private init(notificationCenter: NotificationCenter = .default,
-                 persistor: FocusModePreferencesPersistor = FocusModePreferencesUserDefaultsPersistor()) {
+                 persistor: FocusModePreferencesPersistor = FocusModePreferencesUserDefaultsPersistor(),
+                 allowedSitesViewModel: ExcludedDomainsViewModel = DefaultAllowedDomainsViewModel()) {
         timeRemainingMenuItem = NSMenuItem(title: "Time remaining: --:--", action: nil, keyEquivalent: "")
         status = .off
 
         self.notificationCenter = notificationCenter
         self.persistor = persistor
+        self.allowedSitesViewModel = allowedSitesViewModel
         self.isPlaySoundEnabled = persistor.playSoundEnabled
     }
 
@@ -166,7 +169,9 @@ final class FocusSessionCoordinator: ObservableObject {
             return false
         }
 
-        return true // TODO: Here we will need to check the allow list
+        let isSiteAllowed = allowedSitesViewModel.domains.contains(where: { url.isPart(ofDomain: $0) })
+
+        return !isSiteAllowed
     }
 
     func enableFeature() {
