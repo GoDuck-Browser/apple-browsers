@@ -51,6 +51,10 @@ extension NewTabPageActionsManager {
             getLegacyIsViewExpandedSetting: UserDefaultsWrapper<Bool>(key: .homePageShowRecentlyVisited, defaultValue: false).wrappedValue
         )
 
+        let vpnStatsModel = NewTabPageVPNStatsModel(
+            vpnController: NewTabPageVPNController(),
+            eventMapping: NewTabPageVPNStatsEventHandler())
+
         let recentActivityProvider = RecentActivityProvider(
             historyCoordinator: historyCoordinator,
             urlFavoriteStatusProvider: bookmarkManager,
@@ -77,6 +81,7 @@ extension NewTabPageActionsManager {
             NewTabPageNextStepsCardsClient(model: NewTabPageNextStepsCardsProvider(continueSetUpModel: HomePage.Models.ContinueSetUpModel(tabOpener: NewTabPageTabOpener()))),
             NewTabPageFavoritesClient(favoritesModel: favoritesModel, preferredFaviconSize: Int(Favicon.SizeCategory.medium.rawValue)),
             NewTabPagePrivacyStatsClient(model: privacyStatsModel),
+            NewTabPageVPNStatsClient(model: vpnStatsModel),
             NewTabPageRecentActivityClient(model: recentActivityModel)
         ])
     }

@@ -111,6 +111,7 @@ public final class NewTabPageConfigurationClient: NewTabPageUserScriptClient {
             .init(id: .freemiumPIRBanner),
             .init(id: .nextSteps),
             .init(id: .favorites),
+            .init(id: .vpn),
         ]
         if sectionsAvailabilityProvider.isPrivacyStatsAvailable {
             widgets.append(.init(id: .privacyStats))
@@ -124,7 +125,8 @@ public final class NewTabPageConfigurationClient: NewTabPageUserScriptClient {
 
     private func fetchWidgetConfigs() -> [NewTabPageDataModel.NewTabPageConfiguration.WidgetConfig] {
         var widgetConfigs: [NewTabPageDataModel.NewTabPageConfiguration.WidgetConfig] = [
-            .init(id: .favorites, isVisible: sectionsVisibilityProvider.isFavoritesVisible)
+            .init(id: .favorites, isVisible: sectionsVisibilityProvider.isFavoritesVisible),
+            .init(id: .vpn, isVisible: true)
         ]
         if sectionsAvailabilityProvider.isPrivacyStatsAvailable {
             widgetConfigs.append(.init(id: .privacyStats, isVisible: sectionsVisibilityProvider.isPrivacyStatsVisible))

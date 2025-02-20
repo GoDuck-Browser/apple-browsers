@@ -16,6 +16,7 @@
 //  limitations under the License.
 //
 
+import Combine
 import Common
 import Foundation
 import NetworkProtection
@@ -146,6 +147,14 @@ extension NetworkProtectionIPCTunnelController: TunnelController {
 
     func command(_ command: VPNCommand) async throws {
         try await ipcClient.command(command)
+    }
+
+    var connectionStatus: ConnectionStatus {
+        ipcClient.ipcStatusObserver.recentValue
+    }
+
+    var connectionStatusPublisher: AnyPublisher<ConnectionStatus, Never> {
+        ipcClient.ipcStatusObserver.publisher
     }
 
     /// Queries VPN to know if it's connected.

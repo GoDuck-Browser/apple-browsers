@@ -33,6 +33,7 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../BrowserServicesKit"),
+        .package(path: "../CombineExtensions"),
         .package(path: "../WebKitExtensions"),
         .package(path: "../UserScriptActionsManager"),
         .package(path: "../Utilities"),
@@ -44,6 +45,7 @@ let package = Package(
             name: "NewTabPage",
             dependencies: [
                 .product(name: "BrowserServicesKit", package: "BrowserServicesKit"),
+                .product(name: "CombineExtensions", package: "CombineExtensions"),
                 .product(name: "PersistenceTestingUtils", package: "BrowserServicesKit"),
                 .product(name: "PrivacyStats", package: "BrowserServicesKit"),
                 .product(name: "RemoteMessaging", package: "BrowserServicesKit"),
