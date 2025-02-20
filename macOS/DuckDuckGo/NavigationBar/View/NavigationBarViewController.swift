@@ -1066,9 +1066,7 @@ final class NavigationBarViewController: NSViewController {
     }
 
     @IBAction func focusTimerButtonAction(_ sender: NSButton) {
-        let menu = focusSessionCoordinator.getMenu()
-        let location = NSPoint(x: -menu.size.width + sender.bounds.width, y: sender.bounds.height + 4)
-        menu.popUp(positioning: nil, at: location, in: sender)
+        focusSessionCoordinator.showPopover(in: sender)
     }
 
     private func updateAIChatButton() {

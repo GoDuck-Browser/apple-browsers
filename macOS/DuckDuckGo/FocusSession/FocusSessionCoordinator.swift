@@ -18,6 +18,7 @@
 
 import Foundation
 import Combine
+import SwiftUI
 import SwiftUICore
 import AVFoundation
 
@@ -35,7 +36,7 @@ enum FocusSessionTimer {
     var duration: TimeInterval {
         switch self {
         case .twentyFive:
-            return 10
+            return 25 * 60
         case .fifty:
             return 50 * 60
         case .seventyFive:
@@ -43,6 +44,64 @@ enum FocusSessionTimer {
         case .oneHundred:
             return 100 * 60
         }
+    }
+}
+
+struct FocusModeNavigationBarPopover: View {
+
+    @ObservedObject
+    var coordinator = FocusSessionCoordinator.shared
+
+    @State private var isHovered = false
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Image(.daxResponse)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.bottom, 8)
+
+            Text("Focus Mode is ON")
+                .font(.system(size: 15, weight: .bold))
+                .padding(.bottom, 8)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .center)
+
+            Text("Sites not on your allow list are restricted. You can manage your list anytime in settings.")
+                .font(.system(size: 13, weight: .regular))
+                .foregroundColor(.secondary)
+                .padding(.bottom, 16)
+                .multilineTextAlignment(.center)
+                .frame(alignment: .center)
+
+            Divider()
+
+            HStack {
+                Text("Time Left")
+                Spacer()
+                Text(coordinator.currentTimeRemaining)
+                    .foregroundColor(.secondary)
+            }.padding([.top, .bottom], 2)
+
+            Divider()
+
+            HStack {
+                Image(.settings16)
+                    .padding(.trailing, 2)
+                Text("Customize Focus Mode")
+            }
+            .padding([.top, .bottom], 2)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(isHovered ? .menuItemHover : Color.clear)
+            .onHover { isHovered in
+                self.isHovered = isHovered
+            }
+            .onTapGesture {
+                coordinator.openFocusModeSettings()
+            }
+
+        }
+        .frame(width: 255)
+        .padding(16)
     }
 }
 
@@ -61,21 +120,12 @@ final class FocusSessionCoordinator: ObservableObject {
     static let shared = FocusSessionCoordinator() // Singleton instance
 
     private let notificationCenter: NotificationCenter
-    private var persistor: FocusModePreferencesPersistor
 
-    @Published var status: Preferences.StatusIndicator?
-    @Published var isCurrentOnFocusSession: Bool = false
+    private var persistor: FocusModePreferencesPersistor
     private var timer: Timer?
     private var totalDuration: TimeInterval = 0
     private var remainingTime: TimeInterval = 0
     private var audioPlayer: AVAudioPlayer?
-
-    // Publisher for remaining time
-    private var timeRemainingSubject = PassthroughSubject<String, Never>()
-    var timeRemainingPublisher: AnyPublisher<String, Never> {
-        timeRemainingSubject.eraseToAnyPublisher()
-    }
-
     private var menu = NSMenu()
     private var timeRemainingMenuItem: NSMenuItem
     private var cancellables = Set<AnyCancellable>()
@@ -83,6 +133,9 @@ final class FocusSessionCoordinator: ObservableObject {
     @UserDefaultsWrapper(key: .focusModeEnabled, defaultValue: false)
     private var isFocusModeEnabled: Bool
 
+    @Published var status: Preferences.StatusIndicator?
+    @Published var isCurrentOnFocusSession: Bool = false
+    @Published var currentTimeRemaining: String = "--:--"
     @Published
     var isPlaySoundEnabled: Bool {
         didSet {
@@ -156,7 +209,6 @@ final class FocusSessionCoordinator: ObservableObject {
     private func playSound() {
         guard isPlaySoundEnabled else { return } // Check if sound playback is enabled
 
-        // Replace "soundFileName" with the actual name of your sound file
         guard let url = Bundle.main.url(forResource: "duck-quack", withExtension: "wav") else {
             print("Sound file not found")
             return
@@ -183,7 +235,7 @@ final class FocusSessionCoordinator: ObservableObject {
             timeString = String(format: "%02d:%02d", minutes, seconds)
         }
 
-        timeRemainingSubject.send(timeString)
+        currentTimeRemaining = timeString
 
         // Update menu item
         timeRemainingMenuItem.title = "Time remaining: \(timeString)"
@@ -216,6 +268,19 @@ final class FocusSessionCoordinator: ObservableObject {
         }
 
         return menu
+    }
+
+    func showPopover(in view: NSView) {
+        let popover = NSPopover()
+        let contentView = FocusModeNavigationBarPopover()
+        popover.animates = true
+        popover.behavior = .semitransient
+        popover.contentSize = NSHostingView(rootView: contentView).fittingSize
+        let controller = NSViewController()
+        controller.view = NSHostingView(rootView: contentView)
+        popover.contentViewController = controller
+
+        popover.show(positionedBelow: view)
     }
 
     @objc func startTwentyFiveMinutesSession() {

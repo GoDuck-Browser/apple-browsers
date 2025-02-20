@@ -16835,6 +16835,9 @@
         }
       }
     },
+    "Customize Focus Mode" : {
+
+    },
     "dashboard.permission.allow" : {
       "comment" : "Privacy Dashboard: Website can always access input media device",
       "extractionState" : "extracted_with_value",
@@ -26539,6 +26542,12 @@
           }
         }
       }
+    },
+    "Focus Mode" : {
+
+    },
+    "Focus Mode is ON" : {
+
     },
     "folder.dialog.add" : {
       "comment" : "Button to confim a bookmark folder creation",
@@ -63946,6 +63955,9 @@
         }
       }
     },
+    "Sites not on your allow list are restricted. You can manage your list anytime in settings." : {
+
+    },
     "Smart Copy/Paste" : {
       "comment" : "Main Menu Edit-Substitutions item",
       "localizations" : {
@@ -65961,6 +65973,9 @@
           }
         }
       }
+    },
+    "Time Left" : {
+
     },
     "tooltip.addToFavorites" : {
       "comment" : "Tooltip for add to favorites button",
