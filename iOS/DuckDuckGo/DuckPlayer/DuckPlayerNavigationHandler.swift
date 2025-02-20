@@ -852,6 +852,11 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         
         let parameters = getDuckPlayerParameters(url: url)
         
+        // Present Bottom Sheet (Native entry point)
+        if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
+            duckPlayer.presentBottomSheet(for: videoID)
+        }
+        
         // If this is an internal Youtube Link (i.e Clicking in youtube logo in the player)
         // Do not handle it
         
@@ -874,8 +879,6 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             lastURLChangeHandling = Date()
             Logger.duckPlayer.debug("Handling URL change for \(webView.url?.absoluteString ?? "")")
             return .handled(.duckPlayerEnabled)
-        } else {
-            
         }
         
         return .notHandled(.isNotYoutubeWatch)

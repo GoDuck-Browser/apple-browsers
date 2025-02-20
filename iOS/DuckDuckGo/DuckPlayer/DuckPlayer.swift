@@ -136,6 +136,10 @@ protocol DuckPlayerControlling: AnyObject {
     
     /// Publisher that emits when Native DuckPlayer is dismissed
     var playerDismissedPublisher: PassthroughSubject<Void, Never> { get }
+
+    /// The view and viewModel for the bottom sheet
+    var bottomSheetViewModel: DuckPlayerBottomSheetViewModel? { get }
+    var bottomSheetHostingController: UIHostingController<DuckPlayerBottomSheetView>? { get }
     
     /// Initializes a new instance of DuckPlayer with the provided settings and feature flagger.
     ///
@@ -220,6 +224,11 @@ protocol DuckPlayerControlling: AnyObject {
     ///   - videoID: The ID of the video to load
     ///   - source: The source of the video navigation.
     func loadNativeDuckPlayerVideo(videoID: String, source: DuckPlayer.VideoNavigationSource)
+    
+    /// Presents a bottom sheet asking the user how they want to open the video
+    ///
+    /// - Parameter videoID: The YouTube video ID to be played
+    func presentBottomSheet(for videoID: String)
 
 }
 
@@ -289,6 +298,10 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     
     /// Publisher to notify when DuckPlayer is dismissed
     var playerDismissedPublisher: PassthroughSubject<Void, Never>
+
+    /// The view and viewModel for the bottom sheet
+    var bottomSheetViewModel: DuckPlayerBottomSheetViewModel?
+    var bottomSheetHostingController: UIHostingController<DuckPlayerBottomSheetView>?
     
     /// Initializes a new instance of DuckPlayer with the provided settings and feature flagger.
     ///
@@ -683,7 +696,52 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
        
     }
 
-    
+    /// Presents a bottom sheet asking the user how they want to open the video
+    ///
+    /// - Parameter videoID: The YouTube video ID to be played    
+    @MainActor
+    func presentBottomSheet(for videoID: String) {
+        guard let hostView = hostView else { return }
+        
+        let viewModel = DuckPlayerBottomSheetViewModel(duckPlayer: self, videoID: videoID)
+        let view = DuckPlayerBottomSheetView(viewModel: viewModel)
+        let hostingController = UIHostingController(rootView: view)
+        
+        // Configure the hosting controller
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.isOpaque = false
+        
+        // Get sheet height (assuming fixed height, adjust as needed)
+        let sheetHeight: CGFloat = 80 // Adjust based on your sheet's height
+        
+        // Adjust WebView's bottom constraint
+        hostView.webViewBottomAnchorConstraint?.constant = -sheetHeight
+        
+        // Add sheet view controller
+        hostView.addChild(hostingController)
+        hostView.view.addSubview(hostingController.view)
+        
+        // Setup constraints for sheet
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            hostingController.view.leadingAnchor.constraint(equalTo: hostView.view.leadingAnchor),
+            hostingController.view.trailingAnchor.constraint(equalTo: hostView.view.trailingAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor),
+            hostingController.view.heightAnchor.constraint(equalToConstant: sheetHeight)
+        ])
+        
+        hostingController.didMove(toParent: hostView)
+        
+        bottomSheetViewModel = viewModel
+        bottomSheetHostingController = hostingController
+        
+        // Animate the changes
+        UIView.animate(withDuration: 0.3) {
+            hostView.view.layoutIfNeeded()
+        }
+        
+        viewModel.show()
+    }
 }
 
 extension DuckPlayer: UIGestureRecognizerDelegate {

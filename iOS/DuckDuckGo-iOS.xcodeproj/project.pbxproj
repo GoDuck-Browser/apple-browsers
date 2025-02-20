@@ -324,8 +324,11 @@
 		6505529C2D6741BA0067D4F2 /* addMediaControl.js in Resources */ = {isa = PBXBuildFile; fileRef = 650552952D673E440067D4F2 /* addMediaControl.js */; };
 		6505529D2D6741BD0067D4F2 /* muteAudio.js in Resources */ = {isa = PBXBuildFile; fileRef = 650552962D673E440067D4F2 /* muteAudio.js */; };
 		6505529E2D6741C00067D4F2 /* removeMediaControl.js in Resources */ = {isa = PBXBuildFile; fileRef = 650552972D673E440067D4F2 /* removeMediaControl.js */; };
+		650552A22D67768E0067D4F2 /* DuckPlayerBottomSheetViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650552A12D67768E0067D4F2 /* DuckPlayerBottomSheetViewModel.swift */; };
+		650552A42D67768E0067D4F2 /* DuckPlayerBottomSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650552A02D67768E0067D4F2 /* DuckPlayerBottomSheetView.swift */; };
 		653561022D4D2C6D0064F258 /* Logger+DuckPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653561012D4D2C680064F258 /* Logger+DuckPlayer.swift */; };
 		655A9C6A2D4D2812000A7841 /* DuckPlayerWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655A9C692D4D280D000A7841 /* DuckPlayerWebView.swift */; };
+		6584D5BF2D678E52004A3E24 /* BottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6584D5BE2D678E52004A3E24 /* BottomSheet.swift */; };
 		6594CCEA2D4A3E1200188B1A /* DuckPlayerSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6594CCE92D4A3E1200188B1A /* DuckPlayerSettingsTests.swift */; };
 		65D091242D47DF2100226164 /* DuckPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D091232D47DF1B00226164 /* DuckPlayerViewModel.swift */; };
 		65D091262D47DF2A00226164 /* DuckPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65D091252D47DF2500226164 /* DuckPlayerView.swift */; };
@@ -1801,8 +1804,11 @@
 		650552952D673E440067D4F2 /* addMediaControl.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = addMediaControl.js; sourceTree = "<group>"; };
 		650552962D673E440067D4F2 /* muteAudio.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = muteAudio.js; sourceTree = "<group>"; };
 		650552972D673E440067D4F2 /* removeMediaControl.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = removeMediaControl.js; sourceTree = "<group>"; };
+		650552A02D67768E0067D4F2 /* DuckPlayerBottomSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckPlayerBottomSheetView.swift; sourceTree = "<group>"; };
+		650552A12D67768E0067D4F2 /* DuckPlayerBottomSheetViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckPlayerBottomSheetViewModel.swift; sourceTree = "<group>"; };
 		653561012D4D2C680064F258 /* Logger+DuckPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+DuckPlayer.swift"; sourceTree = "<group>"; };
 		655A9C692D4D280D000A7841 /* DuckPlayerWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckPlayerWebView.swift; sourceTree = "<group>"; };
+		6584D5BE2D678E52004A3E24 /* BottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomSheet.swift; sourceTree = "<group>"; };
 		6594CCE92D4A3E1200188B1A /* DuckPlayerSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckPlayerSettingsTests.swift; sourceTree = "<group>"; };
 		65D091232D47DF1B00226164 /* DuckPlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckPlayerViewModel.swift; sourceTree = "<group>"; };
 		65D091252D47DF2500226164 /* DuckPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckPlayerView.swift; sourceTree = "<group>"; };
@@ -6199,6 +6205,9 @@
 				D63FF8932C1B67E8006DE24D /* YoutubePlayerUserScript.swift */,
 				D6B9E8D12CDA4418002B640C /* DuckPlayerOverlayUsagePixels.swift */,
 				31860A5A2C57ED2D005561F5 /* DuckPlayerStorage.swift */,
+				6584D5BE2D678E52004A3E24 /* BottomSheet.swift */,
+				650552A02D67768E0067D4F2 /* DuckPlayerBottomSheetView.swift */,
+				650552A12D67768E0067D4F2 /* DuckPlayerBottomSheetViewModel.swift */,
 			);
 			path = DuckPlayer;
 			sourceTree = "<group>";
@@ -8510,6 +8519,7 @@
 				6F3537A22C4AB97A009F8717 /* NewTabPageSettingsModel.swift in Sources */,
 				9F23B8032C2BCD0000950875 /* DaxDialogStyles.swift in Sources */,
 				C1641EAF2BC2F5140012607A /* ImportPasswordsViewController.swift in Sources */,
+				6584D5BF2D678E52004A3E24 /* BottomSheet.swift in Sources */,
 				D63FF8982C1B6A45006DE24D /* DuckPlayer.swift in Sources */,
 				85B9CB8921AEBDD5009001F1 /* FavoriteHomeCell.swift in Sources */,
 				859DB81C2CE6268C001F7210 /* MockTextZoomCoordinator.swift in Sources */,
@@ -8793,6 +8803,8 @@
 				D60B1F272B9DDE5A00AE4760 /* SubscriptionGoogleView.swift in Sources */,
 				984D035C24AE15CD0066CFB8 /* TabSwitcherSettings.swift in Sources */,
 				D6E83C562B21ECC1006C8AFB /* SettingsLegacyViewProvider.swift in Sources */,
+				650552A22D67768E0067D4F2 /* DuckPlayerBottomSheetViewModel.swift in Sources */,
+				650552A42D67768E0067D4F2 /* DuckPlayerBottomSheetView.swift in Sources */,
 				CBF259C32D4EC10400AC63E4 /* CrashHandlersConfiguration.swift in Sources */,
 				98B31292218CCB8C00E54DE1 /* AppDependencyProvider.swift in Sources */,
 				D6ACEA322BBD55BF008FADDF /* TabURLInterceptor.swift in Sources */,
