@@ -58,8 +58,9 @@ class NewTabPageVPNController {
         let initialSubscriptionStatus = VPNStatus.subscribed(connectionStatus: initialConnectionStatus)
 
         let publisher = vpnControllerXPCClient.connectionStatusObserver.publisher
-            .combineLatest(vpnControllerXPCClient.serverInfoObserver.publisher)
-            .combineLatest(vpnControllerXPCClient.ipcDataVolumeObserver.publisher)
+            .removeDuplicates()
+            .combineLatest(vpnControllerXPCClient.serverInfoObserver.publisher.removeDuplicates())
+            .combineLatest(vpnControllerXPCClient.ipcDataVolumeObserver.publisher.removeDuplicates())
             .map { values in
 
                 VPNStatus.subscribed(
