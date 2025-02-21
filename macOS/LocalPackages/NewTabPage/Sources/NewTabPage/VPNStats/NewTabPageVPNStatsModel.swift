@@ -74,24 +74,8 @@ public final class NewTabPageVPNStatsModel {
             self.vpnController = vpnController
 
             statsUpdatePublisher = vpnController.statusPublisher
-                .throttle(for: .seconds(1), scheduler: RunLoop.main, latest: true)
                 .map { _ in }
                 .eraseToAnyPublisher()
-
-/*
-        privacyStats.statsUpdatePublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.statsUpdateSubject.send()
-            }
-            .store(in: &cancellables)
-
-        trackerDataProvider.trackerDataUpdatesPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in
-                self?.refreshTopCompanies()
-            }
-            .store(in: &cancellables)*/
     }
 
     func connect() async {

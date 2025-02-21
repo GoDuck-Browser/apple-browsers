@@ -22,6 +22,7 @@ import NetworkProtection
 import NetworkProtectionIPC
 import NewTabPage
 import NetworkProtectionUI
+import Subscription
 
 class NewTabPageVPNController {
 
@@ -45,7 +46,8 @@ class NewTabPageVPNController {
     var statusPublisher: VPNStatusPublisher
 
     init(tunnelController: NetworkProtectionIPCTunnelController = TunnelControllerProvider.shared.tunnelController,
-         vpnControllerXPCClient: VPNControllerXPCClient = .shared) {
+         vpnControllerXPCClient: VPNControllerXPCClient = .shared,
+         subscriptionManager: SubscriptionManager = Application.appDelegate.subscriptionManager) {
 
         self.tunnelController = tunnelController
         self.vpnControllerXPCClient = vpnControllerXPCClient
@@ -55,18 +57,35 @@ class NewTabPageVPNController {
             serverInfo: vpnControllerXPCClient.serverInfoObserver.recentValue,
             dataVolume: vpnControllerXPCClient.ipcDataVolumeObserver.recentValue)
 
-        let initialSubscriptionStatus = VPNStatus.subscribed(connectionStatus: initialConnectionStatus)
+        let initialSubscriptionStatus: VPNStatus = {
+            if subscriptionManager.accountManager.isUserAuthenticated {
+                return VPNStatus.subscribed(connectionStatus: initialConnectionStatus)
+            } else {
+                return VPNStatus.unsubscribed
+            }
+        }()
 
-        let publisher = vpnControllerXPCClient.connectionStatusObserver.publisher
-            .removeDuplicates()
-            .combineLatest(vpnControllerXPCClient.serverInfoObserver.publisher.removeDuplicates())
-            .combineLatest(vpnControllerXPCClient.ipcDataVolumeObserver.publisher.removeDuplicates())
-            .map { values in
+        let accountStatusPublisher = Publishers.Merge(
+            NotificationCenter.default.publisher(for: .accountDidSignIn).map { _ in true },
+            NotificationCenter.default.publisher(for: .accountDidSignOut).map { _ in false })
 
-                VPNStatus.subscribed(
-                    connectionStatus: Self.map(connectionStatus: values.0.0,
-                                               serverInfo: values.0.1,
-                                               dataVolume: values.1))
+        let vpnStatusPublisher = Publishers.CombineLatest4(
+            accountStatusPublisher.prepend(subscriptionManager.accountManager.isUserAuthenticated),
+            vpnControllerXPCClient.connectionStatusObserver.publisher.removeDuplicates(),
+            vpnControllerXPCClient.serverInfoObserver.publisher.removeDuplicates(),
+            vpnControllerXPCClient.ipcDataVolumeObserver.publisher.removeDuplicates()
+        )
+
+        let publisher = vpnStatusPublisher
+            .map { isAuthenticated, connectionStatus, serverInfo, dataVolume in
+                if isAuthenticated {
+                    return VPNStatus.subscribed(
+                        connectionStatus: Self.map(connectionStatus: connectionStatus,
+                                                   serverInfo: serverInfo,
+                                                   dataVolume: dataVolume))
+                } else {
+                    return VPNStatus.unsubscribed
+                }
             }
 
         statusPublisher = VPNStatusPublisher(
