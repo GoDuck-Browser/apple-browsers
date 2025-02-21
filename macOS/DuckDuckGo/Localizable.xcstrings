@@ -63835,6 +63835,9 @@
         }
       }
     },
+    "Site Blocked by Focus Mode" : {
+
+    },
     "site.not.working.button.title" : {
       "comment" : "Button title that appears on a dialog asking users about possible breakage of a site",
       "extractionState" : "extracted_with_value",
@@ -65973,6 +65976,9 @@
           }
         }
       }
+    },
+    "This site is restricted while Focus Mode is active. You can customize your allowed sites in settings." : {
+
     },
     "Time Left" : {
 

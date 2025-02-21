@@ -30,6 +30,7 @@ import PixelKit
 import SpecialErrorPages
 import UserScript
 import WebKit
+import SwiftUI
 
 protocol TabDelegate: ContentOverlayUserScriptDelegate {
     func tabWillStartNavigation(_ tab: Tab, isUserInitiated: Bool)
@@ -70,6 +71,7 @@ protocol NewWindowPolicyDecisionMaker {
     private let internalUserDecider: InternalUserDecider?
     private let pageRefreshMonitor: PageRefreshMonitoring
     private let featureFlagger: FeatureFlagger
+    let hostingView: NSHostingView<OverlayView> = .init(rootView: OverlayView())
     let pinnedTabsManager: PinnedTabsManager
 
     private let webViewConfiguration: WKWebViewConfiguration
@@ -78,6 +80,8 @@ protocol NewWindowPolicyDecisionMaker {
     let tabsPreferences: TabsPreferences
     let reloadPublisher = PassthroughSubject<Void, Never>()
     let navigationDidEndPublisher = PassthroughSubject<Tab, Never>()
+
+
 
     private var extensions: TabExtensions
     // accesing TabExtensions‘ Public Protocols projecting tab.extensions.extensionName to tab.extensionName
@@ -866,11 +870,13 @@ protocol NewWindowPolicyDecisionMaker {
         guard let url = self.url else { return }
 
         if FocusSessionCoordinator.shared.shouldBlock(url: url) {
-            loadErrorHTML(.init(_nsError: .init(domain: "Test", code: 1234)), header: "You are currently in Focus Mode. Exclude this site if you want to open it", forUnreachableURL: URL(string: "www.test.com")!, alternate: false)
+            showBlockedSiteByFocusMode()
         }
     }
 
     func unblockIfBlocked() {
+        self.hostingView.isHidden = true
+        self.webView.isHidden = false
         self.reload()
     }
 
@@ -1037,7 +1043,15 @@ protocol NewWindowPolicyDecisionMaker {
             // if the webView is being added to superview - reload if needed
             guard case .some(.none) = change.oldValue else { return }
 
-            self?.reloadIfNeeded(source: .webViewDisplayed)
+            if let url = self?.url {
+                if FocusSessionCoordinator.shared.isCurrentOnFocusSession && FocusSessionCoordinator.shared.shouldBlock(url: url) {
+                    self?.showBlockedSiteByFocusMode()
+                } else {
+                    self?.reloadIfNeeded(source: .webViewDisplayed)
+                }
+            } else {
+                self?.reloadIfNeeded(source: .webViewDisplayed)
+            }
         }.store(in: &webViewCancellables)
 
         webView.publisher(for: \.url)
@@ -1291,7 +1305,7 @@ extension Tab/*: NavigationResponder*/ { // to be moved to Tab+Navigation.swift
         let coordinator = FocusSessionCoordinator.shared
 
         if coordinator.isCurrentOnFocusSession && coordinator.shouldBlock(url: url) {
-            loadErrorHTML(.init(_nsError: .init(domain: "Test", code: 1234)), header: "You are currently in Focus Mode. Exclude this site if you want to open it", forUnreachableURL: URL(string: "www.test.com")!, alternate: false)
+            showBlockedSiteByFocusMode()
         }
     }
 
@@ -1371,6 +1385,16 @@ extension Tab/*: NavigationResponder*/ { // to be moved to Tab+Navigation.swift
             webView.setDocumentHtml(html)
         }
     }
+
+    private func showBlockedSiteByFocusMode() {
+        guard let superview = webView.superview else { return }
+
+        hostingView.frame = webView.bounds
+        hostingView.autoresizingMask = [.width, .height]
+        superview.addSubview(hostingView)
+        hostingView.isHidden = false
+        webView.isHidden = true
+    }
 }
 
 extension Tab: NewWindowPolicyDecisionMaker {
@@ -1382,6 +1406,41 @@ extension Tab: NewWindowPolicyDecisionMaker {
         return onNewWindow?(navigationAction)
     }
 
+}
+
+struct OverlayView: View {
+    var body: some View {
+        VStack {
+            Spacer()
+            VStack {
+                HStack {
+                    Image(.hourglassBlocked128)
+                        .padding(.trailing, 8)
+
+                    Text("Site Blocked by Focus Mode")
+                        .font(.title)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 8)
+
+                Text("This site is restricted while Focus Mode is active. You can customize your allowed sites in settings.")
+                    .multilineTextAlignment(.leading)
+                    .padding(.bottom, 16)
+
+                Button("Customize Focus Mode") {
+                    FocusSessionCoordinator.shared.openFocusModeSettings()
+                }.frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            .frame(width: 504)
+            .padding([.top, .bottom], 32)
+            .padding([.leading, .trailing], 40)
+            .background(Color.navigationBarBackground)
+            .cornerRadius(12)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
 }
 
 extension Tab: TabDataClearing {
