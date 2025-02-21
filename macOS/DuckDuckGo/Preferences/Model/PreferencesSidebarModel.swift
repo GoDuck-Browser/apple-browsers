@@ -70,6 +70,11 @@ final class PreferencesSidebarModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(onFocusModeEnabled),
+                                               name: .focusModeFeatureEnabled,
+                                               object: nil)
+
         setupVPNPaneVisibility()
     }
 
@@ -85,13 +90,14 @@ final class PreferencesSidebarModel: ObservableObject {
     ) {
         let loadSections = {
             let includingVPN = vpnGatekeeper.isInstalled
+            let isFocusModeEnabled = FocusSessionCoordinator.shared.isEnabled
 
             return PreferencesSection.defaultSections(
                 includingDuckPlayer: includeDuckPlayer,
                 includingSync: syncService.featureFlags.contains(.userInterface),
                 includingVPN: includingVPN,
                 includingAIChat: includeAIChat,
-                includeFocusMode: FocusSessionCoordinator.shared.isEnabled
+                includeFocusMode: isFocusModeEnabled
             )
         }
 
@@ -103,6 +109,10 @@ final class PreferencesSidebarModel: ObservableObject {
     }
 
     // MARK: - Setup
+
+    @objc func onFocusModeEnabled() {
+        refreshSections()
+    }
 
     private func setupVPNPaneVisibility() {
         vpnGatekeeper.onboardStatusPublisher
@@ -161,7 +171,7 @@ final class PreferencesSidebarModel: ObservableObject {
     func selectPane(_ identifier: PreferencePaneIdentifier) {
         // Open a new tab in case of special panes
         if identifier.rawValue.hasPrefix(URL.NavigationalScheme.https.rawValue),
-            let url = URL(string: identifier.rawValue) {
+           let url = URL(string: identifier.rawValue) {
             WindowControllersManager.shared.show(url: url,
                                                  source: .ui,
                                                  newTab: true)
