@@ -16,23 +16,23 @@ import Combine
 import SwiftUI
 
 @MainActor
-final class DuckPlayerBottomSheetViewModel: ObservableObject {
-    private let duckPlayer: DuckPlayerControlling
+final class DuckPlayerEntryPillViewModel: ObservableObject {
     private let videoID: String
+    private let onOpen: () -> Void
     
-    let bottomSheetViewModel: BottomSheet.ViewModel
+    let pillViewModel: DuckPlayerPill.ViewModel
     
-    init(duckPlayer: DuckPlayerControlling, videoID: String) {
-        self.duckPlayer = duckPlayer
+    init(videoID: String, onOpen: @escaping () -> Void) {
         self.videoID = videoID
-        self.bottomSheetViewModel = BottomSheet.ViewModel()
+        self.onOpen = onOpen
+        self.pillViewModel = DuckPlayerPill.ViewModel()
     }
     
     func openInDuckPlayer() {
-        duckPlayer.loadNativeDuckPlayerVideo(videoID: videoID, source: .youtube)
+        onOpen()
     }
     
     func show() {
-        bottomSheetViewModel.show(anchoredTo: nil)
+        pillViewModel.show(anchoredTo: nil)
     }
 } 

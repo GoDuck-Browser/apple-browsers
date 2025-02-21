@@ -14,14 +14,14 @@
 import SwiftUI
 import Combine
 
-public enum BottomSheet {
+public enum DuckPlayerPill {
     
     @MainActor
     public final class ViewModel: ObservableObject {
-        @Published public private(set) var sheetVisible = false
+        @Published public private(set) var pillVisible = false
         
         public func show(anchoredTo rect: CGRect?) {
-            sheetVisible = true
+            pillVisible = true
         }
     }
     
@@ -46,7 +46,7 @@ public enum BottomSheet {
                 
                 VStack {
                     Spacer()
-                    if viewModel.sheetVisible {
+                    if viewModel.pillVisible {
                         content()
                     }
                 }

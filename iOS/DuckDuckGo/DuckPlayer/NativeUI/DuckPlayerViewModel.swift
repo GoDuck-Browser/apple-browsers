@@ -31,11 +31,12 @@ import UIKit
 final class DuckPlayerViewModel: ObservableObject {
     
     /// A publisher to notify when Youtube navigation is required.
-    /// Emits the URL that should be opened in YouTube.
-    let youtubeNavigationRequestPublisher = PassthroughSubject<URL, Never>()
+    /// Emits the videoID that should be opened in YouTube.
+    let youtubeNavigationRequestPublisher = PassthroughSubject<String, Never>()
     
-    // A publisher to notify when the settings button is pressed.    
-
+    /// A publisher to notify when the settings button is pressed.    
+    let settingsRequestPublisher = PassthroughSubject<Void, Never>()
+    
     /// Current interface orientation state.
     /// - `true` when device is in landscape orientation
     /// - `false` when device is in portrait orientation
@@ -72,6 +73,8 @@ final class DuckPlayerViewModel: ObservableObject {
     var shouldShowYouTubeButton: Bool {
         !isLandscape
     }
+
+    var cancellables = Set<AnyCancellable>()
     
     /// The generated URL for the embedded YouTube player
     @Published private(set) var url: URL?
@@ -86,10 +89,9 @@ final class DuckPlayerViewModel: ObservableObject {
     /// - Parameters:
     ///   - videoID: The YouTube video ID to be played
     ///   - appSettings: App settings instance for accessing user preferences
-    init(videoID: String, appSettings: AppSettings = AppDependencyProvider.shared.appSettings, duckPlayer: DuckPlayerControlling) {
+    init(videoID: String, appSettings: AppSettings = AppDependencyProvider.shared.appSettings) {
         self.videoID = videoID
         self.appSettings = appSettings
-        self.duckPlayer = duckPlayer
         self.url = getVideoURL()
     }
     
@@ -103,15 +105,16 @@ final class DuckPlayerViewModel: ObservableObject {
     }
     
     /// Handles navigation requests to YouTube
-    /// - Parameter url: The YouTube URL to navigate to
+    /// - Parameter url: The YouTube video URL to navigate to
     func handleYouTubeNavigation(_ url: URL) {
-        youtubeNavigationRequestPublisher.send(url)
+        if let (videoID, _) = url.youtubeVideoParams {
+            youtubeNavigationRequestPublisher.send(videoID)
+        }
     }
     
     /// Opens the current video in the YouTube app or website
     func openInYouTube() {
-        let url: URL = .youtube(videoID)
-        handleYouTubeNavigation(url)
+        youtubeNavigationRequestPublisher.send(videoID)
     }
     
     /// Called when the view first appears
@@ -151,7 +154,8 @@ final class DuckPlayerViewModel: ObservableObject {
 
     // Opens the settings view
     func openSettings() {
-        duckPlayer?.openDuckPlayerSettings()
+        settingsRequestPublisher.send()
     }
        
+    
 }

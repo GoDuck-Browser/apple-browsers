@@ -840,7 +840,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         guard let url = webView.url, let (videoID, _) = url.youtubeVideoParams else {
             // Added: Dismiss the bottom sheet if URL is not a YouTube watch page
             if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-                duckPlayer.dismissBottomSheet()
+                duckPlayer.dismissPill()
             }
             return .notHandled(.invalidURL)
         }
@@ -848,7 +848,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         guard url.isYoutubeWatch else {
             // Added: Dismiss the bottom sheet if URL is not a YouTube watch page
             if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-                duckPlayer.dismissBottomSheet()
+                duckPlayer.dismissPill()
                 toggleMediaPlayback(webView, pause: false)
             }
             return .notHandled(.isNotYoutubeWatch)
@@ -864,7 +864,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         
         // Present Bottom Sheet (Native entry point)
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-            duckPlayer.presentBottomSheet(for: videoID)
+            duckPlayer.presentEntryPill(for: videoID)
             toggleMediaPlayback(webView, pause: true)
         }
         

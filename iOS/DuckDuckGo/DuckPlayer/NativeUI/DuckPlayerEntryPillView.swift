@@ -20,8 +20,8 @@
 import SwiftUI
 import DesignResourcesKit
 
-struct DuckPlayerBottomSheetView: View {
-    @ObservedObject var viewModel: DuckPlayerBottomSheetViewModel
+struct DuckPlayerEntryPillView: View {
+    @ObservedObject var viewModel: DuckPlayerEntryPillViewModel
     
     private var sheetContent: some View {
         VStack(spacing: 12) {

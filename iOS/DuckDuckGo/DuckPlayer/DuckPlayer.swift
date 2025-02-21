@@ -138,8 +138,8 @@ protocol DuckPlayerControlling: AnyObject {
     var playerDismissedPublisher: PassthroughSubject<Void, Never> { get }
 
     /// The view and viewModel for the bottom sheet
-    var bottomSheetViewModel: DuckPlayerBottomSheetViewModel? { get }
-    var bottomSheetHostingController: UIHostingController<DuckPlayerBottomSheetView>? { get }
+    var bottomSheetViewModel: DuckPlayerEntryPillViewModel? { get }
+    var bottomSheetHostingController: UIHostingController<DuckPlayerEntryPillView>? { get }
     
     /// Initializes a new instance of DuckPlayer with the provided settings and feature flagger.
     ///
@@ -228,10 +228,10 @@ protocol DuckPlayerControlling: AnyObject {
     /// Presents a bottom sheet asking the user how they want to open the video
     ///
     /// - Parameter videoID: The YouTube video ID to be played
-    func presentBottomSheet(for videoID: String)
+    func presentEntryPill(for videoID: String)
     
     /// Dismisses the bottom sheet
-    func dismissBottomSheet()
+    func dismissPill()
     
     /// Hides the bottom sheet when browser chrome is hidden
     func hideBottomSheetForHiddenChrome()
@@ -308,8 +308,11 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     var playerDismissedPublisher: PassthroughSubject<Void, Never>
 
     /// The view and viewModel for the bottom sheet
-    var bottomSheetViewModel: DuckPlayerBottomSheetViewModel?
-    var bottomSheetHostingController: UIHostingController<DuckPlayerBottomSheetView>?
+    var bottomSheetViewModel: DuckPlayerEntryPillViewModel?
+    var bottomSheetHostingController: UIHostingController<DuckPlayerEntryPillView>?
+    
+    private let nativeUIPresenter = DuckPlayerNativeUIPresenter()
+    private var presentationCancellables = Set<AnyCancellable>()
     
     /// Initializes a new instance of DuckPlayer with the provided settings and feature flagger.
     ///
@@ -323,7 +326,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
         self.youtubeNavigationRequest = PassthroughSubject<URL, Never>()
         self.playerDismissedPublisher = PassthroughSubject<Void, Never>()
         super.init()
-        registerOrientationSubscriber()
+        setupSubscriptions()
         
         NotificationCenter.default.addObserver(self,
                                              selector: #selector(handleChromeVisibilityChange(_:)),
@@ -345,6 +348,9 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     /// - Parameter vc: The view controller to set as host.
     public func setHostViewController(_ vc: TabViewController) {
         hostView = vc
+        Task { @MainActor in
+            nativeUIPresenter.setHostViewController(vc)
+        }
     }
     
     private func addTapGestureRecognizer() {
@@ -397,36 +403,23 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
 
     
     func loadNativeDuckPlayerVideo(videoID: String, source: VideoNavigationSource = .other) {
-        Logger.duckplayer.debug("Starting loadNativeDuckPlayerVideo with ID: \(videoID)")
-        let viewModel = DuckPlayerViewModel(videoID: videoID, duckPlayer: self)
+        guard let hostView = hostView else { return }
         
-        Logger.duckplayer.debug("Creating webView for videoID: \(videoID)")
-        // Create webView with viewModel
-        let webView = DuckPlayerWebView(viewModel: viewModel)
-        
-        let duckPlayerView = DuckPlayerView(viewModel: viewModel, webView: webView)
-        let hostingController = UIHostingController(rootView: duckPlayerView)
-        hostingController.modalPresentationStyle = .formSheet
-        hostingController.isModalInPresentation = false
-
-        // Subscribe to the viewModel's publisher
-        viewModel.youtubeNavigationRequestPublisher
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self, weak hostingController] url in
-                Logger.duckplayer.debug("Received YouTube navigation request: \(url)")
-                
-                // When in Youtube, videos are loaded behind the Native Player
-                // So no need to perform a navigation request
-                if source != .youtube {
+        Task { @MainActor in
+            let publishers = await nativeUIPresenter.presentDuckPlayer(videoID: videoID, source: source, in: hostView)
+            
+            publishers.navigation
+                .sink { [weak self] url in
                     self?.youtubeNavigationRequest.send(url)
                 }
-                hostingController?.dismiss(animated: true)
-            }
-            .store(in: &nativePlayerCancellables)
-        
-        // Add dismissal handler
-        hostingController.presentationController?.delegate = self
-        hostView?.present(hostingController, animated: true)
+                .store(in: &nativePlayerCancellables)
+                
+            publishers.settings
+                .sink { [weak self] in
+                    self?.openDuckPlayerSettings()
+                }
+                .store(in: &nativePlayerCancellables)
+        }
     }
 
     // MARK: - Common Message Handlers
@@ -710,59 +703,28 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     }
 
     /// Hides the bottom sheet when browser chrome is hidden
-    func hideBottomSheetForHiddenChrome() {              
+    func hideBottomSheetForHiddenChrome() {
+       Task { await nativeUIPresenter.hideBottomSheetForHiddenChrome() }
     }
     
     /// Shows the bottom sheet when browser chrome is visible
-    func showBottomSheetForVisibleChrome() {      
+    func showBottomSheetForVisibleChrome() {
+        Task { await nativeUIPresenter.showBottomSheetForVisibleChrome() }
     }
     
     /// Presents a bottom sheet asking the user how they want to open the video
     ///
     /// - Parameter videoID: The YouTube video ID to be played    
     @MainActor
-    func presentBottomSheet(for videoID: String) {
+    func presentEntryPill(for videoID: String) {
         guard let hostView = hostView else { return }
-        
-        let viewModel = DuckPlayerBottomSheetViewModel(duckPlayer: self, videoID: videoID)
-        let view = DuckPlayerBottomSheetView(viewModel: viewModel)
-        let hostingController = UIHostingController(rootView: view)
-        
-        hostingController.view.backgroundColor = .clear
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        
-        // Add to the main view instead of webViewContainer
-        hostView.view.addSubview(hostingController.view)
-        hostingController.view.setNeedsLayout()
-        hostingController.view.layoutIfNeeded()
-        
-        let fittingSize = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-        
-        NSLayoutConstraint.activate([
-            hostingController.view.leadingAnchor.constraint(equalTo: hostView.view.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: hostView.view.trailingAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor),
-            hostingController.view.heightAnchor.constraint(equalToConstant: fittingSize.height)
-        ])
-        
-        bottomSheetViewModel = viewModel
-        bottomSheetHostingController = hostingController
-        
-        // Check initial chrome state
-        if hostView.chromeDelegate?.isToolbarHidden == true {
-            hostingController.view.alpha = 0
-        }
-        
-        viewModel.show()
+        nativeUIPresenter.presentEntryPill(for: videoID, in: hostView)
     }
 
-
-    // Add cleanup method to remove the sheet
+    /// Add cleanup method to remove the sheet
     @MainActor
-    func dismissBottomSheet() {
-        bottomSheetHostingController?.view.removeFromSuperview()
-        bottomSheetHostingController = nil
-        bottomSheetViewModel = nil
+    func dismissPill() {
+        Task { await nativeUIPresenter.dismissPill() }
     }
 
     @objc private func handleChromeVisibilityChange(_ notification: Notification) {
@@ -773,6 +735,14 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
                 showBottomSheetForVisibleChrome()
             }
         }
+    }
+    
+    private func setupSubscriptions() {
+        nativeUIPresenter.videoPlaybackRequest
+            .sink { [weak self] videoID in
+                self?.loadNativeDuckPlayerVideo(videoID: videoID, source: .youtube)
+            }
+            .store(in: &presentationCancellables)
     }
 }
 
