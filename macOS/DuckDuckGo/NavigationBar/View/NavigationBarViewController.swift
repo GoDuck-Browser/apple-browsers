@@ -1077,7 +1077,7 @@ final class NavigationBarViewController: NSViewController {
         aiChatButton.menu = menu
         aiChatButton.toolTip = UserText.aiChat
 
-        aiChatButton.isHidden = !(LocalPinningManager.shared.isPinned(.aiChat) && aiChatMenuConfig.isFeatureEnabledForToolbarShortcut)
+        aiChatButton.isHidden = false
     }
 }
 
