@@ -37,7 +37,7 @@ protocol AppearancePreferencesPersistor {
     var continueSetUpCardsClosed: Bool { get set }
     var isRecentActivityVisible: Bool { get set }
     var isPrivacyStatsVisible: Bool { get set }
-    var isVPNStatsVisible: Bool { get set }
+    var isVPNStatusVisible: Bool { get set }
     var isSearchBarVisible: Bool { get set }
     var showBookmarksBar: Bool { get set }
     var bookmarksBarAppearance: BookmarksBarAppearance { get set }
@@ -78,8 +78,8 @@ struct AppearancePreferencesUserDefaultsPersistor: AppearancePreferencesPersisto
     @UserDefaultsWrapper(key: .homePageIsPrivacyStatsVisible, defaultValue: true)
     var isPrivacyStatsVisible: Bool
 
-    @UserDefaultsWrapper(key: .homePageIsVPNStatsVisible, defaultValue: true)
-    var isVPNStatsVisible: Bool
+    @UserDefaultsWrapper(key: .homePageIsVPNStatusVisible, defaultValue: true)
+    var isVPNStatusVisible: Bool
 
     @UserDefaultsWrapper(key: .homePageIsSearchBarVisible, defaultValue: true)
     var isSearchBarVisible: Bool
@@ -245,6 +245,12 @@ final class AppearancePreferences: ObservableObject {
         }
     }
 
+    @Published var isVPNStatusVisible: Bool {
+        didSet {
+            persistor.isVPNStatusVisible = isVPNStatusVisible
+        }
+    }
+
     @Published var isContinueSetUpCardsViewOutdated: Bool
 
     @Published var continueSetUpCardsClosed: Bool {
@@ -406,6 +412,7 @@ final class AppearancePreferences: ObservableObject {
         isRecentActivityVisible = persistor.isRecentActivityVisible
         isPrivacyStatsVisible = persistor.isPrivacyStatsVisible
         isSearchBarVisible = persistor.isSearchBarVisible
+        isVPNStatusVisible = persistor.isVPNStatusVisible
         showBookmarksBar = persistor.showBookmarksBar
         bookmarksBarAppearance = persistor.bookmarksBarAppearance
         homeButtonPosition = persistor.homeButtonPosition

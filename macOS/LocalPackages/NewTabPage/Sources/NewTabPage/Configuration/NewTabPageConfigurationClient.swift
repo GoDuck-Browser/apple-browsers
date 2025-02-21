@@ -32,10 +32,12 @@ public protocol NewTabPageSectionsVisibilityProviding: AnyObject {
     var isFavoritesVisible: Bool { get set }
     var isPrivacyStatsVisible: Bool { get set }
     var isRecentActivityVisible: Bool { get set }
+    var isVPNStatusVisible: Bool { get set }
 
     var isFavoritesVisiblePublisher: AnyPublisher<Bool, Never> { get }
     var isPrivacyStatsVisiblePublisher: AnyPublisher<Bool, Never> { get }
     var isRecentActivityVisiblePublisher: AnyPublisher<Bool, Never> { get }
+    var isVPNStatusVisiblePublisher: AnyPublisher<Bool, Never> { get }
 }
 
 public protocol NewTabPageLinkOpening {
@@ -230,6 +232,8 @@ public final class NewTabPageConfigurationClient: NewTabPageUserScriptClient {
                 sectionsVisibilityProvider.isPrivacyStatsVisible = widgetConfig.visibility.isVisible
             case .recentActivity:
                 sectionsVisibilityProvider.isRecentActivityVisible = widgetConfig.visibility.isVisible
+            case .vpn:
+                sectionsVisibilityProvider.isVPNStatusVisible = widgetConfig.visibility.isVisible
             default:
                 break
             }

@@ -41,4 +41,8 @@ extension AppearancePreferences: NewTabPageSectionsVisibilityProviding {
     var isRecentActivityVisiblePublisher: AnyPublisher<Bool, Never> {
         $isRecentActivityVisible.dropFirst().removeDuplicates().eraseToAnyPublisher()
     }
+
+    var isVPNStatusVisiblePublisher: AnyPublisher<Bool, Never> {
+        $isVPNStatusVisible.dropFirst().removeDuplicates().eraseToAnyPublisher()
+    }
 }

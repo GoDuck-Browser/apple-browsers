@@ -136,7 +136,7 @@ public struct UserDefaultsWrapper<T> {
         case continueSetUpCardsClosed = "home.page.contiune.setup.cards.closed"
         case homePageIsRecentActivityVisible = "home.page.is.recent.activity.visible"
         case homePageIsPrivacyStatsVisible = "home.page.is.privacy.stats.visible"
-        case homePageIsVPNStatsVisible = "home.page.is.vpn.stats.visible"
+        case homePageIsVPNStatusVisible = "home.page.is.vpn.status.visible"
         case homePageIsSearchBarVisible = "home.page.is.search.bar.visible"
         case homePageIsFirstSession = "home.page.is.first.session"
         case homePageDidShowSettingsOnboarding = "home.page.did.show.settings.onboarding"
