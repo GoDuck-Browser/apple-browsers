@@ -77,6 +77,8 @@ class NewTabPageVPNController {
         )
 
         let publisher = vpnStatusPublisher
+            .subscribe(on: DispatchQueue.main)
+            .receive(on: DispatchQueue.main)
             .map { isAuthenticated, connectionStatus, serverInfo, dataVolume in
                 if isAuthenticated {
                     return VPNStatus.subscribed(
