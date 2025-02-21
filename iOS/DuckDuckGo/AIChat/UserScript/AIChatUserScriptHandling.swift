@@ -26,6 +26,7 @@ protocol AIChatUserScriptHandling {
     func getAIChatNativeHandoffData(params: Any, message: UserScriptMessage) -> Encodable?
     func openAIChat(params: Any, message: UserScriptMessage) async -> Encodable?
     func setPayloadHandler(_ payloadHandler: (any AIChatPayloadHandling)?)
+    func textToSpeech(params: Any, message: UserScriptMessage) async -> Encodable?
 }
 
 final class AIChatUserScriptHandler: AIChatUserScriptHandling {
@@ -67,6 +68,26 @@ final class AIChatUserScriptHandler: AIChatUserScriptHandling {
         return nil
     }
 
+    @MainActor
+    func textToSpeech(params: Any, message: UserScriptMessage) async -> Encodable? {
+        if let dictionary = params as? [String: Any] {
+            do {
+                let jsonData = try JSONSerialization.data(withJSONObject: dictionary, options: [])
+                let content = try JSONDecoder().decode(TextToSpeechContent.self, from: jsonData)
+                print("CONTENT \(content)")
+                NotificationCenter.default.post(
+                    name: Notification.Name(rawValue: "TEXT_TO_SPEECH"),
+                    object: content,
+                    userInfo: nil
+                )
+            } catch {
+                print("Failed to decode TextToSpeechContent: \(error)")
+            }
+        }
+
+        return nil
+    }
+
     public func getAIChatNativeConfigValues(params: Any, message: UserScriptMessage) -> Encodable? {
         AIChatNativeConfigValues(isAIChatHandoffEnabled: isHandoffEnabled,
                                platform: platform)
@@ -80,5 +101,13 @@ final class AIChatUserScriptHandler: AIChatUserScriptHandling {
 
     func setPayloadHandler(_ payloadHandler: (any AIChatPayloadHandling)?) {
         self.payloadHandler = payloadHandler
+    }
+}
+
+struct TextToSpeechContent: Codable {
+    let content: String
+    var readableContent: String {
+        let cleanedContent = content.replacingOccurrences(of: "\n", with: " ")
+        return cleanedContent
     }
 }

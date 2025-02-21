@@ -23,6 +23,8 @@ import Foundation
 import BrowserServicesKit
 import WebKit
 import Core
+import Combine
+import SwiftUI
 
 protocol AIChatViewControllerManagerDelegate: AnyObject {
     func aiChatViewControllerManager(_ manager: AIChatViewControllerManager, didRequestToLoad url: URL)
@@ -34,11 +36,52 @@ final class AIChatViewControllerManager {
     private var payloadHandler = AIChatPayloadHandler()
     private let privacyConfigurationManager: PrivacyConfigurationManaging
     private weak var userContentController: UserContentController?
+    private var cancellables = Set<AnyCancellable>()
 
     init(privacyConfigurationManager: PrivacyConfigurationManaging = ContentBlocking.shared.privacyConfigurationManager) {
         self.privacyConfigurationManager = privacyConfigurationManager
+        subscribeToNotifications()
     }
 
+    private func subscribeToNotifications() {
+        NotificationCenter.default.publisher(for: Notification.Name(rawValue: "TEXT_TO_SPEECH"))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                if let content = notification.object as? TextToSpeechContent {
+                    self?.openSpeechView(content)
+                }
+
+            }
+            .store(in: &cancellables)
+    }
+
+    func openSpeechView(_ content: TextToSpeechContent) {
+        let speechView = SpeechView(text: content.readableContent, isShowingSheet: .constant(true))
+
+        let hostingController = UIHostingController(rootView: speechView)
+
+        if let topViewController = topMostViewController() {
+            if let sheet = hostingController.sheetPresentationController {
+                sheet.detents = [.medium(), .large()]
+                sheet.prefersGrabberVisible = true
+                sheet.selectedDetentIdentifier = .medium // Set the initial detent
+            }
+
+            topViewController.present(hostingController, animated: true, completion: nil)
+        }
+    }
+
+    /// Hackdays code, don't judge me
+    private func topMostViewController() -> UIViewController? {
+        guard let rootViewController = UIApplication.shared.windows.first?.rootViewController else {
+            return nil
+        }
+        var topController: UIViewController = rootViewController
+        while let presentedViewController = topController.presentedViewController {
+            topController = presentedViewController
+        }
+        return topController
+    }
     @MainActor
     func openAIChat(_ query: String? = nil, payload: Any? = nil, autoSend: Bool = false, on viewController: UIViewController) {
         let settings = AIChatSettings(privacyConfigurationManager: privacyConfigurationManager)

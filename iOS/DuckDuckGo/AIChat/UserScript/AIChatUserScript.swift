@@ -29,6 +29,7 @@ final class AIChatUserScript: NSObject, Subfeature {
         case openAIChat
         case getAIChatNativeConfigValues
         case getAIChatNativeHandoffData
+        case textToSpeech
     }
 
     private var handler: AIChatUserScriptHandling
@@ -60,6 +61,8 @@ final class AIChatUserScript: NSObject, Subfeature {
             return handler.getAIChatNativeHandoffData
         case .openAIChat:
             return handler.openAIChat
+        case .textToSpeech:
+            return handler.textToSpeech
         default:
             return nil
         }
