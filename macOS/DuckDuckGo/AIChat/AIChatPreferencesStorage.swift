@@ -23,6 +23,8 @@ final class AIChatSummaryProvider {
     static let shared = AIChatSummaryProvider()
 
     private var summaryPost: AIChatSummaryPost?
+    private var translationPost: AIChatTranslationPost?
+
 
     func setSummaryPost(_ post: AIChatSummaryPost?) {
         self.summaryPost = post
@@ -33,6 +35,17 @@ final class AIChatSummaryProvider {
             self.summaryPost = nil
         }
         return self.summaryPost
+    }
+
+    func setTranslationPost(_ post: AIChatTranslationPost?) {
+        self.translationPost = post
+    }
+
+    func consumeTranslationPost() -> AIChatTranslationPost? {
+        defer {
+            self.translationPost = nil
+        }
+        return self.translationPost
     }
 }
 

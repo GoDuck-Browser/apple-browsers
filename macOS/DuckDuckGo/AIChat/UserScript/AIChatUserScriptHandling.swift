@@ -22,6 +22,7 @@ protocol AIChatUserScriptHandling {
     func handleGetUserValues(params: Any, message: UserScriptMessage) -> Encodable?
     func openSettings(params: Any, message: UserScriptMessage) async -> Encodable?
     func getAIChatSummarizeHandoffData(params: Any, message: UserScriptMessage) -> Encodable?
+    func getAIChatTranslationHandoffData(params: Any, message: UserScriptMessage) -> Encodable?
 }
 
 struct AIChatUserScriptHandler: AIChatUserScriptHandling {
@@ -55,4 +56,11 @@ struct AIChatUserScriptHandler: AIChatUserScriptHandling {
         }
     }
 
+    public func getAIChatTranslationHandoffData(params: Any, message: UserScriptMessage) -> Encodable? {
+        if let summary = AIChatSummaryProvider.shared.consumeTranslationPost() {
+            return summary
+        } else {
+            return nil
+        }
+    }
 }

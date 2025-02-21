@@ -25,6 +25,7 @@ final class AIChatUserScript: NSObject, Subfeature {
         case openSettings
         case getUserValues
         case getAIChatSummarizeHandoffData
+        case getAIChatTranslationHandoffData
     }
 
     private let handler: AIChatUserScriptHandling
@@ -56,6 +57,8 @@ final class AIChatUserScript: NSObject, Subfeature {
             return handler.openSettings
         case .getAIChatSummarizeHandoffData:
             return handler.getAIChatSummarizeHandoffData
+        case .getAIChatTranslationHandoffData:
+            return handler.getAIChatTranslationHandoffData
         default:
             return nil
         }

@@ -159,6 +159,9 @@ final class BrowserTabViewController: NSViewController {
         subscribeToSelectedTabViewModel()
         subscribeToHTMLNewTabPageFeatureFlagChanges()
 
+        NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "HACKDAYS"), object: nil, queue: nil) { [weak self] _ in
+            self?.handleDuckAIButton()
+        }
         if let webViewContainer {
             removeChild(in: self.containerStackView, webViewContainer: webViewContainer)
         }
@@ -1573,6 +1576,96 @@ private extension NSViewController {
             context.duration = 0.25
             context.allowsImplicitAnimation = true
             stackView.layoutSubtreeIfNeeded()
+        }
+    }
+
+}
+
+private extension BrowserTabViewController {
+
+    @objc func handleDuckAIButton() {
+        guard let webView = webView else { return }
+
+        extractCleanedText(from: webView) { text in
+            DispatchQueue.main.async {
+                if let text = text {
+                    AIChatTabOpener.openAIChatTab(postData: AIChatSummaryPost(platform: "macos", content: text))
+                } else {
+                    AIChatTabOpener.openAIChatTab()
+                }
+
+            }
+            //print("TEXT \(text)")
+        }
+    }
+
+    func extractCleanedText(from webView: WKWebView, completion: @escaping (String?) -> Void) {
+        let jsCode = """
+        (function() {
+                    const contentSelectors = [
+                        'article',
+                        '[role="main"]',
+                        '.post-content',
+                        '.article-body',
+                        '.content',
+                        'main',
+                        '.entry-content',
+                        '[itemprop="articleBody"]'
+                    ];
+
+                    let mainContent = null;
+                    let maxLength = 0;
+
+                    for (let selector of contentSelectors) {
+                        const elements = document.querySelectorAll(selector);
+                        elements.forEach(element => {
+                            const textLength = element.innerText.length;
+                            if (textLength > maxLength && textLength > 500) {
+                                maxLength = textLength;
+                                mainContent = element;
+                            }
+                        });
+                        if (mainContent) break;
+                    }
+
+                    if (!mainContent) {
+                        const allParagraphs = document.querySelectorAll('p, div');
+                        allParagraphs.forEach(element => {
+                            const textLength = element.innerText.length;
+                            if (textLength > maxLength && textLength > 500) {
+                                const parent = element.parentElement;
+                                if (parent && !parent.querySelector('nav, footer, aside, .ad, .advertisement')) {
+                                    maxLength = textLength;
+                                    mainContent = parent;
+                                }
+                            }
+                        });
+                    }
+
+                    let text = mainContent ? mainContent.cloneNode(true) : document.body;
+                    ['script', 'style', 'iframe', 'nav', 'header', 'footer', 'aside', '.ad', '.advertisement', '.sidebar', '[class*="banner"]', '[id*="banner"]', 'img', 'picture', 'video', 'noscript']
+                        .forEach(selector => text.querySelectorAll(selector).forEach(el => el.remove()));
+
+                    
+                    // Clean text: replace multiple newlines with single newline and multiple spaces with single space
+                    let cleanedText = text.innerText.trim()
+                        .replace(/\\n{2,}/g, '\\n')   // 2 or more newlines -> single newline
+                        .replace(/\\s{2,}/g, ' ')       // Multiple spaces -> single space
+                        .replace(/\\t+/g, '    '); 
+                    
+                    return cleanedText.length > 15000 ? cleanedText.substring(0, 15000) : cleanedText;
+                })();
+        """
+
+        webView.evaluateJavaScript(jsCode) { (result, error) in
+            if let error = error {
+                print("Error evaluating JavaScript: \(error.localizedDescription)")
+                completion(nil)
+            } else if let cleanedText = result as? String {
+                completion(cleanedText)
+            } else {
+                completion(nil)
+            }
         }
     }
 
