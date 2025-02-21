@@ -113,7 +113,7 @@ class NewTabPageVPNController {
         ]
         let weeklyUsage = VPNWeeklyUsage(days: days, maxValue: 24)
         return VPNUsageHistory(
-            longestConnection: VPNUsageTimespan(duration: 45007),
+            longestConnection: VPNUsageTimespan(duration: 45420),
             weeklyUsage: weeklyUsage)
     }
 }
