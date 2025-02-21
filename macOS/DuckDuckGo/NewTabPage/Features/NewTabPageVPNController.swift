@@ -70,7 +70,7 @@ class NewTabPageVPNController {
             NotificationCenter.default.publisher(for: .accountDidSignOut).map { _ in false })
 
         let vpnStatusPublisher = Publishers.CombineLatest4(
-            accountStatusPublisher.prepend(subscriptionManager.accountManager.isUserAuthenticated),
+            accountStatusPublisher.prepend(subscriptionManager.accountManager.isUserAuthenticated).removeDuplicates(),
             vpnControllerXPCClient.connectionStatusObserver.publisher.removeDuplicates(),
             vpnControllerXPCClient.serverInfoObserver.publisher.removeDuplicates(),
             vpnControllerXPCClient.ipcDataVolumeObserver.publisher.removeDuplicates()
