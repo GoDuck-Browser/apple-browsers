@@ -54,11 +54,11 @@ extension NewTabPageDataModel {
     public struct VPNActiveSessionInfo: Codable {
 
         public struct DataVolume: Codable {
-            let upload: Double
-            let download: Double
+            let upload: Int64
+            let download: Int64
             let unit: String
 
-            public init(upload: Double, download: Double, unit: String) {
+            public init(upload: Int64, download: Int64, unit: String) {
                 self.upload = upload
                 self.download = download
                 self.unit = unit

@@ -25,12 +25,14 @@ import NetworkProtectionUI
 
 class NewTabPageVPNController {
 
+    typealias VPNStatusPublisher = CombineExtensions.CurrentValuePublisher<NewTabPage.NewTabPageVPNStatus, Never>
+
     private let tunnelController: NetworkProtectionIPCTunnelController
     private let vpnControllerXPCClient: VPNControllerXPCClient
     private var cancellables = Set<AnyCancellable>()
     private var lastConnectedDate = Date()
 
-    var statusPublisher: CombineExtensions.CurrentValuePublisher<NewTabPage.NewTabPageVPNStatus, Never>
+    var statusPublisher: VPNStatusPublisher
 
     init(tunnelController: NetworkProtectionIPCTunnelController = TunnelControllerProvider.shared.tunnelController,
          vpnControllerXPCClient: VPNControllerXPCClient = .shared) {
@@ -38,22 +40,39 @@ class NewTabPageVPNController {
         self.tunnelController = tunnelController
         self.vpnControllerXPCClient = vpnControllerXPCClient
 
-        let initialValue: NewTabPage.NewTabPageVPNStatus = .subscribed(connectionStatus: Self.map(vpnControllerXPCClient.connectionStatusObserver.recentValue))
+        let initialConnectionStatus = Self.map(
+            connectionStatus: vpnControllerXPCClient.connectionStatusObserver.recentValue,
+            serverInfo: vpnControllerXPCClient.serverInfoObserver.recentValue,
+            dataVolume: vpnControllerXPCClient.ipcDataVolumeObserver.recentValue)
 
-        let publisher = vpnControllerXPCClient.connectionStatusObserver.publisher.map { connectionStatus in
+        let initialSubscriptionStatus = NewTabPage.NewTabPageVPNStatus.subscribed(connectionStatus: initialConnectionStatus)
 
-            NewTabPage.NewTabPageVPNStatus.subscribed(connectionStatus: Self.map(connectionStatus))
-        }
+        let publisher = vpnControllerXPCClient.connectionStatusObserver.publisher
+            .combineLatest(vpnControllerXPCClient.serverInfoObserver.publisher)
+            .combineLatest(vpnControllerXPCClient.ipcDataVolumeObserver.publisher)
+            .map { values in
 
-        statusPublisher = CombineExtensions.CurrentValuePublisher<NewTabPage.NewTabPageVPNStatus, Never>(initialValue: initialValue, publisher: publisher.eraseToAnyPublisher())
+                NewTabPage.NewTabPageVPNStatus.subscribed(
+                    connectionStatus: Self.map(connectionStatus: values.0.0,
+                                               serverInfo: values.0.1,
+                                               dataVolume: values.1))
+            }
+
+        statusPublisher = VPNStatusPublisher(
+            initialValue: initialSubscriptionStatus,
+            publisher: publisher.eraseToAnyPublisher())
     }
 
-    private static func map(_ connectionStatus: ConnectionStatus) -> NewTabPage.NewTabPageVPNConnectionStatus {
+    private static func map(connectionStatus: ConnectionStatus, serverInfo: NetworkProtectionStatusServerInfo, dataVolume: DataVolume) -> NewTabPage.NewTabPageVPNConnectionStatus {
+
         switch connectionStatus {
         case .connected(let connectedDate):
-            let dataVolume = NewTabPageDataModel.VPNActiveSessionInfo.DataVolume(upload: 0, download: 0, unit: "mb/s")
+            let dataVolume = NewTabPageDataModel.VPNActiveSessionInfo.DataVolume(
+                upload: dataVolume.bytesSent / 1024,
+                download: dataVolume.bytesReceived / 1024,
+                unit: "KB")
 
-            let activeSessionInfo = NewTabPageDataModel.VPNActiveSessionInfo(currentIp: "1.1.1.1", connectedSince: connectedDate, dataVolume: dataVolume)
+            let activeSessionInfo = NewTabPageDataModel.VPNActiveSessionInfo(currentIp: serverInfo.serverAddress ?? "unknown", connectedSince: connectedDate, dataVolume: dataVolume)
 
             let history = makeFakeVPNUsageHistory()
 
