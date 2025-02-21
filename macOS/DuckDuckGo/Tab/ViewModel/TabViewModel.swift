@@ -354,6 +354,15 @@ final class TabViewModel {
                 }
             }
             .store(in: &cancellables)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(focusModeAllowListChanged),
+                                               name: .focusModelSiteChanged,
+                                               object: nil)
+    }
+
+    @objc private func focusModeAllowListChanged() {
+        self.tab.focusModeAllowListChanged()
     }
 
     private func updateCanBeBookmarked() {

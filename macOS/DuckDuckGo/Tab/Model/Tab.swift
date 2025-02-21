@@ -880,6 +880,16 @@ protocol NewWindowPolicyDecisionMaker {
         self.reload()
     }
 
+    func focusModeAllowListChanged() {
+        guard let url = self.url else { return }
+
+        if FocusSessionCoordinator.shared.shouldBlock(url: url) {
+            showBlockedSiteByFocusMode()
+        } else {
+            unblockIfBlocked()
+        }
+    }
+
     func muteUnmuteTab() {
         webView.audioState.toggle()
         objectWillChange.send()

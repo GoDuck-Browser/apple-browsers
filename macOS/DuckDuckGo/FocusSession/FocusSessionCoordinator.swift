@@ -25,6 +25,7 @@ import AVFoundation
 public extension NSNotification.Name {
 
     static let focusModeFeatureEnabled = Notification.Name(rawValue: "com.duckduckgo.focus.mode.feature.enabled")
+    static let focusModelSiteChanged = Notification.Name(rawValue: "com.duckduckgo.focus.mode.site.changed")
 }
 
 enum FocusSessionTimer {

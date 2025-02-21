@@ -17,6 +17,7 @@
 //
 
 final class DefaultAllowedDomainsViewModel: ExcludedDomainsViewModel {
+    private let notificationCenter = NotificationCenter.default
     var domains: [String]
 
     init() {
@@ -29,10 +30,14 @@ final class DefaultAllowedDomainsViewModel: ExcludedDomainsViewModel {
         }
 
         domains.append(domain)
+
+        notificationCenter.post(name: .focusModelSiteChanged, object: nil)
     }
 
     func remove(domain: String) {
         domains.removeAll(where: { $0 == domain })
+
+        notificationCenter.post(name: .focusModelSiteChanged, object: nil)
     }
 
     func askUserToReportIssues(withDomain domain: String, in window: NSWindow?) async {
