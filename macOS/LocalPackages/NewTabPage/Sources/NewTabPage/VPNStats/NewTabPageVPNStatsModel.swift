@@ -92,6 +92,7 @@ public final class NewTabPageVPNStatsModel {
         eventMapping?.fire(.tryForFree)
     }
 
+    @MainActor
     func getData() -> NewTabPageDataModel.VPNStatsData {
         switch vpnController.statusPublisher.value {
         case .unsubscribed:
