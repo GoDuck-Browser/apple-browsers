@@ -229,7 +229,15 @@ protocol DuckPlayerControlling: AnyObject {
     ///
     /// - Parameter videoID: The YouTube video ID to be played
     func presentBottomSheet(for videoID: String)
-
+    
+    /// Dismisses the bottom sheet
+    func dismissBottomSheet()
+    
+    /// Hides the bottom sheet when browser chrome is hidden
+    func hideBottomSheetForHiddenChrome()
+    
+    /// Shows the bottom sheet when browser chrome is visible
+    func showBottomSheetForVisibleChrome()
 }
 
 extension DuckPlayerControlling {
@@ -316,6 +324,11 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
         self.playerDismissedPublisher = PassthroughSubject<Void, Never>()
         super.init()
         registerOrientationSubscriber()
+        
+        NotificationCenter.default.addObserver(self,
+                                             selector: #selector(handleChromeVisibilityChange(_:)),
+                                             name: .browserChromeVisibilityChanged,
+                                             object: nil)
     }
     
     deinit {
@@ -361,7 +374,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
             let orientation = UIDevice.current.orientation
             if orientation.isLandscape {
                 hostView?.chromeDelegate?.setBarsHidden(false, animated: true, customAnimationDuration: Constants.chromeShowHideAnimationDuration)
-                setupHideBrowserChromeTimer()
+                showBottomSheetForVisibleChrome()                
             }
         }
     }
@@ -696,6 +709,14 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
        
     }
 
+    /// Hides the bottom sheet when browser chrome is hidden
+    func hideBottomSheetForHiddenChrome() {              
+    }
+    
+    /// Shows the bottom sheet when browser chrome is visible
+    func showBottomSheetForVisibleChrome() {      
+    }
+    
     /// Presents a bottom sheet asking the user how they want to open the video
     ///
     /// - Parameter videoID: The YouTube video ID to be played    
@@ -707,40 +728,51 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
         let view = DuckPlayerBottomSheetView(viewModel: viewModel)
         let hostingController = UIHostingController(rootView: view)
         
-        // Configure the hosting controller
         hostingController.view.backgroundColor = .clear
-        hostingController.view.isOpaque = false
-        
-        // Get sheet height (assuming fixed height, adjust as needed)
-        let sheetHeight: CGFloat = 80 // Adjust based on your sheet's height
-        
-        // Adjust WebView's bottom constraint
-        hostView.webViewBottomAnchorConstraint?.constant = -sheetHeight
-        
-        // Add sheet view controller
-        hostView.addChild(hostingController)
-        hostView.view.addSubview(hostingController.view)
-        
-        // Setup constraints for sheet
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add to the main view instead of webViewContainer
+        hostView.view.addSubview(hostingController.view)
+        hostingController.view.setNeedsLayout()
+        hostingController.view.layoutIfNeeded()
+        
+        let fittingSize = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+        
         NSLayoutConstraint.activate([
             hostingController.view.leadingAnchor.constraint(equalTo: hostView.view.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: hostView.view.trailingAnchor),
             hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor),
-            hostingController.view.heightAnchor.constraint(equalToConstant: sheetHeight)
+            hostingController.view.heightAnchor.constraint(equalToConstant: fittingSize.height)
         ])
-        
-        hostingController.didMove(toParent: hostView)
         
         bottomSheetViewModel = viewModel
         bottomSheetHostingController = hostingController
         
-        // Animate the changes
-        UIView.animate(withDuration: 0.3) {
-            hostView.view.layoutIfNeeded()
+        // Check initial chrome state
+        if hostView.chromeDelegate?.isToolbarHidden == true {
+            hostingController.view.alpha = 0
         }
         
         viewModel.show()
+    }
+
+
+    // Add cleanup method to remove the sheet
+    @MainActor
+    func dismissBottomSheet() {
+        bottomSheetHostingController?.view.removeFromSuperview()
+        bottomSheetHostingController = nil
+        bottomSheetViewModel = nil
+    }
+
+    @objc private func handleChromeVisibilityChange(_ notification: Notification) {
+        if let isHidden = notification.userInfo?["isHidden"] as? Bool {
+            if isHidden {
+                hideBottomSheetForHiddenChrome()
+            } else {
+                showBottomSheetForVisibleChrome()
+            }
+        }
     }
 }
 

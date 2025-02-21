@@ -38,12 +38,21 @@ public enum BottomSheet {
         }
         
         public var body: some View {
-            VStack {
-                Spacer()
-                if viewModel.sheetVisible {
-                    content()
+            ZStack {
+                // Make background clear and non-interactive
+                Color.clear
+                    .contentShape(Rectangle())
+                    .allowsHitTesting(false)
+                
+                VStack {
+                    Spacer()
+                    if viewModel.sheetVisible {
+                        content()
+                    }
                 }
             }
+            .edgesIgnoringSafeArea(.all)
         }
     }
+
 }
