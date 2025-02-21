@@ -24,6 +24,7 @@ final class MainView: NSView {
     let tabBarContainerView = NSView()
     let navigationBarContainerView = NSView()
     let webContainerView = NSView()
+    let aiView = NSView()
     let findInPageContainerView = NSView().hidden()
     let bookmarksBarContainerView = NSView()
     let fireContainerView = NSView()
@@ -34,8 +35,10 @@ final class MainView: NSView {
     private(set) var webContainerTopConstraint: NSLayoutConstraint!
     private(set) var webContainerTopConstraintToNavigation: NSLayoutConstraint!
     private(set) var tabBarHeightConstraint: NSLayoutConstraint!
+    private var aiViewTrailingConstraint: NSLayoutConstraint!
 
     @Published var isMouseAboveWebView: Bool = false
+    private var isAIViewVisible = false
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -46,6 +49,7 @@ final class MainView: NSView {
             bookmarksBarContainerView,
             navigationBarContainerView,
             webContainerView,
+            aiView,
             findInPageContainerView,
             fireContainerView,
         ] {
@@ -53,11 +57,18 @@ final class MainView: NSView {
             addSubview(subview)
         }
 
+        setupAIView()
         addConstraints()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setupAIView() {
+        aiView.wantsLayer = true
+        aiView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+        aiView.isHidden = true
     }
 
     private func addConstraints() {
@@ -69,6 +80,8 @@ final class MainView: NSView {
 
         webContainerTopConstraint.priority = .defaultHigh
         webContainerTopConstraintToNavigation.priority = .defaultLow
+
+        aiViewTrailingConstraint = aiView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 300) // Start offscreen
 
         NSLayoutConstraint.activate([
             tabBarContainerView.topAnchor.constraint(equalTo: topAnchor),
@@ -94,9 +107,14 @@ final class MainView: NSView {
             webContainerTopConstraintToNavigation,
             webContainerView.bottomAnchor.constraint(equalTo: bottomAnchor),
             webContainerView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            webContainerView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            webContainerView.trailingAnchor.constraint(equalTo: aiView.leadingAnchor),
             webContainerView.widthAnchor.constraint(greaterThanOrEqualToConstant: 512),
             webContainerView.heightAnchor.constraint(greaterThanOrEqualToConstant: 178),
+
+            aiView.topAnchor.constraint(equalTo: webContainerView.topAnchor),
+            aiView.bottomAnchor.constraint(equalTo: webContainerView.bottomAnchor),
+            aiView.widthAnchor.constraint(equalToConstant: 300),
+            aiViewTrailingConstraint,
 
             findInPageContainerView.topAnchor.constraint(equalTo: bookmarksBarContainerView.bottomAnchor, constant: -4),
             findInPageContainerView.topAnchor.constraint(equalTo: navigationBarContainerView.bottomAnchor, constant: -4).priority(900),
@@ -110,6 +128,21 @@ final class MainView: NSView {
             fireContainerView.trailingAnchor.constraint(equalTo: trailingAnchor),
         ])
     }
+
+    func toggleAIView() {
+        isAIViewVisible.toggle()
+        aiView.isHidden = false
+        aiViewTrailingConstraint.animator().constant = isAIViewVisible ? 0 : 300
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25
+            layoutSubtreeIfNeeded()
+        } completionHandler: {
+            if !self.isAIViewVisible {
+                self.aiView.isHidden = true
+            }
+        }
+    }
+
 
     private typealias CFWebServicesCopyProviderInfoType = @convention(c) (CFString, UnsafeRawPointer?) -> NSDictionary?
 
