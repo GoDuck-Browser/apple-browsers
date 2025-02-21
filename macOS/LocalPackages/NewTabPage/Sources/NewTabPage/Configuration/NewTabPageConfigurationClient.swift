@@ -114,7 +114,6 @@ public final class NewTabPageConfigurationClient: NewTabPageUserScriptClient {
             .init(id: .freemiumPIRBanner),
             .init(id: .nextSteps),
             .init(id: .favorites),
-            .init(id: .vpn),
         ]
         if sectionsAvailabilityProvider.isPrivacyStatsAvailable {
             widgets.append(.init(id: .privacyStats))
@@ -122,6 +121,8 @@ public final class NewTabPageConfigurationClient: NewTabPageUserScriptClient {
         if sectionsAvailabilityProvider.isRecentActivityAvailable {
             widgets.append(.init(id: .recentActivity))
         }
+        
+        widgets.append(.init(id: .vpn))
 
         return widgets
     }
