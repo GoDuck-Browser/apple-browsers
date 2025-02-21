@@ -74,10 +74,11 @@ public final class NewTabPageConfigurationClient: NewTabPageUserScriptClient {
         self.eventMapper = eventMapper
         super.init()
 
-        Publishers.Merge3(
+        Publishers.Merge4(
             sectionsVisibilityProvider.isFavoritesVisiblePublisher,
             sectionsVisibilityProvider.isPrivacyStatsVisiblePublisher,
-            sectionsVisibilityProvider.isRecentActivityVisiblePublisher
+            sectionsVisibilityProvider.isRecentActivityVisiblePublisher,
+            sectionsVisibilityProvider.isVPNStatusVisiblePublisher
         )
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
@@ -128,7 +129,7 @@ public final class NewTabPageConfigurationClient: NewTabPageUserScriptClient {
     private func fetchWidgetConfigs() -> [NewTabPageDataModel.NewTabPageConfiguration.WidgetConfig] {
         var widgetConfigs: [NewTabPageDataModel.NewTabPageConfiguration.WidgetConfig] = [
             .init(id: .favorites, isVisible: sectionsVisibilityProvider.isFavoritesVisible),
-            .init(id: .vpn, isVisible: true)
+            .init(id: .vpn, isVisible: sectionsVisibilityProvider.isVPNStatusVisible)
         ]
         if sectionsAvailabilityProvider.isPrivacyStatsAvailable {
             widgetConfigs.append(.init(id: .privacyStats, isVisible: sectionsVisibilityProvider.isPrivacyStatsVisible))
@@ -171,6 +172,12 @@ public final class NewTabPageConfigurationClient: NewTabPageUserScriptClient {
                 item.representedObject = menuItem.id
                 item.state = sectionsVisibilityProvider.isRecentActivityVisible ? .on : .off
                 menu.addItem(item)
+            case .vpn:
+                let item = NSMenuItem(title: menuItem.title, action: #selector(self.toggleVisibility(_:)), keyEquivalent: "")
+                item.target = self
+                item.representedObject = menuItem.id
+                item.state = sectionsVisibilityProvider.isVPNStatusVisible ? .on : .off
+                menu.addItem(item)
             default:
                 break
             }
@@ -191,6 +198,8 @@ public final class NewTabPageConfigurationClient: NewTabPageUserScriptClient {
             sectionsVisibilityProvider.isPrivacyStatsVisible.toggle()
         case .recentActivity:
             sectionsVisibilityProvider.isRecentActivityVisible.toggle()
+        case .vpn:
+            sectionsVisibilityProvider.isVPNStatusVisible.toggle()
         default:
             break
         }
