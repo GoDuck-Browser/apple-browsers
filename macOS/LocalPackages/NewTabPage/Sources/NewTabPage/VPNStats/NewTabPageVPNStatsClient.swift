@@ -41,17 +41,9 @@ public final class NewTabPageVPNStatsClient: NewTabPageUserScriptClient {
     public init(model: NewTabPageVPNStatsModel) {
         self.model = model
         super.init()
-/*
-        model.$isViewExpanded.dropFirst()
-            .sink { [weak self] isExpanded in
-                Task { @MainActor in
-                    self?.notifyConfigUpdated(isExpanded)
-                }
-            }
-            .store(in: &cancellables)*/
 
-        model.statsUpdatePublisher
-            .sink { [weak self] connectionStatus in
+        model.$vpnStatus
+            .sink { [weak self] _ in
                 Task { @MainActor in
                     await self?.notifyDataUpdated()
                 }

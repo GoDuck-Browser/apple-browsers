@@ -59,11 +59,10 @@ public enum NewTabPageVPNStatsEvent: Equatable {
 public final class NewTabPageVPNStatsModel {
 
     let vpnController: NewTabPageVPNControlling
-    let statsUpdatePublisher: AnyPublisher<Void, Never>
 
+    @Published
+    var vpnStatus: NewTabPageVPNStatus
     private let eventMapping: EventMapping<NewTabPageVPNStatsEvent>?
-
-    private let statsUpdateSubject = PassthroughSubject<Void, Never>()
     private var cancellables: Set<AnyCancellable> = []
 
     public init(
@@ -72,10 +71,11 @@ public final class NewTabPageVPNStatsModel {
 
             self.eventMapping = eventMapping
             self.vpnController = vpnController
+            self.vpnStatus = vpnController.statusPublisher.value
 
-            statsUpdatePublisher = vpnController.statusPublisher
-                .map { _ in }
-                .eraseToAnyPublisher()
+            vpnController.statusPublisher
+                .assign(to: \.vpnStatus, onWeaklyHeld: self)
+                .store(in: &cancellables)
     }
 
     func connect() async {
@@ -94,7 +94,7 @@ public final class NewTabPageVPNStatsModel {
 
     @MainActor
     func getData() -> NewTabPageDataModel.VPNStatsData {
-        switch vpnController.statusPublisher.value {
+        switch vpnStatus {
         case .unsubscribed:
             return NewTabPageDataModel.VPNStatsData(pending: "none", state: "unsubscribed")
         case .subscribed(let connectionStatus):
