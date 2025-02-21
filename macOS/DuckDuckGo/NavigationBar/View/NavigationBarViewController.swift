@@ -1056,8 +1056,17 @@ final class NavigationBarViewController: NSViewController {
     }
 
     @IBAction func aiChatButtonAction(_ sender: NSButton) {
-        AIChatTabOpener.openAIChatTab()
-        PixelKit.fire(GeneralPixel.aichatToolbarClicked, includeAppVersionParameter: true)
+//        AIChatTabOpener.openAIChatTab()
+//        PixelKit.fire(GeneralPixel.aichatToolbarClicked, includeAppVersionParameter: true)
+
+        DispatchQueue.main.async {
+            guard let window = NSApplication.shared.keyWindow,
+                  let windowController = window.windowController as? MainWindowController else {
+                assertionFailure("No reference to main window controller")
+                return
+            }
+            windowController.mainViewController.mainView.toggleAIView()
+        }
     }
 
     private func updateAIChatButton() {

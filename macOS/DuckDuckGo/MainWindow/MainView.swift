@@ -36,9 +36,11 @@ final class MainView: NSView {
     private(set) var webContainerTopConstraintToNavigation: NSLayoutConstraint!
     private(set) var tabBarHeightConstraint: NSLayoutConstraint!
     private var aiViewTrailingConstraint: NSLayoutConstraint!
+    private var aiViewWidthConstraint: NSLayoutConstraint!
 
     @Published var isMouseAboveWebView: Bool = false
     private var isAIViewVisible = false
+    private var aiViewWidth: CGFloat = 300 // Initial width
 
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -65,10 +67,18 @@ final class MainView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    let aiTab = Tab(content: .url(AIChatRemoteSettings().aiChatURL, source: .ui))
+    private weak var aiContainer: NSView?
+
     private func setupAIView() {
         aiView.wantsLayer = true
         aiView.layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
         aiView.isHidden = true
+
+        let container = WebViewContainerView(tab: aiTab, webView: aiTab.webView, frame: aiView.bounds)
+        self.aiContainer = container
+
+        aiView.addAndLayout(container)
     }
 
     private func addConstraints() {
@@ -81,7 +91,8 @@ final class MainView: NSView {
         webContainerTopConstraint.priority = .defaultHigh
         webContainerTopConstraintToNavigation.priority = .defaultLow
 
-        aiViewTrailingConstraint = aiView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 300) // Start offscreen
+        aiViewTrailingConstraint = aiView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: aiViewWidth) // Start offscreen
+        aiViewWidthConstraint = aiView.widthAnchor.constraint(equalToConstant: aiViewWidth)
 
         NSLayoutConstraint.activate([
             tabBarContainerView.topAnchor.constraint(equalTo: topAnchor),
@@ -113,7 +124,7 @@ final class MainView: NSView {
 
             aiView.topAnchor.constraint(equalTo: webContainerView.topAnchor),
             aiView.bottomAnchor.constraint(equalTo: webContainerView.bottomAnchor),
-            aiView.widthAnchor.constraint(equalToConstant: 300),
+            aiViewWidthConstraint,
             aiViewTrailingConstraint,
 
             findInPageContainerView.topAnchor.constraint(equalTo: bookmarksBarContainerView.bottomAnchor, constant: -4),
@@ -132,7 +143,8 @@ final class MainView: NSView {
     func toggleAIView() {
         isAIViewVisible.toggle()
         aiView.isHidden = false
-        aiViewTrailingConstraint.animator().constant = isAIViewVisible ? 0 : 300
+
+        aiViewTrailingConstraint.animator().constant = isAIViewVisible ? 0 : aiViewWidth
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25
             layoutSubtreeIfNeeded()
@@ -143,6 +155,20 @@ final class MainView: NSView {
         }
     }
 
+    override func resizeSubviews(withOldSize oldSize: NSSize) {
+        super.resizeSubviews(withOldSize: oldSize)
+        adjustAIViewWidth()
+    }
+
+    private func adjustAIViewWidth() {
+        let newWidth = bounds.width * 0.25 // Adjust based on 25% of MainView width
+        aiViewWidth = max(300, newWidth) // Maintain a minimum width of 300
+        aiViewWidthConstraint.constant = aiViewWidth
+
+        if !isAIViewVisible {
+            aiViewTrailingConstraint.constant = aiViewWidth
+        }
+    }
 
     private typealias CFWebServicesCopyProviderInfoType = @convention(c) (CFString, UnsafeRawPointer?) -> NSDictionary?
 

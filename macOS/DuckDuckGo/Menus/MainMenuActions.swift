@@ -332,18 +332,10 @@ extension AppDelegate {
     }
 
     @objc func fireButtonAction(_ sender: NSButton) {
-//        DispatchQueue.main.async {
-//            FireCoordinator.fireButtonAction()
-//            let pixelReporter = OnboardingPixelReporter()
-//            pixelReporter.trackFireButtonPressed()
-//        }
         DispatchQueue.main.async {
-            guard let window = NSApplication.shared.keyWindow,
-                  let windowController = window.windowController as? MainWindowController else {
-                assertionFailure("No reference to main window controller")
-                return
-            }
-            windowController.mainViewController.mainView.toggleAIView()
+            FireCoordinator.fireButtonAction()
+            let pixelReporter = OnboardingPixelReporter()
+            pixelReporter.trackFireButtonPressed()
         }
     }
 
