@@ -25,7 +25,17 @@ import NetworkProtectionUI
 
 class NewTabPageVPNController {
 
-    typealias VPNStatusPublisher = CombineExtensions.CurrentValuePublisher<NewTabPage.NewTabPageVPNStatus, Never>
+    typealias VPNActiveSessionInfo = NewTabPageDataModel.VPNActiveSessionInfo
+    typealias VPNConnectedData = NewTabPageDataModel.VPNConnectedData
+    typealias VPNConnectionStatus = NewTabPage.NewTabPageVPNConnectionStatus
+    typealias VPNDailyUsage = NewTabPageDataModel.VPNDailyUsage
+    typealias VPNDataVolume = VPNActiveSessionInfo.DataVolume
+    typealias VPNDisconnectedData = NewTabPageDataModel.VPNDisconnectedData
+    typealias VPNStatus = NewTabPage.NewTabPageVPNStatus
+    typealias VPNStatusPublisher = CombineExtensions.CurrentValuePublisher<VPNStatus, Never>
+    typealias VPNUsageHistory = NewTabPageDataModel.VPNUsageHistory
+    typealias VPNUsageTimespan = NewTabPageDataModel.VPNUsageTimespan
+    typealias VPNWeeklyUsage = NewTabPageDataModel.VPNWeeklyUsage
 
     private let tunnelController: NetworkProtectionIPCTunnelController
     private let vpnControllerXPCClient: VPNControllerXPCClient
@@ -45,14 +55,14 @@ class NewTabPageVPNController {
             serverInfo: vpnControllerXPCClient.serverInfoObserver.recentValue,
             dataVolume: vpnControllerXPCClient.ipcDataVolumeObserver.recentValue)
 
-        let initialSubscriptionStatus = NewTabPage.NewTabPageVPNStatus.subscribed(connectionStatus: initialConnectionStatus)
+        let initialSubscriptionStatus = VPNStatus.subscribed(connectionStatus: initialConnectionStatus)
 
         let publisher = vpnControllerXPCClient.connectionStatusObserver.publisher
             .combineLatest(vpnControllerXPCClient.serverInfoObserver.publisher)
             .combineLatest(vpnControllerXPCClient.ipcDataVolumeObserver.publisher)
             .map { values in
 
-                NewTabPage.NewTabPageVPNStatus.subscribed(
+                VPNStatus.subscribed(
                     connectionStatus: Self.map(connectionStatus: values.0.0,
                                                serverInfo: values.0.1,
                                                dataVolume: values.1))
@@ -63,46 +73,48 @@ class NewTabPageVPNController {
             publisher: publisher.eraseToAnyPublisher())
     }
 
-    private static func map(connectionStatus: ConnectionStatus, serverInfo: NetworkProtectionStatusServerInfo, dataVolume: DataVolume) -> NewTabPage.NewTabPageVPNConnectionStatus {
+    private static func map(connectionStatus: ConnectionStatus, serverInfo: NetworkProtectionStatusServerInfo, dataVolume: DataVolume) -> VPNConnectionStatus {
 
         switch connectionStatus {
         case .connected(let connectedDate):
-            let dataVolume = NewTabPageDataModel.VPNActiveSessionInfo.DataVolume(
+            let dataVolume = VPNDataVolume(
                 upload: dataVolume.bytesSent / 1024,
                 download: dataVolume.bytesReceived / 1024,
                 unit: "KB")
 
-            let activeSessionInfo = NewTabPageDataModel.VPNActiveSessionInfo(currentIp: serverInfo.serverAddress ?? "unknown", connectedSince: connectedDate, dataVolume: dataVolume)
+            let activeSessionInfo = VPNActiveSessionInfo(currentIp: serverInfo.serverAddress ?? "unknown", connectedSince: connectedDate, dataVolume: dataVolume)
 
             let history = makeFakeVPNUsageHistory()
 
-            let connectedData = NewTabPageDataModel.VPNConnectedData(session: activeSessionInfo, history: history)
+            let connectedData = VPNConnectedData(session: activeSessionInfo, history: history)
 
             return .connected(activeSessionInfo: connectedData)
         case .disconnected, .notConfigured:
-            let data = NewTabPageDataModel.VPNDisconnectedData(history: makeFakeVPNUsageHistory())
+            let data = VPNDisconnectedData(history: makeFakeVPNUsageHistory())
             return .disconnected(data: data)
         case .connecting, .reasserting:
-            let data = NewTabPageDataModel.VPNDisconnectedData(history: makeFakeVPNUsageHistory())
+            let data = VPNDisconnectedData(history: makeFakeVPNUsageHistory())
             return .connecting(data: data)
         case .disconnecting, .snoozing:
-            let data = NewTabPageDataModel.VPNDisconnectedData(history: makeFakeVPNUsageHistory())
+            let data = VPNDisconnectedData(history: makeFakeVPNUsageHistory())
             return .disconnected(data: data)
         }
     }
 
-    private static func makeFakeVPNUsageHistory() -> NewTabPageDataModel.VPNUsageHistory {
+    private static func makeFakeVPNUsageHistory() -> VPNUsageHistory {
         let days = [
-            NewTabPageDataModel.VPNDailyUsage(active: false, day: .sunday, value: 3.4),
-            NewTabPageDataModel.VPNDailyUsage(active: false, day: .monday, value: 5.6),
-            NewTabPageDataModel.VPNDailyUsage(active: false, day: .tuesday, value: 2.1),
-            NewTabPageDataModel.VPNDailyUsage(active: false, day: .wednesday, value: 0.0),
-            NewTabPageDataModel.VPNDailyUsage(active: false, day: .thursday, value: 8.0),
-            NewTabPageDataModel.VPNDailyUsage(active: true, day: .friday, value: 16.0),
-            NewTabPageDataModel.VPNDailyUsage(active: false, day: .saturday, value: 0),
+            VPNDailyUsage(active: false, day: .sunday, value: 3.4),
+            VPNDailyUsage(active: false, day: .monday, value: 5.6),
+            VPNDailyUsage(active: false, day: .tuesday, value: 2.1),
+            VPNDailyUsage(active: false, day: .wednesday, value: 15.0),
+            VPNDailyUsage(active: false, day: .thursday, value: 8.0),
+            VPNDailyUsage(active: true, day: .friday, value: 16.0),
+            VPNDailyUsage(active: false, day: .saturday, value: 0),
         ]
-        let weeklyUsage = NewTabPageDataModel.VPNWeeklyUsage(days: days, maxValue: 24)
-        return NewTabPageDataModel.VPNUsageHistory(longestConnection: 8, weeklyUsage: weeklyUsage)
+        let weeklyUsage = VPNWeeklyUsage(days: days, maxValue: 24)
+        return VPNUsageHistory(
+            longestConnection: VPNUsageTimespan(duration: 45007),
+            weeklyUsage: weeklyUsage)
     }
 }
 

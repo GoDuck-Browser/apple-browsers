@@ -96,12 +96,31 @@ extension NewTabPageDataModel {
     }
 
     public struct VPNUsageHistory: Codable {
-        let longestConnection: TimeInterval
+        let longestConnection: VPNUsageTimespan
         let weeklyUsage: VPNWeeklyUsage
 
-        public init(longestConnection: TimeInterval, weeklyUsage: VPNWeeklyUsage) {
+        public init(longestConnection: VPNUsageTimespan, weeklyUsage: VPNWeeklyUsage) {
             self.longestConnection = longestConnection
             self.weeklyUsage = weeklyUsage
+        }
+    }
+
+    public struct VPNUsageTimespan: Codable {
+        let days: Int?
+        let hours: Int
+        let minutes: Int
+        let weeks: Int?
+
+        public init(duration: TimeInterval) {
+            let totalMinutes = Int(duration) / 60
+            let totalHours = totalMinutes / 60
+            let totalDays = totalHours / 24
+            let totalWeeks = totalDays / 7
+
+            self.weeks = totalWeeks > 0 ? totalWeeks : nil
+            self.days = (totalDays % 7) > 0 ? (totalDays % 7) : nil
+            self.hours = totalHours % 24
+            self.minutes = totalMinutes % 60
         }
     }
 
