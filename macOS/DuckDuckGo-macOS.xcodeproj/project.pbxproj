@@ -181,6 +181,8 @@
 		1DB9617B29F1D06D00CF5568 /* InternalUserDeciderMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9617929F1D06D00CF5568 /* InternalUserDeciderMock.swift */; };
 		1DB9618229F67F6100CF5568 /* FaviconNullStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9617F29F67F3E00CF5568 /* FaviconNullStore.swift */; };
 		1DB9618329F67F6200CF5568 /* FaviconNullStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9617F29F67F3E00CF5568 /* FaviconNullStore.swift */; };
+		1DBFD90C2D68A996003F8D98 /* WebExtensionStoreTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBFD90B2D68A987003F8D98 /* WebExtensionStoreTab.swift */; };
+		1DBFD90D2D68AB48003F8D98 /* WebExtensionStoreTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBFD90B2D68A987003F8D98 /* WebExtensionStoreTab.swift */; };
 		1DC669702B6CF0D700AA0645 /* TabSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC6696F2B6CF0D700AA0645 /* TabSnapshotStore.swift */; };
 		1DC669712B6CF0D700AA0645 /* TabSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC6696F2B6CF0D700AA0645 /* TabSnapshotStore.swift */; };
 		1DCFBC8A29ADF32B00313531 /* BurnerHomePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCFBC8929ADF32B00313531 /* BurnerHomePageView.swift */; };
@@ -3653,6 +3655,7 @@
 		1DB67F2C2B6FEFDB003DF243 /* ViewSnapshotRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewSnapshotRenderer.swift; sourceTree = "<group>"; };
 		1DB9617929F1D06D00CF5568 /* InternalUserDeciderMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InternalUserDeciderMock.swift; sourceTree = "<group>"; };
 		1DB9617F29F67F3E00CF5568 /* FaviconNullStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconNullStore.swift; sourceTree = "<group>"; };
+		1DBFD90B2D68A987003F8D98 /* WebExtensionStoreTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebExtensionStoreTab.swift; sourceTree = "<group>"; };
 		1DC6696F2B6CF0D700AA0645 /* TabSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSnapshotStore.swift; sourceTree = "<group>"; };
 		1DCFBC8929ADF32B00313531 /* BurnerHomePageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BurnerHomePageView.swift; sourceTree = "<group>"; };
 		1DD35AD72D65CEA9002C8724 /* WKWebExtensionTabConfiguration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKWebExtensionTabConfiguration.h; sourceTree = "<group>"; };
@@ -5602,6 +5605,7 @@
 				1DF78E0E2CE6197200AB898E /* WKWebExtensionTab.swift */,
 				1DF78E112CE61DB000AB898E /* WKWebExtensionWindow.swift */,
 				1D5C1AF02CFF58170073ED65 /* Logger+WebExtensions.swift */,
+				1DBFD90B2D68A987003F8D98 /* WebExtensionStoreTab.swift */,
 			);
 			path = WebExtensions;
 			sourceTree = "<group>";
@@ -11932,6 +11936,7 @@
 				3706FB3F293F65D500E42796 /* NSPopUpButtonView.swift in Sources */,
 				F1FDC9392BF51F41006B1435 /* VPNSettings+Environment.swift in Sources */,
 				3199AF762C80734A003AEBDC /* DuckPlayerOnboardingModalView.swift in Sources */,
+				1DBFD90D2D68AB48003F8D98 /* WebExtensionStoreTab.swift in Sources */,
 				1ED910D62B63BFB300936947 /* IdentityTheftRestorationPagesUserScript.swift in Sources */,
 				3706FB40293F65D500E42796 /* BookmarksContextMenu.swift in Sources */,
 				3707C71C294B5D1900682A9F /* TabExtensionsBuilder.swift in Sources */,
@@ -13977,6 +13982,7 @@
 				37EE55E92D5F197300D53C7C /* BadgeAnimationView.swift in Sources */,
 				37EE55EA2D5F197300D53C7C /* BadgeNotificationAnimationModel.swift in Sources */,
 				37EE55EB2D5F197300D53C7C /* CookieManagedNotificationContainerView.swift in Sources */,
+				1DBFD90C2D68A996003F8D98 /* WebExtensionStoreTab.swift in Sources */,
 				37EE55EC2D5F197300D53C7C /* CookieManagedNotificationView.swift in Sources */,
 				37EE55ED2D5F197300D53C7C /* CookieNotificationAnimationModel.swift in Sources */,
 				37EE55EE2D5F197300D53C7C /* NavigationBarBadgeAnimationView.swift in Sources */,

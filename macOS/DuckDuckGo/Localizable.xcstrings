@@ -24087,6 +24087,9 @@
         }
       }
     },
+    "Extensions" : {
+
+    },
     "Favorite This Page…" : {
       "comment" : "Main Menu History item",
       "localizations" : {
@@ -33570,6 +33573,9 @@
           }
         }
       }
+    },
+    "Install" : {
+
     },
     "invite.dialog.get.started.button" : {
       "comment" : "Get Started button on an invite dialog",
@@ -61267,6 +61273,9 @@
           }
         }
       }
+    },
+    "Search extensions" : {
+
     },
     "search.with.DuckDuckGo" : {
       "comment" : "Context menu item",
