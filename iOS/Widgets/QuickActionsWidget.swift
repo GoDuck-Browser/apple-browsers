@@ -74,7 +74,7 @@ enum ShortcutOption: String, CaseIterable, Identifiable, AppEnum {
     case emailProtection
 
     static var typeDisplayRepresentation: TypeDisplayRepresentation = "Shortcut Option"
-    static var caseDisplayRepresentations: [ShortcutOption : DisplayRepresentation] = [
+    static var caseDisplayRepresentations: [ShortcutOption: DisplayRepresentation] = [
         .passwords: "Passwords",
         .duckAI: "Duck.ai",
         .voiceSearch: "Voice Search",
