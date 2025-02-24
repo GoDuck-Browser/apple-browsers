@@ -1,5 +1,5 @@
 //
-//  AIChatControlWidget.swift
+//  ControlWidgetConfigurable.swift
 //  DuckDuckGo
 //
 //  Copyright © 2025 DuckDuckGo. All rights reserved.
@@ -22,7 +22,7 @@ import SwiftUI
 import AppIntents
 
 @available(iOS 18, *)
-protocol ControlWidgetProtocol: ControlWidget {
+protocol ControlWidgetConfigurable: ControlWidget {
     associatedtype IntentType: AppIntent
 
     var kind: ControlWidgetKind { get }
@@ -33,7 +33,7 @@ protocol ControlWidgetProtocol: ControlWidget {
 }
 
 @available(iOS 18, *)
-extension ControlWidgetProtocol {
+extension ControlWidgetConfigurable {
     var body: some ControlWidgetConfiguration {
         StaticControlConfiguration(kind: kind.rawValue) {
             ControlWidgetButton(action: intent) {
@@ -45,11 +45,11 @@ extension ControlWidgetProtocol {
 }
 
 @available(iOS 18, *)
-struct AIChatControlWidget: ControlWidgetProtocol {
+struct AIChatControlWidget: ControlWidgetConfigurable {
     let kind: ControlWidgetKind = .aiChat
     let displayName: LocalizedStringResource = "Duck.ai"
     let labelText: String = "Duck.ai"
-    let imageName: String = "AI-Chat-Symbol"
+    let imageName: String = "FireButton-Symbol"
     let intent = OpenAIChatIntent()
 
     struct OpenAIChatIntent: AppIntent {
@@ -65,7 +65,27 @@ struct AIChatControlWidget: ControlWidgetProtocol {
 }
 
 @available(iOS 18, *)
-struct SearchControlWidget: ControlWidgetProtocol {
+struct FireButtonControlWidget: ControlWidgetConfigurable {
+    let kind: ControlWidgetKind = .fireButton
+    let displayName: LocalizedStringResource = "Fire Button"
+    let labelText: String = "Fire Button"
+    let imageName: String = "FireButton-Symbol"
+    let intent = FireButtonIntent()
+
+    struct FireButtonIntent: AppIntent {
+        static var title: LocalizedStringResource = "Fire Button"
+        static var description: LocalizedStringResource = "Instantly delete your browsing history and start a new private search in DuckDuckGo."
+        static var openAppWhenRun: Bool = true
+
+        func perform() async throws -> some IntentResult & OpensIntent {
+            await EnvironmentValues().openURL(DeepLinks.fireButton)
+            return .result()
+        }
+    }
+}
+
+@available(iOS 18, *)
+struct SearchControlWidget: ControlWidgetConfigurable {
     let kind: ControlWidgetKind = .search
     let displayName: LocalizedStringResource = "Search"
     let labelText: String = "Search"
@@ -85,7 +105,7 @@ struct SearchControlWidget: ControlWidgetProtocol {
 }
 
 @available(iOS 18, *)
-struct PasswordsControlWidget: ControlWidgetProtocol {
+struct PasswordsControlWidget: ControlWidgetConfigurable {
     let kind: ControlWidgetKind = .passwords
     let displayName: LocalizedStringResource = "Passwords"
     let labelText: String = "Passwords"
@@ -105,7 +125,7 @@ struct PasswordsControlWidget: ControlWidgetProtocol {
 }
 
 @available(iOS 18, *)
-struct FavoritesControlWidget: ControlWidgetProtocol {
+struct FavoritesControlWidget: ControlWidgetConfigurable {
     let kind: ControlWidgetKind = .favorites
     let displayName: LocalizedStringResource = "Favorites"
     let labelText: String = "Favorites"
@@ -125,7 +145,7 @@ struct FavoritesControlWidget: ControlWidgetProtocol {
 }
 
 @available(iOS 18, *)
-struct VoiceSearchControlWidget: ControlWidgetProtocol {
+struct VoiceSearchControlWidget: ControlWidgetConfigurable {
     let kind: ControlWidgetKind = .voiceSearch
     let displayName: LocalizedStringResource = "Voice Search"
     let labelText: String = "Voice Search"
@@ -145,15 +165,15 @@ struct VoiceSearchControlWidget: ControlWidgetProtocol {
 }
 
 @available(iOS 18, *)
-struct EmailProtectionControlWidget: ControlWidgetProtocol {
+struct EmailProtectionControlWidget: ControlWidgetConfigurable {
     let kind: ControlWidgetKind = .email
-    let displayName: LocalizedStringResource = "Email Protection"
-    let labelText: String = "Email Protection"
+    let displayName: LocalizedStringResource = "Duck Address"
+    let labelText: String = "Duck Address"
     let imageName: String = "Email-New-Symbol"
     let intent = EmailProtectionIntent()
 
     struct EmailProtectionIntent: AppIntent {
-        static var title: LocalizedStringResource = "Email Protection"
+        static var title: LocalizedStringResource = "Duck Address"
         static var description: LocalizedStringResource = "Instantly generate a new private Duck Address from the Control Center."
         static var openAppWhenRun: Bool = true
 

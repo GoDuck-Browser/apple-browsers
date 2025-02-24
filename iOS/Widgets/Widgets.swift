@@ -271,6 +271,7 @@ struct VPNBundle: WidgetBundle {
             FavoritesControlWidget()
             VoiceSearchControlWidget()
             EmailProtectionControlWidget()
+            FireButtonControlWidget()
         }
     }
 }
