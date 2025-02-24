@@ -35,20 +35,23 @@ final class DuckPlayerNativeUIPresenter {
     private var bottomSheetHostingController: UIHostingController<DuckPlayerEntryPillView>?
     
     /// The host view controller where UI components will be presented
-    private weak var hostView: UIViewController?
+    private weak var hostView: TabViewController?
     
     /// The DuckPlayer instance
     private weak var duckPlayer: DuckPlayerControlling?
     
+    private var playerViewModel: DuckPlayerViewModel?
+    
     let videoPlaybackRequest = PassthroughSubject<String, Never>()
-        
+    private var playerCancellables = Set<AnyCancellable>()
+    
     // MARK: - Public Methods
     
     /// Sets the host view controller for presenting UI components
     ///
     /// - Parameter hostViewController: The view controller that will host the UI components
     func setHostViewController(_ hostViewController: UIViewController) {
-        self.hostView = hostViewController
+        self.hostView = hostViewController as? TabViewController
     }
     
     /// Presents a bottom sheet asking the user how they want to open the video
@@ -61,15 +64,14 @@ final class DuckPlayerNativeUIPresenter {
         
         let viewModel = DuckPlayerEntryPillViewModel(videoID: videoID) { [weak self] in
             self?.videoPlaybackRequest.send(videoID)
-            self?.dismissPill()
         }
+        
         let view = DuckPlayerEntryPillView(viewModel: viewModel)
         let hostingController = UIHostingController(rootView: view)
         
         hostingController.view.backgroundColor = UIColor.clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         
-        // Add to the main view instead of webViewContainer
         hostView.view.addSubview(hostingController.view)
         hostingController.view.setNeedsLayout()
         hostingController.view.layoutIfNeeded()
@@ -100,16 +102,16 @@ final class DuckPlayerNativeUIPresenter {
     /// Hides the bottom sheet when browser chrome is hidden
     @MainActor
     func hideBottomSheetForHiddenChrome() {
-        UIView.animate(withDuration: 0.3) {
-            self.bottomSheetHostingController?.view.alpha = 0
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            self?.bottomSheetHostingController?.view.alpha = 0
         }
     }
     
     /// Shows the bottom sheet when browser chrome is visible
     @MainActor
     func showBottomSheetForVisibleChrome() {
-        UIView.animate(withDuration: 0.3) {
-            self.bottomSheetHostingController?.view.alpha = 1
+        UIView.animate(withDuration: 0.3) { [weak self] in
+            self?.bottomSheetHostingController?.view.alpha = 1
         }
     }
     
@@ -119,6 +121,8 @@ final class DuckPlayerNativeUIPresenter {
         let settingsRequest = PassthroughSubject<Void, Never>()
         
         let viewModel = DuckPlayerViewModel(videoID: videoID)
+        self.playerViewModel = viewModel // Keep strong reference
+        
         let webView = DuckPlayerWebView(viewModel: viewModel)
         let duckPlayerView = DuckPlayerView(viewModel: viewModel, webView: webView)
         
@@ -134,12 +138,12 @@ final class DuckPlayerNativeUIPresenter {
                 }
                 hostingController?.dismiss(animated: true)
             }
-            .store(in: &viewModel.cancellables)
-            
+            .store(in: &playerCancellables)
+        
         viewModel.settingsRequestPublisher
             .sink { settingsRequest.send() }
-            .store(in: &viewModel.cancellables)
-            
+            .store(in: &playerCancellables)
+        
         hostViewController.present(hostingController, animated: true)
         return (navigationRequest, settingsRequest)
     }

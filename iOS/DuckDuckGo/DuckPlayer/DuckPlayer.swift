@@ -412,13 +412,13 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
                 .sink { [weak self] url in
                     self?.youtubeNavigationRequest.send(url)
                 }
-                .store(in: &nativePlayerCancellables)
+                .store(in: &presentationCancellables)
                 
             publishers.settings
                 .sink { [weak self] in
                     self?.openDuckPlayerSettings()
                 }
-                .store(in: &nativePlayerCancellables)
+                .store(in: &presentationCancellables)
         }
     }
 
@@ -718,7 +718,16 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     @MainActor
     func presentEntryPill(for videoID: String) {
         guard let hostView = hostView else { return }
-        nativeUIPresenter.presentEntryPill(for: videoID, in: hostView)
+        
+        Task { @MainActor in
+            nativeUIPresenter.presentEntryPill(for: videoID, in: hostView)
+        }
+        
+        nativeUIPresenter.videoPlaybackRequest
+            .sink { [weak self] videoID in
+                self?.loadNativeDuckPlayerVideo(videoID: videoID, source: .youtube)
+            }
+            .store(in: &presentationCancellables)
     }
 
     /// Add cleanup method to remove the sheet
@@ -738,6 +747,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     }
     
     private func setupSubscriptions() {
+        // Set up the subscription once and keep it alive
         nativeUIPresenter.videoPlaybackRequest
             .sink { [weak self] videoID in
                 self?.loadNativeDuckPlayerVideo(videoID: videoID, source: .youtube)
