@@ -23,14 +23,19 @@ import DesignResourcesKit
 struct DuckPlayerEntryPillView: View {
     @ObservedObject var viewModel: DuckPlayerEntryPillViewModel
     
+    struct Constants {
+        static let daxLogo = "Home"
+        static let playImage = "play.fill"
+    }
+
     private var sheetContent: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                Image("dax-icon")
+                Image(Constants.daxLogo)
                     .resizable()
-                    .frame(width: 24, height: 24)
+                    .frame(width: 40, height: 40)
                 
-                Text("Open in Duck Player")
+                Text(UserText.duckPlayerNativeWatchOnYouTube)
                     .font(.system(size: 16, weight: .semibold))
                 
                 Spacer()
@@ -38,24 +43,23 @@ struct DuckPlayerEntryPillView: View {
                 Button(action: {
                     viewModel.openInDuckPlayer()
                 }) {
-                    Text("Open")
-                        .font(.system(size: 17, weight: .semibold))
+                    Image(systemName: Constants.playImage)
+                        .font(.system(size: 20))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
+                        .frame(width: 44, height: 44)
                         .background(Color.blue)
-                        .cornerRadius(8)
+                        .clipShape(Circle())
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.vertical, 14)
         }
         .background(Color(designSystemColor: .surface))        
         .cornerRadius(12)        
         .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)        
         .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .padding(.bottom, 12)
+        .padding(.vertical, 12)   
+        .padding(.bottom, 80)     
     }
     
     var body: some View {
@@ -72,7 +76,7 @@ struct DuckPlayerEntryPillView: View {
                         // Extra panel extension for bounce
                         Rectangle()
                             .fill(Color(designSystemColor: .panel))
-                            .frame(height: 25)
+                            .frame(height: 60)
                     }
                     
                     // Content
@@ -83,7 +87,7 @@ struct DuckPlayerEntryPillView: View {
                     }
                 }
             }
-            .offset(y: viewModel.isVisible ? 18 : geometry.size.height)
+            .offset(y: viewModel.isVisible ? 16 : geometry.size.height)
         }
         .edgesIgnoringSafeArea(.all)
         .animation(.spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0), value: viewModel.isVisible)

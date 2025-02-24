@@ -9,23 +9,6 @@
     // Capture play events at the earliest possible moment
     document.addEventListener('play', blockPlayback, true);
     document.addEventListener('playing', blockPlayback, true);
-    
-    // Block HTML5 video/audio playback methods
-    if (typeof HTMLMediaElement !== 'undefined') {
-        const origPlay = HTMLMediaElement.prototype.play;
-        HTMLMediaElement.prototype.play = function() {
-            this.pause();
-            return Promise.reject(new Error('Playback blocked'));
-        };
-        
-        // Override load to ensure media starts paused
-        const origLoad = HTMLMediaElement.prototype.load;
-        HTMLMediaElement.prototype.load = function() {
-            this.autoplay = false;
-            this.pause();
-            return origLoad.apply(this, arguments);
-        };
-    }
 
     function addMediaControl() {
         let userInitiated = false;
@@ -34,72 +17,62 @@
         ['touchstart'].forEach(eventType => {
             document.addEventListener(eventType, () => {
                 userInitiated = true;
+                
+                // Remove the early blocking listeners
                 document.removeEventListener('play', blockPlayback, true);
                 document.removeEventListener('playing', blockPlayback, true);
-                
-                // Reset HTMLMediaElement.prototype.play
-                if (typeof HTMLMediaElement !== 'undefined') {
-                    HTMLMediaElement.prototype.play = origPlay;
-                }
 
                 // Unmute all media elements when user interacts
                 document.querySelectorAll('audio, video').forEach(media => {
                     media.muted = false;
                 });
 
-                // Reset after a short delay
+                // Reset after a short delay to prevent indefinite allowance
                 setTimeout(() => {
                     userInitiated = false;
                 }, 500);
-            }, true);
+            }, true);  // Capture phase to detect early
         });
 
-        // Function to aggressively pause and mute all media
+        // Override play to detect and conditionally allow playback
+        const originalPlay = HTMLMediaElement.prototype.play;
+        HTMLMediaElement.prototype.play = function() {
+            if (userInitiated) {
+                // User-triggered playback is allowed, so disconnect the observer and unmute
+                observer.disconnect();
+                this.muted = false;  // Unmute the specific media element being played
+                return originalPlay.apply(this, arguments);
+            } else {
+                // Block programmatic playback
+                this.pause();
+                return Promise.reject(new Error("Playback blocked: Not user-initiated"));
+            }
+        };
+
+        // Initial pause of all media
         function pauseAndMuteAllMedia() {
             document.querySelectorAll('audio, video').forEach(media => {
                 media.pause();
                 media.muted = true;
-                media.autoplay = false;
-                media.setAttribute('autoplay', 'false');
-                // Also prevent playback via play() method
-                media.play = function() {
-                    return Promise.reject(new Error('Playback blocked'));
-                };
             });
         }
 
-        // Run immediately
         pauseAndMuteAllMedia();
 
         // Monitor DOM for newly added media elements
         const observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
-                // Check for attribute modifications
-                if (mutation.type === 'attributes' && 
-                    (mutation.target.tagName === 'VIDEO' || mutation.target.tagName === 'AUDIO')) {
-                    if (!userInitiated) {
-                        mutation.target.pause();
-                        mutation.target.muted = true;
-                        mutation.target.autoplay = false;
-                    }
-                }
-                
-                // Check for added nodes
                 mutation.addedNodes.forEach(node => {
                     if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
-                        if (!userInitiated) {
+                        if (!userInitiated) {  // Only mute if not user-initiated
                             node.pause();
                             node.muted = true;
-                            node.autoplay = false;
-                            node.setAttribute('autoplay', 'false');
                         }
                     } else if (node.querySelectorAll) {
                         node.querySelectorAll('audio, video').forEach(media => {
-                            if (!userInitiated) {
+                            if (!userInitiated) {  // Only mute if not user-initiated
                                 media.pause();
                                 media.muted = true;
-                                media.autoplay = false;
-                                media.setAttribute('autoplay', 'false');
                             }
                         });
                     }
@@ -107,12 +80,7 @@
             });
         });
 
-        observer.observe(document.documentElement || document.body, { 
-            childList: true, 
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['autoplay', 'src', 'playing']
-        });
+        observer.observe(document.body, { childList: true, subtree: true });
     }
 
     // Run as early as possible

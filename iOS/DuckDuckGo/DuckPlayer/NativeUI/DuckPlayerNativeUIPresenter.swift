@@ -28,11 +28,14 @@ final class DuckPlayerNativeUIPresenter {
     
     // MARK: - Properties
     
+    /// The view for the entry pill
+    private var duckPlayerEntryPillView: DuckPlayerEntryPillView?
+
     /// The view model for the bottom sheet
-    private var bottomSheetViewModel: DuckPlayerEntryPillViewModel?
+    private var pillSheetviewModel: DuckPlayerEntryPillViewModel?
     
     /// The hosting controller for the bottom sheet
-    private var bottomSheetHostingController: UIHostingController<DuckPlayerEntryPillView>?
+    private var pillSheetViewController: UIHostingController<DuckPlayerEntryPillView>?
     
     /// The host view controller where UI components will be presented
     private weak var hostView: TabViewController?
@@ -45,6 +48,7 @@ final class DuckPlayerNativeUIPresenter {
     let videoPlaybackRequest = PassthroughSubject<String, Never>()
     private var playerCancellables = Set<AnyCancellable>()
     
+
     // MARK: - Public Methods
     
     /// Sets the host view controller for presenting UI components
@@ -59,13 +63,26 @@ final class DuckPlayerNativeUIPresenter {
     /// - Parameter videoID: The YouTube video ID to be played
     @MainActor
     func presentEntryPill(for videoID: String, in hostViewController: TabViewController) {
+        
+        // If we already have a view model, just update the onOpen closure
+        if let existingViewModel = pillSheetviewModel {
+            print("[DP] Presenter: Updating existing entry pill")
+            existingViewModel.onOpen = { [weak self] in
+                self?.videoPlaybackRequest.send(videoID)
+            }            
+            return
+        }
+        
+        print("[DP] Presenter: Presenting entry pill from scratch")
+        
         self.hostView = hostViewController
         guard let hostView = self.hostView else { return }
         
         // Create and configure the view model
-        let viewModel = DuckPlayerEntryPillViewModel(videoID: videoID) { [weak self] in
+        let viewModel = DuckPlayerEntryPillViewModel() { [weak self] in
             self?.videoPlaybackRequest.send(videoID)
         }
+        self.pillSheetviewModel = viewModel
         
         // Create the view with initial hidden state
         let view = DuckPlayerEntryPillView(viewModel: viewModel)
@@ -84,9 +101,9 @@ final class DuckPlayerNativeUIPresenter {
             hostingController.view.heightAnchor.constraint(equalToConstant: 120) 
         ])
         
-        // Store references and show the view with delay
-        bottomSheetViewModel = viewModel
-        bottomSheetHostingController = hostingController
+        // Store references
+        pillSheetviewModel = viewModel
+        pillSheetViewController = hostingController 
         
         // Add delay before showing the pill
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak viewModel] in
@@ -98,31 +115,29 @@ final class DuckPlayerNativeUIPresenter {
     @MainActor
     func dismissPill() {
         // Hide the view first
-        bottomSheetViewModel?.hide()
-        
+        pillSheetviewModel?.hide()
+        print("[DP] Presenter: Hiding existing entry pill")
+
         // Remove the view after the animation completes
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
-            guard let self = self else { return }
-            
-            // Only remove if it's still hidden
-            if self.bottomSheetViewModel?.isVisible == false {
-                self.bottomSheetHostingController?.view.removeFromSuperview()
-                self.bottomSheetHostingController = nil
-                self.bottomSheetViewModel = nil
-            }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in                   
+            print("[DP] Presenter: Removing existing entry pill")            
+            self?.pillSheetViewController?.view.removeFromSuperview()
+            self?.pillSheetViewController = nil            
+            self?.pillSheetviewModel = nil
+
         }
     }
     
     /// Hides the bottom sheet when browser chrome is hidden
     @MainActor
     func hideBottomSheetForHiddenChrome() {
-        bottomSheetViewModel?.hide()
+        pillSheetviewModel?.hide()
     }
     
     /// Shows the bottom sheet when browser chrome is visible
     @MainActor
     func showBottomSheetForVisibleChrome() {
-        bottomSheetViewModel?.show()
+        pillSheetviewModel?.show()
     }
     
     @MainActor

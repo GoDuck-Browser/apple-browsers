@@ -16,14 +16,12 @@ import Combine
 import SwiftUI
 
 @MainActor
-final class DuckPlayerEntryPillViewModel: ObservableObject {
-    private let videoID: String
-    private let onOpen: () -> Void
+final class DuckPlayerEntryPillViewModel: ObservableObject {    
+    var onOpen: () -> Void
     
     @Published var isVisible: Bool = false
     
-    init(videoID: String, onOpen: @escaping () -> Void) {
-        self.videoID = videoID
+    init(onOpen: @escaping () -> Void) {        
         self.onOpen = onOpen
     }
     

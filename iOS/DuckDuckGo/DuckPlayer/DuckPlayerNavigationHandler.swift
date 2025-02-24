@@ -816,8 +816,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         
         // Dismiss the bottom sheet if URL is not a YouTube watch page
         // Also ensure all media playback is allowed by default
-        if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-            duckPlayer.dismissPill()
+        if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {            
             toggleMediaPlayback(webView, pause: false)
         }
 
@@ -844,10 +843,13 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         }
         
         guard let url = webView.url, let (videoID, _) = url.youtubeVideoParams else {            
+            duckPlayer.dismissPill()
             return .notHandled(.invalidURL)
         }
         
         guard url.isYoutubeWatch else {
+            print("[DP] Handler: Dismissing entry pill")
+            duckPlayer.dismissPill()
             return .notHandled(.isNotYoutubeWatch)
         }
 
@@ -864,11 +866,13 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             // Pause media immediately
             toggleMediaPlayback(webView, pause: true)
             
-            // We need a 2s delay
+            // Only present entry pill if not already presented
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
                 duckPlayer.presentEntryPill(for: videoID)
+                print("[DP] Handler: Presenting entry pill")
             }
+
         }
         
         // If this is an internal Youtube Link (i.e Clicking in youtube logo in the player)

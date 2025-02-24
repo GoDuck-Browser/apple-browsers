@@ -1500,7 +1500,8 @@ But if you *do* want a peek under the hood, you can find more information about 
     // Duck Player Native UI
     static let duckPlayerNativeWatchOnYouTube = NSLocalizedString("duck-player.native-watch-on-youtube", value: "Watch in Youtube", comment: "Text for the button to watch a video on YouTube")
     static let duckPlayerNativeAutoplayVideos = NSLocalizedString("duck-player.native-autoplay-videos", value: "Autoplay Videos", comment: "Text for the toggle to autoplay videos")
-    
+    static let duckPlayerNativeOpenInDuckPlayer = NSLocalizedString("duck-player.native-open-in-duckplayer", value: "Open in Duck Player", comment: "Text for the button to watch a video on YouTube")
+
     // MARK: - AI Chat
     public static let aiChatFeatureName = NSLocalizedString("duckai.settings.title", value: "Duck.ai", comment: "Settings screen cell text for AI Chat settings")
 
