@@ -111,7 +111,7 @@ final class TabViewModel {
         case .subscription, .identityTheftRestoration, .releaseNotes, .webExtensionUrl:
             return true
 
-        case .newtab, .settings, .bookmarks, .history, .onboardingDeprecated, .onboarding, .dataBrokerProtection, .none:
+        case .newtab, .settings, .bookmarks, .history, .onboardingDeprecated, .onboarding, .dataBrokerProtection, .none, .webExtensionStore:
             return false
         }
     }
@@ -192,6 +192,7 @@ final class TabViewModel {
                      .subscription,
                      .identityTheftRestoration,
                      .releaseNotes,
+                     .webExtensionStore,
                      .webExtensionUrl:
                     // Update the address bar instantly for built-in content types or user-initiated navigations
                     return Just( () ).eraseToAnyPublisher()
@@ -364,7 +365,7 @@ final class TabViewModel {
         passiveAddressBarAttributedString = switch tab.content {
         case .newtab, .onboardingDeprecated, .onboarding, .none:
                 .init() // empty
-        case .settings:
+        case .settings, .webExtensionStore:
                 .settingsTrustedIndicator
         case .bookmarks:
                 .bookmarksTrustedIndicator
@@ -450,6 +451,8 @@ final class TabViewModel {
             } else {
                 title = addressBarString
             }
+        case .webExtensionStore:
+            title = "Web Extensions"
         case .releaseNotes:
             title = UserText.releaseNotesTitle
         }
@@ -483,7 +486,7 @@ final class TabViewModel {
             Favicon.subscription
         case .identityTheftRestoration:
             Favicon.identityTheftRestoration
-        case .releaseNotes:
+        case .releaseNotes, .webExtensionStore:
             Favicon.home
         case .url(let url, _, _) where url.isDuckPlayer:
             Favicon.duckPlayer

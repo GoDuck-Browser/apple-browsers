@@ -709,7 +709,7 @@ final class BrowserTabViewController: NSViewController {
              .url(_, _, source: .reload):
             return true
 
-        case .settings, .bookmarks, .history, .dataBrokerProtection, .subscription, .onboardingDeprecated, .onboarding, .releaseNotes, .identityTheftRestoration, .webExtensionUrl:
+        case .settings, .bookmarks, .history, .dataBrokerProtection, .subscription, .onboardingDeprecated, .onboarding, .releaseNotes, .identityTheftRestoration, .webExtensionUrl, .webExtensionStore:
             return true
 
         case .none:
@@ -740,6 +740,8 @@ final class BrowserTabViewController: NSViewController {
             getView = { [weak self] in self?.dataBrokerProtectionHomeViewController?.view }
         case .webExtensionUrl:
             getView = { [weak self] in self?.webExtensionWebView }
+        case .webExtensionStore:
+            getView = { [weak self] in self?.webExtensionStoreViewController?.view }
         case .none:
             getView = nil
         }
@@ -804,6 +806,7 @@ final class BrowserTabViewController: NSViewController {
     private func removeAllTabContent(includingWebView: Bool = true) {
         transientTabContentViewController?.removeCompletely()
         preferencesViewController?.removeCompletely()
+        webExtensionStoreViewController?.removeCompletely()
         bookmarksViewController?.removeCompletely()
         homePageViewController?.removeCompletely()
         webExtensionWebView?.superview?.removeFromSuperview()
@@ -890,6 +893,10 @@ final class BrowserTabViewController: NSViewController {
                 }
             }
 #endif
+        case .webExtensionStore:
+            removeAllTabContent()
+            let viewController = webExtensionStoreViewControllerCreatingIfNeeded()
+            addAndLayoutChild(viewController)
         default:
             removeAllTabContent()
         }
@@ -999,6 +1006,18 @@ final class BrowserTabViewController: NSViewController {
             preferencesViewController.delegate = self
             self.preferencesViewController = preferencesViewController
             return preferencesViewController
+        }()
+    }
+
+    // MARK: - Web Extension Store
+
+    var webExtensionStoreViewController: WebExtensionStoreViewController?
+    private func webExtensionStoreViewControllerCreatingIfNeeded() -> WebExtensionStoreViewController {
+        return webExtensionStoreViewController ?? {
+            let viewController = WebExtensionStoreViewController(tabCollectionViewModel: tabCollectionViewModel)
+            viewController.delegate = self
+            self.webExtensionStoreViewController = viewController
+            return viewController
         }()
     }
 

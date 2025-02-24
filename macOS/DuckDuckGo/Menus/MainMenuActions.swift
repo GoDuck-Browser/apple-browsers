@@ -253,6 +253,14 @@ extension AppDelegate {
         }
     }
 
+    @objc func openWebExtensions(_ sender: Any?) {
+        DispatchQueue.main.async {
+            let tabCollection = TabCollection(tabs: [Tab(content: .webExtensionStore)])
+            let tabCollectionViewModel = TabCollectionViewModel(tabCollection: tabCollection)
+            WindowsManager.openNewWindow(with: tabCollectionViewModel)
+        }
+    }
+
     @objc func openAbout(_ sender: Any?) {
 #if APPSTORE
         let options = [NSApplication.AboutPanelOptionKey.applicationName: UserText.duckDuckGoForMacAppStore]
@@ -400,6 +408,11 @@ extension MainViewController {
     @objc func openPreferences(_ sender: Any?) {
         makeKeyIfNeeded()
         browserTabViewController.openNewTab(with: .anySettingsPane)
+    }
+
+    @objc func openWebExtensions(_ sender: Any?) {
+        makeKeyIfNeeded()
+        browserTabViewController.openNewTab(with: .webExtensionStore)
     }
 
     // MARK: - File

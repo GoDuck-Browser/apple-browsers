@@ -38,6 +38,7 @@ final class MainMenu: NSMenu {
     // MARK: DuckDuckGo
     let servicesMenu = NSMenu(title: UserText.mainMenuAppServices)
     let preferencesMenuItem = NSMenuItem(title: UserText.mainMenuAppPreferences, action: #selector(AppDelegate.openPreferences), keyEquivalent: ",").withAccessibilityIdentifier("MainMenu.preferencesMenuItem")
+    let webExtensionsMenuItem = NSMenuItem(title: "Web Extensions…", action: #selector(AppDelegate.openWebExtensions), keyEquivalent: ",").withAccessibilityIdentifier("MainMenu.webExtensions")
 
     // MARK: File
     let newWindowMenuItem = NSMenuItem(title: UserText.newWindowMenuItem, action: #selector(AppDelegate.newWindow), keyEquivalent: "n")
@@ -157,6 +158,10 @@ final class MainMenu: NSMenu {
             preferencesMenuItem
             addToDockMenuItem
             setAsDefaultMenuItem
+
+            NSMenuItem.separator()
+
+            webExtensionsMenuItem
 
             NSMenuItem.separator()
 

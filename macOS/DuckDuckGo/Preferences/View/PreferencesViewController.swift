@@ -68,13 +68,11 @@ final class PreferencesViewController: NSViewController {
             privacyConfigurationManager: privacyConfigurationManager
         )
 
-//        let prefRootView = Preferences.RootView(model: model,
-//                                                addressBarModel: addressBarModel,
-//                                                subscriptionManager: Application.appDelegate.subscriptionManager,
-//                                                subscriptionUIHandler: Application.appDelegate.subscriptionUIHandler)
-//        let host = NSHostingView(rootView: prefRootView)
-        let webExtensionsStoreTab = WebExtensionStoreTab()
-        let host = NSHostingView(rootView: webExtensionsStoreTab)
+        let prefRootView = Preferences.RootView(model: model,
+                                                addressBarModel: addressBarModel,
+                                                subscriptionManager: Application.appDelegate.subscriptionManager,
+                                                subscriptionUIHandler: Application.appDelegate.subscriptionUIHandler)
+        let host = NSHostingView(rootView: prefRootView)
         view.addAndLayout(host)
     }
 

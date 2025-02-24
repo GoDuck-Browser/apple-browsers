@@ -15,7 +15,6 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-
 import SwiftUI
 
 struct WebExtensionStoreTab: View {
@@ -24,9 +23,11 @@ struct WebExtensionStoreTab: View {
 
     let categories = ["Featured", "Popular", "Productivity", "Privacy", "Themes"]
     let extensions = [
-        WebExtension(id: 1, name: "Ad Blocker", description: "Block ads and trackers", iconName: "shield.lefthalf.fill"),
-        WebExtension(id: 2, name: "Dark Mode", description: "Enable dark mode on all websites", iconName: "moon.fill"),
-        WebExtension(id: 3, name: "Password Manager", description: "Securely store your passwords", iconName: "lock.fill")
+        WebExtension(id: 1, name: "Dark Reader", description: "Enable dark mode on all websites", iconName: "darkreader", url: "https://addons.mozilla.org/firefox/downloads/file/4433330/darkreader-4.9.101.xpi"),
+        WebExtension(id: 2, name: "Emoji", description: "Securely store your passwords", iconName: "emoji", url: "https://addons.mozilla.org/firefox/downloads/file/4433330/darkreader-4.9.101.xpi"),
+        WebExtension(id: 3, name: "LanguageTool", description: "With this extension you can check text with the free style and grammar checker", iconName: "languagetool", url: "https://addons.mozilla.org/firefox/downloads/file/4433330/darkreader-4.9.101.xpi"),
+        WebExtension(id: 4, name: "Bitwarden", description: "Bitwarden easily secures all your passwords, passkeys, and sensitive information", iconName: "bitwarden1", url: "https://addons.mozilla.org/firefox/downloads/file/4433330/darkreader-4.9.101.xpi"),
+        WebExtension(id: 5, name: "Tomato Clock", description: "Simple browser extension that helps with online time management.", iconName: "tomato", url: "https://addons.mozilla.org/firefox/downloads/file/4433330/darkreader-4.9.101.xpi")
     ]
 
     var body: some View {
@@ -72,15 +73,18 @@ struct WebExtension: Identifiable {
     let name: String
     let description: String
     let iconName: String
+    let url: String
     var category: String = "Featured"
 }
 
 struct ExtensionCardView: View {
     let extensionItem: WebExtension
+    @State private var isDownloading = false
+    @State private var isInstalled = false
 
     var body: some View {
         VStack(alignment: .leading) {
-            Image(systemName: extensionItem.iconName)
+            Image(extensionItem.iconName)
                 .resizable()
                 .scaledToFit()
                 .frame(height: 50)
@@ -92,10 +96,19 @@ struct ExtensionCardView: View {
                 .foregroundColor(.secondary)
             Spacer()
             Button(action: {
-                // Install action
+                if isInstalled {
+                    removeExtension()
+                } else {
+                    downloadExtension()
+                }
             }) {
-                Text("Install")
-                    .frame(maxWidth: .infinity)
+                if isDownloading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity)
+                } else {
+                    Text(isInstalled ? "Remove" : "Install")
+                        .frame(maxWidth: .infinity)
+                }
             }
             .buttonStyle(BorderlessButtonStyle())
             .padding(.top, 5)
@@ -104,6 +117,73 @@ struct ExtensionCardView: View {
         .background(Color.preferencesBackground)
         .cornerRadius(8)
         .shadow(radius: 2)
+    }
+
+    func downloadExtension() {
+        guard let downloadURL = URL(string: extensionItem.url) else { return }
+        isDownloading = true
+
+        let downloadsDirectory = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        let destinationURL = downloadsDirectory.appendingPathComponent(downloadURL.lastPathComponent)
+
+        let task = URLSession.shared.downloadTask(with: downloadURL) { tempURL, response, error in
+
+            guard let tempURL = tempURL, error == nil else { return }
+
+            do {
+                let zipURL = downloadsDirectory.appendingPathComponent(downloadURL.deletingPathExtension().lastPathComponent + ".zip")
+
+                // Remove existing file if it exists before moving
+                if FileManager.default.fileExists(atPath: destinationURL.path) {
+                    try FileManager.default.removeItem(at: destinationURL)
+                }
+                try FileManager.default.moveItem(at: tempURL, to: destinationURL)
+
+                if FileManager.default.fileExists(atPath: zipURL.path) {
+                    try FileManager.default.removeItem(at: zipURL)
+                }
+                try FileManager.default.moveItem(at: destinationURL, to: zipURL)
+
+                let unzipDirectory = downloadsDirectory.appendingPathComponent(downloadURL.deletingPathExtension().lastPathComponent)
+
+                // Remove existing directory if it exists
+                if FileManager.default.fileExists(atPath: unzipDirectory.path) {
+                    try FileManager.default.removeItem(at: unzipDirectory)
+                }
+
+                try FileManager.default.createDirectory(at: unzipDirectory, withIntermediateDirectories: true, attributes: nil)
+
+                let process = Process()
+                process.launchPath = "/usr/bin/unzip"
+                process.arguments = ["-o", zipURL.path, "-d", unzipDirectory.path]
+                process.launch()
+                process.waitUntilExit()
+
+                if #available(macOS 15.3, *) {
+                    DispatchQueue.main.async {
+                        WebExtensionManager.shared.addExtension(path: unzipDirectory.absoluteString + "/")
+                    }
+                }
+
+                DispatchQueue.main.async {
+                    isInstalled = true
+                }
+            } catch {
+                print("Error handling downloaded file: \(error)")
+            }
+
+            DispatchQueue.main.async {
+                isDownloading = false
+            }
+        }
+
+        task.resume()
+    }
+
+    func removeExtension() {
+        // Implement the removal logic here
+        // For now, we'll just toggle the isInstalled state
+        isInstalled = false
     }
 }
 

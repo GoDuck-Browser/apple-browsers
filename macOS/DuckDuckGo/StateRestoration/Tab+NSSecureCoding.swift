@@ -98,6 +98,7 @@ private extension Tab.TabContent {
         case releaseNotes = 10
         case history = 11
         case webExtensionUrl = 12
+        case webExtensionStore = 13
     }
 
     init?(type: ContentType, url: URL?, videoID: String?, timestamp: String?, preferencePane: PreferencePaneIdentifier?) {
@@ -133,6 +134,8 @@ private extension Tab.TabContent {
         case .webExtensionUrl:
             guard let url = url else { return nil }
             self = .webExtensionUrl(url)
+        case .webExtensionStore:
+            self = .webExtensionStore
         }
     }
 
@@ -151,6 +154,7 @@ private extension Tab.TabContent {
         case .identityTheftRestoration: return .identityTheftRestoration
         case .releaseNotes: return .releaseNotes
         case .webExtensionUrl: return .webExtensionUrl
+        case .webExtensionStore: return .webExtensionStore
         }
     }
 

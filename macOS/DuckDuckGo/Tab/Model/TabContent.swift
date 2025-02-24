@@ -36,6 +36,7 @@ extension Tab {
         case identityTheftRestoration(URL)
         case releaseNotes
         case webExtensionUrl(URL)
+        case webExtensionStore
     }
     typealias TabContent = Tab.Content
 
@@ -130,6 +131,8 @@ extension TabContent {
             return .dataBrokerProtection
         case URL.releaseNotes:
             return .releaseNotes
+        case URL.webExtensionStore:
+            return .webExtensionStore
         case URL.Invalid.aboutHome:
             guard let customURL = URL(string: StartupPreferences.shared.formattedCustomHomePageURL) else {
                 return .newtab
@@ -187,7 +190,7 @@ extension TabContent {
 
     var isDisplayable: Bool {
         switch self {
-        case .settings, .bookmarks, .history, .dataBrokerProtection, .subscription, .identityTheftRestoration, .releaseNotes:
+        case .settings, .bookmarks, .history, .dataBrokerProtection, .subscription, .identityTheftRestoration, .releaseNotes, .webExtensionStore:
             return true
         default:
             return false
@@ -197,6 +200,8 @@ extension TabContent {
     func matchesDisplayableTab(_ other: TabContent) -> Bool {
         switch (self, other) {
         case (.settings, .settings):
+            return true
+        case (.webExtensionStore, .webExtensionStore):
             return true
         case (.bookmarks, .bookmarks):
             return true
@@ -225,6 +230,7 @@ extension TabContent {
         case .dataBrokerProtection: return UserText.tabDataBrokerProtectionTitle
         case .releaseNotes: return UserText.releaseNotesTitle
         case .subscription, .identityTheftRestoration: return nil
+        case .webExtensionStore: return "Web Extensions"
         }
     }
 
@@ -266,6 +272,8 @@ extension TabContent {
             return .releaseNotes
         case .subscription(let url), .identityTheftRestoration(let url), .webExtensionUrl(let url):
             return url
+        case .webExtensionStore:
+            return .webExtensionStore
         case .none:
             return nil
         }
@@ -276,7 +284,7 @@ extension TabContent {
         case .url(_, _, source: let source):
             return source
         case .newtab, .settings, .bookmarks, .history, .onboardingDeprecated, .onboarding, .releaseNotes, .dataBrokerProtection,
-                .subscription, .identityTheftRestoration, .webExtensionUrl, .none:
+                .subscription, .identityTheftRestoration, .webExtensionUrl, .none, .webExtensionStore:
             return .ui
         }
     }
@@ -346,7 +354,7 @@ extension TabContent {
         switch self {
         case .newtab, .onboardingDeprecated, .onboarding, .none:
             return false
-        case .url, .settings, .bookmarks, .history, .subscription, .identityTheftRestoration, .dataBrokerProtection, .releaseNotes, .webExtensionUrl:
+        case .url, .settings, .bookmarks, .history, .subscription, .identityTheftRestoration, .dataBrokerProtection, .releaseNotes, .webExtensionUrl, .webExtensionStore:
             return true
         }
     }

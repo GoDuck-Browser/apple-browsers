@@ -183,6 +183,8 @@
 		1DB9618329F67F6200CF5568 /* FaviconNullStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DB9617F29F67F3E00CF5568 /* FaviconNullStore.swift */; };
 		1DBFD90C2D68A996003F8D98 /* WebExtensionStoreTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBFD90B2D68A987003F8D98 /* WebExtensionStoreTab.swift */; };
 		1DBFD90D2D68AB48003F8D98 /* WebExtensionStoreTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBFD90B2D68A987003F8D98 /* WebExtensionStoreTab.swift */; };
+		1DBFD90F2D68CDC1003F8D98 /* WebExtensionStoreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBFD90E2D68CDBC003F8D98 /* WebExtensionStoreViewController.swift */; };
+		1DBFD9102D68CF7A003F8D98 /* WebExtensionStoreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DBFD90E2D68CDBC003F8D98 /* WebExtensionStoreViewController.swift */; };
 		1DC669702B6CF0D700AA0645 /* TabSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC6696F2B6CF0D700AA0645 /* TabSnapshotStore.swift */; };
 		1DC669712B6CF0D700AA0645 /* TabSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DC6696F2B6CF0D700AA0645 /* TabSnapshotStore.swift */; };
 		1DCFBC8A29ADF32B00313531 /* BurnerHomePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCFBC8929ADF32B00313531 /* BurnerHomePageView.swift */; };
@@ -3656,6 +3658,7 @@
 		1DB9617929F1D06D00CF5568 /* InternalUserDeciderMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InternalUserDeciderMock.swift; sourceTree = "<group>"; };
 		1DB9617F29F67F3E00CF5568 /* FaviconNullStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconNullStore.swift; sourceTree = "<group>"; };
 		1DBFD90B2D68A987003F8D98 /* WebExtensionStoreTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebExtensionStoreTab.swift; sourceTree = "<group>"; };
+		1DBFD90E2D68CDBC003F8D98 /* WebExtensionStoreViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebExtensionStoreViewController.swift; sourceTree = "<group>"; };
 		1DC6696F2B6CF0D700AA0645 /* TabSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSnapshotStore.swift; sourceTree = "<group>"; };
 		1DCFBC8929ADF32B00313531 /* BurnerHomePageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BurnerHomePageView.swift; sourceTree = "<group>"; };
 		1DD35AD72D65CEA9002C8724 /* WKWebExtensionTabConfiguration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WKWebExtensionTabConfiguration.h; sourceTree = "<group>"; };
@@ -5606,6 +5609,7 @@
 				1DF78E112CE61DB000AB898E /* WKWebExtensionWindow.swift */,
 				1D5C1AF02CFF58170073ED65 /* Logger+WebExtensions.swift */,
 				1DBFD90B2D68A987003F8D98 /* WebExtensionStoreTab.swift */,
+				1DBFD90E2D68CDBC003F8D98 /* WebExtensionStoreViewController.swift */,
 			);
 			path = WebExtensions;
 			sourceTree = "<group>";
@@ -12477,6 +12481,7 @@
 				3706FC65293F65D500E42796 /* HomePageViewController.swift in Sources */,
 				371209262C232E76003ADF3D /* RemoteMessagingClient.swift in Sources */,
 				3706FC67293F65D500E42796 /* OperatingSystemVersionExtension.swift in Sources */,
+				1DBFD9102D68CF7A003F8D98 /* WebExtensionStoreViewController.swift in Sources */,
 				7B6545EE2C0779D500115BEA /* VPNControllerUDSClient+ConvenienceInitializers.swift in Sources */,
 				B6F9BDE52B45CD1900677B33 /* ModalView.swift in Sources */,
 				CD33012D2C89B588009AA127 /* ErrorPageHTMLFactory.swift in Sources */,
@@ -13403,6 +13408,7 @@
 				B6619EFB2B111CC500CD9186 /* InstructionsFormatParser.swift in Sources */,
 				9FBD84522BB3AACB00220859 /* AttributionOriginFileProvider.swift in Sources */,
 				1DC669702B6CF0D700AA0645 /* TabSnapshotStore.swift in Sources */,
+				1DBFD90F2D68CDC1003F8D98 /* WebExtensionStoreViewController.swift in Sources */,
 				376731822C7E226A00EB097B /* HomePageViewBackground.swift in Sources */,
 				379026D12C650CCD00A089E8 /* UserBackgroundImagesManager.swift in Sources */,
 				AAC30A26268DFEE200D2D9CD /* CrashReporter.swift in Sources */,

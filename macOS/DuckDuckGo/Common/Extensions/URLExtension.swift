@@ -144,6 +144,7 @@ extension URL {
     static let releaseNotes = URL(string: "duck://release-notes")!
     // base url for Error Page Alternate HTML loaded into Web View
     static let error = URL(string: "duck://error")!
+    static let webExtensionStore = URL(string: "duck://web-extensions")!
 
     static let dataBrokerProtection = URL(string: "duck://personal-information-removal")!
 

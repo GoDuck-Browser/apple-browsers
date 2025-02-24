@@ -191,11 +191,16 @@ final class NavigationBarViewController: NSViewController {
 #endif
 
         subscribeToAIChatOnboarding()
+        refreshWebExtensionButtons()
+    }
 
+    func refreshWebExtensionButtons() {
 #if !APPSTORE
         if #available(macOS 15.3, *), !burnerMode.isBurner {
             WebExtensionManager.shared.toolbarButtons().enumerated().forEach { (index, button) in
-                menuButtons.insertArrangedSubview(button, at: index)
+                if !menuButtons.arrangedSubviews.contains(button) {
+                    menuButtons.insertArrangedSubview(button, at: index)
+                }
             }
         }
 #endif

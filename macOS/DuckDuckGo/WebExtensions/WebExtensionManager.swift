@@ -106,6 +106,18 @@ final class WebExtensionManager: NSObject, WebExtensionManaging {
 
     func addExtension(path: String) {
         pathsCache.add(path)
+
+        DispatchQueue.main.async { [weak self] in
+            do {
+                try self?.loadWebExtensions()
+            } catch {
+                assertionFailure("Failed to load web extensions")
+            }
+
+            WindowControllersManager.shared.mainWindowControllers.forEach {
+                $0.mainViewController.navigationBarViewController.refreshWebExtensionButtons()
+            }
+        }
     }
 
     func removeExtension(path: String) {

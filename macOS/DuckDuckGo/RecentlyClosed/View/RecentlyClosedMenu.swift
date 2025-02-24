@@ -74,6 +74,9 @@ private extension NSMenuItem {
         case .settings:
             image = TabViewModel.Favicon.settings
             title = UserText.tabPreferencesTitle
+        case .webExtensionStore:
+            image = TabViewModel.Favicon.home
+            title = "Web Extensions"
         case .bookmarks:
             image = TabViewModel.Favicon.bookmarks
             title = UserText.tabPreferencesTitle
