@@ -114,7 +114,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         return DataModel.HistoryItemsBatch(finished: finished, visits: visits)
     }
 
-    func countEntries(for range: DataModel.HistoryRange) async -> Int {
+    func countVisits(for range: DataModel.HistoryRange) async -> Int {
         let startDate = Date()
         let history = Task { @MainActor in
             self.historyGroupingDataSource.history
@@ -237,6 +237,14 @@ extension HistoryView.DataModel.HistoryItem {
             }
             return title
         }()
+
+        let favicon: DataModel.Favicon? = {
+            guard let url = visit.historyEntry?.url, let src = URL.duckFavicon(for: url)?.absoluteString else {
+                return nil
+            }
+            return .init(maxAvailableSize: Int(Favicon.SizeCategory.small.rawValue), src: src)
+        }()
+
         self.init(
             id: historyEntry.identifier.uuidString,
             url: historyEntry.url.absoluteString,
@@ -245,7 +253,8 @@ extension HistoryView.DataModel.HistoryItem {
             etldPlusOne: historyEntry.etldPlusOne,
             dateRelativeDay: dateFormatter.weekDay(for: visit.date),
             dateShort: "", // not in use at the moment
-            dateTimeOfDay: dateFormatter.time(for: visit.date)
+            dateTimeOfDay: dateFormatter.time(for: visit.date),
+            favicon: favicon
         )
     }
 }

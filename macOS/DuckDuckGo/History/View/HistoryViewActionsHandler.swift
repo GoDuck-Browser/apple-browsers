@@ -32,11 +32,11 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return .noAction
         }
 
-        let entriesCount = await dataProvider.countEntries(for: range)
+        let visitsCount = await dataProvider.countVisits(for: range)
 
         let response: HistoryViewDeleteDialogModel.Response = await withCheckedContinuation { continuation in
             let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
-            let model = HistoryViewDeleteDialogModel(entriesCount: entriesCount)
+            let model = HistoryViewDeleteDialogModel(entriesCount: visitsCount)
             let dialog = HistoryViewDeleteDialog(model: model)
             dialog.show(in: parentWindow) {
                 continuation.resume(returning: model.response)

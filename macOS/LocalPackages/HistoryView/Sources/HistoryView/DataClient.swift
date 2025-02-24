@@ -38,7 +38,7 @@ public protocol DataProviding: AnyObject {
     var ranges: [DataModel.HistoryRange] { get }
     func resetCache() async
     func visits(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> DataModel.HistoryItemsBatch
-    func countEntries(for range: DataModel.HistoryRange) async -> Int
+    func countVisits(for range: DataModel.HistoryRange) async -> Int
     func deleteVisits(for range: DataModel.HistoryRange) async
     func burnVisits(for range: DataModel.HistoryRange) async
 }

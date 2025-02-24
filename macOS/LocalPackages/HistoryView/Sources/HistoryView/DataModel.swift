@@ -106,8 +106,9 @@ public enum DataModel {
         public let dateRelativeDay: String
         public let dateShort: String
         public let dateTimeOfDay: String
+        public let favicon: Favicon?
 
-        public init(id: String, url: String, title: String, domain: String, etldPlusOne: String?, dateRelativeDay: String, dateShort: String, dateTimeOfDay: String) {
+        public init(id: String, url: String, title: String, domain: String, etldPlusOne: String?, dateRelativeDay: String, dateShort: String, dateTimeOfDay: String, favicon: Favicon?) {
             self.id = id
             self.url = url
             self.title = title
@@ -116,6 +117,17 @@ public enum DataModel {
             self.dateRelativeDay = dateRelativeDay
             self.dateShort = dateShort
             self.dateTimeOfDay = dateTimeOfDay
+            self.favicon = favicon
+        }
+    }
+
+    public struct Favicon: Codable, Equatable {
+        public let maxAvailableSize: Int
+        public let src: String
+
+        public init(maxAvailableSize: Int, src: String) {
+            self.maxAvailableSize = maxAvailableSize
+            self.src = src
         }
     }
 }

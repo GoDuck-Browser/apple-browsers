@@ -33,9 +33,9 @@ final class CapturingDataProvider: DataProviding {
         return await visits(query, limit, offset)
     }
 
-    func countEntries(for range: DataModel.HistoryRange) async -> Int {
-        countEntriesCalls.append(range)
-        return await countEntries(range)
+    func countVisits(for range: DataModel.HistoryRange) async -> Int {
+        countVisitsCalls.append(range)
+        return await countVisits(range)
     }
 
     func deleteVisits(for range: DataModel.HistoryRange) async {
@@ -51,8 +51,8 @@ final class CapturingDataProvider: DataProviding {
     var rangesCallCount: Int = 0
     var resetCacheCallCount: Int = 0
 
-    var countEntriesCalls: [DataModel.HistoryRange] = []
-    var countEntries: (DataModel.HistoryRange) async -> Int = { _ in return 0 }
+    var countVisitsCalls: [DataModel.HistoryRange] = []
+    var countVisits: (DataModel.HistoryRange) async -> Int = { _ in return 0 }
 
     var deleteVisitsCalls: [DataModel.HistoryRange] = []
     var burnVisitsCalls: [DataModel.HistoryRange] = []
