@@ -49,7 +49,7 @@ struct AIChatControlWidget: ControlWidgetConfigurable {
     let kind: ControlWidgetKind = .aiChat
     let displayName: LocalizedStringResource = "Duck.ai"
     let labelText: String = "Duck.ai"
-    let imageName: String = "FireButton-Symbol"
+    let imageName: String = "AI-Chat-Symbol"
     let intent = OpenAIChatIntent()
 
     struct OpenAIChatIntent: AppIntent {
@@ -149,7 +149,7 @@ struct VoiceSearchControlWidget: ControlWidgetConfigurable {
     let kind: ControlWidgetKind = .voiceSearch
     let displayName: LocalizedStringResource = "Voice Search"
     let labelText: String = "Voice Search"
-    let imageName: String = "Microphone-Symbol"
+    let imageName: String = "VoiceSearch-Symbol"
     let intent = OpenVoiceSearchIntent()
 
     struct OpenVoiceSearchIntent: AppIntent {
