@@ -49,8 +49,10 @@ final class PromptCenteredPopover: NSPopover {
         let screenPoint = mainWindow.convertPoint(toScreen: windowPoint)
         var frame = frame
 
-        // TODO: We need to calculate the x coordinate to always center the popover in the address bar.
-        frame.origin.y = min(max(screenFrame.minY, screenPoint.y - frame.size.height - PromptCenteredPopover.topInset), screenFrame.maxY)
+        let positioningViewCenter = positioningView.convert(positioningView.bounds.center, to: nil)
+        let positioningViewScreenCenter = mainWindow.convertPoint(toScreen: positioningViewCenter)
+        frame.origin.x = positioningViewScreenCenter.x - (frame.size.width / 2) // Adjusts the popover to be always centered in the parent view
+        frame.origin.y = min(max(screenFrame.minY, screenPoint.y - frame.size.height - PromptCenteredPopover.topInset), screenFrame.maxY) // Adjusts the popover to be shown some pixels below the parent view
 
         return frame
     }
