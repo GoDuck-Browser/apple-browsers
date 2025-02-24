@@ -40,6 +40,7 @@ struct ProductionDependencies: SyncDependencies {
         privacyConfigurationManager: PrivacyConfigurationManaging,
         errorEvents: EventMapping<SyncError>
     ) {
+        let userDefaults = UserDefaults()
         self.init(fileStorageUrl: FileManager.default.applicationSupportDirectoryForComponent(named: "Sync"),
                   serverEnvironment: serverEnvironment,
                   keyValueStore: UserDefaults(),
