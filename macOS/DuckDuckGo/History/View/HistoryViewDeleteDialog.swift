@@ -49,35 +49,57 @@ struct HistoryViewDeleteDialog: ModalView {
             Image(.historyBurn)
 
             VStack(spacing: 12) {
-                Text("Delete history?").font(.title3)
-                Text("Do you want to delete \(model.entriesCount) history items?").font(.body)
-                    VStack(spacing: 8) {
-                        Toggle("Also delete cookies and site data", isOn: $model.shouldBurn)
-                            .lineLimit(nil)
-                            .toggleStyle(.checkbox)
-                        Text("This will log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted.")
-                            .fixMultilineScrollableText()
-                            .foregroundColor(.blackWhite60)
-                            .frame(width: 242)
-                    }
-                    .padding(.init(top: 16, leading: 12, bottom: 8, trailing: 12))
-                    .background(RoundedRectangle(cornerRadius: 8.0).stroke(.blackWhite5))
+                Text("Delete history?")
+                    .multilineTextAlignment(.center)
+                    .fixMultilineScrollableText()
+                    .font(.system(size: 15).weight(.semibold))
+
+                Text("Do you want to delete **\(model.entriesCount)** history items?")
+                    .multilineTextAlignment(.center)
+                    .fixMultilineScrollableText()
+                    .font(.system(size: 13))
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("Also delete cookies and site data", isOn: $model.shouldBurn)
+                        .font(.system(size: 13))
+                        .fixMultilineScrollableText()
+                        .toggleStyle(.checkbox)
+
+                    Text("This will log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted.")
+                        .fixMultilineScrollableText()
+                        .foregroundColor(.blackWhite60)
+                        .frame(width: 242)
+                        .font(.system(size: 11))
+                        .padding(.leading, 16)
+                }
+                .padding(.init(top: 16, leading: 12, bottom: 16, trailing: 12))
+                .background(RoundedRectangle(cornerRadius: 8.0).stroke(.blackWhite5))
             }
+            .padding(.bottom, 16)
 
             HStack(spacing: 8) {
-                Button(UserText.cancel) {
+                Button {
                     model.cancel()
                     dismiss()
+                } label: {
+                    Text(UserText.cancel)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 28)
                 }
-                .buttonStyle(StandardButtonStyle())
-                .frame(height: 28)
+                .buttonStyle(StandardButtonStyle(topPadding: 0, bottomPadding: 0))
 
-                Button(UserText.delete) {
+                Button {
                     model.delete()
                     dismiss()
+                } label: {
+                    Text(UserText.delete)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 28)
                 }
-                .buttonStyle(DestructiveActionButtonStyle(enabled: true))
-                .frame(height: 28)
+                .buttonStyle(DestructiveActionButtonStyle(enabled: true, topPadding: 0, bottomPadding: 0))
+
             }
         }
         .padding(16)
