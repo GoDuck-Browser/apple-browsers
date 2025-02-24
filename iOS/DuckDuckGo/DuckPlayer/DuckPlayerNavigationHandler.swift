@@ -712,11 +712,10 @@ final class DuckPlayerNavigationHandler: NSObject {
     ///   - pause: When true, blocks media playback. When false, allows playback
     @MainActor
     private func toggleMediaPlayback(_ webView: WKWebView, pause: Bool) {
-        if pause {
-            // Inject the media control script
+        if pause {            
             webView.evaluateJavaScript(mediaControlScript)
         } else {
-            // Remove the media controls and unmute
+            // Remove the media controls and unmute            
             webView.evaluateJavaScript(removeMediaControlScript)
         }
     }
@@ -986,6 +985,19 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
               let url = webView.url,
               duckPlayerMode == .enabled || duckPlayerMode == .alwaysAsk else {
             return
+        }
+
+        // Inject JS media control scripts and pause all videos
+        let userScript = WKUserScript(source: mediaControlScript,
+                                injectionTime: .atDocumentStart,
+                                forMainFrameOnly: false)
+        webView.configuration.userContentController.addUserScript(userScript) 
+
+        // Pause Youtube videos at start
+        if duckPlayerMode == .enabled &&
+           duckPlayer.settings.nativeUI &&
+           webView.url?.isYoutubeWatch == true {            
+            toggleMediaPlayback(webView, pause: false)
         }
         
         // Get parameters and determine redirection
