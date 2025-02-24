@@ -20,19 +20,22 @@ final class DuckPlayerEntryPillViewModel: ObservableObject {
     private let videoID: String
     private let onOpen: () -> Void
     
-    let pillViewModel: DuckPlayerPill.ViewModel
+    @Published var isVisible: Bool = false
     
     init(videoID: String, onOpen: @escaping () -> Void) {
         self.videoID = videoID
         self.onOpen = onOpen
-        self.pillViewModel = DuckPlayerPill.ViewModel()
     }
     
     func openInDuckPlayer() {
         onOpen()
     }
     
-    func show() {
-        pillViewModel.show(anchoredTo: nil)
+    func show() {        
+        self.isVisible = true
+    }
+    
+    func hide() {
+        isVisible = false
     }
 } 

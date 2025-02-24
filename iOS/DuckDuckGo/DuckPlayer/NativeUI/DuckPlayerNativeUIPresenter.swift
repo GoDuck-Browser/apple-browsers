@@ -62,57 +62,67 @@ final class DuckPlayerNativeUIPresenter {
         self.hostView = hostViewController
         guard let hostView = self.hostView else { return }
         
+        // Create and configure the view model
         let viewModel = DuckPlayerEntryPillViewModel(videoID: videoID) { [weak self] in
             self?.videoPlaybackRequest.send(videoID)
         }
         
+        // Create the view with initial hidden state
         let view = DuckPlayerEntryPillView(viewModel: viewModel)
         let hostingController = UIHostingController(rootView: view)
-        
-        hostingController.view.backgroundColor = UIColor.clear
+        hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         
+        // Add to view hierarchy
         hostView.view.addSubview(hostingController.view)
-        hostingController.view.setNeedsLayout()
-        hostingController.view.layoutIfNeeded()
         
-        let fittingSize = hostingController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
-        
+        // Setup constraints
         NSLayoutConstraint.activate([
             hostingController.view.leadingAnchor.constraint(equalTo: hostView.view.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: hostView.view.trailingAnchor),
             hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor),
-            hostingController.view.heightAnchor.constraint(equalToConstant: fittingSize.height)
+            hostingController.view.heightAnchor.constraint(equalToConstant: 120) 
         ])
         
+        // Store references and show the view with delay
         bottomSheetViewModel = viewModel
         bottomSheetHostingController = hostingController
         
-        viewModel.show()
+        // Add delay before showing the pill
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak viewModel] in
+            viewModel?.show()
+        }
     }
     
     /// Dismisses the currently presented entry pill
     @MainActor
     func dismissPill() {
-        bottomSheetHostingController?.view.removeFromSuperview()
-        bottomSheetHostingController = nil
-        bottomSheetViewModel = nil
+        // Hide the view first
+        bottomSheetViewModel?.hide()
+        
+        // Remove the view after the animation completes
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+            guard let self = self else { return }
+            
+            // Only remove if it's still hidden
+            if self.bottomSheetViewModel?.isVisible == false {
+                self.bottomSheetHostingController?.view.removeFromSuperview()
+                self.bottomSheetHostingController = nil
+                self.bottomSheetViewModel = nil
+            }
+        }
     }
     
     /// Hides the bottom sheet when browser chrome is hidden
     @MainActor
     func hideBottomSheetForHiddenChrome() {
-        UIView.animate(withDuration: 0.3) { [weak self] in
-            self?.bottomSheetHostingController?.view.alpha = 0
-        }
+        bottomSheetViewModel?.hide()
     }
     
     /// Shows the bottom sheet when browser chrome is visible
     @MainActor
     func showBottomSheetForVisibleChrome() {
-        UIView.animate(withDuration: 0.3) { [weak self] in
-            self?.bottomSheetHostingController?.view.alpha = 1
-        }
+        bottomSheetViewModel?.show()
     }
     
     @MainActor

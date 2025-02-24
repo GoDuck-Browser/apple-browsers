@@ -59,23 +59,34 @@ struct DuckPlayerEntryPillView: View {
     }
     
     var body: some View {
-        ZStack {
+        GeometryReader { geometry in
             VStack {
                 Spacer()
-                // Add rounded corners only at the top
-                TopRoundedRectangle(radius: 12)
-                    .fill(Color(designSystemColor: .panel))
-                     .shadow(color: Color.black.opacity(0.08), radius: 8, y: -2)
-                    .edgesIgnoringSafeArea(.bottom)
+                ZStack {
+                    // Background panel that extends beyond the bottom
+                    VStack(spacing: 0) {
+                        TopRoundedRectangle(radius: 12)
+                            .fill(Color(designSystemColor: .panel))
+                            .shadow(color: Color.black.opacity(0.08), radius: 8, y: -2)
+                        
+                        // Extra panel extension for bounce
+                        Rectangle()
+                            .fill(Color(designSystemColor: .panel))
+                            .frame(height: 25)
+                    }
+                    
+                    // Content
+                    VStack {
+                        sheetContent
+                        Spacer()
+                            .frame(height: 0)
+                    }
+                }
             }
-            
-            VStack {
-                Spacer()
-                // Only make the sheet content interactive
-                sheetContent
-            }
+            .offset(y: viewModel.isVisible ? 18 : geometry.size.height)
         }
         .edgesIgnoringSafeArea(.all)
+        .animation(.spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0), value: viewModel.isVisible)
     }
 }
 

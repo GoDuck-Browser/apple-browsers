@@ -814,6 +814,13 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
     @MainActor
     func handleURLChange(webView: WKWebView) -> DuckPlayerNavigationHandlerURLChangeResult {
         
+        // Dismiss the bottom sheet if URL is not a YouTube watch page
+        // Also ensure all media playback is allowed by default
+        if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
+            duckPlayer.dismissPill()
+            toggleMediaPlayback(webView, pause: false)
+        }
+
         // We want to prevent multiple simultaneous redirects
         // This can be caused by Duplicate Nav events, and quick URL changes
         if let lastTimestamp = lastURLChangeHandling,
@@ -836,20 +843,11 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             return .notHandled(.featureOff)
         }
         
-        guard let url = webView.url, let (videoID, _) = url.youtubeVideoParams else {
-            // Added: Dismiss the bottom sheet if URL is not a YouTube watch page
-            if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-                duckPlayer.dismissPill()
-            }
+        guard let url = webView.url, let (videoID, _) = url.youtubeVideoParams else {            
             return .notHandled(.invalidURL)
         }
         
         guard url.isYoutubeWatch else {
-            // Added: Dismiss the bottom sheet if URL is not a YouTube watch page
-            if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-                duckPlayer.dismissPill()
-                toggleMediaPlayback(webView, pause: false)
-            }
             return .notHandled(.isNotYoutubeWatch)
         }
 
@@ -861,10 +859,16 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         
         let parameters = getDuckPlayerParameters(url: url)
         
-        // Present Bottom Sheet (Native entry point)
+        // Present Bottom Sheet (Native entry point) with delay
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-            duckPlayer.presentEntryPill(for: videoID)
+            // Pause media immediately
             toggleMediaPlayback(webView, pause: true)
+            
+            // We need a 2s delay
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                duckPlayer.presentEntryPill(for: videoID)
+            }
         }
         
         // If this is an internal Youtube Link (i.e Clicking in youtube logo in the player)
