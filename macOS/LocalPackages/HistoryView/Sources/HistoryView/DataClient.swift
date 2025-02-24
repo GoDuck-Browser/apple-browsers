@@ -23,17 +23,6 @@ import os.log
 import UserScriptActionsManager
 import WebKit
 
-public enum HistoryViewFilter {
-    case all
-    case today
-    case yesterday
-    case twoDaysAgo
-    case threeDaysAgo
-    case fourDaysAgo
-    case fiveOrMoreDaysAgo
-    case recentlyClosed
-}
-
 public protocol DataProviding: AnyObject {
     var ranges: [DataModel.HistoryRange] { get }
     func resetCache() async

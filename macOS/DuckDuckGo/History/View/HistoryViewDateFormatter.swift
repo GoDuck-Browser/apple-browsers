@@ -16,6 +16,7 @@
 //  limitations under the License.
 //
 
+import Common
 import Foundation
 
 protocol HistoryViewDateFormatting {
@@ -27,6 +28,14 @@ struct DefaultHistoryViewDateFormatter: HistoryViewDateFormatting {
     let weekDayFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "cccc"
+        formatter.formattingContext = .standalone
+        return formatter
+    }()
+
+    let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .none
         return formatter
     }()
 
@@ -38,7 +47,15 @@ struct DefaultHistoryViewDateFormatter: HistoryViewDateFormatting {
     }()
 
     func weekDay(for date: Date) -> String {
-        weekDayFormatter.string(from: date)
+        let today = Date().startOfDay
+        switch Calendar.autoupdatingCurrent.numberOfDaysBetween(date.startOfDay, and: today) {
+        case 0:
+            return "Today"
+        case 1:
+            return "Yesterday"
+        default:
+            return "\(weekDayFormatter.string(from: date)), \(dateFormatter.string(from: date))"
+        }
     }
 
     func time(for date: Date) -> String {

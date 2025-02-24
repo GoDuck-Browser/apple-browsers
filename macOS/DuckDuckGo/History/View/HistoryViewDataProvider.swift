@@ -115,35 +115,29 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
     }
 
     func countVisits(for range: DataModel.HistoryRange) async -> Int {
-        let startDate = Date()
-        let history = Task { @MainActor in
-            self.historyGroupingDataSource.history
-        }
-        guard let history = await history.value else {
+        guard let history = await fetchHistory() else {
             return 0
         }
         let fetchDate = Date()
-        print("Fetching history took \(fetchDate.timeIntervalSince(startDate)) s")
+
         let date = lastQuery?.date ?? Date()
         let dateRange = range.dateRange(for: date)
+
         let entriesCount = history.reduce(0) { partialResult, entry in
             let days = Set(entry.visits.map { $0.date.startOfDay })
             return partialResult + days.count(where: { dateRange?.contains($0) ?? true })
         }
+
         print("Filtering history took \(Date().timeIntervalSince(fetchDate)) s")
         return entriesCount
     }
 
     private func visits(for range: DataModel.HistoryRange) async -> [Visit] {
-        let startDate = Date()
-        let history = Task { @MainActor in
-            self.historyGroupingDataSource.history
-        }
-        guard let history = await history.value else {
+        guard let history = await fetchHistory() else {
             return []
         }
         let fetchDate = Date()
-        print("Fetching history took \(fetchDate.timeIntervalSince(startDate)) s")
+
         let date = lastQuery?.date ?? Date()
         let visits: [Visit] = {
             let allVisits: [Visit] = history.flatMap(\.visits)
@@ -153,7 +147,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
             return allVisits.filter { dateRange.contains($0.date) }
         }()
         let filterDate = Date()
-        print("Filtering history took \(filterDate.timeIntervalSince(startDate)) s")
+        print("Filtering history took \(filterDate.timeIntervalSince(fetchDate)) s")
 
         return visits
     }
@@ -181,6 +175,11 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         }
         await resetCache()
         print("Burning history took \(Date().timeIntervalSince(startDate)) s")
+    }
+
+    @MainActor
+    private func fetchHistory() async -> BrowsingHistory? {
+        historyGroupingDataSource.history
     }
 
     private func perform(_ query: DataModel.HistoryQueryKind) -> [DataModel.HistoryItem] {
