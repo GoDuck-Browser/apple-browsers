@@ -88,7 +88,7 @@ enum ShortcutOption: String, CaseIterable, Identifiable, AppEnum {
         switch self {
         case .passwords: return Image(.key24)
         case .duckAI: return Image(.aiChat24)
-        case .voiceSearch: return Image(.microphone24)
+        case .voiceSearch: return Image(.microphoneSolidSearch24)
         case .favorites: return Image(.favorite24)
         case .emailProtection: return Image(.email24)
         }
