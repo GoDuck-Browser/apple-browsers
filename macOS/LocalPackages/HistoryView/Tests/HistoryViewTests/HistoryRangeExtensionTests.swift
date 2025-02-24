@@ -57,7 +57,13 @@ final class HistoryRangeExtensionTests: XCTestCase {
         XCTAssertEqual(DataModel.HistoryRange(date: wednesday, referenceDate: monday), .older)
     }
 
-    func date(year: Int?, month: Int?, day: Int?, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) throws -> Date {
+//    func testDateRangeToday() throws {
+//        let historyRange = DataModel.HistoryRange.today
+//        let monday = try date(year: 2025, month: 2, day: 24) // Monday
+//        XCTAssertEqual(historyRange.dateRange(for: <#T##Date#>))
+//    }
+
+    private func date(year: Int?, month: Int?, day: Int?, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) throws -> Date {
         let components = DateComponents(year: year, month: month, day: day, hour: hour, minute: minute, second: second)
         return try XCTUnwrap(Calendar.autoupdatingCurrent.date(from: components))
     }
