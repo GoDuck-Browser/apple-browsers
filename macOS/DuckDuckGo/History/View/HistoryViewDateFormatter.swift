@@ -50,9 +50,9 @@ struct DefaultHistoryViewDateFormatter: HistoryViewDateFormatting {
         let today = Date().startOfDay
         switch Calendar.autoupdatingCurrent.numberOfDaysBetween(date.startOfDay, and: today) {
         case 0:
-            return "Today"
+            return "today".localizedCapitalized
         case 1:
-            return "Yesterday"
+            return "yesterday".localizedCapitalized
         default:
             return "\(weekDayFormatter.string(from: date)), \(dateFormatter.string(from: date))"
         }
