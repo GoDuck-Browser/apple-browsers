@@ -79,7 +79,7 @@ enum ShortcutOption: String, CaseIterable, Identifiable, AppEnum {
         .duckAI: "Duck.ai",
         .voiceSearch: "Voice Search",
         .favorites: "Favorites",
-        .emailProtection: "Email Protection"
+        .emailProtection: "Duck Address"
     ]
 
     var id: String { self.rawValue }
