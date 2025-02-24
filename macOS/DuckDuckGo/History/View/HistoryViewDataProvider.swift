@@ -250,9 +250,9 @@ extension HistoryView.DataModel.HistoryItem {
             title: title,
             domain: historyEntry.url.host ?? historyEntry.url.absoluteString,
             etldPlusOne: historyEntry.etldPlusOne,
-            dateRelativeDay: dateFormatter.weekDay(for: visit.date),
+            dateRelativeDay: dateFormatter.dayString(for: visit.date),
             dateShort: "", // not in use at the moment
-            dateTimeOfDay: dateFormatter.time(for: visit.date),
+            dateTimeOfDay: dateFormatter.timeString(for: visit.date),
             favicon: favicon
         )
     }
