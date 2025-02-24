@@ -69,6 +69,7 @@ public final class DataClient: HistoryViewUserScriptClient {
         case query
         case titleMenu = "title_menu"
         case entriesMenu = "entries_menu"
+        case entriesDelete = "entries_delete"
         case reportInitException
         case reportPageException
     }
@@ -82,6 +83,7 @@ public final class DataClient: HistoryViewUserScriptClient {
             MessageName.open.rawValue: { [weak self] in try await self?.open(params: $0, original: $1) },
             MessageName.titleMenu.rawValue: { [weak self] in try await self?.titleMenu(params: $0, original: $1) },
             MessageName.entriesMenu.rawValue: { [weak self] in try await self?.entriesMenu(params: $0, original: $1) },
+            MessageName.entriesDelete.rawValue: { [weak self] in try await self?.entriesDelete(params: $0, original: $1) },
             MessageName.reportInitException.rawValue: { [weak self] in try await self?.reportException(params: $0, original: $1) },
             MessageName.reportPageException.rawValue: { [weak self] in try await self?.reportException(params: $0, original: $1) },
         ])
@@ -141,6 +143,11 @@ public final class DataClient: HistoryViewUserScriptClient {
 
     @MainActor
     private func entriesMenu(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        return nil
+    }
+
+    @MainActor
+    private func entriesDelete(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         return nil
     }
 

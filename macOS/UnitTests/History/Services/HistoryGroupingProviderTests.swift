@@ -21,7 +21,9 @@ import History
 import XCTest
 @testable import DuckDuckGo_Privacy_Browser
 
-final class MockHistoryGroupingDataSource: HistoryGroupingDataSource {
+final class MockHistoryGroupingDataSource: HistoryGroupingDataSource, HistoryDeleting {
+    func delete(_ visits: [Visit]) async {}
+
     var history: BrowsingHistory? = []
 }
 

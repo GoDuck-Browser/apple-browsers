@@ -16,9 +16,10 @@
 //  limitations under the License.
 //
 
-import HistoryView
+import Common
+import Foundation
 
-extension DataModel.HistoryRange {
+public extension DataModel.HistoryRange {
 
     /**
      * Initializes HistoryRange based on `date`s proximity to `referenceDate`.
@@ -123,29 +124,13 @@ extension DataModel.HistoryRange {
 
         let calendar = Calendar.autoupdatingCurrent
         let startOfDayReferenceDate = referenceDate.startOfDay
-        let date = calendar.firstWeekday(weekday, before: startOfDayReferenceDate)
-        let nextDay = date.daysAgo(-1)
+        let startDate = self == .today ? startOfDayReferenceDate : calendar.firstWeekday(weekday, before: startOfDayReferenceDate)
+        let nextDay = startDate.daysAgo(-1)
 
-        if self == .older {
-            return Date.distantPast..<nextDay
+        guard self != .older else {
+            return Date.distantPast ..< nextDay
         }
-        return date..<nextDay
-    }
-}
 
-extension Calendar {
-    public func firstWeekday(_ weekday: Int, before referenceDate: Date) -> Date {
-        let referenceWeekday = component(.weekday, from: referenceDate)
-        let daysDiff: Int = {
-            switch (weekday, referenceWeekday) {
-            case let (a, b) where a < b:
-                return b - a
-            case let (a, b) where a > b:
-                return b - a + 7
-            default: // same weekday
-                return 7
-            }
-        }()
-        return referenceDate.daysAgo(daysDiff)
+        return startDate ..< nextDay
     }
 }

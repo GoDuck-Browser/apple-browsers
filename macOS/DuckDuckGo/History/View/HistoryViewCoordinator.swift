@@ -27,7 +27,7 @@ final class HistoryViewCoordinator {
     let actionsManager: HistoryViewActionsManager
 
     init(
-        historyCoordinator: HistoryGroupingDataSource & HistoryCoordinating & HistoryDeleting,
+        historyCoordinator: HistoryGroupingDataSource & HistoryDeleting,
         notificationCenter: NotificationCenter = .default,
         fireDailyPixel: @escaping (PixelKitEvent) -> Void = { PixelKit.fire($0, frequency: .daily) }
     ) {

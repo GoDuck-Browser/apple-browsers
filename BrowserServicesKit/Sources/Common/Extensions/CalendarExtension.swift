@@ -24,4 +24,12 @@ extension Calendar {
 		return numberOfDays.day
 	}
 
+    public func firstWeekday(_ weekday: Int, before referenceDate: Date) -> Date {
+        let referenceWeekday = component(.weekday, from: referenceDate)
+        var daysDiff = referenceWeekday - weekday
+        if daysDiff <= 0 { // same weekday
+            daysDiff += 7
+        }
+        return referenceDate.daysAgo(daysDiff)
+    }
 }

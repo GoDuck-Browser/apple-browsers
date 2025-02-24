@@ -21,7 +21,7 @@ import HistoryView
 
 extension HistoryViewActionsManager {
 
-    convenience init(historyCoordinator: HistoryGroupingDataSource & HistoryCoordinating & HistoryDeleting) {
+    convenience init(historyCoordinator: HistoryGroupingDataSource & HistoryDeleting) {
         let dataProvider = HistoryViewDataProvider(historyGroupingDataSource: historyCoordinator)
         self.init(scriptClients: [
             DataClient(

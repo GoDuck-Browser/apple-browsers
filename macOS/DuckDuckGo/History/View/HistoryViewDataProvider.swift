@@ -54,10 +54,17 @@ struct HistoryViewGrouping {
 
 final class HistoryViewDataProvider: HistoryView.DataProviding {
 
-    init(historyGroupingDataSource: HistoryGroupingDataSource & HistoryCoordinating & HistoryDeleting, dateFormatter: HistoryViewDateFormatting = DefaultHistoryViewDateFormatter()) {
+    init(
+        historyGroupingDataSource: HistoryGroupingDataSource & HistoryDeleting,
+        dateFormatter: HistoryViewDateFormatting = DefaultHistoryViewDateFormatter(),
+        fire: (() async -> Fire)? = nil,
+        fireproofDomains: FireproofDomains = .shared
+    ) {
         self.dateFormatter = dateFormatter
+        self.fire = fire ?? { @MainActor in FireCoordinator.fireViewModel.fire }
+        self.fireproofDomains = fireproofDomains
+        self.historyGroupingDataSource = historyGroupingDataSource
         historyGroupingProvider = HistoryGroupingProvider(dataSource: historyGroupingDataSource)
-        historyCoordinator = historyGroupingDataSource
     }
 
     func resetCache() async {
@@ -110,7 +117,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
     func countEntries(for range: DataModel.HistoryRange) async -> Int {
         let startDate = Date()
         let history = Task { @MainActor in
-            self.historyCoordinator.history
+            self.historyGroupingDataSource.history
         }
         guard let history = await history.value else {
             return 0
@@ -118,16 +125,19 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         let fetchDate = Date()
         print("Fetching history took \(fetchDate.timeIntervalSince(startDate)) s")
         let date = lastQuery?.date ?? Date()
-        guard let dateRange = range.dateRange(for: date) else {
-            return history.count
+        let dateRange = range.dateRange(for: date)
+        let entriesCount = history.reduce(0) { partialResult, entry in
+            let days = Set(entry.visits.map { $0.date.startOfDay })
+            return partialResult + days.count(where: { dateRange?.contains($0) ?? true })
         }
-        return history.filter { dateRange.contains($0.lastVisit) }.count
+        print("Filtering history took \(Date().timeIntervalSince(fetchDate)) s")
+        return entriesCount
     }
 
     private func visits(for range: DataModel.HistoryRange) async -> [Visit] {
         let startDate = Date()
         let history = Task { @MainActor in
-            self.historyCoordinator.history
+            self.historyGroupingDataSource.history
         }
         guard let history = await history.value else {
             return []
@@ -151,7 +161,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
     func deleteVisits(for range: DataModel.HistoryRange) async {
         let startDate = Date()
         let visits = await visits(for: range)
-        await historyCoordinator.delete(visits)
+        await historyGroupingDataSource.delete(visits)
         await resetCache()
         print("Deleting history took \(Date().timeIntervalSince(startDate)) s")
     }
@@ -160,9 +170,13 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         let startDate = Date()
         let visits = await visits(for: range)
 
+        let isToday = range == .today || range == .all
+
         await withCheckedContinuation { continuation in
-            historyCoordinator.burnVisits(visits) {
-                continuation.resume()
+            Task { @MainActor in
+                await fire().burnVisits(of: visits, except: fireproofDomains, isToday: isToday) {
+                    continuation.resume()
+                }
             }
         }
         await resetCache()
@@ -192,8 +206,10 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
     }
 
     private let historyGroupingProvider: HistoryGroupingProvider
-    private let historyCoordinator: HistoryCoordinating & HistoryDeleting
+    private let historyGroupingDataSource: HistoryGroupingDataSource & HistoryDeleting
     private let dateFormatter: HistoryViewDateFormatting
+    private let fire: () async -> Fire
+    private let fireproofDomains: FireproofDomains
 
     /// this is to be optimized: https://app.asana.com/0/72649045549333/1209339909309306
     private var groupings: [HistoryViewGrouping] = []
