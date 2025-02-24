@@ -216,10 +216,15 @@ public struct UserText {
     public static let bookmarksButtonHint = NSLocalizedString("bookmarks.button.hint", value: "Bookmarks", comment: "")
     
     public static func numberOfTabs(_ number: Int) -> String {
-        let message = NSLocalizedString("number.of.tabs", comment: "Do not translate - stringsdict entry")
-        return message.format(arguments: number)
+        let format = Bundle.main.localizedString(forKey: "number.of.tabs", value: nil, table: nil)
+        return String.localizedStringWithFormat(format, number)
     }
-    
+
+    public static func numberOfSelectedTabs(withCount count: Int) -> String {
+        let format = Bundle.main.localizedString(forKey: "numberOfSelectedTabs.withCount", value: nil, table: nil)
+        return String.localizedStringWithFormat(format, count)
+    }
+
     public static func openTab(withTitle title: String, atAddress address: String) -> String {
         let message = NSLocalizedString("tab.open.with.title.and.address", value: "Open \"%@\" at %@", comment: "Accesibility label: first string is website title, second is address")
         return message.format(arguments: title, address)
@@ -272,8 +277,6 @@ public struct UserText {
         return message.format(arguments: title, address)
     }
 
-    public static let tabSwitcherShareLink = NotLocalizedString("tab.switcher.share.link", value: "Share Link", comment: "Share link menu item")
-
     public static let tabSwitcherBookmarkPage = NotLocalizedString("tab.switcher.bookmark.page", value: "Bookmark This Page", comment: "Bookmark this page menu item")
 
     public static let tabSwitcherBookmarkAllTabs = NotLocalizedString("tab.switcher.bookmarkAll", value: "Bookmark All Tabs", comment: "Bookmark all tabs menu item")
@@ -288,8 +291,13 @@ public struct UserText {
         return String.localizedStringWithFormat(format, count)
     }
 
-    public static func shareSelectedLink(withCount count: Int) -> String {
-        let format = Bundle.main.localizedString(forKey: "tabs.share.selected.with.count", value: nil, table: nil)
+    public static func shareLinks(withCount count: Int) -> String {
+        let format = Bundle.main.localizedString(forKey: "shareLinks.withCount", value: nil, table: nil)
+        return String.localizedStringWithFormat(format, count)
+    }
+
+    public static func shareSelectedTabs(withCount count: Int) -> String {
+        let format = Bundle.main.localizedString(forKey: "shareSelectedTabs.withCount", value: nil, table: nil)
         return String.localizedStringWithFormat(format, count)
     }
 
@@ -800,6 +808,9 @@ public struct UserText {
     public static let vpnSettingDNSServerIPv4Title = NSLocalizedString("vpn.settings.dns.server.ipv4.title", value: "IPv4 Address", comment: "Title for the IPv4 Address setting")
     public static let vpnSettingDNSServerScreenTitle = NSLocalizedString("vpn.settings.dns.server.screen.title", value: "DNS Server", comment: "Title for the DNS Server setting screen")
     public static let vpnSettingDNSServerApplyButtonTitle = NSLocalizedString("vpn.settings.dns.server.apply.button.title", value: "Apply", comment: "Title for the Apply button on the DNS Server setting screen")
+    public static let vpnContentBlockingFilteringTitle = NSLocalizedString("settings.web.tracking.protection.title", value: "Block risky domains", comment: "Title of the vpn blocks risky sites feature settings")
+    public static let vpnContentBlockingFilteringHeader = NSLocalizedString("settings.web.tracking.protection.header", value: "Content Blocking and Filtering", comment: "Header of the vpn blocks risky sites feature settings")
+    public static let vpnContentBlockingFilteringFooter = NSLocalizedString("settings.web.tracking.protection.explanation", value: "Block 150,000+ domains flagged for hosting malware, phishing attacks, and online scams with a DNS-level blocklist. [Learn More](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/privacy-pro/vpn/dns-blocklists/)", comment: "Explanation in Settings how the vpn blocks risky sites (do not remove the link)")
 
     // MARK: Notifications
     
@@ -1199,6 +1210,9 @@ But if you *do* want a peek under the hood, you can find more information about 
     public static let settingsText = NSLocalizedString("settings.text.size", value: "Default Text Zoom", comment: "Settings screen cell text for text size")
     public static let settingsAddressBar = NSLocalizedString("settings.address.bar", value: "Address Bar Position", comment: "Settings screen cell text for addess bar position")
     public static let settingsFullURL = NSLocalizedString("settings.address.full.url", value: "Show Full Site Address", comment: "Settings screen cell title for toggling full URL visibility in address bar")
+    public static let settingsExperimentalSection = NotLocalizedString("settings.experimental.section.title", value: "Experimental theming (internal only) ", comment: "Settings screen section title for experimental features")
+    public static let settingsExperimentalMainSwitch = NotLocalizedString("settings.experimental.main.switch", value: "Experimental appearance", comment: "Settings screen cell title for experimental main switch")
+    public static let settingsExperimentalColorsSwitch = NotLocalizedString("settings.experimental.colors.switch", value: "Alternative colors", comment: "Settings screen cell title for experimental colors switch")
 
     // Privacy Section
     public static let settingsPrivacySection = NSLocalizedString("settings.privacy", value: "Privacy", comment: "Settings title for the privacy section")
