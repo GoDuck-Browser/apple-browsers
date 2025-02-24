@@ -450,11 +450,6 @@ final class NavigationBarViewController: NSViewController {
                                                name: .showPopoverPromptForDefaultBrowser,
                                                object: nil)
 
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(showPopoverPromptForDefaultBrowserInAddressBar(_:)),
-                                               name: .showPopoverPromptForDefaultBrowserAddressBar,
-                                               object: nil)
-
 
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(showCenteredDialog(_:)),
@@ -589,11 +584,6 @@ final class NavigationBarViewController: NSViewController {
         guard let popover = promptsCoordinator.getPopover() else { return }
 
         popover.show(onParent: self, relativeTo: self.optionsButton)
-    }
-
-    @objc private func showPopoverPromptForDefaultBrowserInAddressBar(_ sender: Notification) {
-        let promptsCoordinator = PromptsCoordinator()
-        promptsCoordinator.showPopover(below: self.addressBarViewController!.view)
     }
 
     @objc private func showCenteredDialog(_ sender: Notification) {

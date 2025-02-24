@@ -30,19 +30,17 @@ public extension Notification.Name {
 final class PromptCenteredPopover: NSPopover {
     private static let topInset: CGFloat = 22
 
-    init(viewController: PopoverMessageViewController) {
+    init(viewController: NSHostingController<PopoverMessageView>) {
         super.init()
 
         shouldHideAnchor = true
+        behavior = .semitransient
         contentViewController = viewController
-        delegate = viewController
     }
 
     required init?(coder: NSCoder) {
         fatalError("PromptCenteredPopover: Bad initializer")
     }
-
-    var viewController: PopoverMessageViewController { contentViewController as! PopoverMessageViewController }
 
     @objc override func adjustFrame(_ frame: NSRect) -> NSRect {
         guard let positioningView, let mainWindow, let screenFrame = mainWindow.screen?.visibleFrame else { return frame }
@@ -257,13 +255,28 @@ final class PromptsCoordinator {
     }
 
     func showPopover(below view: NSView) {
-        var popover: PromptCenteredPopover?
-        guard let popoverController = getPopover(onDismiss: { popover?.close() }) else {
+        let isDefaultBrowser = defaultBrowserProvider.isDefault
+        let isAddedToDock = dockCustomization.isAddedToDock
+        guard let content = PromptContent.getStyle(isSparkle: isSparkleBuild, isDefaultBrowser: isDefaultBrowser, isOnDock: isAddedToDock) else {
             return
         }
-
-        popover = PromptCenteredPopover(viewController: popoverController)
+        var popover: NSPopover?
+        let style = PromptStyle.popover(content)
+        let viewModel = PopoverMessageViewModel(title: style.title,
+                                                message: style.message,
+                                                image: style.icon,
+                                                buttonText: style.primaryButtonTitle,
+                                                buttonAction: { self.onSetAsDefaultBrowser() },
+                                                secondaryButtonText: style.secondaryButtonTitle,
+                                                secondaryButtonAction: { popover?.close() },
+                                                shouldShowCloseButton: false,
+                                                shouldPresentMultiline: true,
+                                                alignment: .vertical)
+        let contentView = PopoverMessageView(viewModel: viewModel, onClick: nil, onClose: nil)
+        let viewController = NSHostingController(rootView: contentView)
+        popover = PromptCenteredPopover(viewController: viewController)
         popover?.show(positionedBelow: view)
+        popover?.contentViewController?.view.makeMeFirstResponder()
     }
 
     @MainActor func showModal(in window: NSWindow) {

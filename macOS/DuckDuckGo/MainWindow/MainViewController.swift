@@ -159,6 +159,7 @@ final class MainViewController: NSViewController {
         subscribeToSelectedTabViewModel()
         subscribeToBookmarkBarVisibility()
         subscribeToFirstResponder()
+        subscribeToSetAsDefaultPopover()
         mainView.findInPageContainerView.applyDropShadow()
         // showMessageBannerIfNeeded() TODO: This should be commented for real build so new windows have the banner if it is being show.
 
@@ -514,6 +515,23 @@ final class MainViewController: NSViewController {
             return
         }
         NSApp.mainMenuTyped.stopMenuItem.isEnabled = selectedTabViewModel.isLoading
+    }
+
+    private func subscribeToSetAsDefaultPopover() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(showToSetAsDefaultPopover(_:)),
+                                               name: .showPopoverPromptForDefaultBrowserAddressBar,
+                                               object: nil)
+    }
+
+    @objc private func showToSetAsDefaultPopover(_ sender: Notification) {
+        let promptsCoordinator = PromptsCoordinator()
+
+        if bookmarksBarVisibilityManager.isBookmarksBarVisible {
+            promptsCoordinator.showPopover(below: self.bookmarksBarViewController.view)
+        } else {
+            promptsCoordinator.showPopover(below: self.navigationBarViewController.view)
+        }
     }
 
     // MARK: - First responder
