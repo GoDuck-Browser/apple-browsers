@@ -29,37 +29,37 @@ struct DuckPlayerEntryPillView: View {
     }
 
     private var sheetContent: some View {
-        VStack(spacing: 12) {
-            HStack(spacing: 12) {
-                Image(Constants.daxLogo)
-                    .resizable()
-                    .frame(width: 40, height: 40)
-                
-                Text(UserText.duckPlayerNativeWatchOnYouTube)
-                    .font(.system(size: 16, weight: .semibold))
-                
-                Spacer()
-                
-                Button(action: {
-                    viewModel.openInDuckPlayer()
-                }) {
+        Button(action: { viewModel.openInDuckPlayer()}) {
+            VStack(spacing: 12) {
+                HStack(spacing: 12) {
+                    Image(Constants.daxLogo)
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                    
+                    Text(UserText.duckPlayerNativeWatchOnYouTube)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(Color(designSystemColor: .textPrimary))
+                    
+                    Spacer()
+                    
                     Image(systemName: Constants.playImage)
                         .font(.system(size: 20))
                         .foregroundColor(.white)
                         .frame(width: 44, height: 44)
                         .background(Color.blue)
                         .clipShape(Circle())
+            
                 }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
             }
+            .background(Color(designSystemColor: .surface))        
+            .cornerRadius(12)        
+            .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)        
             .padding(.horizontal, 16)
-            .padding(.vertical, 14)
+            .padding(.vertical, 12)   
+            .padding(.bottom, 80)
         }
-        .background(Color(designSystemColor: .surface))        
-        .cornerRadius(12)        
-        .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)        
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)   
-        .padding(.bottom, 80)     
     }
     
     var body: some View {

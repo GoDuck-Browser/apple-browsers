@@ -869,8 +869,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             // Only present entry pill if not already presented
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
-                duckPlayer.presentEntryPill(for: videoID)
-                print("[DP] Handler: Presenting entry pill")
+                duckPlayer.presentEntryPill(for: videoID)                
             }
 
         }
