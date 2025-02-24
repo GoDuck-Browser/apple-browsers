@@ -158,9 +158,9 @@ public struct PopoverMessageView: View {
             }
         }
         .frame(width: 344)
-        .padding([.leading, .trailing, .bottom], 16)
+        .padding([.leading, .trailing], 16)
+        .padding(.bottom, 8)
         .padding(.top, 20)
-
     }
 
     @ViewBuilder

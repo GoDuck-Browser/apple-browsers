@@ -28,7 +28,7 @@ public extension Notification.Name {
 }
 
 final class PromptCenteredPopover: NSPopover {
-    private static let popoverInsets = NSEdgeInsets(top: 10, left: 13, bottom: 13, right: 13)
+    private static let topInset: CGFloat = 22
 
     init(viewController: PopoverMessageViewController) {
         super.init()
@@ -51,7 +51,8 @@ final class PromptCenteredPopover: NSPopover {
         let screenPoint = mainWindow.convertPoint(toScreen: windowPoint)
         var frame = frame
 
-        frame.origin.y = min(max(screenFrame.minY, screenPoint.y - frame.size.height - Self.popoverInsets.top), screenFrame.maxY)
+        // TODO: We need to calculate the x coordinate to always center the popover in the address bar.
+        frame.origin.y = min(max(screenFrame.minY, screenPoint.y - frame.size.height - PromptCenteredPopover.topInset), screenFrame.maxY)
 
         return frame
     }
