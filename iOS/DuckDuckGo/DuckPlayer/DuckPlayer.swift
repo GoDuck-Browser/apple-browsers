@@ -704,12 +704,12 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
 
     /// Hides the bottom sheet when browser chrome is hidden
     func hideBottomSheetForHiddenChrome() {
-       //Task { await nativeUIPresenter.hideBottomSheetForHiddenChrome() }
+        Task { await nativeUIPresenter.hideBottomSheetForHiddenChrome() }
     }
     
     /// Shows the bottom sheet when browser chrome is visible
     func showBottomSheetForVisibleChrome() {
-        //Task { await nativeUIPresenter.showBottomSheetForVisibleChrome() }
+        Task { await nativeUIPresenter.showBottomSheetForVisibleChrome() }
     }
     
     /// Presents a bottom sheet asking the user how they want to open the video

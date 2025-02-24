@@ -66,15 +66,12 @@ final class DuckPlayerNativeUIPresenter {
         
         // If we already have a view model, just update the onOpen closure
         if let existingViewModel = pillSheetviewModel {
-            print("[DP] Presenter: Updating existing entry pill")
             existingViewModel.onOpen = { [weak self] in
                 self?.videoPlaybackRequest.send(videoID)
             }            
             return
         }
-        
-        print("[DP] Presenter: Presenting entry pill from scratch")
-        
+                
         self.hostView = hostViewController
         guard let hostView = self.hostView else { return }
         
@@ -115,12 +112,10 @@ final class DuckPlayerNativeUIPresenter {
     @MainActor
     func dismissPill() {
         // Hide the view first
-        pillSheetviewModel?.hide()
-        print("[DP] Presenter: Hiding existing entry pill")
+        pillSheetviewModel?.hide()        
 
         // Remove the view after the animation completes
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in                   
-            print("[DP] Presenter: Removing existing entry pill")            
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in                               
             self?.pillSheetViewController?.view.removeFromSuperview()
             self?.pillSheetViewController = nil            
             self?.pillSheetviewModel = nil
