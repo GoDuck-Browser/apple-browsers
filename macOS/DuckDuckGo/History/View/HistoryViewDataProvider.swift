@@ -20,6 +20,30 @@ import Foundation
 import History
 import HistoryView
 
+protocol HistoryBurning: AnyObject {
+    func burn(_ visits: [Visit], animated: Bool) async
+}
+
+class FireHistoryBurner: HistoryBurning {
+    let fireproofDomains: DomainFireproofStatusProviding
+    let fire: () async -> Fire
+
+    init(fireproofDomains: DomainFireproofStatusProviding = FireproofDomains.shared, fire: (() async -> Fire)? = nil) {
+        self.fireproofDomains = fireproofDomains
+        self.fire = fire ?? { @MainActor in FireCoordinator.fireViewModel.fire }
+    }
+
+    func burn(_ visits: [Visit], animated: Bool) async {
+        await withCheckedContinuation { continuation in
+            Task { @MainActor in
+                await fire().burnVisits(visits, except: fireproofDomains, isToday: animated) {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+}
+
 protocol HistoryDeleting: AnyObject {
     func delete(_ visits: [Visit]) async
 }
@@ -44,7 +68,7 @@ struct HistoryViewGrouping {
     }
 
     init?(_ historyGrouping: HistoryGrouping, dateFormatter: HistoryViewDateFormatting) {
-        guard let range = DataModel.HistoryRange(date: historyGrouping.date, referenceDate: Date()) else {
+        guard let range = DataModel.HistoryRange(date: historyGrouping.date, referenceDate: dateFormatter.currentDate()) else {
             return nil
         }
         self.range = range
@@ -56,26 +80,24 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
 
     init(
         historyGroupingDataSource: HistoryGroupingDataSource & HistoryDeleting,
-        dateFormatter: HistoryViewDateFormatting = DefaultHistoryViewDateFormatter(),
-        fire: (() async -> Fire)? = nil,
-        fireproofDomains: DomainFireproofStatusProviding = FireproofDomains.shared
+        historyBurner: HistoryBurning = FireHistoryBurner(),
+        dateFormatter: HistoryViewDateFormatting = DefaultHistoryViewDateFormatter()
     ) {
         self.dateFormatter = dateFormatter
-        self.fire = fire ?? { @MainActor in FireCoordinator.fireViewModel.fire }
-        self.fireproofDomains = fireproofDomains
         self.historyGroupingDataSource = historyGroupingDataSource
+        self.historyBurner = historyBurner
         historyGroupingProvider = HistoryGroupingProvider(dataSource: historyGroupingDataSource)
-    }
-
-    func resetCache() async {
-        lastQuery = nil
-        await populateVisits()
     }
 
     var ranges: [DataModel.HistoryRange] {
         var ranges: [DataModel.HistoryRange] = [.all]
         ranges.append(contentsOf: groupings.map(\.range))
         return ranges
+    }
+
+    func resetCache() async {
+        lastQuery = nil
+        await populateVisits()
     }
 
     func visits(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> HistoryView.DataModel.HistoryItemsBatch {
@@ -89,7 +111,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         guard let history = await fetchHistory() else {
             return 0
         }
-        let date = lastQuery?.date ?? Date()
+        let date = lastQuery?.date ?? dateFormatter.currentDate()
         let dateRange = range.dateRange(for: date)
 
         let entriesCount = history.reduce(0) { partialResult, entry in
@@ -108,16 +130,8 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
 
     func burnVisits(for range: DataModel.HistoryRange) async {
         let visits = await visits(for: range)
-
-        let isToday = range == .today || range == .all
-
-        await withCheckedContinuation { continuation in
-            Task { @MainActor in
-                await fire().burnVisits(visits, except: fireproofDomains, isToday: isToday) {
-                    continuation.resume()
-                }
-            }
-        }
+        let animated = range == .today || range == .all
+        await historyBurner.burn(visits, animated: animated)
         await resetCache()
     }
 
@@ -156,7 +170,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         guard let history = await fetchHistory() else {
             return []
         }
-        let date = lastQuery?.date ?? Date()
+        let date = lastQuery?.date ?? dateFormatter.currentDate()
         let visits: [Visit] = {
             let allVisits: [Visit] = history.flatMap(\.visits)
             guard let dateRange = range.dateRange(for: date) else {
@@ -195,15 +209,14 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
             }
         }()
 
-        lastQuery = .init(date: Date(), query: query, items: items)
+        lastQuery = .init(date: dateFormatter.currentDate(), query: query, items: items)
         return items
     }
 
     private let historyGroupingProvider: HistoryGroupingProvider
     private let historyGroupingDataSource: HistoryGroupingDataSource & HistoryDeleting
     private let dateFormatter: HistoryViewDateFormatting
-    private let fire: () async -> Fire
-    private let fireproofDomains: DomainFireproofStatusProviding
+    private let historyBurner: HistoryBurning
 
     /// this is to be optimized: https://app.asana.com/0/72649045549333/1209339909309306
     private var groupings: [HistoryViewGrouping] = []

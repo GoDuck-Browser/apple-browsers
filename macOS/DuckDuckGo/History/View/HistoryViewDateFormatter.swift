@@ -20,6 +20,7 @@ import Common
 import Foundation
 
 protocol HistoryViewDateFormatting {
+    func currentDate() -> Date
     func dayString(for date: Date) -> String
     func timeString(for date: Date) -> String
 }
@@ -39,8 +40,12 @@ struct DefaultHistoryViewDateFormatter: HistoryViewDateFormatting {
         return formatter
     }()
 
+    func currentDate() -> Date {
+        Date()
+    }
+
     func dayString(for date: Date) -> String {
-        let today = Date().startOfDay
+        let today = currentDate().startOfDay
         switch Calendar.autoupdatingCurrent.numberOfDaysBetween(date.startOfDay, and: today) {
         case 0:
             return "today".localizedCapitalized
