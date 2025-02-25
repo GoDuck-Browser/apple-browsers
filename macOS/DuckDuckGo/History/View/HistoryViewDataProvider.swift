@@ -58,7 +58,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         historyGroupingDataSource: HistoryGroupingDataSource & HistoryDeleting,
         dateFormatter: HistoryViewDateFormatting = DefaultHistoryViewDateFormatter(),
         fire: (() async -> Fire)? = nil,
-        fireproofDomains: FireproofDomains = .shared
+        fireproofDomains: DomainFireproofStatusProviding = FireproofDomains.shared
     ) {
         self.dateFormatter = dateFormatter
         self.fire = fire ?? { @MainActor in FireCoordinator.fireViewModel.fire }
@@ -118,8 +118,6 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         guard let history = await fetchHistory() else {
             return 0
         }
-        let fetchDate = Date()
-
         let date = lastQuery?.date ?? Date()
         let dateRange = range.dateRange(for: date)
 
@@ -128,7 +126,6 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
             return partialResult + days.count(where: { dateRange?.contains($0) ?? true })
         }
 
-        print("Filtering history took \(Date().timeIntervalSince(fetchDate)) s")
         return entriesCount
     }
 
@@ -136,8 +133,6 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         guard let history = await fetchHistory() else {
             return []
         }
-        let fetchDate = Date()
-
         let date = lastQuery?.date ?? Date()
         let visits: [Visit] = {
             let allVisits: [Visit] = history.flatMap(\.visits)
@@ -146,37 +141,35 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
             }
             return allVisits.filter { dateRange.contains($0.date) }
         }()
-        let filterDate = Date()
-        print("Filtering history took \(filterDate.timeIntervalSince(fetchDate)) s")
-
         return visits
     }
 
     func deleteVisits(for range: DataModel.HistoryRange) async {
-        let startDate = Date()
         let visits = await visits(for: range)
         await historyGroupingDataSource.delete(visits)
         await resetCache()
-        print("Deleting history took \(Date().timeIntervalSince(startDate)) s")
     }
 
     func burnVisits(for range: DataModel.HistoryRange) async {
-        let startDate = Date()
         let visits = await visits(for: range)
 
         let isToday = range == .today || range == .all
 
         await withCheckedContinuation { continuation in
             Task { @MainActor in
-                await fire().burnVisits(of: visits, except: fireproofDomains, isToday: isToday) {
+                await fire().burnVisits(visits, except: fireproofDomains, isToday: isToday) {
                     continuation.resume()
                 }
             }
         }
         await resetCache()
-        print("Burning history took \(Date().timeIntervalSince(startDate)) s")
     }
 
+    /**
+     * This function is here to ensure that history is accessed on the main thread.
+     *
+     * `HistoryCoordinator` uses `dispatchPrecondition(condition: .onQueue(.main))` internally.
+     */
     @MainActor
     private func fetchHistory() async -> BrowsingHistory? {
         historyGroupingDataSource.history
@@ -208,7 +201,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
     private let historyGroupingDataSource: HistoryGroupingDataSource & HistoryDeleting
     private let dateFormatter: HistoryViewDateFormatting
     private let fire: () async -> Fire
-    private let fireproofDomains: FireproofDomains
+    private let fireproofDomains: DomainFireproofStatusProviding
 
     /// this is to be optimized: https://app.asana.com/0/72649045549333/1209339909309306
     private var groupings: [HistoryViewGrouping] = []

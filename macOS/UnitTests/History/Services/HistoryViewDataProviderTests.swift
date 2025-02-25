@@ -22,13 +22,21 @@ import XCTest
 @testable import DuckDuckGo_Privacy_Browser
 
 final class MockHistoryViewDateFormatter: HistoryViewDateFormatting {
-    func weekDay(for date: Date) -> String {
+    func dayString(for date: Date) -> String {
         "Today"
     }
 
-    func time(for date: Date) -> String {
+    func timeString(for date: Date) -> String {
         "10:08"
     }
+}
+
+final class MockDomainFireproofStatusProvider: DomainFireproofStatusProviding {
+    func isFireproof(fireproofDomain domain: String) -> Bool {
+        isFireproof(domain)
+    }
+
+    var isFireproof: (String) -> Bool = { _ in false }
 }
 
 final class HistoryViewDataProviderTests: XCTestCase {
@@ -37,7 +45,8 @@ final class HistoryViewDataProviderTests: XCTestCase {
     override func setUp() {
         provider = HistoryViewDataProvider(
             historyGroupingDataSource: MockHistoryGroupingDataSource(),
-            dateFormatter: MockHistoryViewDateFormatter()
+            dateFormatter: MockHistoryViewDateFormatter(),
+            fireproofDomains: MockDomainFireproofStatusProvider()
         )
     }
 }
