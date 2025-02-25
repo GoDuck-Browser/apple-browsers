@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/duckduckgo/content-scope-scripts",
       "state" : {
-        "revision" : "695df496504a9a98ee15a32ad1be25c94a5bb532",
-        "version" : "7.20.0"
+        "revision" : "c8428aec4646126b7aa4903f85caf6315d565995",
+        "version" : "7.22.0"
       }
     },
     {
