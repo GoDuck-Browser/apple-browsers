@@ -1,4 +1,8 @@
 (function() {
+    // Store original play method globally
+    const originalPlay = HTMLMediaElement.prototype.play;
+    let observer = null;
+
     // Block video playback before anything else loads
     const blockPlayback = function(event) {
         event.preventDefault();
@@ -10,7 +14,7 @@
     document.addEventListener('play', blockPlayback, true);
     document.addEventListener('playing', blockPlayback, true);
 
-    function addMediaControl() {
+    function startMediaControl() {
         let userInitiated = false;
 
         // Listen for user interactions that may lead to playback
@@ -34,12 +38,16 @@
             }, true);  // Capture phase to detect early
         });
 
+        // Store original play method for later restoration
+        HTMLMediaElement.prototype._originalPlay = originalPlay;
+
         // Override play to detect and conditionally allow playback
-        const originalPlay = HTMLMediaElement.prototype.play;
         HTMLMediaElement.prototype.play = function() {
             if (userInitiated) {
                 // User-triggered playback is allowed, so disconnect the observer and unmute
-                observer.disconnect();
+                if (observer) {
+                    observer.disconnect();
+                }
                 this.muted = false;  // Unmute the specific media element being played
                 return originalPlay.apply(this, arguments);
             } else {
@@ -60,7 +68,7 @@
         pauseAndMuteAllMedia();
 
         // Monitor DOM for newly added media elements
-        const observer = new MutationObserver(mutations => {
+        observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 mutation.addedNodes.forEach(node => {
                     if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
@@ -80,13 +88,41 @@
             });
         });
 
+        // Store observer for cleanup
+        window._mediaObserver = observer;
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    // Run as early as possible
+    // Cleanup function that restores original state
+    function stopMediaControl() {
+        // Restore original play method
+        if (HTMLMediaElement.prototype._originalPlay) {
+            HTMLMediaElement.prototype.play = HTMLMediaElement.prototype._originalPlay;
+            delete HTMLMediaElement.prototype._originalPlay;
+        }
+        
+        // Remove event listeners
+        document.removeEventListener('play', blockPlayback, true);
+        document.removeEventListener('playing', blockPlayback, true);
+        
+        // Clean up observer
+        if (window._mediaObserver) {
+            window._mediaObserver.disconnect();
+            delete window._mediaObserver;
+        }
+        if (observer) {
+            observer.disconnect();
+            observer = null;
+        }
+    }
+
+    // Run as early as possible, but also clean up if needed
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', addMediaControl);
+        document.addEventListener('DOMContentLoaded', startMediaControl);
+        // Clean up when navigating away
+        window.addEventListener('beforeunload', stopMediaControl);
     } else {
-        addMediaControl();
+        startMediaControl();
+        window.addEventListener('beforeunload', stopMediaControl);
     }
 })();

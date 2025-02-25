@@ -2,7 +2,7 @@
 //  DuckPlayerNavigationHandler.swift
 //  DuckDuckGo
 //
-//  Copyright © 2024 DuckDuckGo. All rights reserved.
+//  Copyright 2024 DuckDuckGo. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -85,24 +85,14 @@ final class DuckPlayerNavigationHandler: NSObject {
     /// Cancellable for observing DuckPlayer dismissal
     private var duckPlayerDismissalCancellable: AnyCancellable?
     
-    /// JavaScript for media playback control using MutationObserver
-    private let mediaControlScript: String = {
-        guard let url = Bundle.main.url(forResource: "addMediaControl", withExtension: "js"),
+    /// JavaScript for media playback control
+    private let mediaControlScript: WKUserScript? = {
+        guard let url = Bundle.main.url(forResource: "mediaControl", withExtension: "js"),
               let script = try? String(contentsOf: url) else {
             assertionFailure("Failed to load media control script")
-            return ""
+            return nil
         }
-        return script
-    }()
-
-    /// Script to remove media playback controls
-    private let removeMediaControlScript: String = {
-        guard let url = Bundle.main.url(forResource: "removeMediaControl", withExtension: "js"),
-              let script = try? String(contentsOf: url) else {
-            assertionFailure("Failed to load remove media control script")
-            return ""
-        }
-        return script
+        return WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: false)
     }()
 
     /// Script to mute/unmute audio
@@ -711,12 +701,11 @@ final class DuckPlayerNavigationHandler: NSObject {
     ///   - webView: The `WKWebView` to manipulate
     ///   - pause: When true, blocks media playback. When false, allows playback
     @MainActor
-    private func toggleMediaPlayback(_ webView: WKWebView, pause: Bool) {
-        if pause {            
-            webView.evaluateJavaScript(mediaControlScript)
+    private func toggleMediaPlayback(_ webView: WKWebView, pause: Bool) {        
+        if pause {
+            webView.evaluateJavaScript("startMediaControl()")
         } else {
-            // Remove the media controls and unmute            
-            webView.evaluateJavaScript(removeMediaControlScript)
+            webView.evaluateJavaScript("stopMediaControl()")
         }
     }
     
@@ -816,7 +805,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         
         // Dismiss the bottom sheet if URL is not a YouTube watch page
         // Also ensure all media playback is allowed by default
-        if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {            
+        if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
             toggleMediaPlayback(webView, pause: false)
         }
 
@@ -987,6 +976,16 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
     @MainActor
     func handleAttach(webView: WKWebView) {
         
+        // Initialize/Inject the Media control script
+        if let mediaControlScript = mediaControlScript {
+            webView.configuration.userContentController.addUserScript(mediaControlScript)
+        }        
+
+        // Stop playback if needed
+        if duckPlayerMode == .enabled && duckPlayer.settings.nativeUI {
+            toggleMediaPlayback(webView, pause: true)
+        }
+       
         // Reset referrer and initial settings
         referrer = .other
 
@@ -1003,19 +1002,6 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             return
         }
 
-        // Inject JS media control scripts and pause all videos
-        let userScript = WKUserScript(source: mediaControlScript,
-                                injectionTime: .atDocumentStart,
-                                forMainFrameOnly: false)
-        webView.configuration.userContentController.addUserScript(userScript) 
-
-        // Pause Youtube videos at start
-        if duckPlayerMode == .enabled &&
-           duckPlayer.settings.nativeUI &&
-           webView.url?.isYoutubeWatch == true {            
-            toggleMediaPlayback(webView, pause: false)
-        }
-        
         // Get parameters and determine redirection
         let parameters = getDuckPlayerParameters(url: url)
         if parameters.allowFirstVideo {
