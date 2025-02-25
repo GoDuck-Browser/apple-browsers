@@ -1,128 +1,135 @@
-(function() {
-    // Store original play method globally
-    const originalPlay = HTMLMediaElement.prototype.play;
-    let observer = null;
+// Only initialize once
+if (!window._mediaControlInitialized) {
+    window._mediaControlInitialized = true;
+    console.log('Media Control Script loading...');
 
-    // Block video playback before anything else loads
-    const blockPlayback = function(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        return false;
+    // Store shared state
+    window._mediaControlState = {
+        observer: null,
+        userInitiated: false,
+        originalPlay: HTMLMediaElement.prototype.play,
+        touchHandler: null,
+        blockPlayback: null
     };
 
-    // Capture play events at the earliest possible moment
-    document.addEventListener('play', blockPlayback, true);
-    document.addEventListener('playing', blockPlayback, true);
-
-    function startMediaControl() {
-        let userInitiated = false;
-
-        // Listen for user interactions that may lead to playback
-        ['touchstart'].forEach(eventType => {
-            document.addEventListener(eventType, () => {
-                userInitiated = true;
-                
-                // Remove the early blocking listeners
-                document.removeEventListener('play', blockPlayback, true);
-                document.removeEventListener('playing', blockPlayback, true);
-
-                // Unmute all media elements when user interacts
-                document.querySelectorAll('audio, video').forEach(media => {
-                    media.muted = false;
-                });
-
-                // Reset after a short delay to prevent indefinite allowance
-                setTimeout(() => {
-                    userInitiated = false;
-                }, 500);
-            }, true);  // Capture phase to detect early
+    // Run initial setup
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Media Control Script: DOMContentLoaded');
+            mediaControl(true);
         });
+    } else {
+        console.log('Media Control Script: document already loaded');
+        mediaControl(true);
+    }
 
-        // Store original play method for later restoration
-        HTMLMediaElement.prototype._originalPlay = originalPlay;
+    // Cleanup on unload
+    window.addEventListener('beforeunload', () => {
+        console.log('Media Control Script: beforeunload');
+        mediaControl(false);
+    });
+}
 
-        // Override play to detect and conditionally allow playback
+function mediaControl(pause) {
+    const state = window._mediaControlState;
+    if (!state) return; // Safety check
+
+    // Clean up existing handlers
+    if (state.touchHandler) {
+        document.removeEventListener('touchstart', state.touchHandler, true);
+    }
+    if (state.blockPlayback) {
+        document.removeEventListener('play', state.blockPlayback, true);
+        document.removeEventListener('playing', state.blockPlayback, true);
+    }
+
+    if (pause) {
+        // Block video playback
+        state.blockPlayback = function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            return false;
+        };
+
+        // Listen for user interactions
+        state.touchHandler = () => {
+            state.userInitiated = true;
+            
+            // Remove blocking listeners
+            document.removeEventListener('play', state.blockPlayback, true);
+            document.removeEventListener('playing', state.blockPlayback, true);
+
+            // Unmute media
+            document.querySelectorAll('audio, video').forEach(media => {
+                media.muted = false;
+            });
+
+            setTimeout(() => {
+                state.userInitiated = false;
+            }, 500);
+        };
+
+        document.addEventListener('touchstart', state.touchHandler, true);
+        document.addEventListener('play', state.blockPlayback, true);
+        document.addEventListener('playing', state.blockPlayback, true);
+
+        // Override play method
         HTMLMediaElement.prototype.play = function() {
-            if (userInitiated) {
-                // User-triggered playback is allowed, so disconnect the observer and unmute
-                if (observer) {
-                    observer.disconnect();
+            if (state.userInitiated) {
+                if (state.observer) {
+                    state.observer.disconnect();
                 }
-                this.muted = false;  // Unmute the specific media element being played
-                return originalPlay.apply(this, arguments);
+                this.muted = false;
+                return state.originalPlay.apply(this, arguments);
             } else {
-                // Block programmatic playback
                 this.pause();
                 return Promise.reject(new Error("Playback blocked: Not user-initiated"));
             }
         };
 
-        // Initial pause of all media
-        function pauseAndMuteAllMedia() {
-            document.querySelectorAll('audio, video').forEach(media => {
-                media.pause();
-                media.muted = true;
-            });
-        }
-
-        pauseAndMuteAllMedia();
-
-        // Monitor DOM for newly added media elements
-        observer = new MutationObserver(mutations => {
-            mutations.forEach(mutation => {
-                mutation.addedNodes.forEach(node => {
-                    if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
-                        if (!userInitiated) {  // Only mute if not user-initiated
-                            node.pause();
-                            node.muted = true;
-                        }
-                    } else if (node.querySelectorAll) {
-                        node.querySelectorAll('audio, video').forEach(media => {
-                            if (!userInitiated) {  // Only mute if not user-initiated
-                                media.pause();
-                                media.muted = true;
-                            }
-                        });
-                    }
-                });
-            });
+        // Pause and mute existing media
+        document.querySelectorAll('audio, video').forEach(media => {
+            media.pause();
+            media.muted = true;
         });
 
-        // Store observer for cleanup
-        window._mediaObserver = observer;
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
-
-    // Cleanup function that restores original state
-    function stopMediaControl() {
-        // Restore original play method
-        if (HTMLMediaElement.prototype._originalPlay) {
-            HTMLMediaElement.prototype.play = HTMLMediaElement.prototype._originalPlay;
-            delete HTMLMediaElement.prototype._originalPlay;
+        // Setup observer if needed
+        if (!state.observer) {
+            state.observer = new MutationObserver(mutations => {
+                mutations.forEach(mutation => {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
+                            if (!state.userInitiated) {
+                                node.pause();
+                                node.muted = true;
+                            }
+                        } else if (node.querySelectorAll) {
+                            node.querySelectorAll('audio, video').forEach(media => {
+                                if (!state.userInitiated) {
+                                    media.pause();
+                                    media.muted = true;
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+            state.observer.observe(document.body, { childList: true, subtree: true });
         }
-        
-        // Remove event listeners
-        document.removeEventListener('play', blockPlayback, true);
-        document.removeEventListener('playing', blockPlayback, true);
+
+    } else {
+        // Restore original play method
+        HTMLMediaElement.prototype.play = state.originalPlay;
         
         // Clean up observer
-        if (window._mediaObserver) {
-            window._mediaObserver.disconnect();
-            delete window._mediaObserver;
+        if (state.observer) {
+            state.observer.disconnect();
+            state.observer = null;
         }
-        if (observer) {
-            observer.disconnect();
-            observer = null;
-        }
-    }
 
-    // Run as early as possible, but also clean up if needed
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', startMediaControl);
-        // Clean up when navigating away
-        window.addEventListener('beforeunload', stopMediaControl);
-    } else {
-        startMediaControl();
-        window.addEventListener('beforeunload', stopMediaControl);
+        // Unmute media
+        document.querySelectorAll('audio, video').forEach(media => {
+            media.muted = false;
+        });
     }
-})();
+}

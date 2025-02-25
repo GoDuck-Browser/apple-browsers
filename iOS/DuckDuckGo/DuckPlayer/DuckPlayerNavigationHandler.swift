@@ -85,15 +85,15 @@ final class DuckPlayerNavigationHandler: NSObject {
     /// Cancellable for observing DuckPlayer dismissal
     private var duckPlayerDismissalCancellable: AnyCancellable?
     
-    /// JavaScript for media playback control
-    private let mediaControlScript: WKUserScript? = {
+    /// JavaScript for media playback control        
+    private let mediaControlScript: String = {
         guard let url = Bundle.main.url(forResource: "mediaControl", withExtension: "js"),
               let script = try? String(contentsOf: url) else {
-            assertionFailure("Failed to load media control script")
-            return nil
+            assertionFailure("Failed to load mute audio script")
+            return ""
         }
-        return WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-    }()
+        return script
+    }()    
 
     /// Script to mute/unmute audio
     private let muteAudioScript: String = {
@@ -104,6 +104,7 @@ final class DuckPlayerNavigationHandler: NSObject {
         }
         return script
     }()
+
     private struct Constants {
         static let SERPURL =  "duckduckgo.com/"
         static let refererHeader = "Referer"
@@ -702,11 +703,9 @@ final class DuckPlayerNavigationHandler: NSObject {
     ///   - pause: When true, blocks media playback. When false, allows playback
     @MainActor
     private func toggleMediaPlayback(_ webView: WKWebView, pause: Bool) {        
-        if pause {
-            webView.evaluateJavaScript("startMediaControl()")
-        } else {
-            webView.evaluateJavaScript("stopMediaControl()")
-        }
+        if let url = webView.url, url.isYoutubeWatch {
+        webView.evaluateJavaScript("\(mediaControlScript); mediaControl(\(pause))")          
+        }        
     }
     
     /// Cleans up timers and audio state when DuckPlayer is dismissed
@@ -975,12 +974,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
     /// - Parameter webView: The `WKWebView` being attached.
     @MainActor
     func handleAttach(webView: WKWebView) {
-        
-        // Initialize/Inject the Media control script
-        if let mediaControlScript = mediaControlScript {
-            webView.configuration.userContentController.addUserScript(mediaControlScript)
-        }        
-
+       
         // Stop playback if needed
         if duckPlayerMode == .enabled && duckPlayer.settings.nativeUI {
             toggleMediaPlayback(webView, pause: true)
