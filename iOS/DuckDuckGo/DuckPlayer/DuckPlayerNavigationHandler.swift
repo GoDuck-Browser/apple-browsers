@@ -2,7 +2,7 @@
 //  DuckPlayerNavigationHandler.swift
 //  DuckDuckGo
 //
-//  Copyright 2024 DuckDuckGo. All rights reserved.
+//  Copyright © 2024 DuckDuckGo. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -696,7 +696,7 @@ final class DuckPlayerNavigationHandler: NSObject {
         }
     }
     
-    /// Toggles continuous pause injection and audio for all media elements in a webView.
+    /// Toggles pause and audio for all media elements in a webView.
     ///
     /// - Parameters:
     ///   - webView: The `WKWebView` to manipulate
@@ -853,13 +853,13 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
                 let startTime = Date()
                 
                 // Temporarily pause media playback during page transition
-                // to prevents audio/video from playing in the new page
-                // We apply the pause command repeatedly for 1 second to ensure it takes effect
-                // even if the DOM is changing during early navigation
-                // Once the page has loaded, the JS mutation observer takes care 
+                // The pause is applied repeatedly for 1 second to ensure it takes effect
+                // even if the DOM is changing during early initialization
+                // Once the page has loaded, the JS mutation observer takes care
+                // Of pausing newly added elements. 
                 while Date().timeIntervalSince(startTime) < 1.0 {
                     self.toggleMediaPlayback(webView, pause: true)
-                    try? await Task.sleep(nanoseconds: 50_000_000) // 50ms between attempts
+                    try? await Task.sleep(nanoseconds: 50_000_000)
                 }
 
             }
