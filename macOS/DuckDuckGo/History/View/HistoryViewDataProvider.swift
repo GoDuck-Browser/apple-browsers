@@ -72,6 +72,57 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         await populateVisits()
     }
 
+    var ranges: [DataModel.HistoryRange] {
+        var ranges: [DataModel.HistoryRange] = [.all]
+        ranges.append(contentsOf: groupings.map(\.range))
+        return ranges
+    }
+
+    func visits(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> HistoryView.DataModel.HistoryItemsBatch {
+        let items = perform(query)
+        let visits = items.chunk(with: limit, offset: offset)
+        let finished = items.count < limit
+        return DataModel.HistoryItemsBatch(finished: finished, visits: visits)
+    }
+
+    func countVisits(for range: DataModel.HistoryRange) async -> Int {
+        guard let history = await fetchHistory() else {
+            return 0
+        }
+        let date = lastQuery?.date ?? Date()
+        let dateRange = range.dateRange(for: date)
+
+        let entriesCount = history.reduce(0) { partialResult, entry in
+            let days = Set(entry.visits.map { $0.date.startOfDay })
+            return partialResult + days.count(where: { dateRange?.contains($0) ?? true })
+        }
+
+        return entriesCount
+    }
+
+    func deleteVisits(for range: DataModel.HistoryRange) async {
+        let visits = await visits(for: range)
+        await historyGroupingDataSource.delete(visits)
+        await resetCache()
+    }
+
+    func burnVisits(for range: DataModel.HistoryRange) async {
+        let visits = await visits(for: range)
+
+        let isToday = range == .today || range == .all
+
+        await withCheckedContinuation { continuation in
+            Task { @MainActor in
+                await fire().burnVisits(visits, except: fireproofDomains, isToday: isToday) {
+                    continuation.resume()
+                }
+            }
+        }
+        await resetCache()
+    }
+
+    // MARK: - Private
+
     @MainActor
     private func populateVisits() {
         var olderHistoryItems = [DataModel.HistoryItem]()
@@ -101,34 +152,6 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         self.historyItems = groupings.flatMap(\.items)
     }
 
-    var ranges: [DataModel.HistoryRange] {
-        var ranges: [DataModel.HistoryRange] = [.all]
-        ranges.append(contentsOf: groupings.map(\.range))
-        return ranges
-    }
-
-    func visits(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> HistoryView.DataModel.HistoryItemsBatch {
-        let items = perform(query)
-        let visits = items.chunk(with: limit, offset: offset)
-        let finished = items.count < limit
-        return DataModel.HistoryItemsBatch(finished: finished, visits: visits)
-    }
-
-    func countVisits(for range: DataModel.HistoryRange) async -> Int {
-        guard let history = await fetchHistory() else {
-            return 0
-        }
-        let date = lastQuery?.date ?? Date()
-        let dateRange = range.dateRange(for: date)
-
-        let entriesCount = history.reduce(0) { partialResult, entry in
-            let days = Set(entry.visits.map { $0.date.startOfDay })
-            return partialResult + days.count(where: { dateRange?.contains($0) ?? true })
-        }
-
-        return entriesCount
-    }
-
     private func visits(for range: DataModel.HistoryRange) async -> [Visit] {
         guard let history = await fetchHistory() else {
             return []
@@ -142,27 +165,6 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
             return allVisits.filter { dateRange.contains($0.date) }
         }()
         return visits
-    }
-
-    func deleteVisits(for range: DataModel.HistoryRange) async {
-        let visits = await visits(for: range)
-        await historyGroupingDataSource.delete(visits)
-        await resetCache()
-    }
-
-    func burnVisits(for range: DataModel.HistoryRange) async {
-        let visits = await visits(for: range)
-
-        let isToday = range == .today || range == .all
-
-        await withCheckedContinuation { continuation in
-            Task { @MainActor in
-                await fire().burnVisits(visits, except: fireproofDomains, isToday: isToday) {
-                    continuation.resume()
-                }
-            }
-        }
-        await resetCache()
     }
 
     /**
