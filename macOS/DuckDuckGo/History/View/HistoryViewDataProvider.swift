@@ -16,6 +16,7 @@
 //  limitations under the License.
 //
 
+import BrowserServicesKit
 import Foundation
 import History
 import HistoryView
@@ -81,12 +82,13 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
     init(
         historyGroupingDataSource: HistoryGroupingDataSource & HistoryDeleting,
         historyBurner: HistoryBurning = FireHistoryBurner(),
-        dateFormatter: HistoryViewDateFormatting = DefaultHistoryViewDateFormatter()
+        dateFormatter: HistoryViewDateFormatting = DefaultHistoryViewDateFormatter(),
+        featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger
     ) {
         self.dateFormatter = dateFormatter
         self.historyGroupingDataSource = historyGroupingDataSource
         self.historyBurner = historyBurner
-        historyGroupingProvider = HistoryGroupingProvider(dataSource: historyGroupingDataSource)
+        historyGroupingProvider = HistoryGroupingProvider(dataSource: historyGroupingDataSource, featureFlagger: featureFlagger)
     }
 
     var ranges: [DataModel.HistoryRange] {
@@ -100,14 +102,14 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         await populateVisits()
     }
 
-    func visits(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> HistoryView.DataModel.HistoryItemsBatch {
+    func visitsBatch(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> HistoryView.DataModel.HistoryItemsBatch {
         let items = perform(query)
         let visits = items.chunk(with: limit, offset: offset)
-        let finished = items.count < limit
+        let finished = offset + limit >= items.count
         return DataModel.HistoryItemsBatch(finished: finished, visits: visits)
     }
 
-    func countVisits(for range: DataModel.HistoryRange) async -> Int {
+    func countVisibleVisits(for range: DataModel.HistoryRange) async -> Int {
         guard let history = await fetchHistory() else {
             return 0
         }
@@ -123,13 +125,13 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
     }
 
     func deleteVisits(for range: DataModel.HistoryRange) async {
-        let visits = await visits(for: range)
+        let visits = await allVisits(for: range)
         await historyGroupingDataSource.delete(visits)
         await resetCache()
     }
 
     func burnVisits(for range: DataModel.HistoryRange) async {
-        let visits = await visits(for: range)
+        let visits = await allVisits(for: range)
         let animated = range == .today || range == .all
         await historyBurner.burn(visits, animated: animated)
         await resetCache()
@@ -166,19 +168,17 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         self.historyItems = groupings.flatMap(\.items)
     }
 
-    private func visits(for range: DataModel.HistoryRange) async -> [Visit] {
+    private func allVisits(for range: DataModel.HistoryRange) async -> [Visit] {
         guard let history = await fetchHistory() else {
             return []
         }
         let date = lastQuery?.date ?? dateFormatter.currentDate()
-        let visits: [Visit] = {
-            let allVisits: [Visit] = history.flatMap(\.visits)
-            guard let dateRange = range.dateRange(for: date) else {
-                return allVisits
-            }
-            return allVisits.filter { dateRange.contains($0.date) }
-        }()
-        return visits
+
+        let allVisits: [Visit] = history.flatMap(\.visits)
+        guard let dateRange = range.dateRange(for: date) else {
+            return allVisits
+        }
+        return allVisits.filter { dateRange.contains($0.date) }
     }
 
     /**
@@ -198,7 +198,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
 
         let items: [DataModel.HistoryItem] = {
             switch query {
-            case .rangeFilter(.all), .searchTerm(""):
+            case .rangeFilter(.all), .searchTerm(""), .domainFilter(""):
                 return historyItems
             case .rangeFilter(let range):
                 return groupings.first(where: { $0.range == range })?.items ?? []

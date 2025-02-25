@@ -32,7 +32,7 @@ public extension DataModel.HistoryRange {
      * - `nil` when `date` is newer than `referenceDate` (which shouldn't happen).
      */
     init?(date: Date, referenceDate: Date) {
-        guard referenceDate > date else {
+        guard referenceDate >= date else {
             return nil
         }
         let calendar = Calendar.autoupdatingCurrent

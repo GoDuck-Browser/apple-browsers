@@ -28,14 +28,14 @@ final class CapturingDataProvider: DataProviding {
         resetCacheCallCount += 1
     }
 
-    func visits(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> DataModel.HistoryItemsBatch {
-        visitsCalls.append(.init(query: query, limit: limit, offset: offset))
-        return await visits(query, limit, offset)
+    func visitsBatch(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> DataModel.HistoryItemsBatch {
+        visitsBatchCalls.append(.init(query: query, limit: limit, offset: offset))
+        return await visitsBatch(query, limit, offset)
     }
 
-    func countVisits(for range: DataModel.HistoryRange) async -> Int {
-        countVisitsCalls.append(range)
-        return await countVisits(range)
+    func countVisibleVisits(for range: DataModel.HistoryRange) async -> Int {
+        countVisibleVisitsCalls.append(range)
+        return await countVisibleVisits(range)
     }
 
     func deleteVisits(for range: DataModel.HistoryRange) async {
@@ -51,16 +51,16 @@ final class CapturingDataProvider: DataProviding {
     var rangesCallCount: Int = 0
     var resetCacheCallCount: Int = 0
 
-    var countVisitsCalls: [DataModel.HistoryRange] = []
-    var countVisits: (DataModel.HistoryRange) async -> Int = { _ in return 0 }
+    var countVisibleVisitsCalls: [DataModel.HistoryRange] = []
+    var countVisibleVisits: (DataModel.HistoryRange) async -> Int = { _ in return 0 }
 
     var deleteVisitsCalls: [DataModel.HistoryRange] = []
     var burnVisitsCalls: [DataModel.HistoryRange] = []
 
-    var visitsCalls: [VisitsCall] = []
-    var visits: (DataModel.HistoryQueryKind, Int, Int) async -> DataModel.HistoryItemsBatch = { _, _, _ in .init(finished: true, visits: []) }
+    var visitsBatchCalls: [VisitsBatchCall] = []
+    var visitsBatch: (DataModel.HistoryQueryKind, Int, Int) async -> DataModel.HistoryItemsBatch = { _, _, _ in .init(finished: true, visits: []) }
 
-    struct VisitsCall: Equatable {
+    struct VisitsBatchCall: Equatable {
         let query: DataModel.HistoryQueryKind
         let limit: Int
         let offset: Int

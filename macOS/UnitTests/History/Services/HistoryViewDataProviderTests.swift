@@ -68,13 +68,20 @@ final class HistoryViewDataProviderTests: XCTestCase {
     var dataSource: CapturingHistoryGroupingDataSource!
     var burner: CapturingHistoryBurner!
     var dateFormatter: MockHistoryViewDateFormatter!
+    var featureFlagger: MockFeatureFlagger!
 
     @MainActor
     override func setUp() async throws {
         dataSource = CapturingHistoryGroupingDataSource()
         burner = CapturingHistoryBurner()
         dateFormatter = MockHistoryViewDateFormatter()
-        provider = HistoryViewDataProvider(historyGroupingDataSource: dataSource, historyBurner: burner, dateFormatter: dateFormatter)
+        featureFlagger = MockFeatureFlagger()
+        provider = HistoryViewDataProvider(
+            historyGroupingDataSource: dataSource,
+            historyBurner: burner,
+            dateFormatter: dateFormatter,
+            featureFlagger: featureFlagger
+        )
         await provider.resetCache()
     }
 
@@ -91,7 +98,8 @@ final class HistoryViewDataProviderTests: XCTestCase {
     }
 
     func testThatRangesIncludesTodayWhenHistoryContainsEntriesFromToday() async throws {
-        let today = Date().startOfDay
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
 
         dataSource.history = [
             .make(url: try XCTUnwrap("https://example.com".url), visits: [
@@ -103,7 +111,8 @@ final class HistoryViewDataProviderTests: XCTestCase {
     }
 
     func testThatRangesIncludesYesterdayWhenHistoryContainsEntriesFromYesterday() async throws {
-        let today = Date().startOfDay
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
 
         dataSource.history = [
             .make(url: try XCTUnwrap("https://example.com".url), visits: [
@@ -116,7 +125,8 @@ final class HistoryViewDataProviderTests: XCTestCase {
     }
 
     func testThatRangesIncludesOlderWhenHistoryContainsEntriesOlderThan5Days() async throws {
-        let today = Date().startOfDay
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
 
         dataSource.history = [
             .make(url: try XCTUnwrap("https://example.com".url), visits: [
@@ -161,6 +171,158 @@ final class HistoryViewDataProviderTests: XCTestCase {
         try await populateHistory(for: date(year: 2025, month: 3, day: 2)) // Sunday
         XCTAssertEqual(provider.ranges, [.all, .friday, .thursday, .wednesday])
     }
+
+    // MARK: - visitsBatch
+
+    func testThatVisitsBatchReturnsChunksOfVisits() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
+        ]
+        await provider.resetCache()
+        var batch = await provider.visitsBatch(for: .rangeFilter(.all), limit: 3, offset: 0)
+        XCTAssertEqual(batch.finished, false)
+        XCTAssertEqual(batch.visits.count, 3)
+
+        batch = await provider.visitsBatch(for: .rangeFilter(.all), limit: 3, offset: 3)
+        XCTAssertEqual(batch.finished, true)
+        XCTAssertEqual(batch.visits.count, 1)
+    }
+
+    func testThatVisitsBatchReturnsVisitsDeduplicatedByDay() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = dateFormatter.currentDate().startOfDay.daysAgo(1)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
+                .init(date: today),
+                .init(date: today.addingTimeInterval(10)),
+                .init(date: yesterday.addingTimeInterval(3600))
+            ]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
+        ]
+        await provider.resetCache()
+        let batch = await provider.visitsBatch(for: .rangeFilter(.all), limit: 6, offset: 0)
+        XCTAssertEqual(batch.finished, true)
+        XCTAssertEqual(batch.visits.count, 5)
+    }
+
+    func testThatVisitsBatchWithRangeFilterReturnsVisitsMatchingTheDateRange() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = dateFormatter.currentDate().startOfDay.daysAgo(1)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday.addingTimeInterval(10)),
+                .init(date: yesterday.addingTimeInterval(3600))
+            ]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: yesterday)]),
+            .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
+        ]
+        await provider.resetCache()
+        let batch = await provider.visitsBatch(for: .rangeFilter(.yesterday), limit: 4, offset: 0)
+        XCTAssertEqual(batch.finished, true)
+        XCTAssertEqual(Set(batch.visits.map(\.url)), ["https://example1.com", "https://example3.com"])
+    }
+
+    func testThatVisitsBatchWithEmptySearchTermOrDomainFilterReturnsAllVisits() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = dateFormatter.currentDate().startOfDay.daysAgo(1)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday.addingTimeInterval(10)),
+                .init(date: yesterday.addingTimeInterval(3600))
+            ]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: yesterday)]),
+            .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
+        ]
+        await provider.resetCache()
+        var batch = await provider.visitsBatch(for: .searchTerm(""), limit: 6, offset: 0)
+        XCTAssertEqual(batch.finished, true)
+        XCTAssertEqual(batch.visits.count, 5)
+
+        batch = await provider.visitsBatch(for: .domainFilter(""), limit: 6, offset: 0)
+        XCTAssertEqual(batch.finished, true)
+        XCTAssertEqual(batch.visits.count, 5)
+    }
+
+    func testThatVisitsBatchReturnsVisitsMatchingSearchTerm() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example12.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example3.com".url), title: "12", visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
+        ]
+        await provider.resetCache()
+        let batch = await provider.visitsBatch(for: .searchTerm("2"), limit: 4, offset: 0)
+        XCTAssertEqual(batch.finished, true)
+        XCTAssertEqual(batch.visits.count, 3)
+        XCTAssertEqual(Set(batch.visits.map(\.url)), ["https://example12.com", "https://example2.com", "https://example3.com"])
+    }
+
+    func testThatVisitsBatchReturnsVisitsMatchingSearchTermIgnoringCase() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example12.com".url), title: "abcdE", visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example.com/abCDe".url), title: "foo", visits: [.init(date: today)])
+        ]
+        await provider.resetCache()
+        let batch = await provider.visitsBatch(for: .searchTerm("bCd"), limit: 4, offset: 0)
+        XCTAssertEqual(batch.finished, true)
+        XCTAssertEqual(batch.visits.count, 2)
+    }
+
+    func testThatVisitsBatchWithDomainFilterReturnsVisitsWithURLMatchingTheDomain() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example12.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://abcd.example.com/foo".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://abcd.example.com/bar".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://duckduckgo.com".url), title: "abcd.example.com", visits: [.init(date: today)])
+        ]
+        await provider.resetCache()
+        let batch = await provider.visitsBatch(for: .domainFilter("abcd.example.com"), limit: 4, offset: 0)
+        XCTAssertEqual(batch.finished, true)
+        XCTAssertEqual(batch.visits.count, 2)
+        XCTAssertEqual(Set(batch.visits.map(\.url)), ["https://abcd.example.com/foo", "https://abcd.example.com/bar"])
+    }
+
+    func testThatVisitsBatchWithDomainFilterRequiresExactMatch() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+        let today = dateFormatter.currentDate().startOfDay
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://abcd.example.com/foo".url), visits: [.init(date: today)])
+        ]
+        await provider.resetCache()
+        let batch = await provider.visitsBatch(for: .domainFilter("example.com"), limit: 4, offset: 0)
+        XCTAssertEqual(batch.finished, true)
+        XCTAssertEqual(batch.visits.count, 0)
+    }
+
+    // MARK: - helpers
 
     private func date(year: Int?, month: Int?, day: Int?, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) throws -> Date {
         let components = DateComponents(year: year, month: month, day: day, hour: hour, minute: minute, second: second)

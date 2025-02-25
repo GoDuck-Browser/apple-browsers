@@ -21,8 +21,8 @@ import Foundation
 public enum DataModel {
 
     public struct HistoryItemsBatch: Codable, Equatable {
-        let finished: Bool
-        let visits: [HistoryItem]
+        public let finished: Bool
+        public let visits: [HistoryItem]
 
         public init(finished: Bool, visits: [HistoryItem]) {
             self.finished = finished
