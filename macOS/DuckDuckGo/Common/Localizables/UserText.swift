@@ -240,12 +240,18 @@ struct UserText {
     static let closeTabsToTheRight = NSLocalizedString("close.tabs.to.the.right", value: "Close Tabs to the Right", comment: "Menu item")
     static let openInNewTab = NSLocalizedString("open.in.new.tab", value: "Open in New Tab", comment: "Menu item that opens the link in a new tab")
     static let openInNewWindow = NSLocalizedString("open.in.new.window", value: "Open in New Window", comment: "Menu item that opens the link in a new window")
+    static let openInNewFireWindow = NSLocalizedString("open.in.new.fire.window", value: "Open in New Fire Window", comment: "Menu item that opens the link in a new Fire Window")
     static let openAllInNewTabs = NSLocalizedString("open.all.in.new.tabs", value: "Open All in New Tabs", comment: "Menu item that opens all the bookmarks in a folder to new tabs")
     static let openAllTabsInNewWindow = NSLocalizedString("open.all.tabs.in.new.window", value: "Open All in New Window", comment: "Menu item that opens all the bookmarks in a folder in a new window")
+    static let openAllInNewFireWindow = NSLocalizedString("open.all.in.new.fire.window", value: "Open All in New Fire Window", comment: "Menu item that opens all URLs in a new Fire Window")
     static let showFolderContents = NSLocalizedString("show.folder.contents", value: "Show Folder Contents", comment: "Menu item that shows the content of a folder ")
     static let editBookmark = NSLocalizedString("menu.bookmarks.edit", value: "Edit…", comment: "Menu item to edit a bookmark or a folder")
     static let addFolder = NSLocalizedString("menu.add.folder", value: "Add Folder…", comment: "Menu item to add a folder")
     static let showInFolder = NSLocalizedString("menu.show.in.folder", value: "Show in Folder", comment: "Menu item to show where a bookmark is located")
+
+    static let showAllHistoryFromThisSite = NSLocalizedString("show.all.history.from.this.site", value: "Show All History From This Site", comment: "Context menu item for showing history for a single URL domain")
+    static let addToBookmarks = NSLocalizedString("add.to.bookmarks", value: "Add to Bookmarks", comment: "Context menu item for adding a URL to bookmarks")
+    static let addAllToBookmarks = NSLocalizedString("add.all.to.bookmarks", value: "Add All to Bookmarks", comment: "Context menu item for adding all selected URLs to bookmarks")
 
     static let tabHomeTitle = NSLocalizedString("tab.home.title", value: "New Tab", comment: "Tab home title")
     static let tabUntitledTitle = NSLocalizedString("tab.empty.title", value: "Untitled", comment: "Title for an empty tab without a title")

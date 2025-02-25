@@ -876,6 +876,18 @@
         }
       }
     },
+    "add.all.to.bookmarks" : {
+      "comment" : "Context menu item for adding all selected URLs to bookmarks",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add All to Bookmarks"
+          }
+        }
+      }
+    },
     "add.bookmark.name" : {
       "comment" : "New bookmark folder dialog folder name field heading",
       "extractionState" : "extracted_with_value",
@@ -1052,6 +1064,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Добавить ссылку на закладки"
+          }
+        }
+      }
+    },
+    "add.to.bookmarks" : {
+      "comment" : "Context menu item for adding a URL to bookmarks",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add to Bookmarks"
           }
         }
       }
@@ -3480,6 +3504,9 @@
           }
         }
       }
+    },
+    "Also delete cookies and site data" : {
+
     },
     "Always Show" : {
       "comment" : "Preference for always showing the bookmarks bar",
@@ -17967,6 +17994,9 @@
         }
       }
     },
+    "Delete history?" : {
+
+    },
     "delete-bookmark" : {
       "comment" : "Delete Bookmark button",
       "extractionState" : "extracted_with_value",
@@ -18431,6 +18461,9 @@
           }
         }
       }
+    },
+    "Do you want to delete **%lld** history items?" : {
+
     },
     "domain-is-fireproof" : {
       "comment" : "Domain fireproof status",
@@ -42913,6 +42946,18 @@
         }
       }
     },
+    "open.all.in.new.fire.window" : {
+      "comment" : "Menu item that opens all URLs in a new Fire Window",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open All in New Fire Window"
+          }
+        }
+      }
+    },
     "open.all.in.new.tabs" : {
       "comment" : "Menu item that opens all the bookmarks in a folder to new tabs",
       "extractionState" : "extracted_with_value",
@@ -43389,6 +43434,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Открыть в %@"
+          }
+        }
+      }
+    },
+    "open.in.new.fire.window" : {
+      "comment" : "Menu item that opens the link in a new Fire Window",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open in New Fire Window"
           }
         }
       }
@@ -63763,6 +63820,18 @@
         }
       }
     },
+    "show.all.history.from.this.site" : {
+      "comment" : "Context menu item for showing history for a single URL domain",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Show All History From This Site"
+          }
+        }
+      }
+    },
     "show.data.clearing.settings" : {
       "comment" : "Button in Settings. It navigates user to Data Clearing Settings. The Data Clearing string should match the string with the preferences.data-clearing key",
       "extractionState" : "extracted_with_value",
@@ -66018,6 +66087,9 @@
           }
         }
       }
+    },
+    "This will log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted." : {
+
     },
     "tooltip.addToFavorites" : {
       "comment" : "Tooltip for add to favorites button",

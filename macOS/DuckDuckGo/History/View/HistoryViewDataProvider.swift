@@ -245,7 +245,7 @@ extension HistoryView.DataModel.HistoryItem {
         }()
 
         self.init(
-            id: historyEntry.identifier.uuidString,
+            id: VisitIdentifier(historyEntry: historyEntry, date: visit.date).description,
             url: historyEntry.url.absoluteString,
             title: title,
             domain: historyEntry.url.host ?? historyEntry.url.absoluteString,
@@ -256,4 +256,36 @@ extension HistoryView.DataModel.HistoryItem {
             favicon: favicon
         )
     }
+}
+
+struct VisitIdentifier: LosslessStringConvertible {
+    init?(_ description: String) {
+        let components = description.components(separatedBy: "|")
+        guard components.count == 3, let url = components[1].url, let date = Self.timestampFormatter.date(from: components[2]) else {
+            return nil
+        }
+        self.init(uuid: components[0], url: url, date: date)
+    }
+
+    init(historyEntry: HistoryEntry, date: Date) {
+        self.uuid = historyEntry.identifier.uuidString
+        self.url = historyEntry.url
+        self.date = date
+    }
+
+    init(uuid: String, url: URL, date: Date) {
+        self.uuid = uuid
+        self.url = url
+        self.date = date
+    }
+
+    var description: String {
+        [uuid, url.absoluteString, Self.timestampFormatter.string(from: date)].joined(separator: "|")
+    }
+
+    let uuid: String
+    let url: URL
+    let date: Date
+
+    static let timestampFormatter = ISO8601DateFormatter()
 }

@@ -31,7 +31,7 @@ public enum DataModel {
     }
 
     public enum DeleteDialogResponse: String, Codable {
-        case delete, noAction = "none"
+        case delete, domainSearch = "domain-search", noAction = "none"
     }
 
     public enum HistoryRange: String, Codable {
@@ -157,6 +157,14 @@ extension DataModel {
     }
 
     struct DeleteRangeResponse: Codable, Equatable {
+        let action: DeleteDialogResponse
+    }
+
+    struct EntriesMenuRequest: Codable, Equatable {
+        let ids: [String]
+    }
+
+    struct EntriesMenuResponse: Codable, Equatable {
         let action: DeleteDialogResponse
     }
 

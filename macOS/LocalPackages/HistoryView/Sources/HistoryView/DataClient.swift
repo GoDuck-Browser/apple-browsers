@@ -41,11 +41,18 @@ public final class DataClient: HistoryViewUserScriptClient {
     private var cancellables = Set<AnyCancellable>()
     private let dataProvider: DataProviding
     private let actionsHandler: ActionsHandling
+    private let contextMenuPresenter: ContextMenuPresenting
     private let errorHandler: EventMapping<HistoryViewEvent>?
 
-    public init(dataProvider: DataProviding, actionsHandler: ActionsHandling, errorHandler: EventMapping<HistoryViewEvent>?) {
+    public init(
+        dataProvider: DataProviding,
+        actionsHandler: ActionsHandling,
+        contextMenuPresenter: ContextMenuPresenting = DefaultContextMenuPresenter(),
+        errorHandler: EventMapping<HistoryViewEvent>?
+    ) {
         self.dataProvider = dataProvider
         self.actionsHandler = actionsHandler
+        self.contextMenuPresenter = contextMenuPresenter
         self.errorHandler = errorHandler
         super.init()
     }
@@ -132,7 +139,9 @@ public final class DataClient: HistoryViewUserScriptClient {
 
     @MainActor
     private func entriesMenu(params: Any, original: WKScriptMessage) async throws -> Encodable? {
-        return nil
+        guard let request: DataModel.EntriesMenuRequest = DecodableHelper.decode(from: params) else { return nil }
+        let action = await actionsHandler.showContextMenu(for: request.ids, using: contextMenuPresenter)
+        return DataModel.DeleteRangeResponse(action: action)
     }
 
     @MainActor

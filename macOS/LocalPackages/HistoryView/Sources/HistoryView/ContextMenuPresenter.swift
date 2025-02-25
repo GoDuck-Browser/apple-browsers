@@ -1,5 +1,5 @@
 //
-//  ActionsHandling.swift
+//  ContextMenuPresenter.swift
 //
 //  Copyright © 2025 DuckDuckGo. All rights reserved.
 //
@@ -16,10 +16,18 @@
 //  limitations under the License.
 //
 
-import Foundation
+import AppKit
 
-public protocol ActionsHandling {
-    @MainActor func open(_ url: URL)
-    @MainActor func showDeleteDialog(for range: DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse
-    @MainActor func showContextMenu(for entries: [String], using presenter: ContextMenuPresenting) async -> DataModel.DeleteDialogResponse
+public protocol ContextMenuPresenting {
+    func showContextMenu(_ menu: NSMenu)
+}
+
+public struct DefaultContextMenuPresenter: ContextMenuPresenting {
+    public func showContextMenu(_ menu: NSMenu) {
+        if !menu.items.isEmpty {
+            menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+        }
+    }
+
+    public init() {}
 }
