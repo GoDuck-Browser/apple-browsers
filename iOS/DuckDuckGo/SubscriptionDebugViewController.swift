@@ -29,7 +29,7 @@ final class SubscriptionDebugViewController: UITableViewController {
 
     let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
     private var subscriptionManager: SubscriptionManager {
-        AppDependencyProvider.shared.subscriptionManager
+        AppDependencyProvider.shared.subscriptionManager!
     }
     private var featureFlagger: FeatureFlagger {
         AppDependencyProvider.shared.featureFlagger

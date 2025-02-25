@@ -35,21 +35,22 @@ final class VPNService: NSObject {
     private let widgetRefreshModel = NetworkProtectionWidgetRefreshModel()
     private let tunnelDefaults = UserDefaults.networkProtectionGroupDefaults
 
-    private lazy var vpnWorkaround: VPNRedditSessionWorkaround = VPNRedditSessionWorkaround(accountManager: accountManager,
-                                                                                            tunnelController: tunnelController)
+    private let vpnWorkaround: VPNRedditSessionWorkaround
     private let vpnFeatureVisibility: DefaultNetworkProtectionVisibility = AppDependencyProvider.shared.vpnFeatureVisibility
     private let tipKitAppEventsHandler = TipKitAppEventHandler()
 
     private let mainCoordinator: MainCoordinator
-    private let accountManager: AccountManager
+    private let subscriptionManager: any SubscriptionAuthV1toV2Bridge
     private let application: UIApplication
     init(mainCoordinator: MainCoordinator,
-         accountManager: AccountManager = AppDependencyProvider.shared.accountManager,
+         subscriptionManager: any SubscriptionAuthV1toV2Bridge = AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge,
          application: UIApplication = UIApplication.shared,
          notificationCenter: UNUserNotificationCenter = .current()) {
         self.mainCoordinator = mainCoordinator
-        self.accountManager = accountManager
+        self.subscriptionManager = subscriptionManager
         self.application = application
+        self.vpnWorkaround = VPNRedditSessionWorkaround(authenticationStateProvider: subscriptionManager,
+                                                        tunnelController: tunnelController)
         super.init()
 
         notificationCenter.delegate = self
@@ -104,7 +105,7 @@ final class VPNService: NSObject {
 
     private func stopAndRemoveVPNIfNotAuthenticated() async {
         // Only remove the VPN if the user is not authenticated, and it's installed:
-        guard !accountManager.isUserAuthenticated, await tunnelController.isInstalled else {
+        guard !subscriptionManager.isUserAuthenticated, await tunnelController.isInstalled else {
             return
         }
 
@@ -123,9 +124,8 @@ final class VPNService: NSObject {
 
     @MainActor
     private func refreshVPNShortcuts() async {
-        guard vpnFeatureVisibility.shouldShowVPNShortcut(),
-              case .success(true) = await accountManager.hasEntitlement(forProductName: .networkProtection,
-                                                                        cachePolicy: .returnCacheDataDontLoad)
+        guard await vpnFeatureVisibility.shouldShowVPNShortcut(),
+              await subscriptionManager.isEnabled(feature: .networkProtection)
         else {
             application.shortcutItems = nil
             return
