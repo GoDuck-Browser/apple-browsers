@@ -90,7 +90,7 @@ struct DuckPlayerEntryPillView: View {
             .offset(y: viewModel.isVisible ? 16 : geometry.size.height)
         }
         .edgesIgnoringSafeArea(.all)
-        .animation(.spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0), value: viewModel.isVisible)
+        .animation(viewModel.shouldAnimate ? .spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0) : nil, value: viewModel.isVisible)
     }
 }
 

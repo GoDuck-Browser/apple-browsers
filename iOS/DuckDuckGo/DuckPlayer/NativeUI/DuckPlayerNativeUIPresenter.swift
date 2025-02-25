@@ -98,7 +98,7 @@ final class DuckPlayerNativeUIPresenter {
         
         // If we already have a view model, just update the onOpen closure
         if let existingViewModel = pillSheetviewModel {
-            existingViewModel.onOpen = { [weak self] in
+            existingViewModel.updateOnOpen { [weak self] in
                 self?.videoPlaybackRequest.send(videoID)
             }            
             return

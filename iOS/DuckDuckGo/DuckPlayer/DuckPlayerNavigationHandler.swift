@@ -847,8 +847,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             return .notHandled(.invalidURL)
         }
         
-        guard url.isYoutubeWatch else {
-            print("[DP] Handler: Dismissing entry pill")
+        guard url.isYoutubeWatch else {            
             duckPlayer.dismissPill()
             return .notHandled(.isNotYoutubeWatch)
         }
@@ -860,16 +859,26 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         }
         
         let parameters = getDuckPlayerParameters(url: url)
-        
+            
         // Present Bottom Sheet (Native entry point) with delay
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
             // Pause media immediately
             toggleMediaPlayback(webView, pause: true)
-            
-            // Only present entry pill if not already presented
+
+            // If we're not in a Watch main page, hide
+            // the pill.  Youtube adds #fragments to Watch main pages
+            // When presenting settings and preferences
+            if !url.isYoutubeWatchMainPage {
+                duckPlayer.dismissPill()
+            }
+
+            // Present the Pill if needed
             Task { @MainActor in
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
-                duckPlayer.presentEntryPill(for: videoID)                
+                // Skip URLs for settings and #fragments
+                if url.isYoutubeWatchMainPage {
+                    duckPlayer.presentEntryPill(for: videoID)                
+                }
             }
 
         }
