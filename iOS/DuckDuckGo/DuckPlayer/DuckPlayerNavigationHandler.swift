@@ -848,10 +848,23 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         // Present Bottom Sheet (Native entry point) with delay
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
             
-            // Pause Youtube video
-            // A short delay is required to allow the webview initiate the request
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                self.toggleMediaPlayback(webView, pause: true)    
+
+            // First phase: try every 0.1s for 1 second
+            Task { @MainActor in
+                let startTime = Date()
+                
+                // Phase 1: 0.1s intervals for 1 second
+                while Date().timeIntervalSince(startTime) < 1.0 {
+                    self.toggleMediaPlayback(webView, pause: true)
+                    try? await Task.sleep(nanoseconds: 50_000_000) // 0.05s
+                }
+                
+                // Phase 2: 0.2s intervals for 1 second
+                let phase2Start = Date()
+                while Date().timeIntervalSince(phase2Start) < 1.0 {
+                    self.toggleMediaPlayback(webView, pause: true)
+                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
+                }
             }
 
             // If we're not in a Watch main page, hide

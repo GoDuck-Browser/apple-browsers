@@ -36,7 +36,7 @@ struct DuckPlayerEntryPillView: View {
                         .resizable()
                         .frame(width: 40, height: 40)
                     
-                    Text(UserText.duckPlayerNativeWatchOnYouTube)
+                    Text(UserText.duckPlayerNativeOpenInDuckPlayer)
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(Color(designSystemColor: .textPrimary))
                     

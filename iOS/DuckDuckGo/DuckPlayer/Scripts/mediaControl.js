@@ -48,7 +48,9 @@
     const handleTouch = function(event) {
         if (!state.isPaused) return;
         state.userInitiated = true;
-        
+        document.querySelectorAll('audio, video').forEach(media => {
+            media.muted = false;
+        });
         // Allow playback for a short time
         setTimeout(() => {
             state.userInitiated = false;
@@ -158,16 +160,4 @@
     // Export function
     window.mediaControl = mediaControl;
     
-    // Handle SPA navigation
-    if (!window._mediaControlInitialized) {
-        window._mediaControlInitialized = true;
-        
-        ['popstate', 'pushstate', 'replacestate', 'yt-navigate-finish'].forEach(event => {
-            window.addEventListener(event, () => {
-                if (state.isPaused) {
-                    setTimeout(mediaControl, 100, true);
-                }
-            });
-        });
-    }
 })();
