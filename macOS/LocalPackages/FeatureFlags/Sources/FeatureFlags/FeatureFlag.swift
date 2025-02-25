@@ -60,9 +60,21 @@ public enum FeatureFlag: String, CaseIterable {
     case autcompleteTabs
     case webExtensions
     case syncSeamlessAccountSwitching
+
+    case killswitchExampleCrossPlatformFeature
+    case killswitchExamplePlatformSpecificSubfeature
 }
 
 extension FeatureFlag: FeatureFlagDescribing {
+    public var defaultValue: Bool {
+        switch self {
+        case .killswitchExampleCrossPlatformFeature, .killswitchExamplePlatformSpecificSubfeature:
+            true
+        default:
+            false
+        }
+    }
+    
     public var cohortType: (any FeatureFlagCohortDescribing.Type)? {
         switch self {
         default:
@@ -72,7 +84,7 @@ extension FeatureFlag: FeatureFlagDescribing {
 
     public var supportsLocalOverriding: Bool {
         switch self {
-        case .htmlNewTabPage, .autofillPartialFormSaves, .autcompleteTabs, .networkProtectionAppExclusions, .networkProtectionRiskyDomainsProtection, .syncSeamlessAccountSwitching, .historyView, .webExtensions:
+        case .htmlNewTabPage, .autofillPartialFormSaves, .autcompleteTabs, .networkProtectionAppExclusions, .networkProtectionRiskyDomainsProtection, .syncSeamlessAccountSwitching, .historyView, .webExtensions, .killswitchExampleCrossPlatformFeature, .killswitchExamplePlatformSpecificSubfeature:
             return true
         case .debugMenu,
              .sslCertificatesBypass,
@@ -126,6 +138,10 @@ extension FeatureFlag: FeatureFlagDescribing {
             return .remoteReleasable(.subfeature(SyncSubfeature.seamlessAccountSwitching))
         case .networkProtectionRiskyDomainsProtection:
             return .remoteReleasable(.subfeature(NetworkProtectionSubfeature.riskyDomainsProtection))
+        case .killswitchExampleCrossPlatformFeature:
+            return .remoteReleasable(.feature(.killswitchExample))
+        case .killswitchExamplePlatformSpecificSubfeature:
+            return .remoteReleasable(.subfeature(macOSBrowserConfigSubfeature.killswitchExample))
         }
     }
 }

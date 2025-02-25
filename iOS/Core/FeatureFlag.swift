@@ -85,9 +85,22 @@ public enum FeatureFlag: String {
     case experimentalBrowserTheming
 
     case alternativeColorScheme
+
+    case killswitchExampleCrossPlatformFeature
+
+    case killswitchExamplePlatformSpecificSubfeature
 }
 
 extension FeatureFlag: FeatureFlagDescribing {
+    public var defaultValue: Bool {
+        switch self {
+        case .killswitchExampleCrossPlatformFeature, .killswitchExamplePlatformSpecificSubfeature:
+            true
+        default:
+            false
+        }
+    }
+    
     public var cohortType: (any FeatureFlagCohortDescribing.Type)? {
         switch self {
         case .privacyProFreeTrialJan25:
@@ -194,6 +207,10 @@ extension FeatureFlag: FeatureFlagDescribing {
             return .remoteDevelopment(.feature(.experimentalBrowserTheming))
         case .alternativeColorScheme:
             return .internalOnly()
+        case .killswitchExampleCrossPlatformFeature:
+            return .remoteReleasable(.feature(.killswitchExample))
+        case .killswitchExamplePlatformSpecificSubfeature:
+            return .remoteReleasable(.subfeature(iOSBrowserConfigSubfeature.killswitchExample))
         }
     }
 }
