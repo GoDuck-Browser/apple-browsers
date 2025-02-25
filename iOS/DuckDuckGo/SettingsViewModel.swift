@@ -890,9 +890,16 @@ extension SettingsViewModel {
             self.state.textZoom = SettingsState.TextZoom(enabled: true, level: self.appSettings.defaultTextZoomLevel)
         })
     }
-    
-    func restoreAccountPurchase() async {
 
+    func restoreAccountPurchase() async {
+        if !AppDependencyProvider.shared.isAuthV2Enabled {
+            await restoreAccountPurchaseV1()
+        } else {
+            await restoreAccountPurchaseV2()
+        }
+    }
+
+    func restoreAccountPurchaseV1() async {
         guard let subscriptionManagerV1 else {
             assertionFailure("Missing dependency: subscriptionManagerV1")
             return
