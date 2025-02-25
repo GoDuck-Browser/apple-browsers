@@ -704,7 +704,7 @@ final class DuckPlayerNavigationHandler: NSObject {
     @MainActor
     private func toggleMediaPlayback(_ webView: WKWebView, pause: Bool) {        
         if let url = webView.url, url.isYoutubeWatch {
-        webView.evaluateJavaScript("\(mediaControlScript); mediaControl(\(pause))")          
+            webView.evaluateJavaScript("\(mediaControlScript); mediaControl(\(pause))")          
         }        
     }
     
@@ -800,13 +800,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
     /// - Parameter webView: The `WKWebView` whose URL has changed.
     /// - Returns: A result indicating whether the URL change was handled.
     @MainActor
-    func handleURLChange(webView: WKWebView) -> DuckPlayerNavigationHandlerURLChangeResult {
-        
-        // Dismiss the bottom sheet if URL is not a YouTube watch page
-        // Also ensure all media playback is allowed by default
-        if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-            toggleMediaPlayback(webView, pause: false)
-        }
+    func handleURLChange(webView: WKWebView) -> DuckPlayerNavigationHandlerURLChangeResult {        
 
         // We want to prevent multiple simultaneous redirects
         // This can be caused by Duplicate Nav events, and quick URL changes
@@ -825,6 +819,9 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             return .notHandled(.duplicateNavigation)
         }
         
+        // Ensure all media playback is allowed by default
+        self.toggleMediaPlayback(webView, pause: false)
+
         // Check if DuckPlayer feature is enabled
         guard isDuckPlayerFeatureEnabled else {
             return .notHandled(.featureOff)
@@ -850,8 +847,12 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             
         // Present Bottom Sheet (Native entry point) with delay
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-            // Pause media immediately
-            toggleMediaPlayback(webView, pause: true)
+            
+            // Pause Youtube video
+            // A short delay is required to allow the webview initiate the request
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                self.toggleMediaPlayback(webView, pause: true)    
+            }
 
             // If we're not in a Watch main page, hide
             // the pill.  Youtube adds #fragments to Watch main pages

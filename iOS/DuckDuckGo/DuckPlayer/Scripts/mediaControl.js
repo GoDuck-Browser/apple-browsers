@@ -1,135 +1,173 @@
-// Only initialize once
-if (!window._mediaControlInitialized) {
-    window._mediaControlInitialized = true;
-    console.log('Media Control Script loading...');
+(function() {
+    // Initialize state if not exists
+    if (!window._mediaControlState) {
+        window._mediaControlState = {
+            observer: null,
+            userInitiated: false,
+            originalPlay: HTMLMediaElement.prototype.play,
+            eventListeners: new Map(), // Store event listeners for cleanup
+            isPaused: false
+        };
+    }
+    const state = window._mediaControlState;
 
-    // Store shared state
-    window._mediaControlState = {
-        observer: null,
-        userInitiated: false,
-        originalPlay: HTMLMediaElement.prototype.play,
-        touchHandler: null,
-        blockPlayback: null
+    // Helper to safely add event listeners with cleanup
+    function addEventListenerWithCleanup(target, type, listener, options) {
+        const wrappedListener = (e) => {
+            if (!state.isPaused || state.userInitiated) return;
+            listener(e);
+        };
+        target.addEventListener(type, wrappedListener, options);
+        
+        // Store for cleanup
+        if (!state.eventListeners.has(type)) {
+            state.eventListeners.set(type, []);
+        }
+        state.eventListeners.get(type).push({ target, listener: wrappedListener, options });
+    }
+
+    // Helper to remove all stored event listeners
+    function removeAllEventListeners() {
+        state.eventListeners.forEach((listeners, type) => {
+            listeners.forEach(({ target, listener, options }) => {
+                target.removeEventListener(type, listener, options);
+            });
+        });
+        state.eventListeners.clear();
+    }
+
+    // Block playback handler
+    const blockPlayback = function(event) {
+        if (!state.isPaused || state.userInitiated) return;
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
     };
 
-    // Run initial setup
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('Media Control Script: DOMContentLoaded');
-            mediaControl(true);
-        });
-    } else {
-        console.log('Media Control Script: document already loaded');
-        mediaControl(true);
-    }
+    // Touch handler
+    const handleTouch = function(event) {
+        if (!state.isPaused) return;
+        state.userInitiated = true;
+        
+        // Allow playback for a short time
+        setTimeout(() => {
+            state.userInitiated = false;
+        }, 1000);
+    };
 
-    // Cleanup on unload
-    window.addEventListener('beforeunload', () => {
-        console.log('Media Control Script: beforeunload');
-        mediaControl(false);
-    });
-}
-
-function mediaControl(pause) {
-    const state = window._mediaControlState;
-    if (!state) return; // Safety check
-
-    // Clean up existing handlers
-    if (state.touchHandler) {
-        document.removeEventListener('touchstart', state.touchHandler, true);
-    }
-    if (state.blockPlayback) {
-        document.removeEventListener('play', state.blockPlayback, true);
-        document.removeEventListener('playing', state.blockPlayback, true);
-    }
-
-    if (pause) {
-        // Block video playback
-        state.blockPlayback = function(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
-        };
-
-        // Listen for user interactions
-        state.touchHandler = () => {
-            state.userInitiated = true;
-            
-            // Remove blocking listeners
-            document.removeEventListener('play', state.blockPlayback, true);
-            document.removeEventListener('playing', state.blockPlayback, true);
-
-            // Unmute media
-            document.querySelectorAll('audio, video').forEach(media => {
-                media.muted = false;
-            });
-
-            setTimeout(() => {
-                state.userInitiated = false;
-            }, 500);
-        };
-
-        document.addEventListener('touchstart', state.touchHandler, true);
-        document.addEventListener('play', state.blockPlayback, true);
-        document.addEventListener('playing', state.blockPlayback, true);
-
-        // Override play method
-        HTMLMediaElement.prototype.play = function() {
-            if (state.userInitiated) {
-                if (state.observer) {
-                    state.observer.disconnect();
+    // The actual media control function
+    function mediaControl(pause) {
+        // Update state
+        state.isPaused = pause;
+        
+        // Clean up existing handlers
+        removeAllEventListeners();
+        
+        if (pause) {
+            // Override play method
+            HTMLMediaElement.prototype.play = function() {
+                if (!state.isPaused || state.userInitiated) {
+                    return state.originalPlay.apply(this, arguments);
                 }
-                this.muted = false;
-                return state.originalPlay.apply(this, arguments);
-            } else {
                 this.pause();
-                return Promise.reject(new Error("Playback blocked: Not user-initiated"));
+                return Promise.reject(new Error("Playback blocked"));
+            };
+
+            // Add event listeners
+            addEventListenerWithCleanup(document, 'play', blockPlayback, true);
+            addEventListenerWithCleanup(document, 'playing', blockPlayback, true);
+            addEventListenerWithCleanup(document, 'touchstart', handleTouch, true);
+            addEventListenerWithCleanup(document, 'click', handleTouch, true);
+
+            // Function to pause all media
+            const pauseAllMedia = () => {
+                if (!state.isPaused || state.userInitiated) return;
+                document.querySelectorAll('audio, video').forEach(media => {
+                    try {
+                        media.pause();
+                        media.muted = true;
+                    } catch (e) {
+                        console.error('Error pausing media:', e);
+                    }
+                });
+            };
+
+            // Initial pause
+            pauseAllMedia();
+
+            // Setup observer if needed
+            if (state.observer) {
+                state.observer.disconnect();
             }
-        };
-
-        // Pause and mute existing media
-        document.querySelectorAll('audio, video').forEach(media => {
-            media.pause();
-            media.muted = true;
-        });
-
-        // Setup observer if needed
-        if (!state.observer) {
+            
             state.observer = new MutationObserver(mutations => {
+                if (!state.isPaused || state.userInitiated) return;
                 mutations.forEach(mutation => {
                     mutation.addedNodes.forEach(node => {
                         if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
-                            if (!state.userInitiated) {
+                            try {
                                 node.pause();
                                 node.muted = true;
+                            } catch (e) {
+                                console.error('Error handling new media:', e);
                             }
                         } else if (node.querySelectorAll) {
                             node.querySelectorAll('audio, video').forEach(media => {
-                                if (!state.userInitiated) {
+                                try {
                                     media.pause();
                                     media.muted = true;
+                                } catch (e) {
+                                    console.error('Error handling new media:', e);
                                 }
                             });
                         }
                     });
                 });
             });
-            state.observer.observe(document.body, { childList: true, subtree: true });
-        }
+            
+            try {
+                state.observer.observe(document.body, { 
+                    childList: true, 
+                    subtree: true 
+                });
+            } catch (e) {
+                console.error('Error setting up observer:', e);
+            }
 
-    } else {
-        // Restore original play method
-        HTMLMediaElement.prototype.play = state.originalPlay;
+        } else {
+            // Restore original play method
+            HTMLMediaElement.prototype.play = state.originalPlay;
+            
+            // Clean up observer
+            if (state.observer) {
+                state.observer.disconnect();
+                state.observer = null;
+            }
+
+            // Unmute media
+            document.querySelectorAll('audio, video').forEach(media => {
+                try {
+                    media.muted = false;
+                } catch (e) {
+                    console.error('Error unmuting media:', e);
+                }
+            });
+        }
+    }
+
+    // Export function
+    window.mediaControl = mediaControl;
+    
+    // Handle SPA navigation
+    if (!window._mediaControlInitialized) {
+        window._mediaControlInitialized = true;
         
-        // Clean up observer
-        if (state.observer) {
-            state.observer.disconnect();
-            state.observer = null;
-        }
-
-        // Unmute media
-        document.querySelectorAll('audio, video').forEach(media => {
-            media.muted = false;
+        ['popstate', 'pushstate', 'replacestate', 'yt-navigate-finish'].forEach(event => {
+            window.addEventListener(event, () => {
+                if (state.isPaused) {
+                    setTimeout(mediaControl, 100, true);
+                }
+            });
         });
     }
-}
+})();
