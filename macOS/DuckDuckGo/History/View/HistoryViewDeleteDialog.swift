@@ -49,23 +49,23 @@ struct HistoryViewDeleteDialog: ModalView {
             Image(.historyBurn)
 
             VStack(spacing: 12) {
-                Text("Delete history?")
+                Text(UserText.deleteHistory)
                     .multilineTextAlignment(.center)
                     .fixMultilineScrollableText()
                     .font(.system(size: 15).weight(.semibold))
 
-                Text("Do you want to delete **\(model.entriesCount)** history items?")
+                Text(.init(UserText.deleteHistoryMessage(items: model.entriesCount)))
                     .multilineTextAlignment(.center)
                     .fixMultilineScrollableText()
                     .font(.system(size: 13))
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Toggle("Also delete cookies and site data", isOn: $model.shouldBurn)
+                    Toggle(UserText.deleteCookiesAndSiteData, isOn: $model.shouldBurn)
                         .font(.system(size: 13))
                         .fixMultilineScrollableText()
                         .toggleStyle(.checkbox)
 
-                    Text("This will log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted.")
+                    Text(UserText.deleteCookiesAndSiteDataExplanation)
                         .fixMultilineScrollableText()
                         .foregroundColor(.blackWhite60)
                         .frame(width: 242)
