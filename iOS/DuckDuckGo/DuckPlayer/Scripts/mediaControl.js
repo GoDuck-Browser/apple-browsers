@@ -5,140 +5,122 @@
             observer: null,
             userInitiated: false,
             originalPlay: HTMLMediaElement.prototype.play,
-            eventListeners: new Map(), // Store event listeners for cleanup
+            originalLoad: HTMLMediaElement.prototype.load,
             isPaused: false
         };
     }
     const state = window._mediaControlState;
 
-    // Helper to safely add event listeners with cleanup
-    function addEventListenerWithCleanup(target, type, listener, options) {
-        const wrappedListener = (e) => {
-            if (!state.isPaused || state.userInitiated) return;
-            listener(e);
-        };
-        target.addEventListener(type, wrappedListener, options);
-        
-        // Store for cleanup
-        if (!state.eventListeners.has(type)) {
-            state.eventListeners.set(type, []);
-        }
-        state.eventListeners.get(type).push({ target, listener: wrappedListener, options });
-    }
-
-    // Helper to remove all stored event listeners
-    function removeAllEventListeners() {
-        state.eventListeners.forEach((listeners, type) => {
-            listeners.forEach(({ target, listener, options }) => {
-                target.removeEventListener(type, listener, options);
-            });
-        });
-        state.eventListeners.clear();
-    }
-
     // Block playback handler
     const blockPlayback = function(event) {
-        if (!state.isPaused || state.userInitiated) return;
         event.preventDefault();
         event.stopPropagation();
         return false;
     };
 
-    // Touch handler
-    const handleTouch = function(event) {
-        if (!state.isPaused) return;
-        state.userInitiated = true;
-        document.querySelectorAll('audio, video').forEach(media => {
-            media.muted = false;
-        });
-        // Allow playback for a short time
-        setTimeout(() => {
-            state.userInitiated = false;
-        }, 1000);
-    };
-
     // The actual media control function
     function mediaControl(pause) {
-        // Update state
         state.isPaused = pause;
         
-        // Clean up existing handlers
-        removeAllEventListeners();
-        
         if (pause) {
-            // Override play method
+            // Capture play events at the earliest possible moment
+            document.addEventListener('play', blockPlayback, true);
+            document.addEventListener('playing', blockPlayback, true);
+            
+            // Block HTML5 video/audio playback methods
             HTMLMediaElement.prototype.play = function() {
-                if (!state.isPaused || state.userInitiated) {
-                    return state.originalPlay.apply(this, arguments);
-                }
                 this.pause();
-                return Promise.reject(new Error("Playback blocked"));
+                return Promise.reject(new Error('Playback blocked'));
+            };
+            
+            // Override load to ensure media starts paused
+            HTMLMediaElement.prototype.load = function() {
+                this.autoplay = false;
+                this.pause();
+                return state.originalLoad.apply(this, arguments);
             };
 
-            // Add event listeners
-            addEventListenerWithCleanup(document, 'play', blockPlayback, true);
-            addEventListenerWithCleanup(document, 'playing', blockPlayback, true);
-            addEventListenerWithCleanup(document, 'touchstart', handleTouch, true);
-            addEventListenerWithCleanup(document, 'click', handleTouch, true);
+            // Listen for user interactions that may lead to playback
+            document.addEventListener('touchstart', () => {
+                state.userInitiated = true;
+                
+                // Remove the early blocking listeners
+                document.removeEventListener('play', blockPlayback, true);
+                document.removeEventListener('playing', blockPlayback, true);
+                
+                // Reset HTMLMediaElement.prototype.play
+                HTMLMediaElement.prototype.play = state.originalPlay;
 
-            // Function to pause all media
-            const pauseAllMedia = () => {
-                if (!state.isPaused || state.userInitiated) return;
+                // Unmute all media elements when user interacts
                 document.querySelectorAll('audio, video').forEach(media => {
-                    try {
-                        media.pause();
-                        media.muted = true;
-                    } catch (e) {
-                        console.error('Error pausing media:', e);
-                    }
+                    media.muted = false;
                 });
-            };
 
-            // Initial pause
-            pauseAllMedia();
+                // Reset after a short delay
+                setTimeout(() => {
+                    state.userInitiated = false;
+                    
+                    // Re-add blocking if still in paused state
+                    if (state.isPaused) {
+                        document.addEventListener('play', blockPlayback, true);
+                        document.addEventListener('playing', blockPlayback, true);
+                        HTMLMediaElement.prototype.play = function() {
+                            this.pause();
+                            return Promise.reject(new Error('Playback blocked'));
+                        };
+                    }
+                }, 500);
+            }, true);
 
-            // Setup observer if needed
+            // Initial pause of all media
+            document.querySelectorAll('audio, video').forEach(media => {
+                media.pause();
+                media.muted = true;
+                media.autoplay = false;
+            });
+
+            // Monitor DOM for newly added media elements
             if (state.observer) {
                 state.observer.disconnect();
             }
             
             state.observer = new MutationObserver(mutations => {
-                if (!state.isPaused || state.userInitiated) return;
                 mutations.forEach(mutation => {
+                    // Check for added nodes
                     mutation.addedNodes.forEach(node => {
-                        if (node.tagName === 'AUDIO' || node.tagName === 'VIDEO') {
-                            try {
+                        if (node.tagName === 'VIDEO' || node.tagName === 'AUDIO') {
+                            if (!state.userInitiated) {
                                 node.pause();
                                 node.muted = true;
-                            } catch (e) {
-                                console.error('Error handling new media:', e);
+                                node.autoplay = false;
                             }
                         } else if (node.querySelectorAll) {
                             node.querySelectorAll('audio, video').forEach(media => {
-                                try {
+                                if (!state.userInitiated) {
                                     media.pause();
                                     media.muted = true;
-                                } catch (e) {
-                                    console.error('Error handling new media:', e);
+                                    media.autoplay = false;
                                 }
                             });
                         }
                     });
                 });
             });
-            
-            try {
-                state.observer.observe(document.body, { 
-                    childList: true, 
-                    subtree: true 
-                });
-            } catch (e) {
-                console.error('Error setting up observer:', e);
-            }
 
+            state.observer.observe(document.documentElement || document.body, { 
+                childList: true, 
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['autoplay', 'src', 'playing']
+            });
         } else {
-            // Restore original play method
+            // Restore original methods
             HTMLMediaElement.prototype.play = state.originalPlay;
+            HTMLMediaElement.prototype.load = state.originalLoad;
+            
+            // Remove listeners
+            document.removeEventListener('play', blockPlayback, true);
+            document.removeEventListener('playing', blockPlayback, true);
             
             // Clean up observer
             if (state.observer) {
@@ -146,13 +128,9 @@
                 state.observer = null;
             }
 
-            // Unmute media
+            // Unmute all media
             document.querySelectorAll('audio, video').forEach(media => {
-                try {
-                    media.muted = false;
-                } catch (e) {
-                    console.error('Error unmuting media:', e);
-                }
+                media.muted = false;
             });
         }
     }
