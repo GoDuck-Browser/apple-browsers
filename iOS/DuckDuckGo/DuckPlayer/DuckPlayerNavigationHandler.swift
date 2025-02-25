@@ -848,25 +848,22 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         // Present Bottom Sheet (Native entry point) with delay
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
             
-
-            // First phase: try every 0.1s for 1 second
+            // First phase: try every 0.05s for 1 second
             Task { @MainActor in
                 let startTime = Date()
                 
-                // Phase 1: 0.1s intervals for 1 second
+                // Temporarily pause media playback during page transition
+                // to prevents audio/video from playing in the new page
+                // We apply the pause command repeatedly for 1 second to ensure it takes effect
+                // even if the DOM is changing during early navigation
+                // Once the page has loaded, the JS mutation observer takes care 
                 while Date().timeIntervalSince(startTime) < 1.0 {
                     self.toggleMediaPlayback(webView, pause: true)
-                    try? await Task.sleep(nanoseconds: 50_000_000) // 0.05s
+                    try? await Task.sleep(nanoseconds: 50_000_000) // 50ms between attempts
                 }
-                
-                // Phase 2: 0.2s intervals for 1 second
-                let phase2Start = Date()
-                while Date().timeIntervalSince(phase2Start) < 1.0 {
-                    self.toggleMediaPlayback(webView, pause: true)
-                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1s
-                }
-            }
 
+            }
+            
             // If we're not in a Watch main page, hide
             // the pill.  Youtube adds #fragments to Watch main pages
             // When presenting settings and preferences
