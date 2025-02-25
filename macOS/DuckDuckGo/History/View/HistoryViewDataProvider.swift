@@ -110,18 +110,10 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
     }
 
     func countVisibleVisits(for range: DataModel.HistoryRange) async -> Int {
-        guard let history = await fetchHistory() else {
-            return 0
+        guard range != .all else {
+            return historyItems.count
         }
-        let date = lastQuery?.date ?? dateFormatter.currentDate()
-        let dateRange = range.dateRange(for: date)
-
-        let entriesCount = history.reduce(0) { partialResult, entry in
-            let days = Set(entry.visits.map { $0.date.startOfDay })
-            return partialResult + days.count(where: { dateRange?.contains($0) ?? true })
-        }
-
-        return entriesCount
+        return groupings.first(where: { $0.range == range })?.items.count ?? 0
     }
 
     func deleteVisits(for range: DataModel.HistoryRange) async {

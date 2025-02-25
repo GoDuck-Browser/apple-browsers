@@ -322,6 +322,61 @@ final class HistoryViewDataProviderTests: XCTestCase {
         XCTAssertEqual(batch.visits.count, 0)
     }
 
+    // MARK: - countVisibleVisits
+
+    func testThatCountVisibleVisitsReportsOneVisitPerDayPerURL() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+        let friday = today.daysAgo(3)
+        let thursday = today.daysAgo(4)
+        let older1 = today.daysAgo(5)
+        let older2 = today.daysAgo(6)
+        let older3 = today.daysAgo(7)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday),
+                .init(date: saturday),
+                .init(date: saturday),
+                .init(date: saturday),
+                .init(date: thursday),
+                .init(date: older1),
+                .init(date: older2),
+                .init(date: older3)
+            ]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday),
+                .init(date: friday),
+                .init(date: older1)
+            ]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [
+                .init(date: saturday),
+                .init(date: thursday),
+                .init(date: older1),
+                .init(date: older3)
+            ])
+        ]
+        await provider.resetCache()
+        let allCount = await provider.countVisibleVisits(for: .all)
+        let todayCount = await provider.countVisibleVisits(for: .today)
+        let yesterdayCount = await provider.countVisibleVisits(for: .yesterday)
+        let saturdayCount = await provider.countVisibleVisits(for: .saturday)
+        let fridayCount = await provider.countVisibleVisits(for: .friday)
+        let thursdayCount = await provider.countVisibleVisits(for: .thursday)
+        let olderCount = await provider.countVisibleVisits(for: .older)
+        XCTAssertEqual(allCount, 15)
+        XCTAssertEqual(todayCount, 2)
+        XCTAssertEqual(yesterdayCount, 2)
+        XCTAssertEqual(saturdayCount, 2)
+        XCTAssertEqual(fridayCount, 1)
+        XCTAssertEqual(thursdayCount, 2)
+        XCTAssertEqual(olderCount, 6)
+    }
+
     // MARK: - helpers
 
     private func date(year: Int?, month: Int?, day: Int?, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) throws -> Date {
