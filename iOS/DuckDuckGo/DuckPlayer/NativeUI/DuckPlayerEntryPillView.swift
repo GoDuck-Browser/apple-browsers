@@ -54,27 +54,19 @@ struct DuckPlayerEntryPillView: View {
                         .clipShape(Circle())
             
                 }
-                .padding(16)
+                .padding(16)                
             }
             .background(Color(designSystemColor: .surface))        
             .cornerRadius(12)        
             .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)   
-            .padding(16)     
+            .padding(16)                 
         }
     }
     
     var body: some View {        
-        sheetContent
-            .frame(height: viewHeight)
-            .onAppear {
-                // Delay the height animation by 2 seconds
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    // Use withAnimation to ensure the change is animated
-                    withAnimation(.spring(duration: 0.5)) {
-                        iconSize = 600
-                    }
-                }
-            }                      
+        ZStack(alignment: .bottom) {
+            sheetContent
+        }           
     }
 }
 
