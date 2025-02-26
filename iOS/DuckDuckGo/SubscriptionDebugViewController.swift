@@ -340,14 +340,35 @@ final class SubscriptionDebugViewController: UITableViewController {
     }
 
     private func showAccountDetails() {
+        if !AppDependencyProvider.shared.isAuthV2Enabled {
+            showAccountDetailsV1()
+        } else {
+            showAccountDetailsV2()
+        }
+    }
+
+    private func showAccountDetailsV1() {
+        let title = subscriptionManagerV1.accountManager.isUserAuthenticated ? "Authenticated" : "Not Authenticated"
+        let message = subscriptionManagerV1.accountManager.isUserAuthenticated ?
+        ["Service Environment: \(subscriptionManagerV1.currentEnvironment.serviceEnvironment.description)",
+         "AuthToken: \(subscriptionManagerV1.accountManager.authToken ?? "")",
+         "AccessToken: \(subscriptionManagerV1.accountManager.accessToken ?? "")",
+         "Email: \(subscriptionManagerV1.accountManager.email ?? "")"].joined(separator: "\n") : nil
+        showAlert(title: title, message: message)
+    }
+
+    private func showAccountDetailsV2() {
         Task {
-            let token = try? await subscriptionAuthV1toV2Bridge.getAccessToken()
-            let title = subscriptionAuthV1toV2Bridge.isUserAuthenticated ? "Authenticated" : "Not Authenticated"
-            let message = subscriptionAuthV1toV2Bridge.isUserAuthenticated ?
-            ["Service Environment: \(serviceEnvironment.description)",
-             "AccessToken: \(token ?? "")",
-             "Email: \(subscriptionAuthV1toV2Bridge.email ?? "")"].joined(separator: "\n") : nil
-            showAlert(title: title, message: message)
+            let tokenContainer = try? await subscriptionManagerV2.getTokenContainer(policy: .local)
+            let authenticated = tokenContainer != nil
+            let title = authenticated ? "Authenticated" : "Not Authenticated"
+            let message = authenticated ?
+            ["Service Environment: \(subscriptionManagerV2.currentEnvironment.serviceEnvironment)",
+             "AuthToken: \(tokenContainer?.accessToken ?? "")",
+             "Email: \(tokenContainer?.decodedAccessToken.email ?? "")"].joined(separator: "\n") : nil
+            DispatchQueue.main.async {
+                self.showAlert(title: title, message: message)
+            }
         }
     }
 
