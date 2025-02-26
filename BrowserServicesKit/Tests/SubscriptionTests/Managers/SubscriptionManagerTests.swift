@@ -100,7 +100,7 @@ final class SubscriptionManagerTests: XCTestCase {
             self.storePurchaseManager.areProductsAvailable = true
             expectation.fulfill()
         }
-        
+
         // Then
         await fulfillment(of: [expectation], timeout: 2.0)
         XCTAssertTrue(storePurchaseManager.updateAvailableProductsCalled)

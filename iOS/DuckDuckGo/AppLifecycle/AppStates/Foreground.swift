@@ -176,10 +176,6 @@ extension Foreground {
 
         let appDependencies: AppDependencies
 
-        init(appDependencies: AppDependencies) {
-            self.appDependencies = appDependencies
-        }
-
     }
 
     func makeBackgroundState() -> any BackgroundHandling {
