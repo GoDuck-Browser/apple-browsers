@@ -62,6 +62,10 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         }
     }
 
+    func showDeleteDialog(for entries: [String]) async -> DataModel.DeleteDialogResponse {
+        await showDeleteDialog(for: entries.compactMap(VisitIdentifier.init))
+    }
+
     @MainActor
     func showContextMenu(for entries: [String], using presenter: any ContextMenuPresenting) async -> DataModel.DeleteDialogResponse {
         contextMenuResponse = .noAction

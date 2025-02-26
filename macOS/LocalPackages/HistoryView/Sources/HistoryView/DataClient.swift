@@ -62,7 +62,6 @@ public final class DataClient: HistoryViewUserScriptClient {
         case deleteRange
         case open
         case query
-        case titleMenu = "title_menu"
         case entriesMenu = "entries_menu"
         case entriesDelete = "entries_delete"
         case reportInitException
@@ -76,7 +75,6 @@ public final class DataClient: HistoryViewUserScriptClient {
             MessageName.deleteRange.rawValue: { [weak self] in try await self?.deleteRange(params: $0, original: $1) },
             MessageName.query.rawValue: { [weak self] in try await self?.query(params: $0, original: $1) },
             MessageName.open.rawValue: { [weak self] in try await self?.open(params: $0, original: $1) },
-            MessageName.titleMenu.rawValue: { [weak self] in try await self?.titleMenu(params: $0, original: $1) },
             MessageName.entriesMenu.rawValue: { [weak self] in try await self?.entriesMenu(params: $0, original: $1) },
             MessageName.entriesDelete.rawValue: { [weak self] in try await self?.entriesDelete(params: $0, original: $1) },
             MessageName.reportInitException.rawValue: { [weak self] in try await self?.reportException(params: $0, original: $1) },
@@ -132,11 +130,6 @@ public final class DataClient: HistoryViewUserScriptClient {
     }
 
     @MainActor
-    private func titleMenu(params: Any, original: WKScriptMessage) async throws -> Encodable? {
-        return nil
-    }
-
-    @MainActor
     private func entriesMenu(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         guard let request: DataModel.EntriesMenuRequest = DecodableHelper.decode(from: params) else { return nil }
         let action = await actionsHandler.showContextMenu(for: request.ids, using: contextMenuPresenter)
@@ -145,7 +138,9 @@ public final class DataClient: HistoryViewUserScriptClient {
 
     @MainActor
     private func entriesDelete(params: Any, original: WKScriptMessage) async throws -> Encodable? {
-        return nil
+        guard let request: DataModel.EntriesMenuRequest = DecodableHelper.decode(from: params) else { return nil }
+        let action = await actionsHandler.showDeleteDialog(for: request.ids)
+        return DataModel.DeleteRangeResponse(action: action)
     }
 
     private func reportException(params: Any, original: WKScriptMessage) async throws -> Encodable? {
