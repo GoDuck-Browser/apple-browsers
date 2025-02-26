@@ -327,14 +327,25 @@ final class SubscriptionDebugViewController: UITableViewController {
             }
         }
     }
-
-    var subscriptionAuthV1toV2Bridge: SubscriptionAuthV1toV2Bridge {
-        AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge
+    
+    private func clearAuthData() {
+        if !AppDependencyProvider.shared.isAuthV2Enabled {
+            clearAuthDataV1()
+        } else {
+            clearAuthDataV2()
+        }
+    }
+    
+    private func clearAuthDataV1() {
+        Task {
+            await subscriptionManagerV1.signOut(notifyUI: true)
+            showAlert(title: "Data cleared!")
+        }
     }
 
-    private func clearAuthData() {
+    private func clearAuthDataV2() {
         Task {
-            await subscriptionAuthV1toV2Bridge.signOut(notifyUI: true)
+            await subscriptionManagerV1.signOut(notifyUI: true)
             showAlert(title: "Data cleared!")
         }
     }
@@ -446,7 +457,7 @@ final class SubscriptionDebugViewController: UITableViewController {
 
     private func validateTokenV1() {
         Task {
-            guard let token = try? await subscriptionAuthV1toV2Bridge.getAccessToken() else {
+            guard let token = subscriptionManagerV1.accountManager.accessToken else {
                 showAlert(title: "Not authenticated", message: "No authenticated user found! - Token not available")
                 return
             }
