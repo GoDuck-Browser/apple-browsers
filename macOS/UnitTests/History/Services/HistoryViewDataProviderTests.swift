@@ -377,6 +377,164 @@ final class HistoryViewDataProviderTests: XCTestCase {
         XCTAssertEqual(olderCount, 6)
     }
 
+    // MARK: - deleteVisits
+
+    func testThatDeleteVisitsDeletesAllVisitsInTheGivenRange() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+        let thursday = today.daysAgo(4)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday)
+            ]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+            ]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [
+                .init(date: saturday),
+                .init(date: thursday)
+            ])
+        ]
+        await provider.resetCache()
+        await provider.deleteVisits(for: .yesterday)
+        XCTAssertEqual(dataSource.deleteCalls.count, 1)
+
+        let deletedVisits = try XCTUnwrap(dataSource.deleteCalls.first)
+        XCTAssertEqual(deletedVisits.count, 5)
+        XCTAssertEqual(
+            Set(deletedVisits.compactMap(\.historyEntry?.url.absoluteString)),
+            ["https://example1.com", "https://example2.com"]
+        )
+    }
+
+    func testThatDeleteAllVisitsDeletesAllVisits() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+        let thursday = today.daysAgo(4)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday)
+            ]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+            ]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [
+                .init(date: saturday),
+                .init(date: thursday)
+            ])
+        ]
+        await provider.resetCache()
+        await provider.deleteVisits(for: .all)
+        XCTAssertEqual(dataSource.deleteCalls.count, 1)
+
+        let deletedVisits = try XCTUnwrap(dataSource.deleteCalls.first)
+        XCTAssertEqual(deletedVisits.count, 9)
+    }
+
+    // MARK: - burnVisits
+
+    func testThatBurnVisitsBurnsAllVisitsInTheGivenRange() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+        let thursday = today.daysAgo(4)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday)
+            ]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+            ]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [
+                .init(date: saturday),
+                .init(date: thursday)
+            ])
+        ]
+        await provider.resetCache()
+        await provider.burnVisits(for: .yesterday)
+        XCTAssertEqual(burner.burnCalls.count, 1)
+
+        let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
+        XCTAssertEqual(burnVisitsCall.visits.count, 5)
+        XCTAssertEqual(burnVisitsCall.animated, false)
+        XCTAssertEqual(
+            Set(burnVisitsCall.visits.compactMap(\.historyEntry?.url.absoluteString)),
+            ["https://example1.com", "https://example2.com"]
+        )
+    }
+
+    func testThatBurnAllVisitsBurnsAllVisitsAndAnimates() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+        let thursday = today.daysAgo(4)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday)
+            ]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+            ]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [
+                .init(date: saturday),
+                .init(date: thursday)
+            ])
+        ]
+        await provider.resetCache()
+        await provider.burnVisits(for: .all)
+        XCTAssertEqual(burner.burnCalls.count, 1)
+
+        let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
+        XCTAssertEqual(burnVisitsCall.visits.count, 9)
+        XCTAssertEqual(burnVisitsCall.animated, true)
+    }
+
+    func testThatBurnVisitsFromTodayAnimates() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [.init(date: today)])
+        ]
+        await provider.resetCache()
+        await provider.burnVisits(for: .today)
+        XCTAssertEqual(burner.burnCalls.count, 1)
+
+        let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
+        XCTAssertEqual(burnVisitsCall.visits.count, 1)
+        XCTAssertEqual(burnVisitsCall.animated, true)
+    }
+
     // MARK: - helpers
 
     private func date(year: Int?, month: Int?, day: Int?, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) throws -> Date {
