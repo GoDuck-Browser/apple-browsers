@@ -19,10 +19,33 @@
 import HistoryView
 import SwiftUIExtensions
 
+protocol HistoryViewBookmarksHandling: AnyObject {
+    func isUrlBookmarked(url: URL) -> Bool
+    func isUrlFavorited(url: URL) -> Bool
+    func getBookmark(for url: URL) -> Bookmark?
+    func markAsFavorite(_ bookmark: Bookmark)
+    func addNewBookmark(for url: URL, title: String)
+    func addNewFavorite(for url: URL, title: String)
+}
+
+extension LocalBookmarkManager: HistoryViewBookmarksHandling {
+    func addNewBookmark(for url: URL, title: String) {
+        addNewBookmark(for: url, title: title, isFavorite: false)
+    }
+
+    func addNewFavorite(for url: URL, title: String) {
+        addNewBookmark(for: url, title: title, isFavorite: true)
+    }
+
+    private func addNewBookmark(for url: URL, title: String, isFavorite: Bool) {
+        makeBookmark(for: url, title: title, isFavorite: isFavorite)
+    }
+}
+
 final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
     weak var dataProvider: HistoryViewDataProviding?
-    private let bookmarkManager: BookmarkManager
+    private let bookmarkHandler: HistoryViewBookmarksHandling
     private var contextMenuResponse: DataModel.DeleteDialogResponse = .noAction
     private let deleteDialogPresenter: HistoryViewDeleteDialogPresenting
     private var deleteDialogTask: Task<DataModel.DeleteDialogResponse, Never>?
@@ -30,11 +53,11 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
     init(
         dataProvider: HistoryViewDataProviding,
         deleteDialogPresenter: HistoryViewDeleteDialogPresenting = DefaultHistoryViewDeleteDialogPresenter(),
-        bookmarkManager: BookmarkManager = LocalBookmarkManager.shared
+        bookmarkHandler: HistoryViewBookmarksHandling = LocalBookmarkManager.shared
     ) {
         self.dataProvider = dataProvider
         self.deleteDialogPresenter = deleteDialogPresenter
-        self.bookmarkManager = bookmarkManager
+        self.bookmarkHandler = bookmarkHandler
     }
 
     func showDeleteDialog(for range: DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse {
@@ -70,16 +93,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
         let visitsCount = await dataProvider.countVisibleVisits(matching: searchTerm)
 
-        let response: HistoryViewDeleteDialogModel.Response = await withCheckedContinuation { continuation in
-            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
-            let model = HistoryViewDeleteDialogModel(entriesCount: visitsCount)
-            let dialog = HistoryViewDeleteDialog(model: model)
-            dialog.show(in: parentWindow) {
-                continuation.resume(returning: model.response)
-            }
-        }
-
-        switch response {
+        switch await deleteDialogPresenter.showDialog(for: visitsCount) {
         case .burn:
             await dataProvider.burnVisits(matching: searchTerm)
             return .delete
@@ -137,15 +151,15 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
                 NSMenuItem.separator()
                 NSMenuItem(title: UserText.copy, action: #selector(copy(_:)), target: self, representedObject: url)
                     .withAccessibilityIdentifier("HistoryView.copy")
-                if !bookmarkManager.isUrlBookmarked(url: url) {
+                if !bookmarkHandler.isUrlBookmarked(url: url) {
                     NSMenuItem(title: UserText.addToBookmarks, action: #selector(addBookmarks(_:)), target: self, representedObject: [url])
                         .withAccessibilityIdentifier("HistoryView.addBookmark")
                 }
-                if !bookmarkManager.isUrlFavorited(url: url) {
+                if !bookmarkHandler.isUrlFavorited(url: url) {
                     NSMenuItem(title: UserText.addToFavorites, action: #selector(addFavorite(_:)), target: self, representedObject: url)
                         .withAccessibilityIdentifier("HistoryView.addFavorite")
                 }
-            } else if urls.contains(where: { !bookmarkManager.isUrlBookmarked(url: $0) }) {
+            } else if urls.contains(where: { !bookmarkHandler.isUrlBookmarked(url: $0) }) {
                 NSMenuItem(title: UserText.addAllToBookmarks, action: #selector(addBookmarks(_:)), target: self, representedObject: urls)
                     .withAccessibilityIdentifier("HistoryView.addBookmark")
             }
@@ -212,20 +226,27 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
     @MainActor
     @objc private func addBookmarks(_ sender: NSMenuItem) {
-        guard let urls = sender.representedObject as? [URL] else {
+        guard let dataProvider, let urls = sender.representedObject as? [URL] else {
             return
         }
+
+        let titles = dataProvider.titles(for: urls)
         for url in urls {
-            bookmarkManager.makeBookmark(for: url, title: url.host?.droppingWwwPrefix() ?? url.absoluteString, isFavorite: false)
+            bookmarkHandler.addNewBookmark(for: url, title: titles[url] ?? url.absoluteString)
         }
     }
 
     @MainActor
     @objc private func addFavorite(_ sender: NSMenuItem) {
-        guard let urls = sender.representedObject as? [URL], let url = urls.first else {
+        guard let dataProvider, let url = sender.representedObject as? URL else {
             return
         }
-        bookmarkManager.makeBookmark(for: url, title: url.host?.droppingWwwPrefix() ?? url.absoluteString, isFavorite: false)
+        let titles = dataProvider.titles(for: [url])
+        if let bookmark = bookmarkHandler.getBookmark(for: url) {
+            bookmarkHandler.markAsFavorite(bookmark)
+        } else {
+            bookmarkHandler.addNewFavorite(for: url, title: titles[url] ?? url.absoluteString)
+        }
     }
 
     @MainActor
@@ -257,16 +278,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
         let visitsCount = identifiers.count
 
-        let response: HistoryViewDeleteDialogModel.Response = await withCheckedContinuation { continuation in
-            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
-            let model = HistoryViewDeleteDialogModel(entriesCount: visitsCount)
-            let dialog = HistoryViewDeleteDialog(model: model)
-            dialog.show(in: parentWindow) {
-                continuation.resume(returning: model.response)
-            }
-        }
-
-        switch response {
+        switch await deleteDialogPresenter.showDialog(for: visitsCount) {
         case .burn:
             await dataProvider.burnVisits(for: identifiers)
             return .delete

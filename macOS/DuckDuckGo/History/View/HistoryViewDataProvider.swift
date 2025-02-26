@@ -82,6 +82,9 @@ struct HistoryViewGrouping {
 }
 
 protocol HistoryViewDataProviding: HistoryView.DataProviding {
+
+    func titles(for urls: [URL]) -> [URL: String]
+
     func countVisibleVisits(for range: DataModel.HistoryRange) async -> Int
     func deleteVisits(for identifiers: [VisitIdentifier]) async
     func burnVisits(for identifiers: [VisitIdentifier]) async
@@ -173,6 +176,16 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         let visits = await allVisits(matching: searchTerm)
         await historyBurner.burn(visits, animated: false)
         await resetCache()
+    }
+
+    func titles(for urls: [URL]) -> [URL: String] {
+        guard let historyDictionary = historyDataSource.historyDictionary else {
+            return [:]
+        }
+
+        return urls.reduce(into: [URL: String]()) { partialResult, url in
+            partialResult[url] = historyDictionary[url]?.title
+        }
     }
 
     // MARK: - Private
