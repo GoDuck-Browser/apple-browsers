@@ -45,52 +45,22 @@ struct DuckPlayerEntryPillView: View {
                     Image(systemName: Constants.playImage)
                         .font(.system(size: 20))
                         .foregroundColor(.white)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 40, height: 40)
                         .background(Color.blue)
                         .clipShape(Circle())
             
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
+                .padding(16)
             }
             .background(Color(designSystemColor: .surface))        
             .cornerRadius(12)        
-            .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)        
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)   
-            .padding(.bottom, 80)
+            .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)   
+            .padding(16)     
         }
     }
     
-    var body: some View {
-        GeometryReader { geometry in
-            VStack {
-                Spacer()
-                ZStack {
-                    // Background panel that extends beyond the bottom
-                    VStack(spacing: 0) {
-                        TopRoundedRectangle(radius: 12)
-                            .fill(Color(designSystemColor: .panel))
-                            .shadow(color: Color.black.opacity(0.08), radius: 8, y: -2)
-                        
-                        // Extra panel extension for bounce
-                        Rectangle()
-                            .fill(Color(designSystemColor: .panel))
-                            .frame(height: 60)
-                    }
-                    
-                    // Content
-                    VStack {
-                        sheetContent
-                        Spacer()
-                            .frame(height: 0)
-                    }
-                }
-            }
-            .offset(y: viewModel.isVisible ? 16 : geometry.size.height)
-        }
-        .edgesIgnoringSafeArea(.all)
-        .animation(viewModel.shouldAnimate ? .spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0) : nil, value: viewModel.isVisible)
+    var body: some View {        
+        sheetContent                        
     }
 }
 

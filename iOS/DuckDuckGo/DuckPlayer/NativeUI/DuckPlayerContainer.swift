@@ -22,11 +22,6 @@ import SwiftUI
 private let sheetTopMargin = 44.0
 
 public enum DuckPlayerContainer {
-  
-  public enum DismissTrigger {
-    case userInteraction
-    case programmatic
-  }
 
   public struct PresentationMetrics {
     public let contentWidth: Double
@@ -34,11 +29,7 @@ public enum DuckPlayerContainer {
 
   @MainActor
   public final class ViewModel: ObservableObject {
-    @Published public private(set) var sheetVisible = false
-    @Published public var hasDragHandle = false
-
-    private let _onDismiss = PassthroughSubject<DismissTrigger, Never>()
-    public private(set) lazy var onDismiss = _onDismiss.eraseToAnyPublisher()
+    @Published public private(set) var sheetVisible = false        
 
     private var subscriptions = Set<AnyCancellable>()
 
@@ -46,16 +37,14 @@ public enum DuckPlayerContainer {
       sheetVisible = true
     }
 
-    public func dismiss(trigger: DismissTrigger) {
-      sheetVisible = false
-      _onDismiss.send(trigger)
+    public func dismiss() {
+      sheetVisible = false        
     }
   }
 
   public struct Container<Content: View>: View {
     @ObservedObject var viewModel: ViewModel
-
-    @State private var keyboardVisible = false
+    
     @State private var sheetHeight = 0.0
 
     let hasBackground: Bool
@@ -77,25 +66,19 @@ public enum DuckPlayerContainer {
     }
 
     public var body: some View {
-      GeometryReader { geometry in
-        let containerHeight = geometry.size.height
-        ZStack {
-          if hasBackground {
-            Color.black
-              .ignoresSafeArea()
-              .opacity(viewModel.sheetVisible ? 1 : 0)
-              .animation(.easeInOut(duration: 0.2), value: viewModel.sheetVisible)
-              .onTapGesture { viewModel.dismiss(trigger: .userInteraction) }
-          }
-          Group {
-            sheet(containerHeight: containerHeight)
-            .padding(.horizontal, 16)
-            .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding(.bottom, keyboardVisible ? 20 : 0)
-            
-          }
+      VStack(spacing: 0) {
+        if hasBackground {
+          Color.black
+            .ignoresSafeArea()
+            .opacity(viewModel.sheetVisible ? 1 : 0)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.sheetVisible)              
+            .animation(.spring(duration: 0.2), value: sheetHeight)
         }
-      }     
+        
+        // Use a fixed container height for offset calculations
+        sheet(containerHeight: 300)
+          .frame(maxHeight: .infinity, alignment: .bottom)            
+      }
     }
   }
 }
@@ -103,7 +86,7 @@ public enum DuckPlayerContainer {
 // MARK: - Private
 
 private func calculateSheetOffset(for visible: Bool, containerHeight: Double) -> Double {
-  visible ? 0 : containerHeight + 100
+  visible ? 0 : containerHeight + 200
 }
 
 @MainActor
@@ -115,26 +98,12 @@ private struct SheetView<Content: View>: View {
 
   @State private var sheetHeight: Double = 0
   @State private var sheetWidth: Double?
-  // Start at a high number so that the content doesn't flash on screen before we have the correct geometry values.
+
   @State private var sheetOffset = 10000.0
 
-  @GestureState private var dragStartOffset: Double? = nil
-
-  @ViewBuilder private var handle: some View {
-    RoundedRectangle(cornerRadius: 2, style: .circular)
-      .fill(Color.gray)
-      .frame(width: 36, height: 4)
-  }
-
   var body: some View {
-    VStack(alignment: .center, spacing: 8) {
-      if viewModel.hasDragHandle {
-        HStack {
-          handle
-            .padding(.bottom, 16)
-        }
-        .frame(maxWidth: .infinity)
-      }
+    VStack(alignment: .center) {      
+      
       if let sheetWidth {
         content(DuckPlayerContainer.PresentationMetrics(contentWidth: sheetWidth))
       }
@@ -142,67 +111,25 @@ private struct SheetView<Content: View>: View {
     .onWidthChange { newWidth in
       sheetWidth = newWidth
     }
-    .padding(.horizontal, 10)
-    .padding(.vertical, 12)
     .frame(maxWidth: .infinity)
-    .background(
-      RoundedRectangle(cornerRadius: 22, style: .continuous)
-        .fill(Color.white)
-        .shadow(color: Color.gray, radius: 36, y: 10)
-    )
     .offset(y: sheetOffset)
-    .animation(.easeInOut, value: viewModel.hasDragHandle)
+    
     .onAppear {
       sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
     }
-    // If we use an animation() modifier for this this also animates all the content in with the spring
-    // when the offset changes. To avoid this, use withAnimation() explicitly.
+        
     .onChange(of: viewModel.sheetVisible) { sheetVisible in
       withAnimation(.spring(duration: 0.3, bounce: 0.2)) {
         sheetOffset = calculateSheetOffset(for: sheetVisible, containerHeight: containerHeight)
       }
     }
+
     .onChange(of: containerHeight) { containerHeight in
       withAnimation(.spring(duration: 0.3, bounce: 0.2)) {
         sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
       }
-    }
-    // Add top padding to make the sheet easier to drag
-    .padding(.top, sheetTopMargin)
-    // For some reason contentShape() isn't working here for hit testing
-    .background(.black.opacity(viewModel.sheetVisible ? 0.001 : 0))
-    .highPriorityGesture(
-      DragGesture()
-        .updating($dragStartOffset) { _, state, _ in
-          if state == nil {
-            state = sheetOffset
-          }
-        }
-        .onChanged { value in
-          guard let dragStartOffset else { return }
-
-          let offsetY = value.translation.height
-          withAnimation(.spring(duration: 0.3, bounce: 0.2)) {
-            if offsetY < 0 {
-              // Sigmoid function to decay the drag upwards to emulate resistance.
-              let y = 1.0 / (1.0 + exp(-1 * (abs(offsetY) / 50.0))) - 0.5
-
-              sheetOffset = dragStartOffset + y * max(offsetY, -150)
-            } else {
-              sheetOffset = dragStartOffset + offsetY
-            }
-          }
-        }
-        .onEnded { value in
-          if value.translation.height > sheetHeight * 0.5 || value.velocity.height > 150 {
-            viewModel.dismiss(trigger: .userInteraction)
-          } else {
-            withAnimation(.spring(duration: 0.2, bounce: 0.4)) {
-              sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
-            }
-          }
-        }
-    )
+    }    
+    
     .onHeightChange { newHeight in
       sheetHeight = newHeight
       onHeightChange(newHeight)
@@ -233,8 +160,6 @@ extension View {
     )
   }
 }
-
-// MARK: - Preference Keys
 
 private struct WidthPreferenceKey: PreferenceKey {
   static var defaultValue: Double = 0

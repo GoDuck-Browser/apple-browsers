@@ -26,14 +26,11 @@ import Combine
 /// This includes presenting entry pills and handling their lifecycle.
 final class DuckPlayerNativeUIPresenter {
     
-    /// The view for the entry pill
-    private var duckPlayerEntryPillView: DuckPlayerEntryPillView?
-
-    /// The view model for the bottom sheet
-    private var pillSheetviewModel: DuckPlayerEntryPillViewModel?
+    /// The container view model for the entry pill
+    private var containerViewModel: DuckPlayerContainer.ViewModel?
     
-    /// The hosting controller for the bottom sheet
-    private var pillSheetViewController: UIHostingController<DuckPlayerEntryPillView>?
+    /// The hosting controller for the container
+    private var containerViewController: UIHostingController<DuckPlayerContainer.Container<DuckPlayerEntryPillView>>?
     
     /// The host view controller where UI components will be presented
     private weak var hostView: TabViewController?
@@ -47,6 +44,7 @@ final class DuckPlayerNativeUIPresenter {
     /// A publisher to notify when a video playback request is needed
     let videoPlaybackRequest = PassthroughSubject<String, Never>()
     private var playerCancellables = Set<AnyCancellable>()
+    private var containerCancellables = Set<AnyCancellable>()
 
     /// Application Settings
     private var appSettings: AppSettings
@@ -54,7 +52,7 @@ final class DuckPlayerNativeUIPresenter {
     /// Current height of the OmniBar
     private var omniBarHeight: CGFloat = 0
     
-    /// Bottom constraint for the pill view
+    /// Bottom constraint for the container view
     private var bottomConstraint: NSLayoutConstraint?
 
     // MARK: - Public Methods
@@ -96,53 +94,59 @@ final class DuckPlayerNativeUIPresenter {
     @MainActor
     func presentEntryPill(for videoID: String, in hostViewController: TabViewController) {
         
-        // If we already have a view model, just update the onOpen closure
-        if let existingViewModel = pillSheetviewModel {
-            existingViewModel.updateOnOpen { [weak self] in
-                self?.videoPlaybackRequest.send(videoID)
-            }            
+        // If we already have a container view model, just show it again
+        if let existingViewModel = containerViewModel {
+            existingViewModel.show()
             return
         }
                 
         self.hostView = hostViewController
         guard let hostView = self.hostView else { return }
         
-        // Create and configure the view model
-        let viewModel = DuckPlayerEntryPillViewModel() { [weak self] in
+        // Create and configure the container view model
+        let containerViewModel = DuckPlayerContainer.ViewModel()
+        self.containerViewModel = containerViewModel
+        
+        // Create the pill view model
+        let pillViewModel = DuckPlayerEntryPillViewModel() { [weak self] in
             self?.videoPlaybackRequest.send(videoID)
         }
-        self.pillSheetviewModel = viewModel
         
-        // Create the view with initial hidden state
-        let view = DuckPlayerEntryPillView(viewModel: viewModel)
-        let hostingController = UIHostingController(rootView: view)
+        // Create the container view with the pill view
+        let containerView = DuckPlayerContainer.Container(
+            viewModel: containerViewModel,
+            hasBackground: false
+        ) { _ in
+            DuckPlayerEntryPillView(viewModel: pillViewModel)
+        }
+        
+        // Set up hosting controller
+        let hostingController = UIHostingController(rootView: containerView)
         hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         
-        // Add to view hierarchy
+        // Add to host view
         hostView.view.addSubview(hostingController.view)
         
         // Calculate bottom constraints based on URL Bar position
-        // If at the bottom, the Pill should be placed above it
+        // If at the bottom, the Container should be placed above it
         bottomConstraint = appSettings.currentAddressBarPosition == .bottom ? 
                     hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor, constant: -omniBarHeight) : 
                     hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor)
 
-        // Setup constraints
         NSLayoutConstraint.activate([   
             hostingController.view.leadingAnchor.constraint(equalTo: hostView.view.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: hostView.view.trailingAnchor),
-            bottomConstraint!,
-            hostingController.view.heightAnchor.constraint(equalToConstant: 120) 
+            bottomConstraint!,            
+            hostingController.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 20)
         ])
-        
-        // Store references
-        pillSheetviewModel = viewModel
-        pillSheetViewController = hostingController 
+                
+        // Store reference to the hosting controller
+        containerViewController = hostingController
         
         // Add delay before showing the pill
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak viewModel] in
-            viewModel?.show()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak containerViewModel] in
+            containerViewModel?.show()
         }
     }
     
@@ -150,27 +154,27 @@ final class DuckPlayerNativeUIPresenter {
     @MainActor
     func dismissPill() {
         // Hide the view first
-        pillSheetviewModel?.hide()        
-
+        containerViewModel?.dismiss()
+        
         // Remove the view after the animation completes
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in                               
-            self?.pillSheetViewController?.view.removeFromSuperview()
-            self?.pillSheetViewController = nil            
-            self?.pillSheetviewModel = nil
-
+            self?.containerViewController?.view.removeFromSuperview()
+            self?.containerViewController = nil            
+            self?.containerViewModel = nil
+            self?.containerCancellables.removeAll()
         }
     }
     
     /// Hides the bottom sheet when browser chrome is hidden
     @MainActor
     func hideBottomSheetForHiddenChrome() {
-        pillSheetviewModel?.hide()
+        containerViewModel?.dismiss()
     }
     
     /// Shows the bottom sheet when browser chrome is visible
     @MainActor
     func showBottomSheetForVisibleChrome() {
-        pillSheetviewModel?.show()
+        containerViewModel?.show()
     }
     
     @MainActor
@@ -208,6 +212,7 @@ final class DuckPlayerNativeUIPresenter {
 
     deinit {
         playerCancellables.removeAll()
+        containerCancellables.removeAll()
         NotificationCenter.default.removeObserver(self)
     }
 }
