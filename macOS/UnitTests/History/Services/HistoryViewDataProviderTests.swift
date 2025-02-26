@@ -92,18 +92,18 @@ final class HistoryViewDataProviderTests: XCTestCase {
             dateFormatter: dateFormatter,
             featureFlagger: featureFlagger
         )
-        await provider.resetCache()
+        await provider.refreshData()
     }
 
     // MARK: - ranges
 
     func testThatRangesReturnsAllWhenHistoryIsEmpty() async {
         dataSource.history = nil
-        await provider.resetCache()
+        await provider.refreshData()
         XCTAssertEqual(provider.ranges, [.all])
 
         dataSource.history = []
-        await provider.resetCache()
+        await provider.refreshData()
         XCTAssertEqual(provider.ranges, [.all])
     }
 
@@ -116,7 +116,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: today.addingTimeInterval(10))
             ])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         XCTAssertEqual(provider.ranges, [.all, .today])
     }
 
@@ -130,7 +130,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: today.daysAgo(1))
             ])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         XCTAssertEqual(provider.ranges, [.all, .today, .yesterday])
     }
 
@@ -143,7 +143,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: today.daysAgo(5))
             ])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         XCTAssertEqual(provider.ranges, [.all, .older])
     }
 
@@ -157,7 +157,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                     .init(date: dateFormatter.date.daysAgo(4))
                 ])
             ]
-            await provider.resetCache()
+            await provider.refreshData()
         }
 
         try await populateHistory(for: date(year: 2025, month: 2, day: 24)) // Monday
@@ -194,7 +194,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: today)]),
             .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         var batch = await provider.visitsBatch(for: .rangeFilter(.all), limit: 3, offset: 0)
         XCTAssertEqual(batch.finished, false)
         XCTAssertEqual(batch.visits.count, 3)
@@ -219,7 +219,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: today)]),
             .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         let batch = await provider.visitsBatch(for: .rangeFilter(.all), limit: 6, offset: 0)
         XCTAssertEqual(batch.finished, true)
         XCTAssertEqual(batch.visits.count, 5)
@@ -240,7 +240,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: yesterday)]),
             .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         let batch = await provider.visitsBatch(for: .rangeFilter(.yesterday), limit: 4, offset: 0)
         XCTAssertEqual(batch.finished, true)
         XCTAssertEqual(Set(batch.visits.map(\.url)), ["https://example1.com", "https://example3.com"])
@@ -261,7 +261,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: yesterday)]),
             .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         var batch = await provider.visitsBatch(for: .searchTerm(""), limit: 6, offset: 0)
         XCTAssertEqual(batch.finished, true)
         XCTAssertEqual(batch.visits.count, 5)
@@ -281,7 +281,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             .make(url: try XCTUnwrap("https://example3.com".url), title: "12", visits: [.init(date: today)]),
             .make(url: try XCTUnwrap("https://example4.com".url), visits: [.init(date: today)])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         let batch = await provider.visitsBatch(for: .searchTerm("2"), limit: 4, offset: 0)
         XCTAssertEqual(batch.finished, true)
         XCTAssertEqual(batch.visits.count, 3)
@@ -296,7 +296,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             .make(url: try XCTUnwrap("https://example12.com".url), title: "abcdE", visits: [.init(date: today)]),
             .make(url: try XCTUnwrap("https://example.com/abCDe".url), title: "foo", visits: [.init(date: today)])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         let batch = await provider.visitsBatch(for: .searchTerm("bCd"), limit: 4, offset: 0)
         XCTAssertEqual(batch.finished, true)
         XCTAssertEqual(batch.visits.count, 2)
@@ -312,7 +312,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             .make(url: try XCTUnwrap("https://abcd.example.com/bar".url), visits: [.init(date: today)]),
             .make(url: try XCTUnwrap("https://duckduckgo.com".url), title: "abcd.example.com", visits: [.init(date: today)])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         let batch = await provider.visitsBatch(for: .domainFilter("abcd.example.com"), limit: 4, offset: 0)
         XCTAssertEqual(batch.finished, true)
         XCTAssertEqual(batch.visits.count, 2)
@@ -326,7 +326,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
         dataSource.history = [
             .make(url: try XCTUnwrap("https://abcd.example.com/foo".url), visits: [.init(date: today)])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         let batch = await provider.visitsBatch(for: .domainFilter("example.com"), limit: 4, offset: 0)
         XCTAssertEqual(batch.finished, true)
         XCTAssertEqual(batch.visits.count, 0)
@@ -370,7 +370,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: older3)
             ])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         let allCount = await provider.countVisibleVisits(for: .all)
         let todayCount = await provider.countVisibleVisits(for: .today)
         let yesterdayCount = await provider.countVisibleVisits(for: .yesterday)
@@ -413,7 +413,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: thursday)
             ])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         await provider.deleteVisits(for: .yesterday)
         XCTAssertEqual(dataSource.deleteCalls.count, 1)
 
@@ -449,7 +449,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: thursday)
             ])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         await provider.deleteVisits(for: .all)
         XCTAssertEqual(dataSource.deleteCalls.count, 1)
 
@@ -483,7 +483,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: thursday)
             ])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         await provider.burnVisits(for: .yesterday)
         XCTAssertEqual(burner.burnCalls.count, 1)
 
@@ -520,7 +520,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: thursday)
             ])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         await provider.burnVisits(for: .all)
         XCTAssertEqual(burner.burnCalls.count, 1)
 
@@ -536,7 +536,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
         dataSource.history = [
             .make(url: try XCTUnwrap("https://example1.com".url), visits: [.init(date: today)])
         ]
-        await provider.resetCache()
+        await provider.refreshData()
         await provider.burnVisits(for: .today)
         XCTAssertEqual(burner.burnCalls.count, 1)
 

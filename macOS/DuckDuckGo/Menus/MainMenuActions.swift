@@ -567,7 +567,7 @@ extension MainViewController {
         if featureFlagger.isFeatureOn(.historyView) {
             Task {
                 let historyViewDataProvider = HistoryViewDataProvider(historyDataSource: HistoryCoordinator.shared)
-                await historyViewDataProvider.resetCache()
+                await historyViewDataProvider.refreshData()
                 let visitsCount = await historyViewDataProvider.countVisibleVisits(for: .all)
 
                 let presenter = DefaultHistoryViewDeleteDialogPresenter()

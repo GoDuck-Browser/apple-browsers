@@ -114,7 +114,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         return ranges
     }
 
-    func resetCache() async {
+    func refreshData() async {
         lastQuery = nil
         await populateVisits()
     }
@@ -136,26 +136,26 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
     func deleteVisits(for range: DataModel.HistoryRange) async {
         let visits = await allVisits(for: range)
         await historyDataSource.delete(visits)
-        await resetCache()
+        await refreshData()
     }
 
     func burnVisits(for range: DataModel.HistoryRange) async {
         let visits = await allVisits(for: range)
         let animated = range == .today || range == .all
         await historyBurner.burn(visits, animated: animated)
-        await resetCache()
+        await refreshData()
     }
 
     func deleteVisits(for identifiers: [VisitIdentifier]) async {
         let visits = await visits(for: identifiers)
         await historyDataSource.delete(visits)
-        await resetCache()
+        await refreshData()
     }
 
     func burnVisits(for identifiers: [VisitIdentifier]) async {
         let visits = await visits(for: identifiers)
         await historyBurner.burn(visits, animated: false)
-        await resetCache()
+        await refreshData()
     }
 
     func countVisibleVisits(matching searchTerm: String) async -> Int {
@@ -169,13 +169,13 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
     func deleteVisits(matching searchTerm: String) async {
         let visits = await allVisits(matching: searchTerm)
         await historyDataSource.delete(visits)
-        await resetCache()
+        await refreshData()
     }
 
     func burnVisits(matching searchTerm: String) async {
         let visits = await allVisits(matching: searchTerm)
         await historyBurner.burn(visits, animated: false)
-        await resetCache()
+        await refreshData()
     }
 
     func titles(for urls: [URL]) -> [URL: String] {
@@ -195,6 +195,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         var olderHistoryItems = [DataModel.HistoryItem]()
         var olderVisits = [Visit]()
 
+        // generate groupings by day and set aside "older" days.
         groupings = historyGroupingProvider.getVisitGroupings()
             .compactMap { historyGrouping -> HistoryViewGrouping? in
                 guard let grouping = HistoryViewGrouping(historyGrouping, dateFormatter: dateFormatter) else {
@@ -209,6 +210,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
                 return grouping
             }
 
+        // collect all "older" days into a single grouping
         if !olderHistoryItems.isEmpty {
             groupings.append(.init(range: .older, visits: olderHistoryItems))
         }
@@ -302,11 +304,15 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
     private var visitsByRange: [DataModel.HistoryRange: [Visit]] = [:]
 
     private struct QueryInfo {
+        /// When the query happened.
         let date: Date
+        /// What was the query.
         let query: DataModel.HistoryQueryKind
+        /// Query result (a subset of `HistoryViewDataProvider.historyItems`)
         let items: [DataModel.HistoryItem]
     }
 
+    /// The last query from the FE, i.e. filtered items list.
     private var lastQuery: QueryInfo?
 }
 
@@ -327,6 +333,12 @@ extension HistoryView.DataModel.HistoryItem: SearchableHistoryEntry {
 }
 
 extension HistoryView.DataModel.HistoryItem {
+    /**
+     * This initializer converts native side history `Visit` into FE `HistoryItem` model.
+     *
+     * It uses a date formatter because `HistoryItem` models are dumb and are expected
+     * to contain user-visible text instead of timestamps.
+     */
     init?(_ visit: Visit, dateFormatter: HistoryViewDateFormatting) {
         guard let historyEntry = visit.historyEntry else {
             return nil

@@ -48,7 +48,7 @@ final class DataClientTests: XCTestCase {
 
     func testThatInitialSetupResetsDataProviderCache() async throws {
         try await messageHelper.handleMessageIgnoringResponse(named: .initialSetup)
-        XCTAssertEqual(dataProvider.resetCacheCallCount, 1)
+        XCTAssertEqual(dataProvider.refreshDataCallCount, 1)
     }
 
     // MARK: - getRanges

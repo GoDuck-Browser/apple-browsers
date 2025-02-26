@@ -24,8 +24,8 @@ final class CapturingDataProvider: DataProviding {
         return _ranges
     }
 
-    func resetCache() {
-        resetCacheCallCount += 1
+    func refreshData() {
+        refreshDataCallCount += 1
     }
 
     func visitsBatch(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> DataModel.HistoryItemsBatch {
@@ -49,7 +49,7 @@ final class CapturingDataProvider: DataProviding {
     // swiftlint:disable:next identifier_name
     var _ranges: [DataModel.HistoryRange] = []
     var rangesCallCount: Int = 0
-    var resetCacheCallCount: Int = 0
+    var refreshDataCallCount: Int = 0
 
     var countVisibleVisitsCalls: [DataModel.HistoryRange] = []
     var countVisibleVisits: (DataModel.HistoryRange) async -> Int = { _ in return 0 }

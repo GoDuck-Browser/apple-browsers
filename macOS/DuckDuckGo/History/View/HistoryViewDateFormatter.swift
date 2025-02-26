@@ -19,9 +19,23 @@
 import Common
 import Foundation
 
+/**
+ * This protocol defines API for date and time formatting in History View.
+ */
 protocol HistoryViewDateFormatting {
+    /**
+     * Returns the current date - useful for unit testing.
+     */
     func currentDate() -> Date
+
+    /**
+     * Returns string representation of a day for a given `date`.
+     */
     func dayString(for date: Date) -> String
+
+    /**
+     * Returns string representation of time for a given `date`.
+     */
     func timeString(for date: Date) -> String
 }
 

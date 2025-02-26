@@ -28,7 +28,7 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
         return _ranges
     }
 
-    func resetCache() {
+    func refreshData() {
         resetCacheCallCount += 1
     }
 
@@ -71,6 +71,11 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
         burnVisitsMatchingSearchTermCalls.append(searchTerm)
     }
 
+    func titles(for urls: [URL]) -> [URL : String] {
+        titlesForURLsCalls.append(urls)
+        return titlesForURLs(urls)
+    }
+
     // swiftlint:disable:next identifier_name
     var _ranges: [DataModel.HistoryRange] = []
     var rangesCallCount: Int = 0
@@ -94,6 +99,9 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
     var visitsBatchCalls: [VisitsBatchCall] = []
     var visitsBatch: (DataModel.HistoryQueryKind, Int, Int) async -> DataModel.HistoryItemsBatch = { _, _, _ in .init(finished: true, visits: []) }
 
+    var titlesForURLsCalls: [[URL]] = []
+    var titlesForURLs: ([URL]) -> [URL: String] = { _ in [:] }
+
     struct VisitsBatchCall: Equatable {
         let query: DataModel.HistoryQueryKind
         let limit: Int
@@ -102,11 +110,22 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
 }
 
 final class CapturingHistoryViewDeleteDialogPresenter: HistoryViewDeleteDialogPresenting {
-    var response: HistoryViewDeleteDialogModel.Response = .noAction
-    var showDialogCalls: [Int] = []
 
-    func showDialog(for itemsCount: Int) async -> HistoryViewDeleteDialogModel.Response {
-        showDialogCalls.append(itemsCount)
+    var response: HistoryViewDeleteDialogModel.Response = .noAction
+    var showDialogCalls: [ShowDialogCall] = []
+
+    struct ShowDialogCall: Equatable {
+        let itemsCount: Int
+        let deleteModel: HistoryViewDeleteDialogModel.DeleteMode
+
+        init(_ itemsCount: Int, _ deleteModel: HistoryViewDeleteDialogModel.DeleteMode) {
+            self.itemsCount = itemsCount
+            self.deleteModel = deleteModel
+        }
+    }
+
+    func showDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response {
+        showDialogCalls.append(.init(itemsCount, deleteMode))
         return response
     }
 }
