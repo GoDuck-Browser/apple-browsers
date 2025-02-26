@@ -20,9 +20,20 @@ import Foundation
 import HistoryView
 
 final class CapturingActionsHandler: ActionsHandling {
+
     func showDeleteDialog(for range: DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse {
-        showDeleteDialogCalls.append(range)
-        return await showDeleteDialog(range)
+        showDeleteDialogForRangeCalls.append(range)
+        return await showDeleteDialogForRange(range)
+    }
+
+    func showDeleteDialog(for entries: [String]) async -> HistoryView.DataModel.DeleteDialogResponse {
+        showDeleteDialogForEntriesCalls.append(entries)
+        return await showDeleteDialogForEntries(entries)
+    }
+
+    func showDeleteDialog(for searchTerm: String) async -> HistoryView.DataModel.DeleteDialogResponse {
+        showDeleteDialogForSearchTermCalls.append(searchTerm)
+        return await showDeleteDialogForSearchTerm(searchTerm)
     }
 
     func showContextMenu(for entries: [String], using presenter: any ContextMenuPresenting) async -> DataModel.DeleteDialogResponse {
@@ -33,7 +44,14 @@ final class CapturingActionsHandler: ActionsHandling {
         openCalls.append(url)
     }
 
-    var showDeleteDialogCalls: [DataModel.HistoryRange] = []
-    var showDeleteDialog: (DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse = { _ in .delete }
+    var showDeleteDialogForRangeCalls: [DataModel.HistoryRange] = []
+    var showDeleteDialogForRange: (DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse = { _ in .delete }
+
+    var showDeleteDialogForEntriesCalls: [[String]] = []
+    var showDeleteDialogForEntries: ([String]) async -> DataModel.DeleteDialogResponse = { _ in .delete }
+
+    var showDeleteDialogForSearchTermCalls: [String] = []
+    var showDeleteDialogForSearchTerm: (String) async -> DataModel.DeleteDialogResponse = { _ in .delete }
+
     var openCalls: [URL] = []
 }

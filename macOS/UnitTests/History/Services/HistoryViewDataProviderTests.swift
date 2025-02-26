@@ -553,7 +553,6 @@ final class HistoryViewDataProviderTests: XCTestCase {
     }
 }
 
-
 fileprivate extension HistoryEntry {
     static func make(identifier: UUID = UUID(), url: URL, title: String? = nil, visits: Set<Visit>) -> HistoryEntry {
         let entry = HistoryEntry(

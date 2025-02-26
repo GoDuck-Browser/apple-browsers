@@ -24,10 +24,16 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
     weak var dataProvider: HistoryViewDataProviding?
     private let bookmarkManager: BookmarkManager
     private var contextMenuResponse: DataModel.DeleteDialogResponse = .noAction
+    private let deleteDialogPresenter: HistoryViewDeleteDialogPresenting
     private var deleteDialogTask: Task<DataModel.DeleteDialogResponse, Never>?
 
-    init(dataProvider: HistoryViewDataProviding, bookmarkManager: BookmarkManager = LocalBookmarkManager.shared) {
+    init(
+        dataProvider: HistoryViewDataProviding,
+        deleteDialogPresenter: HistoryViewDeleteDialogPresenting = DefaultHistoryViewDeleteDialogPresenter(),
+        bookmarkManager: BookmarkManager = LocalBookmarkManager.shared
+    ) {
         self.dataProvider = dataProvider
+        self.deleteDialogPresenter = deleteDialogPresenter
         self.bookmarkManager = bookmarkManager
     }
 
@@ -41,16 +47,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return .noAction
         }
 
-        let response: HistoryViewDeleteDialogModel.Response = await withCheckedContinuation { continuation in
-            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
-            let model = HistoryViewDeleteDialogModel(entriesCount: visitsCount)
-            let dialog = HistoryViewDeleteDialog(model: model)
-            dialog.show(in: parentWindow) {
-                continuation.resume(returning: model.response)
-            }
-        }
-
-        switch response {
+        switch await deleteDialogPresenter.showDialog(for: visitsCount) {
         case .burn:
             await dataProvider.burnVisits(for: range)
             return .delete
