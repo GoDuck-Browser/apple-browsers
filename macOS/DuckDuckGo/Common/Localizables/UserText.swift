@@ -207,7 +207,10 @@ struct UserText {
     static let mainMenuHelp = NSLocalizedString("Help", comment: "Main Menu Help")
     static let mainMenuHelpDuckDuckGoHelp = NSLocalizedString("DuckDuckGo Help", comment: "Main Menu Help item")
 
-    // MARK: - History Delete Dialog
+    // MARK: - History
+    static let today = NSLocalizedString("today", value: "today", comment: "Date section in history view indicating current day")
+    static let yesterday = NSLocalizedString("yesterday", value: "yesterday", comment: "Date section in history view indicating previous day")
+
     static let deleteHistory = NSLocalizedString("history.delete.dialog.title", value: "Delete history?", comment: "Title of a dialog asking the user to confirm deleting history")
     static func deleteHistoryMessage(items: Int) -> String {
         let localized = {
