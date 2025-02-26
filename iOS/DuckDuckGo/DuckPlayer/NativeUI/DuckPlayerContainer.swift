@@ -74,8 +74,7 @@ public enum DuckPlayerContainer {
           Color.black
             .ignoresSafeArea()
             .opacity(viewModel.sheetVisible ? 1 : 0)
-            .animation(.easeInOut(duration: 0.2), value: viewModel.sheetVisible)              
-            .animation(.spring(duration: 0.2), value: sheetHeight)
+            .animation(.easeInOut(duration: 0.2), value: viewModel.sheetVisible)                          
         }
         
         // Use a fixed container height for offset calculations
@@ -101,7 +100,7 @@ private struct SheetView<Content: View>: View {
 
   @State private var sheetHeight: Double = 0
   @State private var sheetWidth: Double?
-
+  @State private var opacity: Double = 0
   @State private var sheetOffset = 10000.0
 
   var body: some View {
@@ -116,20 +115,29 @@ private struct SheetView<Content: View>: View {
     }
     .frame(maxWidth: .infinity)
     .offset(y: sheetOffset)
+    .opacity(opacity)
+    .animation(.easeInOut(duration: 0.3), value: opacity)
     
     .onAppear {
       sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
+      opacity = viewModel.sheetVisible ? 1 : 0
     }
         
     .onChange(of: viewModel.sheetVisible) { sheetVisible in
-      withAnimation(.spring(duration: 0.3, bounce: 0.2)) {
+      withAnimation(.spring(duration: 0.5, bounce: 0.2)) {
         sheetOffset = calculateSheetOffset(for: sheetVisible, containerHeight: containerHeight)
+      }
+      withAnimation(.easeInOut(duration: 0.5)) {
+        opacity = sheetVisible ? 1 : 0
       }
     }
 
     .onChange(of: containerHeight) { containerHeight in
-      withAnimation(.spring(duration: 0.3, bounce: 0.2)) {
+      withAnimation(.spring(duration: 0.5, bounce: 0.2)) {
         sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
+      }
+      withAnimation(.easeInOut(duration: 0.5)) {
+        opacity = viewModel.sheetVisible ? 1 : 0
       }
     }    
     

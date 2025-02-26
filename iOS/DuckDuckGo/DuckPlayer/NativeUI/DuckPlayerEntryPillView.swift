@@ -59,50 +59,33 @@ struct DuckPlayerEntryPillView: View {
             .background(Color(designSystemColor: .surface))        
             .cornerRadius(12)        
             .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)   
-            .padding(16)                 
+            .padding(16)
+            .padding(.bottom, 25) // Add padding to cover boder during animation                      
         }
     }
     
     var body: some View {        
         ZStack(alignment: .bottom) {
+            Color(designSystemColor: .panel)                
             sheetContent
-        }           
+        }
+        .clipShape(CustomRoundedCorners(radius: 12, corners: [.topLeft, .topRight]))          
+        .shadow(color: Color.black.opacity(0.2), radius: 8, x: 0, y: 4)
+        .offset(y: 20)
     }
 }
 
-private struct TopRoundedRectangle: Shape {
+
+struct CustomRoundedCorners: Shape {
     var radius: CGFloat
+    var corners: UIRectCorner
     
     func path(in rect: CGRect) -> Path {
-        var path = Path()
-        
-        let tl = CGPoint(x: rect.minX, y: rect.minY)
-        let tr = CGPoint(x: rect.maxX, y: rect.minY)
-        let br = CGPoint(x: rect.maxX, y: rect.maxY)
-        let bl = CGPoint(x: rect.minX, y: rect.maxY)
-        
-        path.move(to: CGPoint(x: tl.x, y: tl.y + radius))
-        
-        // Top left corner
-        path.addQuadCurve(to: CGPoint(x: tl.x + radius, y: tl.y),
-                         control: tl)
-        
-        // Top edge
-        path.addLine(to: CGPoint(x: tr.x - radius, y: tr.y))
-        
-        // Top right corner
-        path.addQuadCurve(to: CGPoint(x: tr.x, y: tr.y + radius),
-                         control: tr)
-        
-        // Right edge
-        path.addLine(to: br)
-        
-        // Bottom edge
-        path.addLine(to: bl)
-        
-        // Left edge
-        path.addLine(to: CGPoint(x: tl.x, y: tl.y + radius))
-        
-        return path
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
     }
 }
