@@ -30,9 +30,11 @@ public protocol SubscriptionAuthV1toV2Bridge: SubscriptionTokenProvider, Subscri
 }
 
 extension DefaultSubscriptionManager: SubscriptionAuthV1toV2Bridge {
+
     public func isEnabled(feature: Entitlement.ProductName) async -> Bool {
-        if case .success(let hasEntitlements) = await accountManager.hasEntitlement(forProductName: .networkProtection), hasEntitlements {
-            return true
+        if case .success(let hasEntitlements) = await accountManager.hasEntitlement(forProductName: .networkProtection,
+                                                                                    cachePolicy: .reloadIgnoringLocalCacheData), hasEntitlements {
+            return hasEntitlements
         } else {
             return false
         }
