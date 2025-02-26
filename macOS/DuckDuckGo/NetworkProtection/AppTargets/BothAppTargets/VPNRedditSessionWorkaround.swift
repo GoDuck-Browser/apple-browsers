@@ -26,14 +26,14 @@ import os.log
 
 final class VPNRedditSessionWorkaround {
 
-    private let accountManager: AccountManager
+    private let subscriptionManager: any SubscriptionAuthV1toV2Bridge
     private let ipcClient: VPNControllerXPCClient
     private let statusReporter: NetworkProtectionStatusReporter
 
-    init(accountManager: AccountManager,
+    init(subscriptionManager: any SubscriptionAuthV1toV2Bridge,
          ipcClient: VPNControllerXPCClient = .shared,
          statusReporter: NetworkProtectionStatusReporter) {
-        self.accountManager = accountManager
+        self.subscriptionManager = subscriptionManager
         self.ipcClient = ipcClient
         self.statusReporter = statusReporter
         self.statusReporter.forceRefresh()
@@ -53,7 +53,7 @@ final class VPNRedditSessionWorkaround {
 
     @MainActor
     func installRedditSessionWorkaround(to cookieStore: WKHTTPCookieStore) async {
-        guard accountManager.isUserAuthenticated,
+        guard subscriptionManager.isUserAuthenticated,
               statusReporter.statusObserver.recentValue.isConnected,
             let redditSessionCookie = HTTPCookie.emptyRedditSession else {
             return

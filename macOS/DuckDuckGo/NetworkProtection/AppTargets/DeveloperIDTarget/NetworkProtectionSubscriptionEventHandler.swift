@@ -26,14 +26,14 @@ import os.log
 
 final class NetworkProtectionSubscriptionEventHandler {
 
-    private let subscriptionManager: SubscriptionManager
+    private let subscriptionManager: any SubscriptionAuthV1toV2Bridge
     private let tunnelController: TunnelController
     private let networkProtectionTokenStorage: NetworkProtectionTokenStore
     private let vpnUninstaller: VPNUninstalling
     private let userDefaults: UserDefaults
     private var cancellables = Set<AnyCancellable>()
 
-    init(subscriptionManager: SubscriptionManager,
+    init(subscriptionManager: any SubscriptionAuthV1toV2Bridge,
          tunnelController: TunnelController,
          networkProtectionTokenStorage: NetworkProtectionTokenStore = NetworkProtectionKeychainTokenStore(),
          vpnUninstaller: VPNUninstalling,
@@ -49,14 +49,7 @@ final class NetworkProtectionSubscriptionEventHandler {
 
     private func subscribeToEntitlementChanges() {
         Task {
-            switch await subscriptionManager.accountManager.hasEntitlement(forProductName: .networkProtection) {
-            case .success(let hasEntitlements):
-                Task {
-                    await handleEntitlementsChange(hasEntitlements: hasEntitlements)
-                }
-            case .failure:
-                break
-            }
+            await handleEntitlementsChange(hasEntitlements: await subscriptionManager.isEnabled(feature: .networkProtection))
 
             NotificationCenter.default
                 .publisher(for: .entitlementsDidChange)
@@ -98,7 +91,7 @@ final class NetworkProtectionSubscriptionEventHandler {
     }
 
     @objc private func handleAccountDidSignIn() {
-        guard subscriptionManager.accountManager.accessToken != nil else {
+        guard subscriptionManager.isUserAuthenticated else {
             assertionFailure("[NetP Subscription] AccountManager signed in but token could not be retrieved")
             return
         }
