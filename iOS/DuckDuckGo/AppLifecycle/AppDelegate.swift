@@ -19,6 +19,7 @@
 
 import UIKit
 import Core
+import os.log
 
 @UIApplicationMain class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -28,6 +29,13 @@ import Core
 
     /// See: `Launching.swift`
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        if #available(iOS 18.2, *) {
+            (1...10).forEach { i in
+                DispatchQueue.main.asyncAfter(deadline: .now() + TimeInterval(i)) {
+                    let isDefaultBrowser = DefaultBrowserChecker().isDefaultBrowser()
+                }
+            }
+        }
         let isTesting: Bool = ProcessInfo().arguments.contains("testing")
         appStateMachine.handle(.didFinishLaunching(isTesting: isTesting))
         return true
