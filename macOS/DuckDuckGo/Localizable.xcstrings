@@ -66118,6 +66118,9 @@
         }
       }
     },
+    "today" : {
+      "comment" : "Date section in history view indicating current day"
+    },
     "tooltip.addToFavorites" : {
       "comment" : "Tooltip for add to favorites button",
       "extractionState" : "extracted_with_value",
@@ -73913,6 +73916,9 @@
           }
         }
       }
+    },
+    "yesterday" : {
+      "comment" : "Date section in history view indicating previous day"
     },
     "You'll be asked to enter your Primary Password for %@.\n\nImported passwords are encrypted and only stored on this computer." : {
       "comment" : "Warning that Firefox-based browser name (%@) data import would require entering a Primary Password for the browser.",
