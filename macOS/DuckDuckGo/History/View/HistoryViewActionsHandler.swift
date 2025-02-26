@@ -33,6 +33,9 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         }
 
         let visitsCount = await dataProvider.countVisibleVisits(for: range)
+        guard visitsCount > 0 else {
+            return .noAction
+        }
 
         let response: HistoryViewDeleteDialogModel.Response = await withCheckedContinuation { continuation in
             let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
