@@ -26,6 +26,10 @@ import os.log
 
 final class HistoryMenu: NSMenu {
 
+    enum Location: Equatable {
+        case mainMenu, moreOptionsMenu
+    }
+
     let backMenuItem = NSMenuItem(title: UserText.navigateBack, action: #selector(MainViewController.back), keyEquivalent: "[")
     let forwardMenuItem = NSMenuItem(title: UserText.navigateForward, action: #selector(MainViewController.forward), keyEquivalent: "]")
 
@@ -45,25 +49,36 @@ final class HistoryMenu: NSMenu {
     private let featureFlagger: FeatureFlagger
     @MainActor
     private let reopenMenuItemKeyEquivalentManager = ReopenMenuItemKeyEquivalentManager()
+    private let location: Location
 
     @MainActor
-    init(historyGroupingProvider: HistoryGroupingProvider = .init(dataSource: HistoryCoordinator.shared), featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger) {
+    init(location: Location = .mainMenu, historyGroupingProvider: HistoryGroupingProvider = .init(dataSource: HistoryCoordinator.shared), featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger) {
+        self.location = location
         self.historyGroupingProvider = historyGroupingProvider
         self.featureFlagger = featureFlagger
 
         super.init(title: UserText.mainMenuHistory)
 
         self.buildItems {
-            backMenuItem
-            forwardMenuItem
+            switch location {
+            case .mainMenu:
+                backMenuItem
+                forwardMenuItem
+            case .moreOptionsMenu:
+                showHistoryMenuItem
+            }
+
             NSMenuItem.separator()
 
             reopenLastClosedMenuItem
             recentlyClosedMenuItem
             reopenAllWindowsFromLastSessionMenuItem
+            NSMenuItem.separator()
 
-            showHistorySeparator
-            showHistoryMenuItem
+            if location == .mainMenu {
+                showHistorySeparator
+                showHistoryMenuItem
+            }
             clearAllHistorySeparator
             clearAllHistoryMenuItem
         }
@@ -97,7 +112,7 @@ final class HistoryMenu: NSMenu {
             recentlyVisitedMenuItems.contains(menuItem) ||
             historyGroupingsMenuItems.contains(menuItem) ||
             menuItem == clearAllHistoryMenuItem ||
-            menuItem == showHistoryMenuItem
+            (menuItem == showHistoryMenuItem && location == .mainMenu)
         }
     }
 
@@ -270,7 +285,7 @@ final class HistoryMenu: NSMenu {
     // MARK: - Clear All History
 
     private func addClearAllAndShowHistoryOnTheBottom() {
-        if featureFlagger.isFeatureOn(.historyView) {
+        if featureFlagger.isFeatureOn(.historyView) && location == .mainMenu {
             if showHistorySeparator.menu != nil {
                 removeItem(showHistorySeparator)
             }
