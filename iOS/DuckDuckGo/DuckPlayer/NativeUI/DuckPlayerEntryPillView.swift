@@ -2,7 +2,7 @@
 //  DuckPlayerBottomSheetView.swift
 //  DuckDuckGo
 //
-//  Copyright © 2024 DuckDuckGo. All rights reserved.
+//  Copyright 2024 DuckDuckGo. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -23,6 +23,10 @@ import DesignResourcesKit
 struct DuckPlayerEntryPillView: View {
     @ObservedObject var viewModel: DuckPlayerEntryPillViewModel
     
+    // Add state to track the height
+    @State private var viewHeight: CGFloat = 100
+    @State private var iconSize: CGFloat = 40
+
     struct Constants {
         static let daxLogo = "Home"
         static let playImage = "play.fill"
@@ -45,7 +49,7 @@ struct DuckPlayerEntryPillView: View {
                     Image(systemName: Constants.playImage)
                         .font(.system(size: 20))
                         .foregroundColor(.white)
-                        .frame(width: 40, height: 40)
+                        .frame(width: iconSize, height: iconSize)
                         .background(Color.blue)
                         .clipShape(Circle())
             
@@ -60,7 +64,17 @@ struct DuckPlayerEntryPillView: View {
     }
     
     var body: some View {        
-        sheetContent                        
+        sheetContent
+            .frame(height: viewHeight)
+            .onAppear {
+                // Delay the height animation by 2 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    // Use withAnimation to ensure the change is animated
+                    withAnimation(.spring(duration: 0.5)) {
+                        iconSize = 600
+                    }
+                }
+            }                      
     }
 }
 

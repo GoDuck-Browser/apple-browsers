@@ -137,8 +137,7 @@ final class DuckPlayerNativeUIPresenter {
         NSLayoutConstraint.activate([   
             hostingController.view.leadingAnchor.constraint(equalTo: hostView.view.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: hostView.view.trailingAnchor),
-            bottomConstraint!,            
-            hostingController.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 20)
+            bottomConstraint!           
         ])
                 
         // Store reference to the hosting controller

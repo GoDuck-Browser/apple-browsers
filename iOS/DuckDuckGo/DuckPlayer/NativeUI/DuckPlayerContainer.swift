@@ -55,7 +55,7 @@ public enum DuckPlayerContainer {
       self.hasBackground = hasBackground
       self.content = content
     }
-
+  
     @ViewBuilder private func sheet(containerHeight: Double) -> some View {
       SheetView(
         viewModel: viewModel,
@@ -67,6 +67,9 @@ public enum DuckPlayerContainer {
 
     public var body: some View {
       VStack(spacing: 0) {
+        // Add a spacer at the top to push content to the bottom
+        Spacer(minLength: 0)
+        
         if hasBackground {
           Color.black
             .ignoresSafeArea()
@@ -77,7 +80,7 @@ public enum DuckPlayerContainer {
         
         // Use a fixed container height for offset calculations
         sheet(containerHeight: 300)
-          .frame(maxHeight: .infinity, alignment: .bottom)            
+          .frame(alignment: .bottom)            
       }
     }
   }
