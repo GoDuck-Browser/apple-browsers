@@ -406,7 +406,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
         guard let hostView = hostView else { return }
         
         Task { @MainActor in
-            let publishers = await nativeUIPresenter.presentDuckPlayer(videoID: videoID, source: source, in: hostView)
+            let publishers = nativeUIPresenter.presentDuckPlayer(videoID: videoID, source: source, in: hostView)
             
             publishers.navigation
                 .sink { [weak self] url in

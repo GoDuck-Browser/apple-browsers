@@ -848,21 +848,8 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         // Present Bottom Sheet (Native entry point) with delay
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
             
-            // First phase: try every 0.05s for 1 second
-            Task { @MainActor in
-                let startTime = Date()
-                
-                // Temporarily pause media playback during page transition
-                // The pause is applied repeatedly for 1 second to ensure it takes effect
-                // even if the DOM is changing during early initialization
-                // Once the page has loaded, the JS mutation observer takes care
-                // Of pausing newly added elements. 
-                while Date().timeIntervalSince(startTime) < 1.0 {
-                    self.toggleMediaPlayback(webView, pause: true)
-                    try? await Task.sleep(nanoseconds: 50_000_000)
-                }
-
-            }
+            // Pause video
+            Task { await pauseVideoStart(webView: webView) }
             
             // If we're not in a Watch main page, hide
             // the pill.  Youtube adds #fragments to Watch main pages
@@ -911,6 +898,24 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         return .notHandled(.isNotYoutubeWatch)
     }
     
+    // Temporarily pause media playback during page transition
+    // The pause is applied repeatedly for 1 second to ensure it takes effect
+    // even if the DOM is changing during early initialization
+    // Once the page has loaded, the JS mutation observer takes care
+    // Of pausing newly added elements. 
+    private func pauseVideoStart(webView: WKWebView) async {
+        // First phase: try every 0.05s for 1 second
+        Task { @MainActor in
+            let startTime = Date()            
+            
+            while Date().timeIntervalSince(startTime) < 1.0 {
+                self.toggleMediaPlayback(webView, pause: true)
+                try? await Task.sleep(nanoseconds: 50_000_000)
+            }
+
+        }
+    }
+
     /// Custom back navigation logic to handle Duck Player in the web view's history stack.
     ///
     /// - Parameter webView: The `WKWebView` to navigate back in.

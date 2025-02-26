@@ -2,7 +2,7 @@
 //  DuckPlayerContainer.swift
 //  DuckDuckGo
 //
-//  Copyright © 2025 DuckDuckGo. All rights reserved.
+//  Copyright 2025 DuckDuckGo. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -23,6 +23,21 @@ private let sheetTopMargin = 44.0
 
 public enum DuckPlayerContainer {
 
+  public struct Constants {
+    enum Animation {
+      static let easeInOutDuration: Double = 0.3
+      static let shortDuration: Double = 0.2
+      static let springDuration: Double = 0.5
+      static let springBounce: Double = 0.2
+    }
+    
+    enum Offset {
+      static let extraHeight: Double = 200.0
+      static let initialValue: Double = 10000.0
+      static let fixedContainerHeight: Double = 300.0
+    }
+  }
+
   public struct PresentationMetrics {
     public let contentWidth: Double
   }
@@ -32,6 +47,12 @@ public enum DuckPlayerContainer {
     @Published public private(set) var sheetVisible = false        
 
     private var subscriptions = Set<AnyCancellable>()
+    
+    private var shouldAnimate = true
+    
+    public var springAnimation: Animation? {
+      shouldAnimate ? .spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0) : nil
+    }
 
     public func show() {      
       sheetVisible = true
@@ -74,11 +95,11 @@ public enum DuckPlayerContainer {
           Color.black
             .ignoresSafeArea()
             .opacity(viewModel.sheetVisible ? 1 : 0)
-            .animation(.easeInOut(duration: 0.2), value: viewModel.sheetVisible)                          
+            .animation(viewModel.springAnimation, value: viewModel.sheetVisible)                          
         }
         
         // Use a fixed container height for offset calculations
-        sheet(containerHeight: 300)
+        sheet(containerHeight: DuckPlayerContainer.Constants.Offset.fixedContainerHeight)
           .frame(alignment: .bottom)            
       }
     }
@@ -88,7 +109,7 @@ public enum DuckPlayerContainer {
 // MARK: - Private
 
 private func calculateSheetOffset(for visible: Bool, containerHeight: Double) -> Double {
-  visible ? 0 : containerHeight + 200
+  visible ? 0 : containerHeight + DuckPlayerContainer.Constants.Offset.extraHeight
 }
 
 @MainActor
@@ -101,7 +122,7 @@ private struct SheetView<Content: View>: View {
   @State private var sheetHeight: Double = 0
   @State private var sheetWidth: Double?
   @State private var opacity: Double = 0
-  @State private var sheetOffset = 10000.0
+  @State private var sheetOffset = DuckPlayerContainer.Constants.Offset.initialValue
 
   var body: some View {
     VStack(alignment: .center) {      
@@ -116,7 +137,7 @@ private struct SheetView<Content: View>: View {
     .frame(maxWidth: .infinity)
     .offset(y: sheetOffset)
     .opacity(opacity)
-    .animation(.easeInOut(duration: 0.3), value: opacity)
+    .animation(.easeInOut(duration: DuckPlayerContainer.Constants.Animation.easeInOutDuration), value: opacity)
     
     .onAppear {
       sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
@@ -124,19 +145,19 @@ private struct SheetView<Content: View>: View {
     }
         
     .onChange(of: viewModel.sheetVisible) { sheetVisible in
-      withAnimation(.spring(duration: 0.5, bounce: 0.2)) {
+      withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
         sheetOffset = calculateSheetOffset(for: sheetVisible, containerHeight: containerHeight)
       }
-      withAnimation(.easeInOut(duration: 0.5)) {
+      withAnimation(viewModel.springAnimation) {
         opacity = sheetVisible ? 1 : 0
       }
     }
 
     .onChange(of: containerHeight) { containerHeight in
-      withAnimation(.spring(duration: 0.5, bounce: 0.2)) {
+      withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
         sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
       }
-      withAnimation(.easeInOut(duration: 0.5)) {
+      withAnimation(viewModel.springAnimation) {
         opacity = viewModel.sheetVisible ? 1 : 0
       }
     }    
