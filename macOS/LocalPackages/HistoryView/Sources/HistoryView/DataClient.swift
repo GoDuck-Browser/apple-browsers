@@ -60,6 +60,7 @@ public final class DataClient: HistoryViewUserScriptClient {
         case initialSetup
         case getRanges
         case deleteRange
+        case deleteTerm
         case open
         case query
         case entriesMenu = "entries_menu"
@@ -73,6 +74,7 @@ public final class DataClient: HistoryViewUserScriptClient {
             MessageName.initialSetup.rawValue: { [weak self] in try await self?.initialSetup(params: $0, original: $1) },
             MessageName.getRanges.rawValue: { [weak self] in try await self?.getRanges(params: $0, original: $1) },
             MessageName.deleteRange.rawValue: { [weak self] in try await self?.deleteRange(params: $0, original: $1) },
+            MessageName.deleteTerm.rawValue: { [weak self] in try await self?.deleteTerm(params: $0, original: $1) },
             MessageName.query.rawValue: { [weak self] in try await self?.query(params: $0, original: $1) },
             MessageName.open.rawValue: { [weak self] in try await self?.open(params: $0, original: $1) },
             MessageName.entriesMenu.rawValue: { [weak self] in try await self?.entriesMenu(params: $0, original: $1) },
@@ -108,6 +110,13 @@ public final class DataClient: HistoryViewUserScriptClient {
     private func deleteRange(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         guard let request: DataModel.DeleteRangeRequest = DecodableHelper.decode(from: params) else { return nil }
         let action = await actionsHandler.showDeleteDialog(for: request.range)
+        return DataModel.DeleteRangeResponse(action: action)
+    }
+
+    @MainActor
+    private func deleteTerm(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        guard let request: DataModel.DeleteTermRequest = DecodableHelper.decode(from: params) else { return nil }
+        let action = await actionsHandler.showDeleteDialog(for: request.term)
         return DataModel.DeleteRangeResponse(action: action)
     }
 

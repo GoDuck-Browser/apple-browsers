@@ -156,6 +156,14 @@ extension DataModel {
         let range: HistoryRange
     }
 
+    struct DeleteTermRequest: Codable, Equatable {
+        let term: String
+    }
+
+    struct DeleteTermResponse: Codable, Equatable {
+        let action: DeleteDialogResponse
+    }
+
     struct DeleteRangeResponse: Codable, Equatable {
         let action: DeleteDialogResponse
     }

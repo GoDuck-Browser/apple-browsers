@@ -66,6 +66,35 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         await showDeleteDialog(for: entries.compactMap(VisitIdentifier.init))
     }
 
+    func showDeleteDialog(for searchTerm: String) async -> DataModel.DeleteDialogResponse {
+        guard let dataProvider, !searchTerm.isEmpty else {
+            return .noAction
+        }
+
+        let visitsCount = await dataProvider.countVisibleVisits(matching: searchTerm)
+
+        let response: HistoryViewDeleteDialogModel.Response = await withCheckedContinuation { continuation in
+            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
+            let model = HistoryViewDeleteDialogModel(entriesCount: visitsCount)
+            let dialog = HistoryViewDeleteDialog(model: model)
+            dialog.show(in: parentWindow) {
+                continuation.resume(returning: model.response)
+            }
+        }
+
+        switch response {
+        case .burn:
+            await dataProvider.burnVisits(matching: searchTerm)
+            return .delete
+        case .delete:
+            await dataProvider.deleteVisits(matching: searchTerm)
+            return .delete
+        default:
+            return .noAction
+        }
+
+    }
+
     @MainActor
     func showContextMenu(for entries: [String], using presenter: any ContextMenuPresenting) async -> DataModel.DeleteDialogResponse {
         contextMenuResponse = .noAction

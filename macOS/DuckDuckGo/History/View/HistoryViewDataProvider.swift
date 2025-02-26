@@ -85,6 +85,10 @@ protocol HistoryViewDataProviding: HistoryView.DataProviding {
     func countVisibleVisits(for range: DataModel.HistoryRange) async -> Int
     func deleteVisits(for identifiers: [VisitIdentifier]) async
     func burnVisits(for identifiers: [VisitIdentifier]) async
+
+    func countVisibleVisits(matching searchTerm: String) async -> Int
+    func deleteVisits(matching searchTerm: String) async
+    func burnVisits(matching searchTerm: String) async
 }
 
 final class HistoryViewDataProvider: HistoryViewDataProviding {
@@ -151,6 +155,26 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         await resetCache()
     }
 
+    func countVisibleVisits(matching searchTerm: String) async -> Int {
+        guard let lastQuery, lastQuery.query == .searchTerm(searchTerm) else {
+            let items = perform(.searchTerm(searchTerm))
+            return items.count
+        }
+        return lastQuery.items.count
+    }
+
+    func deleteVisits(matching searchTerm: String) async {
+        let visits = await allVisits(matching: searchTerm)
+        await historyDataSource.delete(visits)
+        await resetCache()
+    }
+
+    func burnVisits(matching searchTerm: String) async {
+        let visits = await allVisits(matching: searchTerm)
+        await historyBurner.burn(visits, animated: false)
+        await resetCache()
+    }
+
     // MARK: - Private
 
     @MainActor
@@ -195,12 +219,22 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         return allVisits.filter { dateRange.contains($0.date) }
     }
 
+    private func allVisits(matching searchTerm: String) async -> [Visit] {
+        guard let history = await fetchHistory() else {
+            return []
+        }
+
+        return history.reduce(into: [Visit]()) { partialResult, historyEntry in
+            if historyEntry.matches(searchTerm) {
+                partialResult.append(contentsOf: historyEntry.visits)
+            }
+        }
+    }
+
     private func visits(for identifiers: [VisitIdentifier]) async -> [Visit] {
         guard let historyDictionary = historyDataSource.historyDictionary else {
             return []
         }
-
-        let date = lastQuery?.date ?? dateFormatter.currentDate()
 
         return identifiers.reduce(into: [Visit]()) { partialResult, identifier in
             guard let visitsForIdentifier = historyDictionary[identifier.url]?.visits else {
@@ -233,7 +267,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
             case .rangeFilter(let range):
                 return groupings.first(where: { $0.range == range })?.items ?? []
             case .searchTerm(let term):
-                return historyItems.filter { $0.title.localizedCaseInsensitiveContains(term) || $0.url.localizedCaseInsensitiveContains(term) }
+                return historyItems.filter { $0.matches(term) }
             case .domainFilter(let domain):
                 return historyItems.filter { URL(string: $0.url)?.host == domain }
             }
@@ -261,6 +295,22 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
     }
 
     private var lastQuery: QueryInfo?
+}
+
+protocol SearchableHistoryEntry {
+    func matches(_ searchTerm: String) -> Bool
+}
+
+extension HistoryEntry: SearchableHistoryEntry {
+    func matches(_ searchTerm: String) -> Bool {
+        (title ?? "").localizedCaseInsensitiveContains(searchTerm) || url.absoluteString.localizedCaseInsensitiveContains(searchTerm)
+    }
+}
+
+extension HistoryView.DataModel.HistoryItem: SearchableHistoryEntry {
+    func matches(_ searchTerm: String) -> Bool {
+        title.localizedCaseInsensitiveContains(searchTerm) || url.localizedCaseInsensitiveContains(searchTerm)
+    }
 }
 
 extension HistoryView.DataModel.HistoryItem {
