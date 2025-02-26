@@ -61,7 +61,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return .noAction
         }
 
-        let visitsCount = await dataProvider.countVisibleVisits(for: range)
+        let visitsCount = await dataProvider.countVisibleVisits(matching: .rangeFilter(range))
         guard visitsCount > 0 else {
             return .noAction
         }
@@ -82,10 +82,10 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
         switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: deleteMode) {
         case .burn:
-            await dataProvider.burnVisits(for: range)
+            await dataProvider.burnVisits(matching: .rangeFilter(range))
             return .delete
         case .delete:
-            await dataProvider.deleteVisits(for: range)
+            await dataProvider.deleteVisits(matching: .rangeFilter(range))
             return .delete
         default:
             return .noAction
@@ -101,19 +101,37 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return .noAction
         }
 
-        let visitsCount = await dataProvider.countVisibleVisits(matching: searchTerm)
+        let visitsCount = await dataProvider.countVisibleVisits(matching: .searchTerm(searchTerm))
 
         switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: .unspecified) {
         case .burn:
-            await dataProvider.burnVisits(matching: searchTerm)
+            await dataProvider.burnVisits(matching: .searchTerm(searchTerm))
             return .delete
         case .delete:
-            await dataProvider.deleteVisits(matching: searchTerm)
+            await dataProvider.deleteVisits(matching: .searchTerm(searchTerm))
             return .delete
         default:
             return .noAction
         }
+    }
 
+    func showDeleteDialog(forDomain domain: String) async -> DataModel.DeleteDialogResponse {
+        guard let dataProvider, !domain.isEmpty else {
+            return .noAction
+        }
+
+        let visitsCount = await dataProvider.countVisibleVisits(matching: .domainFilter(domain))
+
+        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: .unspecified) {
+        case .burn:
+            await dataProvider.burnVisits(matching: .domainFilter(domain))
+            return .delete
+        case .delete:
+            await dataProvider.deleteVisits(matching: .domainFilter(domain))
+            return .delete
+        default:
+            return .noAction
+        }
     }
 
     @MainActor

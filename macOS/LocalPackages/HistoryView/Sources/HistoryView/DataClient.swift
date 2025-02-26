@@ -27,8 +27,8 @@ public protocol DataProviding: AnyObject {
     var ranges: [DataModel.HistoryRange] { get }
     func refreshData() async
     func visitsBatch(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> DataModel.HistoryItemsBatch
-    func deleteVisits(for range: DataModel.HistoryRange) async
-    func burnVisits(for range: DataModel.HistoryRange) async
+    func deleteVisits(matching query: DataModel.HistoryQueryKind) async
+    func burnVisits(matching query: DataModel.HistoryQueryKind) async
 }
 
 public enum HistoryViewEvent: Equatable {
@@ -59,6 +59,7 @@ public final class DataClient: HistoryViewUserScriptClient {
     enum MessageName: String, CaseIterable {
         case initialSetup
         case getRanges
+        case deleteDomain
         case deleteRange
         case deleteTerm
         case open
@@ -73,6 +74,7 @@ public final class DataClient: HistoryViewUserScriptClient {
         userScript.registerMessageHandlers([
             MessageName.initialSetup.rawValue: { [weak self] in try await self?.initialSetup(params: $0, original: $1) },
             MessageName.getRanges.rawValue: { [weak self] in try await self?.getRanges(params: $0, original: $1) },
+            MessageName.deleteDomain.rawValue: { [weak self] in try await self?.deleteDomain(params: $0, original: $1) },
             MessageName.deleteRange.rawValue: { [weak self] in try await self?.deleteRange(params: $0, original: $1) },
             MessageName.deleteTerm.rawValue: { [weak self] in try await self?.deleteTerm(params: $0, original: $1) },
             MessageName.query.rawValue: { [weak self] in try await self?.query(params: $0, original: $1) },
@@ -104,6 +106,13 @@ public final class DataClient: HistoryViewUserScriptClient {
     @MainActor
     private func getRanges(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         DataModel.GetRangesResponse(ranges: dataProvider.ranges)
+    }
+
+    @MainActor
+    private func deleteDomain(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        guard let request: DataModel.DeleteDomainRequest = DecodableHelper.decode(from: params) else { return nil }
+        let action = await actionsHandler.showDeleteDialog(forDomain: request.domain)
+        return DataModel.DeleteRangeResponse(action: action)
     }
 
     @MainActor

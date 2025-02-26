@@ -152,6 +152,10 @@ extension DataModel {
         let ranges: [HistoryRange]
     }
 
+    struct DeleteDomainRequest: Codable, Equatable {
+        let domain: String
+    }
+
     struct DeleteRangeRequest: Codable, Equatable {
         let range: HistoryRange
     }

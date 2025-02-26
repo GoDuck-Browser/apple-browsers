@@ -568,7 +568,7 @@ extension MainViewController {
             Task {
                 let historyViewDataProvider = HistoryViewDataProvider(historyDataSource: HistoryCoordinator.shared)
                 await historyViewDataProvider.refreshData()
-                let visitsCount = await historyViewDataProvider.countVisibleVisits(for: .all)
+                let visitsCount = await historyViewDataProvider.countVisibleVisits(matching: .rangeFilter(.all))
 
                 let presenter = DefaultHistoryViewDeleteDialogPresenter()
                 switch await presenter.showDialog(for: visitsCount, deleteMode: .all) {
