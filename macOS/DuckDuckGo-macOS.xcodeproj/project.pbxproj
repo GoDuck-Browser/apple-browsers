@@ -1215,6 +1215,8 @@
 		378F44EC29B4C73E00899924 /* ViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 378F44EA29B4C73E00899924 /* ViewExtension.swift */; };
 		379026D12C650CCD00A089E8 /* UserBackgroundImagesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379026D02C650CCD00A089E8 /* UserBackgroundImagesManager.swift */; };
 		379026D22C650CCD00A089E8 /* UserBackgroundImagesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379026D02C650CCD00A089E8 /* UserBackgroundImagesManager.swift */; };
+		37918CF92D6F341A00250F1A /* HistoryViewActionsHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37918CF82D6F341000250F1A /* HistoryViewActionsHandlerTests.swift */; };
+		37918CFA2D6F341A00250F1A /* HistoryViewActionsHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37918CF82D6F341000250F1A /* HistoryViewActionsHandlerTests.swift */; };
 		379230942D38527E0019E130 /* HistoryView in Frameworks */ = {isa = PBXBuildFile; productRef = 379230932D38527E0019E130 /* HistoryView */; };
 		379230962D3852860019E130 /* HistoryView in Frameworks */ = {isa = PBXBuildFile; productRef = 379230952D3852860019E130 /* HistoryView */; };
 		379230992D38565C0019E130 /* HistoryWebViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379230982D3856500019E130 /* HistoryWebViewModel.swift */; };
@@ -3884,6 +3886,7 @@
 		378F44E229B4B7B600899924 /* SwiftUIExtensions */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = SwiftUIExtensions; sourceTree = "<group>"; };
 		378F44EA29B4C73E00899924 /* ViewExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewExtension.swift; sourceTree = "<group>"; };
 		379026D02C650CCD00A089E8 /* UserBackgroundImagesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserBackgroundImagesManager.swift; sourceTree = "<group>"; };
+		37918CF82D6F341000250F1A /* HistoryViewActionsHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewActionsHandlerTests.swift; sourceTree = "<group>"; };
 		379230982D3856500019E130 /* HistoryWebViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryWebViewModel.swift; sourceTree = "<group>"; };
 		3797C79F2C61806500DA77FB /* HomePageSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePageSettingsView.swift; sourceTree = "<group>"; };
 		3797C7A22C62C38800DA77FB /* HomePageSettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePageSettingsModel.swift; sourceTree = "<group>"; };
@@ -6237,6 +6240,14 @@
 				7B76E6852AD5D77600186A84 /* XPCHelper */,
 			);
 			path = LocalPackages;
+			sourceTree = "<group>";
+		};
+		37918CF72D6F340A00250F1A /* View */ = {
+			isa = PBXGroup;
+			children = (
+				37918CF82D6F341000250F1A /* HistoryViewActionsHandlerTests.swift */,
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 		379230972D3856390019E130 /* View */ = {
@@ -9302,6 +9313,7 @@
 		AAEC74AE2642C47300C2EFBC /* History */ = {
 			isa = PBXGroup;
 			children = (
+				37918CF72D6F340A00250F1A /* View */,
 				AAEC74AF2642C48800C2EFBC /* Model */,
 				AAEC74B02642C48B00C2EFBC /* Services */,
 			);
@@ -12896,6 +12908,7 @@
 				F1AFDBD72C23221700710F2C /* SubscriptionErrorReporterTests.swift in Sources */,
 				3706FE6E293F661700E42796 /* FirefoxBookmarksReaderTests.swift in Sources */,
 				4B9DB05B2A983B55000927DB /* MockWaitlistRequest.swift in Sources */,
+				37918CFA2D6F341A00250F1A /* HistoryViewActionsHandlerTests.swift in Sources */,
 				1D9FDEBE2B9B5F0F0040B78C /* CookiePopupProtectionPreferencesTests.swift in Sources */,
 				EEBBEF372CC145BA000CAAF1 /* AutofillCredentialsImportManagerTests.swift in Sources */,
 				028904212A7B25770028369C /* AppConfigurationURLProviderTests.swift in Sources */,
@@ -14421,6 +14434,7 @@
 				FD23FD2B28816606007F6985 /* AutoconsentMessageProtocolTests.swift in Sources */,
 				56A0543B2C20878E007D8FAB /* DuckSchemeHandlerTests.swift in Sources */,
 				1D77921A28FDC79800BE0210 /* FaviconStoringMock.swift in Sources */,
+				37918CF92D6F341A00250F1A /* HistoryViewActionsHandlerTests.swift in Sources */,
 				1D1C36E629FB019C001FA40C /* HistoryTabExtensionTests.swift in Sources */,
 				1D9FDEBD2B9B5F0F0040B78C /* CookiePopupProtectionPreferencesTests.swift in Sources */,
 				377D7BC22D0AC7E000ADFD06 /* NewTabPageNextStepsCardsProviderTests.swift in Sources */,
