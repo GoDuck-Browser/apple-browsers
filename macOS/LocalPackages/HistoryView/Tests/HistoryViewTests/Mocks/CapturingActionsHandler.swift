@@ -25,6 +25,10 @@ final class CapturingActionsHandler: ActionsHandling {
         return await showDeleteDialog(range)
     }
 
+    func showContextMenu(for entries: [String], using presenter: any ContextMenuPresenting) async -> DataModel.DeleteDialogResponse {
+        return .noAction
+    }
+
     func open(_ url: URL) {
         openCalls.append(url)
     }

@@ -21,6 +21,24 @@ import Foundation
 import History
 import HistoryView
 
+protocol HistoryDeleting: AnyObject {
+    func delete(_ visits: [Visit]) async
+}
+
+protocol HistoryDataSource: HistoryGroupingDataSource, HistoryDeleting {
+    var historyDictionary: [URL: HistoryEntry]? { get }
+}
+
+extension HistoryCoordinator: HistoryDataSource {
+    func delete(_ visits: [Visit]) async {
+        await withCheckedContinuation { continuation in
+            burnVisits(visits) {
+                continuation.resume()
+            }
+        }
+    }
+}
+
 protocol HistoryBurning: AnyObject {
     func burn(_ visits: [Visit], animated: Bool) async
 }
@@ -45,20 +63,6 @@ final class FireHistoryBurner: HistoryBurning {
     }
 }
 
-protocol HistoryDeleting: AnyObject {
-    func delete(_ visits: [Visit]) async
-}
-
-extension HistoryCoordinator: HistoryDeleting {
-    func delete(_ visits: [Visit]) async {
-        await withCheckedContinuation { continuation in
-            burnVisits(visits) {
-                continuation.resume()
-            }
-        }
-    }
-}
-
 struct HistoryViewGrouping {
     let range: DataModel.HistoryRange
     let items: [DataModel.HistoryItem]
@@ -77,18 +81,24 @@ struct HistoryViewGrouping {
     }
 }
 
-final class HistoryViewDataProvider: HistoryView.DataProviding {
+protocol HistoryViewDataProviding: HistoryView.DataProviding {
+    func countVisibleVisits(for range: DataModel.HistoryRange) async -> Int
+    func deleteVisits(for identifiers: [VisitIdentifier]) async
+    func burnVisits(for identifiers: [VisitIdentifier]) async
+}
+
+final class HistoryViewDataProvider: HistoryViewDataProviding {
 
     init(
-        historyGroupingDataSource: HistoryGroupingDataSource & HistoryDeleting,
+        historyDataSource: HistoryDataSource,
         historyBurner: HistoryBurning = FireHistoryBurner(),
         dateFormatter: HistoryViewDateFormatting = DefaultHistoryViewDateFormatter(),
         featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger
     ) {
         self.dateFormatter = dateFormatter
-        self.historyGroupingDataSource = historyGroupingDataSource
+        self.historyDataSource = historyDataSource
         self.historyBurner = historyBurner
-        historyGroupingProvider = HistoryGroupingProvider(dataSource: historyGroupingDataSource, featureFlagger: featureFlagger)
+        historyGroupingProvider = HistoryGroupingProvider(dataSource: historyDataSource, featureFlagger: featureFlagger)
     }
 
     var ranges: [DataModel.HistoryRange] {
@@ -118,7 +128,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
 
     func deleteVisits(for range: DataModel.HistoryRange) async {
         let visits = await allVisits(for: range)
-        await historyGroupingDataSource.delete(visits)
+        await historyDataSource.delete(visits)
         await resetCache()
     }
 
@@ -126,6 +136,18 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         let visits = await allVisits(for: range)
         let animated = range == .today || range == .all
         await historyBurner.burn(visits, animated: animated)
+        await resetCache()
+    }
+
+    func deleteVisits(for identifiers: [VisitIdentifier]) async {
+        let visits = await visits(for: identifiers)
+        await historyDataSource.delete(visits)
+        await resetCache()
+    }
+
+    func burnVisits(for identifiers: [VisitIdentifier]) async {
+        let visits = await visits(for: identifiers)
+        await historyBurner.burn(visits, animated: false)
         await resetCache()
     }
 
@@ -173,6 +195,22 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
         return allVisits.filter { dateRange.contains($0.date) }
     }
 
+    private func visits(for identifiers: [VisitIdentifier]) async -> [Visit] {
+        guard let historyDictionary = historyDataSource.historyDictionary else {
+            return []
+        }
+
+        let date = lastQuery?.date ?? dateFormatter.currentDate()
+
+        return identifiers.reduce(into: [Visit]()) { partialResult, identifier in
+            guard let visitsForIdentifier = historyDictionary[identifier.url]?.visits else {
+                return
+            }
+            let visitsMatchingDay = visitsForIdentifier.filter { $0.date.isSameDay(identifier.date) }
+            partialResult.append(contentsOf: visitsMatchingDay)
+        }
+    }
+
     /**
      * This function is here to ensure that history is accessed on the main thread.
      *
@@ -180,7 +218,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
      */
     @MainActor
     private func fetchHistory() async -> BrowsingHistory? {
-        historyGroupingDataSource.history
+        historyDataSource.history
     }
 
     private func perform(_ query: DataModel.HistoryQueryKind) -> [DataModel.HistoryItem] {
@@ -206,7 +244,7 @@ final class HistoryViewDataProvider: HistoryView.DataProviding {
     }
 
     private let historyGroupingProvider: HistoryGroupingProvider
-    private let historyGroupingDataSource: HistoryGroupingDataSource & HistoryDeleting
+    private let historyDataSource: HistoryDataSource
     private let dateFormatter: HistoryViewDateFormatting
     private let historyBurner: HistoryBurning
 

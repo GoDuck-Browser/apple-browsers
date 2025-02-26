@@ -3505,9 +3505,6 @@
         }
       }
     },
-    "Also delete cookies and site data" : {
-
-    },
     "Always Show" : {
       "comment" : "Preference for always showing the bookmarks bar",
       "localizations" : {
@@ -17994,9 +17991,6 @@
         }
       }
     },
-    "Delete history?" : {
-
-    },
     "delete-bookmark" : {
       "comment" : "Delete Bookmark button",
       "extractionState" : "extracted_with_value",
@@ -18461,9 +18455,6 @@
           }
         }
       }
-    },
-    "Do you want to delete **%lld** history items?" : {
-
     },
     "domain-is-fireproof" : {
       "comment" : "Domain fireproof status",
@@ -66087,9 +66078,6 @@
           }
         }
       }
-    },
-    "This will log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted." : {
-
     },
     "tooltip.addToFavorites" : {
       "comment" : "Tooltip for add to favorites button",

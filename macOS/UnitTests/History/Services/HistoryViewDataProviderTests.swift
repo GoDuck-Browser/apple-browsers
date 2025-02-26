@@ -63,21 +63,31 @@ final class CapturingHistoryBurner: HistoryBurning {
     }
 }
 
+final class CapturingHistoryDataSource: HistoryDataSource {
+    func delete(_ visits: [Visit]) async {
+        deleteCalls.append(visits)
+    }
+
+    var history: BrowsingHistory? = []
+    var historyDictionary: [URL: HistoryEntry]? = [:]
+    var deleteCalls: [[Visit]] = []
+}
+
 final class HistoryViewDataProviderTests: XCTestCase {
     var provider: HistoryViewDataProvider!
-    var dataSource: CapturingHistoryGroupingDataSource!
+    var dataSource: CapturingHistoryDataSource!
     var burner: CapturingHistoryBurner!
     var dateFormatter: MockHistoryViewDateFormatter!
     var featureFlagger: MockFeatureFlagger!
 
     @MainActor
     override func setUp() async throws {
-        dataSource = CapturingHistoryGroupingDataSource()
+        dataSource = CapturingHistoryDataSource()
         burner = CapturingHistoryBurner()
         dateFormatter = MockHistoryViewDateFormatter()
         featureFlagger = MockFeatureFlagger()
         provider = HistoryViewDataProvider(
-            historyGroupingDataSource: dataSource,
+            historyDataSource: dataSource,
             historyBurner: burner,
             dateFormatter: dateFormatter,
             featureFlagger: featureFlagger

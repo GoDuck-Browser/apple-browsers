@@ -21,11 +21,12 @@ import SwiftUIExtensions
 
 final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
-    weak var dataProvider: HistoryView.DataProviding?
+    weak var dataProvider: HistoryViewDataProviding?
     private let bookmarkManager: BookmarkManager
     private var contextMenuResponse: DataModel.DeleteDialogResponse = .noAction
+    private var deleteDialogTask: Task<DataModel.DeleteDialogResponse, Never>?
 
-    init(dataProvider: HistoryView.DataProviding, bookmarkManager: BookmarkManager = LocalBookmarkManager.shared) {
+    init(dataProvider: HistoryViewDataProviding, bookmarkManager: BookmarkManager = LocalBookmarkManager.shared) {
         self.dataProvider = dataProvider
         self.bookmarkManager = bookmarkManager
     }
@@ -120,11 +121,15 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             }
 
             NSMenuItem.separator()
-            NSMenuItem(title: UserText.delete, action: #selector(delete(_:)), target: self)
+            NSMenuItem(title: UserText.delete, action: #selector(delete(_:)), target: self, representedObject: identifiers)
                 .withAccessibilityIdentifier("HistoryView.delete")
         }
 
         presenter.showContextMenu(menu)
+        if let deleteDialogResponse = await deleteDialogTask?.value {
+            deleteDialogTask = nil
+            contextMenuResponse = deleteDialogResponse
+        }
         return contextMenuResponse
     }
 
@@ -204,14 +209,43 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return
         }
 
-        Task { @MainActor in
+        deleteDialogTask = Task { @MainActor in
             await showDeleteDialog(for: identifiers)
         }
     }
 
     @MainActor
     private func showDeleteDialog(for identifiers: [VisitIdentifier]) async -> DataModel.DeleteDialogResponse {
-        return .noAction
+        guard let dataProvider, identifiers.count > 0 else {
+            return .noAction
+        }
+
+        guard identifiers.count > 1 else {
+            await dataProvider.deleteVisits(for: identifiers)
+            return .delete
+        }
+
+        let visitsCount = identifiers.count
+
+        let response: HistoryViewDeleteDialogModel.Response = await withCheckedContinuation { continuation in
+            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
+            let model = HistoryViewDeleteDialogModel(entriesCount: visitsCount)
+            let dialog = HistoryViewDeleteDialog(model: model)
+            dialog.show(in: parentWindow) {
+                continuation.resume(returning: model.response)
+            }
+        }
+
+        switch response {
+        case .burn:
+            await dataProvider.burnVisits(for: identifiers)
+            return .delete
+        case .delete:
+            await dataProvider.deleteVisits(for: identifiers)
+            return .delete
+        default:
+            return .noAction
+        }
     }
 
     @MainActor
