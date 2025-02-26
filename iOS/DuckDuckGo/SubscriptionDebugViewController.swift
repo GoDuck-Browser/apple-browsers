@@ -327,7 +327,7 @@ final class SubscriptionDebugViewController: UITableViewController {
             }
         }
     }
-    
+
     private func clearAuthData() {
         if !AppDependencyProvider.shared.isAuthV2Enabled {
             clearAuthDataV1()
@@ -335,7 +335,7 @@ final class SubscriptionDebugViewController: UITableViewController {
             clearAuthDataV2()
         }
     }
-    
+
     private func clearAuthDataV1() {
         Task {
             await subscriptionManagerV1.signOut(notifyUI: true)
@@ -571,7 +571,7 @@ final class SubscriptionDebugViewController: UITableViewController {
 
         if newSubscriptionEnvironment.serviceEnvironment != currentSubscriptionEnvironment.serviceEnvironment {
             Task {
-                await subscriptionAuthV1toV2Bridge.signOut(notifyUI: true)
+                await AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge.signOut(notifyUI: true)
 
                 // Save Subscription environment
                 DefaultSubscriptionManager.save(subscriptionEnvironment: newSubscriptionEnvironment, userDefaults: subscriptionUserDefaults)
