@@ -282,7 +282,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
             case .searchTerm(let term):
                 return historyItems.filter { $0.matches(term) }
             case .domainFilter(let domain):
-                return historyItems.filter { URL(string: $0.url)?.host == domain }
+                return historyItems.filter { $0.etldPlusOne == domain }
             }
         }()
 
