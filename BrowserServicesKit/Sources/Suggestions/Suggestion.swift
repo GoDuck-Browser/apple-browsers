@@ -99,7 +99,7 @@ extension Suggestion {
                          allowedInTopHits: allowedInTopHits)
     }
 
-    init?(bookmark: Bookmark) {
+    public init?(bookmark: Bookmark) {
         guard let urlObject = URL(string: bookmark.url) else { return nil }
         self = .bookmark(title: bookmark.title,
                          url: urlObject,
@@ -107,7 +107,7 @@ extension Suggestion {
                          allowedInTopHits: bookmark.isFavorite)
     }
 
-    init(historyEntry: HistorySuggestion) {
+    public init(historyEntry: HistorySuggestion) {
         let areVisitsLow = historyEntry.numberOfVisits < 4
         let allowedInTopHits = !(historyEntry.failedToLoad ||
                                  (areVisitsLow && !historyEntry.url.isRoot))
@@ -116,19 +116,19 @@ extension Suggestion {
                              allowedInTopHits: allowedInTopHits)
     }
 
-    init(internalPage: InternalPage) {
+    public init(internalPage: InternalPage) {
         self = .internalPage(title: internalPage.title, url: internalPage.url)
     }
 
-    init(tab: BrowserTab) {
+    public init(tab: BrowserTab) {
         self = .openTab(title: tab.title, url: tab.url)
     }
 
-    init(url: URL) {
+    public init(url: URL) {
         self = .website(url: url)
     }
 
-    init(phrase: String, isNav: Bool) {
+    public init(phrase: String, isNav: Bool) {
         if isNav, let url = URL(string: "http://\(phrase)") {
             self = .website(url: url)
         } else {

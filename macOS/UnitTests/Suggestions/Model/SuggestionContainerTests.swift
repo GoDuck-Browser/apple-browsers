@@ -17,6 +17,8 @@
 //
 
 import Combine
+import History
+import NetworkingTestingUtils
 import Suggestions
 import XCTest
 
@@ -24,13 +26,17 @@ import XCTest
 
 final class SuggestionContainerTests: XCTestCase {
 
+    override class func tearDown() {
+        MockURLProtocol.requestHandler = nil
+    }
+
     func testWhenGetSuggestionsIsCalled_ThenContainerAsksAndHoldsSuggestionsFromLoader() {
         let suggestionLoadingMock = SuggestionLoadingMock()
-        let historyCoordinatingMock = HistoryCoordinatingMock()
+        let historyCoordinatingMock = HistoryProviderMock()
         let suggestionContainer = SuggestionContainer(openTabsProvider: { [] },
                                                       suggestionLoading: suggestionLoadingMock,
-                                                      historyCoordinating: historyCoordinatingMock,
-                                                      bookmarkManager: LocalBookmarkManager.shared,
+                                                      historyProvider: historyCoordinatingMock,
+                                                      bookmarkProvider: LocalBookmarkManager.shared,
                                                       burnerMode: .regular)
 
         let e = expectation(description: "Suggestions updated")
@@ -53,11 +59,11 @@ final class SuggestionContainerTests: XCTestCase {
 
     func testWhenStopGettingSuggestionsIsCalled_ThenNoSuggestionsArePublished() {
         let suggestionLoadingMock = SuggestionLoadingMock()
-        let historyCoordinatingMock = HistoryCoordinatingMock()
+        let historyCoordinatingMock = HistoryProviderMock()
         let suggestionContainer = SuggestionContainer(openTabsProvider: { [] },
                                                       suggestionLoading: suggestionLoadingMock,
-                                                      historyCoordinating: historyCoordinatingMock,
-                                                      bookmarkManager: LocalBookmarkManager.shared,
+                                                      historyProvider: historyCoordinatingMock,
+                                                      bookmarkProvider: LocalBookmarkManager.shared,
                                                       burnerMode: .regular)
 
         suggestionContainer.getSuggestions(for: "test")
@@ -70,11 +76,11 @@ final class SuggestionContainerTests: XCTestCase {
 
     func testSuggestionLoadingCacheClearing() {
         let suggestionLoadingMock = SuggestionLoadingMock()
-        let historyCoordinatingMock = HistoryCoordinatingMock()
+        let historyCoordinatingMock = HistoryProviderMock()
         let suggestionContainer = SuggestionContainer(openTabsProvider: { [] },
                                                       suggestionLoading: suggestionLoadingMock,
-                                                      historyCoordinating: historyCoordinatingMock,
-                                                      bookmarkManager: LocalBookmarkManager.shared,
+                                                      historyProvider: historyCoordinatingMock,
+                                                      bookmarkProvider: LocalBookmarkManager.shared,
                                                       burnerMode: .regular)
 
         XCTAssertNil(suggestionContainer.suggestionDataCache)
@@ -102,135 +108,168 @@ final class SuggestionContainerTests: XCTestCase {
     }
 
     @MainActor
-    func testStandardOpenTabProviderReturnsOpenTabsWithoutCurrentAndBurnerTabs() {
-        let openTabs: [[OpenTab]] = [
-            [
-                OpenTab(title: "Example", url: URL(string: "https://example.com")!),
-                OpenTab(title: "Selected Tab", url: URL(string: "https://another-example.com")!),
-                OpenTab(title: "New Tab", url: URL.newtab),
-                OpenTab(title: "Bookmarks", url: URL.bookmarks),
-                OpenTab(title: "Settings", url: URL.settings),
-                OpenTab(title: "Last Tab", url: URL(string: "https://last.com")!),
-            ],
-            [
-                OpenTab(title: "Yet Another Example", url: URL(string: "https://yet-another-example.com")!),
-                OpenTab(title: "Yet Another Example", url: URL(string: "https://yet-another-example.com")!), // duplicate
-                OpenTab(title: "Duplicate to Selected Tab", url: URL(string: "https://another-example.com")!),
-            ]
-        ]
-        let pinnedTabs = [
-            OpenTab(title: "Pinned tab 1", url: URL(string: "https://pinned-example.com")!),
-            OpenTab(title: "Pinned tab 2", url: URL(string: "https://pinned-example-2.com")!),
-        ]
-        let burnerTabs: [[OpenTab]] = [
-            [
-                OpenTab(title: "Burner example", url: URL(string: "https://burner-example.com")!),
-                OpenTab(title: "Burner example 2", url: URL(string: "https://burner-example-1.com")!),
-            ],
-            [
-                OpenTab(title: "Burner example 3", url: URL(string: "https://burner-example-2.com")!),
-            ]
-        ]
-
-        let suggestionLoadingMock = SuggestionLoadingMock()
-
-        let burnerMode = BurnerMode(isBurner: true)
-        // Create tab collection view models for open and burner tabs
-        let tabCollectionViewModels = openTabs.map {
-            TabCollectionViewModel(tabCollection: tabCollection($0), burnerMode: .regular)
-        } + burnerTabs.map {
-            TabCollectionViewModel(tabCollection: tabCollection($0, burnerMode: burnerMode), burnerMode: burnerMode)
+    func testSuggestionsJsonScenarios() async throws {
+        guard let directoryURL = Bundle(for: SuggestionContainerTests.self).url(forResource: "privacy-reference-tests/suggestions", withExtension: nil) else {
+            return XCTFail("Failed to locate the suggestions directory in the bundle")
         }
 
-        let windowControllersManagerMock = WindowControllersManagerMock(pinnedTabsManager: pinnedTabsManager(tabs: pinnedTabs),
-                                                                        tabCollectionViewModels: tabCollectionViewModels)
+        let fileURLs = try FileManager.default.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
 
-        // Set the selected tab to the first open tab
-        windowControllersManagerMock.selectedTab = tabCollectionViewModels.first!.tabCollection.tabs[1]
+        // Filter for JSON files
+        let jsonFiles = fileURLs.filter { $0.pathExtension == "json" }
 
-        // Create a suggestion container with the mock open tabs provider
-        let suggestionContainer = SuggestionContainer(burnerMode: .regular,
-                                                      windowControllersManager: windowControllersManagerMock)
+        for fileURL in jsonFiles {
+            // Load and decode each JSON file
+            let data = try Data(contentsOf: fileURL)
+            let testScenario: TestScenario
+            do {
+                testScenario = try JSONDecoder().decode(TestScenario.self, from: data)
+            } catch let error as NSError {
+                throw NSError(domain: error.domain, code: error.code, userInfo: error.userInfo.merging([NSFilePathErrorKey: fileURL.lastPathComponent]) { $1 })
+            }
 
-        // Get the standard open tabs
-        let openTabSuggestions = Set(suggestionContainer.openTabs(for: suggestionLoadingMock) as! [OpenTab])
-
-        // Verify that the standard tab provider returns the expected open tabs
-        let expectedOpenTabs = Set((openTabs.flatMap { $0 } + pinnedTabs).filter {
-            $0.url != windowControllersManagerMock.selectedTab?.content.userEditableUrl
-            && $0.title != "Duplicate Example"
-            && $0.url != .newtab
-        })
-        XCTAssertEqual(openTabSuggestions, expectedOpenTabs)
+            // Run the test for each scenario
+            try await runJsonTestScenario(testScenario, named: fileURL.deletingPathExtension().lastPathComponent)
+        }
     }
 
     @MainActor
-    func testStandardBurnerTabProviderReturnsCurrentSessionBurnerTabs() {
-        let openTabs: [[OpenTab]] = [
-            [
-                OpenTab(title: "Example", url: URL(string: "https://example.com")!),
-                OpenTab(title: "Selected Tab", url: URL(string: "https://another-example.com")!),
-            ],
-            [
-                OpenTab(title: "Yet Another Example", url: URL(string: "https://yet-another-example.com")!),
-                OpenTab(title: "Duplicate Example", url: URL(string: "https://yet-another-example.com")!),
-            ]
-        ]
-
-        let pinnedTabs = [
-            OpenTab(title: "Pinned tab 1", url: URL(string: "https://pinned-example.com")!),
-            OpenTab(title: "Pinned tab 2", url: URL(string: "https://pinned-example-2.com")!),
-        ]
-
-        let burnerTabs: [[OpenTab]] = [
-            [
-                OpenTab(title: "Burner example", url: URL(string: "https://burner-example.com")!),
-                OpenTab(title: "Burner example 2", url: URL(string: "https://burner-example-1.com")!),
-            ],
-            [
-                OpenTab(title: "Burner example 3", url: URL(string: "https://burner-example-2.com")!),
-                OpenTab(title: "Burner example 4", url: URL(string: "https://burner-example-3.com")!),
-                OpenTab(title: "Burner example 5", url: URL(string: "https://burner-example-4.com")!),
-            ]
-        ]
-
-        let suggestionLoadingMock = SuggestionLoadingMock()
-        let burnerModes = [
-            BurnerMode(isBurner: true),
-            BurnerMode(isBurner: true),
-        ]
+    private func runJsonTestScenario(_ testScenario: TestScenario, named name: String) async throws {
+        let input = testScenario.input
 
         // Create tab collection view models for open and burner tabs
-        let tabCollectionViewModels = openTabs.map {
-            TabCollectionViewModel(tabCollection: tabCollection($0), burnerMode: .regular)
-        } + burnerTabs.enumerated().map { (index, tabs) in
-            TabCollectionViewModel(tabCollection: tabCollection(tabs, burnerMode: burnerModes[index]), burnerMode: burnerModes[index])
+        let tabCollectionViewModels = input.windows.map { window in
+            TabCollectionViewModel(tabCollection: tabCollection(window.tabs.map(OpenTab.init)),
+                                   selectionIndex: window.selectedTab.type == .pinned ? .pinned(window.selectedTab.index) : .unpinned(window.selectedTab.index),
+                                   burnerMode: .regular)
         }
+        // Index of the window that is currently selected.
+        let selectedWindowIndices = input.windows.enumerated().filter { $0.element.isSelected }.map(\.offset)
+        guard selectedWindowIndices.count == 1 else { return XCTFail("Multiple selected windows are not supported: \(selectedWindowIndices)") }
+        let selectedWindow = selectedWindowIndices[0]
 
-        let windowControllersManagerMock = WindowControllersManagerMock(pinnedTabsManager: pinnedTabsManager(tabs: pinnedTabs),
-                                                                        tabCollectionViewModels: tabCollectionViewModels)
+        // Initialize a mock WindowControllersManager with pinned tabs, tab view models, and the selected window index for testing.
+        let windowControllersManagerMock = WindowControllersManagerMock(pinnedTabsManager: pinnedTabsManager(tabs: input.pinnedTabs),
+                                                                        tabCollectionViewModels: tabCollectionViewModels,
+                                                                        selectedWindow: selectedWindow)
 
-        // Set the selected tab to the first open tab
-        windowControllersManagerMock.selectedTab = tabCollectionViewModels.last!.tabCollection.tabs.first!
-
-        // Create a suggestion container with the mock open tabs provider in burner mode
-        let suggestionContainer = SuggestionContainer(burnerMode: burnerModes[1],
+        // Tested object
+        let suggestionContainer = SuggestionContainer(urlSession: .mock(),
+                                                      historyProvider: HistoryProviderMock(history: input.history),
+                                                      bookmarkProvider: BookmarkProviderMock(bookmarks: input.bookmarks),
+                                                      burnerMode: tabCollectionViewModels[selectedWindow].burnerMode,
                                                       windowControllersManager: windowControllersManagerMock)
 
-        // Get the open tabs for the container with burner mode
-        let openTabSuggestions = Set(suggestionContainer.openTabs(for: suggestionLoadingMock) as! [OpenTab])
-
-        // Verify that only the burner tabs from the current burner session are returned
-        let expectedBurnerTabs = Set(burnerTabs.flatMap { $0 })
-        let filteredExpectedBurnerTabs = expectedBurnerTabs.filter { tab in
-            // Ensure that we only include tabs from the current burner session
-            ["Burner example 4", "Burner example 5"].contains(tab.title)
+        // Mock API Suggestions response
+        MockURLProtocol.requestHandler = { request in
+            let urlComponents = URLComponents(string: request.url!.absoluteString)!
+            XCTAssertTrue(urlComponents.queryItems!.contains(URLQueryItem(name: "q", value: input.query)))
+            switch input.apiSuggestions {
+            case .suggestions(let suggestions):
+                var respData: Data?
+                do {
+                    respData = try JSONEncoder().encode(suggestions)
+                } catch {
+                    XCTFail("Could not encode API suggestions from \(name) to JSON: \(error)")
+                }
+                return (HTTPURLResponse.ok, respData)
+            case .error(let error):
+                return (HTTPURLResponse(url: request.url!,
+                                        statusCode: error.statusCode,
+                                        httpVersion: nil,
+                                        headerFields: [:])!, nil)
+            }
         }
-        XCTAssertEqual(openTabSuggestions, filteredExpectedBurnerTabs)
+
+        // Get the compiled suggestions
+        let resultPromise = suggestionContainer.$result.dropFirst().timeout(1).first().promise()
+        suggestionContainer.getSuggestions(for: input.query)
+        let result = try await resultPromise.get()
+
+        XCTAssertEqual(result, testScenario.expectation, "Incorrect results for \(name)")
     }
+
 }
 
-private extension SuggestionContainerTests {
+extension SuggestionContainerTests {
+
+    struct TestScenario: Decodable {
+        let description: String
+        let input: TestInput
+        let expectation: SuggestionResult
+    }
+
+    struct TestInput: Decodable {
+        let query: String
+        let bookmarks: [Bookmark]
+        let history: [HistoryEntry]
+        let pinnedTabs: [OpenTab]
+        let windows: [Window]
+        let apiSuggestions: ApiSuggestions
+
+        enum ApiSuggestions: Decodable {
+            case suggestions([Suggestions.APIResult.SuggestionResult])
+            case error(HTTPError)
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.singleValueContainer()
+                if let result = try? container.decode(Suggestions.APIResult.self) {
+                    self = .suggestions(result.items)
+                } else {
+                    self = try .error(.init(from: decoder))
+                }
+            }
+        }
+        struct HTTPError: Swift.Error, Decodable {
+            let statusCode: Int
+        }
+    }
+
+    struct Bookmark: Decodable, Suggestions.Bookmark {
+        let title: String
+        let url: String
+        let isFavorite: Bool
+    }
+
+    struct HistoryEntry: Decodable, Suggestions.HistorySuggestion {
+        var identifier: UUID
+        var title: String?
+        let url: URL
+        let numberOfVisits: Int
+        var lastVisit: Date
+        var failedToLoad: Bool
+    }
+
+    struct Window: Decodable {
+        enum WindowType: String, Decodable {
+            case regular
+            case fire
+            case popup
+        }
+        struct SelectedTab: Decodable {
+            enum TabType: String, Decodable {
+                case pinned
+                case regular
+            }
+            let type: TabType
+            let index: Int
+        }
+        let type: String
+        private let selected: Bool?
+        var isSelected: Bool { selected ?? false }
+        let selectedTab: SelectedTab
+        let tabs: [TabMock]
+    }
+
+    struct TabMock: Decodable {
+        let title: String
+        let url: URL
+    }
+
+    struct APISuggestion: Decodable {
+        let phrase: String
+        let isNav: Bool?
+    }
 
     class WindowControllersManagerMock: WindowControllersManagerProtocol {
         var mainWindowControllers: [DuckDuckGo_Privacy_Browser.MainWindowController] = []
@@ -258,16 +297,18 @@ private extension SuggestionContainerTests {
         func showTab(with content: DuckDuckGo_Privacy_Browser.Tab.TabContent) {
         }
 
-        var selectedTab: Tab?
         var allTabCollectionViewModels: [TabCollectionViewModel] = []
+        var selectedWindowIndex: Int
+        var selectedTab: Tab?
 
         func openNewWindow(with tabCollectionViewModel: DuckDuckGo_Privacy_Browser.TabCollectionViewModel?, burnerMode: DuckDuckGo_Privacy_Browser.BurnerMode, droppingPoint: NSPoint?, contentSize: NSSize?, showWindow: Bool, popUp: Bool, lazyLoadTabs: Bool, isMiniaturized: Bool, isMaximized: Bool, isFullscreen: Bool) -> DuckDuckGo_Privacy_Browser.MainWindow? {
             nil
         }
 
-        init(pinnedTabsManager: PinnedTabsManager, tabCollectionViewModels: [TabCollectionViewModel] = []) {
+        init(pinnedTabsManager: PinnedTabsManager, tabCollectionViewModels: [TabCollectionViewModel] = [], selectedWindow: Int = 0) {
             self.pinnedTabsManager = pinnedTabsManager
             self.allTabCollectionViewModels = tabCollectionViewModels
+            self.selectedWindowIndex = selectedWindow
         }
     }
 
@@ -284,4 +325,108 @@ private extension SuggestionContainerTests {
         PinnedTabsManager(tabCollection: tabCollection(tabs))
     }
 
+}
+private extension OpenTab {
+    init(_ tab: SuggestionContainerTests.TabMock) {
+        self.init(title: tab.title, url: tab.url)
+    }
+}
+class HistoryProviderMock: SuggestionContainer.HistoryProvider {
+    let history: [SuggestionContainerTests.HistoryEntry]
+
+    func history(for suggestionLoading: any Suggestions.SuggestionLoading) -> [any Suggestions.HistorySuggestion] {
+        history
+    }
+
+    init(history: [SuggestionContainerTests.HistoryEntry] = []) {
+        self.history = history
+    }
+}
+private class BookmarkProviderMock: SuggestionContainer.BookmarkProvider {
+    let bookmarks: [SuggestionContainerTests.Bookmark]
+    
+    func bookmarks(for suggestionLoading: any Suggestions.SuggestionLoading) -> [any Suggestions.Bookmark] {
+        bookmarks
+    }
+    
+    init(bookmarks: [SuggestionContainerTests.Bookmark]) {
+        self.bookmarks = bookmarks
+    }
+}
+
+extension Suggestion: Decodable {
+    private enum CodingKeys: String, CodingKey {
+        case type, phrase, url, title, isFavorite, numberOfVisits, value
+    }
+
+    private enum SuggestionType: String, Decodable {
+        case phrase
+        case website
+        case bookmark
+        case historyEntry
+        case internalPage
+        case openTab
+        case unknown
+    }
+
+    private enum DecodingError: Error {
+        case invalidType(String)
+        case invalidBookmark(SuggestionContainerTests.Bookmark)
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(String.self, forKey: .type)
+
+        switch SuggestionType(rawValue: type) {
+        case .phrase:
+            let phrase = try container.decode(String.self, forKey: .phrase)
+            self = .phrase(phrase: phrase)
+        case .website:
+            let url = try container.decode(URL.self, forKey: .url)
+            self = .website(url: url)
+        case .bookmark:
+            let title = try container.decode(String.self, forKey: .title)
+            let url = try container.decode(String.self, forKey: .url)
+            let isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
+            let bookmark = SuggestionContainerTests.Bookmark(title: title, url: url, isFavorite: isFavorite)
+            self = try .init(bookmark: bookmark) ?? { throw DecodingError.invalidBookmark(bookmark) }()
+        case .historyEntry:
+            let title = try container.decode(String.self, forKey: .title)
+            let url = try container.decode(URL.self, forKey: .url)
+            let numberOfVisits = try container.decode(Int.self, forKey: .numberOfVisits)
+            self = .init(historyEntry: SuggestionContainerTests.HistoryEntry(identifier: UUID(), title: title, url: url, numberOfVisits: numberOfVisits, lastVisit: Date(), failedToLoad: false))
+        case .internalPage:
+            let title = try container.decode(String.self, forKey: .title)
+            let url = try container.decode(URL.self, forKey: .url)
+            self = .internalPage(title: title, url: url)
+        case .openTab:
+            let title = try container.decode(String.self, forKey: .title)
+            let url = try container.decode(URL.self, forKey: .url)
+            self = .openTab(title: title, url: url)
+        case .unknown:
+            let value = try container.decode(String.self, forKey: .value)
+            self = .unknown(value: value)
+        default:
+            throw DecodingError.invalidType(type)
+        }
+    }
+}
+extension SuggestionResult: Decodable {
+    public init(from decoder: any Decoder) throws {
+        struct TestExpectation: Decodable {
+            let topHits: [Suggestion]
+            let duckduckgoSuggestions: [Suggestion]
+            let localSuggestions: [Suggestion]
+        }
+        let result = try TestExpectation(from: decoder)
+        self.init(topHits: result.topHits, duckduckgoSuggestions: result.duckduckgoSuggestions, localSuggestions: result.localSuggestions)
+    }
+}
+private extension URLSession {
+    static func mock() -> URLSession {
+        let testConfiguration = URLSessionConfiguration.default
+        testConfiguration.protocolClasses = [MockURLProtocol.self]
+        return URLSession(configuration: testConfiguration)
+    }
 }

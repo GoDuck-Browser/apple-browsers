@@ -24,7 +24,7 @@ import Suggestions
 final class SuggestionContainerViewModelTests: XCTestCase {
 
     var suggestionLoadingMock: SuggestionLoadingMock!
-    var historyCoordinatingMock: HistoryCoordinatingMock!
+    var historyProviderMock: HistoryProviderMock!
     var suggestionContainer: SuggestionContainer!
     var suggestionContainerViewModel: SuggestionContainerViewModel!
 
@@ -33,18 +33,18 @@ final class SuggestionContainerViewModelTests: XCTestCase {
     override func setUp() {
         SearchPreferences.shared.showAutocompleteSuggestions = true
         suggestionLoadingMock = SuggestionLoadingMock()
-        historyCoordinatingMock = HistoryCoordinatingMock()
+        historyProviderMock = HistoryProviderMock()
         suggestionContainer = SuggestionContainer(openTabsProvider: { [] },
                                                   suggestionLoading: suggestionLoadingMock,
-                                                  historyCoordinating: historyCoordinatingMock,
-                                                  bookmarkManager: LocalBookmarkManager.shared,
+                                                  historyProvider: historyProviderMock,
+                                                  bookmarkProvider: LocalBookmarkManager.shared,
                                                   burnerMode: .regular)
         suggestionContainerViewModel = SuggestionContainerViewModel(suggestionContainer: suggestionContainer)
     }
 
     override func tearDown() {
         suggestionLoadingMock = nil
-        historyCoordinatingMock = nil
+        historyProviderMock = nil
         suggestionContainer = nil
         suggestionContainerViewModel = nil
         cancellables.removeAll()
@@ -311,8 +311,8 @@ final class SuggestionContainerViewModelTests: XCTestCase {
         // Mock the open tabs provider to return the defined open tabs
         suggestionContainer = SuggestionContainer(openTabsProvider: { openTabs },
                                                   suggestionLoading: suggestionLoadingMock,
-                                                  historyCoordinating: historyCoordinatingMock,
-                                                  bookmarkManager: LocalBookmarkManager.shared,
+                                                  historyProvider: historyProviderMock,
+                                                  bookmarkProvider: LocalBookmarkManager.shared,
                                                   burnerMode: .regular)
         suggestionContainerViewModel = SuggestionContainerViewModel(suggestionContainer: suggestionContainer)
 

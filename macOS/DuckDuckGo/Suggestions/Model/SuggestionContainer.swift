@@ -26,15 +26,23 @@ import PixelKit
 import Suggestions
 
 final class SuggestionContainer {
-
     static let maximumNumberOfSuggestions = 9
 
     @PublishedAfter var result: SuggestionResult?
 
     typealias OpenTabsProvider = @MainActor () -> [any Suggestions.BrowserTab]
     private let openTabsProvider: OpenTabsProvider
-    private let historyCoordinating: HistoryCoordinating
-    private let bookmarkManager: BookmarkManager
+
+    protocol HistoryProvider {
+        func history(for suggestionLoading: SuggestionLoading) -> [HistorySuggestion]
+    }
+    private let historyProvider: HistoryProvider
+
+    protocol BookmarkProvider {
+        func bookmarks(for suggestionLoading: SuggestionLoading) -> [Suggestions.Bookmark]
+    }
+    private let bookmarkProvider: BookmarkProvider
+
     private let startupPreferences: StartupPreferences
     private let featureFlagger: FeatureFlagger
     private let loading: SuggestionLoading
@@ -46,32 +54,26 @@ final class SuggestionContainer {
 
     private var latestQuery: Query?
 
-    fileprivate let suggestionsURLSession = URLSession(configuration: .ephemeral)
+    private let urlSession: URLSession
 
-    init(openTabsProvider: @escaping OpenTabsProvider, suggestionLoading: SuggestionLoading, historyCoordinating: HistoryCoordinating, bookmarkManager: BookmarkManager, startupPreferences: StartupPreferences = .shared, featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger, burnerMode: BurnerMode,
+    init(openTabsProvider: OpenTabsProvider? = nil, suggestionLoading: SuggestionLoading? = nil, urlSession: URLSession? = nil, historyProvider: HistoryProvider, bookmarkProvider: BookmarkProvider, startupPreferences: StartupPreferences = .shared, featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger, burnerMode: BurnerMode,
          windowControllersManager: WindowControllersManagerProtocol? = nil) {
-        self.openTabsProvider = openTabsProvider
-        self.bookmarkManager = bookmarkManager
-        self.historyCoordinating = historyCoordinating
+        let windowControllersManager = windowControllersManager ?? WindowControllersManager.shared
+        self.openTabsProvider = openTabsProvider ?? Self.defaultOpenTabsProvider(burnerMode: burnerMode, windowControllersManager: windowControllersManager)
+        self.bookmarkProvider = bookmarkProvider
+        self.historyProvider = historyProvider
         self.startupPreferences = startupPreferences
         self.featureFlagger = featureFlagger
-        self.loading = suggestionLoading
+        self.loading = suggestionLoading ?? SuggestionLoader(urlFactory: URL.makeURL(fromSuggestionPhrase:))
+        self.urlSession = urlSession ?? URLSession(configuration: .ephemeral)
         self.burnerMode = burnerMode
-        self.windowControllersManager = windowControllersManager ?? WindowControllersManager.shared
+        self.windowControllersManager = windowControllersManager
     }
 
     @MainActor
-    convenience init (burnerMode: BurnerMode,
-                      windowControllersManager: WindowControllersManagerProtocol? = nil) {
-        let urlFactory = { urlString in
-            return URL.makeURL(fromSuggestionPhrase: urlString)
-        }
-        let windowControllersManager = windowControllersManager ?? WindowControllersManager.shared
-        self.init(openTabsProvider: Self.defaultOpenTabsProvider(burnerMode: burnerMode,
-                                                                 windowControllersManager: windowControllersManager),
-                  suggestionLoading: SuggestionLoader(urlFactory: urlFactory),
-                  historyCoordinating: HistoryCoordinator.shared,
-                  bookmarkManager: LocalBookmarkManager.shared,
+    convenience init(burnerMode: BurnerMode, windowControllersManager: WindowControllersManagerProtocol? = nil) {
+        self.init(historyProvider: HistoryCoordinator.shared,
+                  bookmarkProvider: LocalBookmarkManager.shared,
                   burnerMode: burnerMode,
                   windowControllersManager: windowControllersManager)
     }
@@ -129,21 +131,30 @@ final class SuggestionContainer {
 
 }
 
-struct OpenTab: BrowserTab, Hashable {
+struct OpenTab: BrowserTab, Hashable, Codable {
 
     let title: String
     let url: URL
 
 }
-
-extension SuggestionContainer: SuggestionLoadingDataSource {
+extension HistoryCoordinator: SuggestionContainer.HistoryProvider {
+    func history(for suggestionLoading: SuggestionLoading) -> [HistorySuggestion] {
+        history ?? []
+    }
+}
+extension LocalBookmarkManager: SuggestionContainer.BookmarkProvider {
+    func bookmarks(for suggestionLoading: SuggestionLoading) -> [Suggestions.Bookmark] {
+        list?.bookmarks() ?? []
+    }
+}
+extension SuggestionContainer: @preconcurrency SuggestionLoadingDataSource {
 
     var platform: Platform {
         return .desktop
     }
 
     func history(for suggestionLoading: SuggestionLoading) -> [HistorySuggestion] {
-        return historyCoordinating.history ?? []
+        return historyProvider.history(for: suggestionLoading)
     }
 
     @MainActor func internalPages(for suggestionLoading: Suggestions.SuggestionLoading) -> [Suggestions.InternalPage] {
@@ -179,8 +190,8 @@ extension SuggestionContainer: SuggestionLoadingDataSource {
         return result
     }
 
-    @MainActor func bookmarks(for suggestionLoading: SuggestionLoading) -> [Suggestions.Bookmark] {
-        bookmarkManager.list?.bookmarks() ?? []
+    func bookmarks(for suggestionLoading: SuggestionLoading) -> [Suggestions.Bookmark] {
+        bookmarkProvider.bookmarks(for: suggestionLoading)
     }
 
     @MainActor func openTabs(for suggestionLoading: any Suggestions.SuggestionLoading) -> [any Suggestions.BrowserTab] {
@@ -201,7 +212,7 @@ extension SuggestionContainer: SuggestionLoadingDataSource {
         var request = URLRequest.defaultRequest(with: url)
         request.timeoutInterval = 1
 
-        suggestionsURLSession.dataTask(with: request) { (data, _, error) in
+        urlSession.dataTask(with: request) { (data, _, error) in
             self.suggestionDataCache = data
             completion(data, error)
         }.resume()
