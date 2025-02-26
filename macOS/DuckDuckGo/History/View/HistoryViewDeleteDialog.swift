@@ -16,18 +16,64 @@
 //  limitations under the License.
 //
 
+import Foundation
 import SwiftUIExtensions
+
+protocol HistoryViewDeleteDialogPresenting {
+    @MainActor
+    func showDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response
+}
+
+final class DefaultHistoryViewDeleteDialogPresenter: HistoryViewDeleteDialogPresenting {
+    @MainActor
+    func showDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response {
+        await withCheckedContinuation { continuation in
+            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
+            let model = HistoryViewDeleteDialogModel(entriesCount: itemsCount, mode: deleteMode)
+            let dialog = HistoryViewDeleteDialog(model: model)
+            dialog.show(in: parentWindow) {
+                continuation.resume(returning: model.response)
+            }
+        }
+    }
+}
 
 final class HistoryViewDeleteDialogModel: ObservableObject {
     enum Response {
         case unknown, noAction, delete, burn
     }
+
+    enum DeleteMode: Equatable {
+        case all, date(Date), formattedDate(String), unspecified
+
+        var date: Date? {
+            guard case let .date(date) = self else {
+                return nil
+            }
+            return date
+        }
+    }
+
     let entriesCount: Int
+
+    var title: String {
+        switch mode {
+        case .all:
+            return UserText.deleteAllHistory
+        case .unspecified:
+            return UserText.deleteHistory
+        case .date(let date):
+            return UserText.deleteHistory(for: Self.dateFormatter.string(from: date))
+        case .formattedDate(let stringDate):
+            return UserText.deleteHistory(for: stringDate)
+        }
+    }
     @Published var shouldBurn: Bool = true
     @Published private(set) var response: Response = .unknown
 
-    init(entriesCount: Int) {
+    init(entriesCount: Int, mode: DeleteMode = .unspecified) {
         self.entriesCount = entriesCount
+        self.mode = mode
     }
 
     func cancel() {
@@ -37,25 +83,16 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
     func delete() {
         response = shouldBurn ? .burn : .delete
     }
-}
 
-protocol HistoryViewDeleteDialogPresenting {
-    @MainActor
-    func showDialog(for itemsCount: Int) async -> HistoryViewDeleteDialogModel.Response
-}
+    private let mode: DeleteMode
 
-final class DefaultHistoryViewDeleteDialogPresenter: HistoryViewDeleteDialogPresenting {
-    @MainActor
-    func showDialog(for itemsCount: Int) async -> HistoryViewDeleteDialogModel.Response {
-        await withCheckedContinuation { continuation in
-            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
-            let model = HistoryViewDeleteDialogModel(entriesCount: itemsCount)
-            let dialog = HistoryViewDeleteDialog(model: model)
-            dialog.show(in: parentWindow) {
-                continuation.resume(returning: model.response)
-            }
-        }
-    }
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .full
+        formatter.timeStyle = .none
+        formatter.formattingContext = .middleOfSentence
+        return formatter
+    }()
 }
 
 struct HistoryViewDeleteDialog: ModalView {
@@ -68,7 +105,7 @@ struct HistoryViewDeleteDialog: ModalView {
             Image(.historyBurn)
 
             VStack(spacing: 12) {
-                Text(UserText.deleteHistory)
+                Text(model.title)
                     .multilineTextAlignment(.center)
                     .fixMultilineScrollableText()
                     .font(.system(size: 15).weight(.semibold))

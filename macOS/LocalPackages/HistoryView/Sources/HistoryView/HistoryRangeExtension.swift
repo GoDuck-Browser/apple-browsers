@@ -133,4 +133,13 @@ public extension DataModel.HistoryRange {
 
         return startDate ..< nextDay
     }
+
+    func date(for referenceDate: Date) -> Date? {
+        guard self != .all, self != .older, let weekday = weekday(for: referenceDate) else {
+            return nil
+        }
+        let calendar = Calendar.autoupdatingCurrent
+        let startOfDayReferenceDate = referenceDate.startOfDay
+        return self == .today ? startOfDayReferenceDate : calendar.firstWeekday(weekday, before: startOfDayReferenceDate)
+    }
 }

@@ -105,6 +105,7 @@ final class HistoryMenu: NSMenu {
         addRecentlyVisited()
         addHistoryGroupings()
         addClearAllAndShowHistoryOnTheBottom()
+        clearAllHistoryMenuItem.title = featureFlagger.isFeatureOn(.historyView) ? UserText.mainMenuHistoryDeleteAllHistory : UserText.mainMenuHistoryClearAllHistory
     }
 
     private func clearOldVariableMenuItems() {
@@ -271,7 +272,7 @@ final class HistoryMenu: NSMenu {
     }()
 
     private func makeClearThisHistoryMenuItems(with dateString: String?) -> [NSMenuItem] {
-        let headerItem = ClearThisHistoryMenuItem(title: UserText.clearThisHistoryMenuItem,
+        let headerItem = ClearThisHistoryMenuItem(title: featureFlagger.isFeatureOn(.historyView) ? UserText.deleteThisHistoryMenuItem : UserText.clearThisHistoryMenuItem,
                                                   action: #selector(AppDelegate.clearThisHistory(_:)),
                                                   keyEquivalent: "")
         let historyTimeWindow = ClearThisHistoryMenuItem.HistoryTimeWindow(dateString: dateString)

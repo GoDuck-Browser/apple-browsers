@@ -181,6 +181,7 @@ struct UserText {
     static let mainMenuHistory = NSLocalizedString("History", comment: "Main Menu ")
     static let mainMenuHistoryRecentlyClosed = NSLocalizedString("Recently Closed", comment: "Main Menu History item")
     static let mainMenuHistoryClearAllHistory = NSLocalizedString("Clear All History…", comment: "Main Menu History item")
+    static let mainMenuHistoryDeleteAllHistory = NSLocalizedString("Delete All History…", comment: "Main Menu History item")
     static let mainMenuHistoryManageBookmarks = NSLocalizedString("Manage Bookmarks", comment: "Main Menu History item")
     static let mainMenuHistoryFavoriteThisPage = NSLocalizedString("Favorite This Page…", comment: "Main Menu History item")
     static let mainMenuHistoryReopenAllWindowsFromLastSession = NSLocalizedString("Reopen All Windows from Last Session", comment: "Main Menu History item")
@@ -209,6 +210,13 @@ struct UserText {
 
     // MARK: - History Delete Dialog
     static let deleteHistory = NSLocalizedString("history.delete.dialog.title", value: "Delete history?", comment: "Title of a dialog asking the user to confirm deleting history")
+    static let deleteAllHistory = NSLocalizedString("history.delete.all.dialog.title", value: "Delete all history?", comment: "Title of a dialog asking the user to confirm deleting all history")
+    static func deleteHistory(for date: String) -> String {
+        let localized = NSLocalizedString("history.delete.date.dialog.title",
+                                          value: "Delete all history from %@?",
+                                          comment: "Title of a dialog asking the user to confirm deleting history for a given date. %@ represents the date")
+        return String(format: localized, date)
+    }
     static func deleteHistoryMessage(items: Int) -> String {
         let localized = {
             if #available(macOS 12.0, *) {
@@ -968,6 +976,7 @@ struct UserText {
     static let autoconsentModalDenyButton = NSLocalizedString("autoconsent.modal.cta.deny", value: "No Thanks", comment: "Deny button for modal asking the user to auto manage cookies")
 
     static let clearThisHistoryMenuItem = NSLocalizedString("history.menu.clear.this.history", value: "Clear This History…", comment: "Menu item to clear parts of history and data")
+    static let deleteThisHistoryMenuItem = NSLocalizedString("history.menu.delete.this.history", value: "Delete This History…", comment: "Menu item to delete parts of history and website data")
     static let recentlyVisitedMenuSection = NSLocalizedString("history.menu.recently.visited", value: "Recently Visited", comment: "Section header of the history menu")
     static let olderMenuItem = NSLocalizedString("history.menu.older", value: "Older…", comment: "Menu item representing older history")
 

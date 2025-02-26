@@ -70,7 +70,21 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return .noAction
         }
 
-        switch await deleteDialogPresenter.showDialog(for: visitsCount) {
+        let deleteMode: HistoryViewDeleteDialogModel.DeleteMode = {
+            switch range {
+            case .all:
+                return .all
+            case .older:
+                return .unspecified
+            default:
+                guard let date = range.date(for: Date()) else {
+                    return .unspecified
+                }
+                return .date(date)
+            }
+        }()
+
+        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: deleteMode) {
         case .burn:
             await dataProvider.burnVisits(for: range)
             return .delete
@@ -93,7 +107,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
         let visitsCount = await dataProvider.countVisibleVisits(matching: searchTerm)
 
-        switch await deleteDialogPresenter.showDialog(for: visitsCount) {
+        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: .unspecified) {
         case .burn:
             await dataProvider.burnVisits(matching: searchTerm)
             return .delete
@@ -278,7 +292,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
         let visitsCount = identifiers.count
 
-        switch await deleteDialogPresenter.showDialog(for: visitsCount) {
+        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: .unspecified) {
         case .burn:
             await dataProvider.burnVisits(for: identifiers)
             return .delete

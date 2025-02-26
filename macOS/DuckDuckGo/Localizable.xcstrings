@@ -17991,6 +17991,9 @@
         }
       }
     },
+    "Delete All History…" : {
+      "comment" : "Main Menu History item"
+    },
     "delete-bookmark" : {
       "comment" : "Delete Bookmark button",
       "extractionState" : "extracted_with_value",
@@ -27570,6 +27573,30 @@
         }
       }
     },
+    "history.delete.all.dialog.title" : {
+      "comment" : "Title of a dialog asking the user to confirm deleting all history",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete all history?"
+          }
+        }
+      }
+    },
+    "history.delete.date.dialog.title" : {
+      "comment" : "Title of a dialog asking the user to confirm deleting history for a given date. %@ represents the date",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete all history from %@?"
+          }
+        }
+      }
+    },
     "history.delete.dialog.burn.checkbox" : {
       "comment" : "Caption for a checkbox to optionally delete cookies and website data alongside removing browser history entries",
       "extractionState" : "extracted_with_value",
@@ -28046,6 +28073,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Стереть эту запись…"
+          }
+        }
+      }
+    },
+    "history.menu.delete.this.history" : {
+      "comment" : "Menu item to delete parts of history and website data",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete This History…"
           }
         }
       }
