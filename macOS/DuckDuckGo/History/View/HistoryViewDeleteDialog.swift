@@ -44,7 +44,7 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
     }
 
     enum DeleteMode: Equatable {
-        case all, date(Date), formattedDate(String), unspecified
+        case all, today, yesterday, date(Date), formattedDate(String), unspecified
 
         var date: Date? {
             guard case let .date(date) = self else {
@@ -60,6 +60,10 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
         switch mode {
         case .all:
             return UserText.deleteAllHistory
+        case .today:
+            return UserText.deleteAllHistoryFromToday
+        case .yesterday:
+            return UserText.deleteAllHistoryFromYesterday
         case .unspecified:
             return UserText.deleteHistory
         case .date(let date):

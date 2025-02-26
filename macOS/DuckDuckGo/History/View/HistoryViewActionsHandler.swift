@@ -70,6 +70,10 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             switch range {
             case .all:
                 return .all
+            case .today:
+                return .today
+            case .yesterday:
+                return .yesterday
             case .older:
                 return .unspecified
             default:

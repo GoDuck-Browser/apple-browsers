@@ -214,9 +214,11 @@ struct UserText {
 
     static let deleteHistory = NSLocalizedString("history.delete.dialog.title", value: "Delete history?", comment: "Title of a dialog asking the user to confirm deleting history")
     static let deleteAllHistory = NSLocalizedString("history.delete.all.dialog.title", value: "Delete all history?", comment: "Title of a dialog asking the user to confirm deleting all history")
+    static let deleteAllHistoryFromToday = NSLocalizedString("history.delete.today.dialog.title", value: "Delete all history from today?", comment: "Title of a dialog asking the user to confirm deleting history from today")
+    static let deleteAllHistoryFromYesterday = NSLocalizedString("history.delete.yesterday.dialog.title", value: "Delete all history from yesterday?", comment: "Title of a dialog asking the user to confirm deleting history from yesterday")
     static func deleteHistory(for date: String) -> String {
         let localized = NSLocalizedString("history.delete.date.dialog.title",
-                                          value: "Delete all history from %@?",
+                                          value: "Delete all history from\n%@?",
                                           comment: "Title of a dialog asking the user to confirm deleting history for a given date. %@ represents the date")
         return String(format: localized, date)
     }

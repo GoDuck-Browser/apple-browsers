@@ -27592,7 +27592,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Delete all history from %@?"
+            "value" : "Delete all history from\n%@?"
           }
         }
       }
@@ -27653,6 +27653,30 @@
           "stringUnit" : {
             "state" : "new",
             "value" : "Delete history?"
+          }
+        }
+      }
+    },
+    "history.delete.today.dialog.title" : {
+      "comment" : "Title of a dialog asking the user to confirm deleting history from today",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete all history from today?"
+          }
+        }
+      }
+    },
+    "history.delete.yesterday.dialog.title" : {
+      "comment" : "Title of a dialog asking the user to confirm deleting history from yesterday",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Delete all history from yesterday?"
           }
         }
       }

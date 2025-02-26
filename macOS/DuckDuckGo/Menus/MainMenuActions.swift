@@ -602,7 +602,7 @@ extension MainViewController {
         if featureFlagger.isFeatureOn(.historyView) {
             let deleteMode: HistoryViewDeleteDialogModel.DeleteMode = {
                 guard let dateString = sender.dateString else {
-                    return sender.isToday ? .formattedDate("today") : .unspecified
+                    return sender.isToday ? .today : .unspecified
                 }
                 return .formattedDate(dateString)
             }()
