@@ -39,6 +39,25 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
     }
 }
 
+protocol HistoryViewDeleteDialogPresenting {
+    @MainActor
+    func showDialog(for itemsCount: Int) async -> HistoryViewDeleteDialogModel.Response
+}
+
+final class DefaultHistoryViewDeleteDialogPresenter: HistoryViewDeleteDialogPresenting {
+    @MainActor
+    func showDialog(for itemsCount: Int) async -> HistoryViewDeleteDialogModel.Response {
+        await withCheckedContinuation { continuation in
+            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
+            let model = HistoryViewDeleteDialogModel(entriesCount: itemsCount)
+            let dialog = HistoryViewDeleteDialog(model: model)
+            dialog.show(in: parentWindow) {
+                continuation.resume(returning: model.response)
+            }
+        }
+    }
+}
+
 struct HistoryViewDeleteDialog: ModalView {
 
     @ObservedObject var model: HistoryViewDeleteDialogModel

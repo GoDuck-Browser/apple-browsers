@@ -22,9 +22,14 @@ import SwiftUIExtensions
 final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
     weak var dataProvider: HistoryView.DataProviding?
+    let deleteDialogPresenter: HistoryViewDeleteDialogPresenting
 
-    init(dataProvider: HistoryView.DataProviding) {
+    init(
+        dataProvider: HistoryView.DataProviding,
+        deleteDialogPresenter: HistoryViewDeleteDialogPresenting = DefaultHistoryViewDeleteDialogPresenter()
+    ) {
         self.dataProvider = dataProvider
+        self.deleteDialogPresenter = deleteDialogPresenter
     }
 
     func showDeleteDialog(for range: DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse {
@@ -37,16 +42,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return .noAction
         }
 
-        let response: HistoryViewDeleteDialogModel.Response = await withCheckedContinuation { continuation in
-            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
-            let model = HistoryViewDeleteDialogModel(entriesCount: visitsCount)
-            let dialog = HistoryViewDeleteDialog(model: model)
-            dialog.show(in: parentWindow) {
-                continuation.resume(returning: model.response)
-            }
-        }
-
-        switch response {
+        switch await deleteDialogPresenter.showDialog(for: visitsCount) {
         case .burn:
             await dataProvider.burnVisits(for: range)
             return .delete
