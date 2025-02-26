@@ -27,7 +27,7 @@ final class CapturingHistoryViewDataProvider: DataProviding {
         return _ranges
     }
 
-    func resetCache() {
+    func refreshData() {
         resetCacheCallCount += 1
     }
 

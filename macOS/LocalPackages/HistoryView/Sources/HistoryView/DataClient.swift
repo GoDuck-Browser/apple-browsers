@@ -25,7 +25,7 @@ import WebKit
 
 public protocol DataProviding: AnyObject {
     var ranges: [DataModel.HistoryRange] { get }
-    func resetCache() async
+    func refreshData() async
     func visitsBatch(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> DataModel.HistoryItemsBatch
     func countVisibleVisits(for range: DataModel.HistoryRange) async -> Int
     func deleteVisits(for range: DataModel.HistoryRange) async
@@ -86,7 +86,7 @@ public final class DataClient: HistoryViewUserScriptClient {
         let env = "production"
 #endif
 
-        await dataProvider.resetCache()
+        await dataProvider.refreshData()
 
         return DataModel.Configuration(
             env: env,
