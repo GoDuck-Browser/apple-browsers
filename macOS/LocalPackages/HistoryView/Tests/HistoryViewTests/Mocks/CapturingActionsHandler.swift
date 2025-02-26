@@ -24,7 +24,7 @@ final class CapturingActionsHandler: ActionsHandling {
         showDeleteDialogCalls.append(range)
         return await showDeleteDialog(range)
     }
-    
+
     func open(_ url: URL) {
         openCalls.append(url)
     }

@@ -25,7 +25,7 @@ protocol HistoryBurning: AnyObject {
     func burn(_ visits: [Visit], animated: Bool) async
 }
 
-class FireHistoryBurner: HistoryBurning {
+final class FireHistoryBurner: HistoryBurning {
     let fireproofDomains: DomainFireproofStatusProviding
     let fire: () async -> Fire
 
