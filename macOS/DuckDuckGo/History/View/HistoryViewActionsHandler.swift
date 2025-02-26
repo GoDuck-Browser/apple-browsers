@@ -24,21 +24,17 @@ protocol HistoryViewBookmarksHandling: AnyObject {
     func isUrlFavorited(url: URL) -> Bool
     func getBookmark(for url: URL) -> Bookmark?
     func markAsFavorite(_ bookmark: Bookmark)
-    func addNewBookmark(for url: URL, title: String)
+    func addNewBookmarks(for websiteInfos: [WebsiteInfo])
     func addNewFavorite(for url: URL, title: String)
 }
 
 extension LocalBookmarkManager: HistoryViewBookmarksHandling {
-    func addNewBookmark(for url: URL, title: String) {
-        addNewBookmark(for: url, title: title, isFavorite: false)
+    func addNewBookmarks(for websiteInfos: [WebsiteInfo]) {
+        makeBookmarks(for: websiteInfos, inNewFolderNamed: nil, withinParentFolder: .root)
     }
 
     func addNewFavorite(for url: URL, title: String) {
-        addNewBookmark(for: url, title: title, isFavorite: true)
-    }
-
-    private func addNewBookmark(for url: URL, title: String, isFavorite: Bool) {
-        makeBookmark(for: url, title: title, isFavorite: isFavorite)
+        makeBookmark(for: url, title: title, isFavorite: true)
     }
 }
 
@@ -245,9 +241,8 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         }
 
         let titles = dataProvider.titles(for: urls)
-        for url in urls {
-            bookmarkHandler.addNewBookmark(for: url, title: titles[url] ?? url.absoluteString)
-        }
+        let websiteInfos = urls.map { WebsiteInfo(url: $0, title: titles[$0]) }
+        bookmarkHandler.addNewBookmarks(for: websiteInfos)
     }
 
     @MainActor
