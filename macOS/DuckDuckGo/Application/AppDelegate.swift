@@ -113,15 +113,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let onboardingStateMachine: ContextualOnboardingStateMachine & ContextualOnboardingStateUpdater
 
     var isAuthV2Enabled: Bool = false
-    var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge {
-        if !isAuthV2Enabled {
-            return subscriptionManagerV1
-        } else {
-            return subscriptionManagerV2
-        }
-    }
-    public let subscriptionManagerV1: any SubscriptionManager
-    public let subscriptionManagerV2: any SubscriptionManagerV2
+    var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
+    let subscriptionManagerV1: any SubscriptionManager
+    let subscriptionManagerV2: any SubscriptionManagerV2
 
     public let subscriptionUIHandler: SubscriptionUIHandling
     private let subscriptionCookieManager: any SubscriptionCookieManaging
@@ -315,12 +309,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // MARK: - Subscription configuration --------------------------------------------------------------------------------------------------------
 
-        // MARK: V1
-        subscriptionManagerV1 = DefaultSubscriptionManager(featureFlagger: featureFlagger)
         subscriptionUIHandler = SubscriptionUIHandler(windowControllersManagerProvider: {
             return WindowControllersManager.shared
         })
 
+        // MARK: V1
+        subscriptionManagerV1 = DefaultSubscriptionManager(featureFlagger: featureFlagger)
         subscriptionCookieManager = SubscriptionCookieManager(tokenProvider: subscriptionManagerV1, currentCookieStore: {
             WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
         }, eventMapping: SubscriptionCookieManageEventPixelMapping())
@@ -336,13 +330,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                          canPerformAuthMigration: true,
                                                          canHandlePixels: true)
 
-        subscriptionUIHandler = SubscriptionUIHandler(windowControllersManagerProvider: {
-            return WindowControllersManager.shared
-        })
-
         subscriptionCookieManagerV2 = SubscriptionCookieManagerV2(subscriptionManager: subscriptionManagerV2, currentCookieStore: {
             WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
         }, eventMapping: SubscriptionCookieManageEventPixelMapping())
+
+        if !isAuthV2Enabled {
+            subscriptionAuthV1toV2Bridge = subscriptionManagerV1
+        } else {
+            subscriptionAuthV1toV2Bridge = subscriptionManagerV2
+        }
 
         // MARK: -------------------------------------------------------------------------------------------------------------------------------------
 

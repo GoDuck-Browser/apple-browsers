@@ -3262,6 +3262,8 @@
 		F124E0F12D6E123A0035C7BA /* SubscriptionTestingUtilities in Frameworks */ = {isa = PBXBuildFile; productRef = F124E0F02D6E123A0035C7BA /* SubscriptionTestingUtilities */; };
 		F1476FC02C1359FB00EAE46A /* SubscriptionUIHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1476FBF2C1359FB00EAE46A /* SubscriptionUIHandler.swift */; };
 		F1476FC12C1359FB00EAE46A /* SubscriptionUIHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1476FBF2C1359FB00EAE46A /* SubscriptionUIHandler.swift */; };
+		F1664A682D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1664A672D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift */; };
+		F1664A692D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1664A672D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift */; };
 		F17114822C7C98FB009836C1 /* Logger+Favicons.swift in Sources */ = {isa = PBXBuildFile; fileRef = F17114812C7C98FB009836C1 /* Logger+Favicons.swift */; };
 		F17114832C7C98FB009836C1 /* Logger+Favicons.swift in Sources */ = {isa = PBXBuildFile; fileRef = F17114812C7C98FB009836C1 /* Logger+Favicons.swift */; };
 		F17114852C7C9D28009836C1 /* Logger+Fire.swift in Sources */ = {isa = PBXBuildFile; fileRef = F17114842C7C9D28009836C1 /* Logger+Fire.swift */; };
@@ -5177,6 +5179,7 @@
 		F118EA7C2BEA2B8700F77634 /* DefaultSubscriptionFeatureAvailability+DefaultInitializer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "DefaultSubscriptionFeatureAvailability+DefaultInitializer.swift"; sourceTree = "<group>"; };
 		F118EA842BEACC7000F77634 /* NonStandardPixel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NonStandardPixel.swift; sourceTree = "<group>"; };
 		F1476FBF2C1359FB00EAE46A /* SubscriptionUIHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionUIHandler.swift; sourceTree = "<group>"; };
+		F1664A672D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPagesUseSubscriptionFeatureV2.swift; sourceTree = "<group>"; };
 		F17114812C7C98FB009836C1 /* Logger+Favicons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+Favicons.swift"; sourceTree = "<group>"; };
 		F17114842C7C9D28009836C1 /* Logger+Fire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+Fire.swift"; sourceTree = "<group>"; };
 		F17E7DDB2C7C7F8100907A84 /* Logger+DBPBackgroundAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+DBPBackgroundAgent.swift"; sourceTree = "<group>"; };
@@ -10252,6 +10255,7 @@
 			children = (
 				1E0C72052ABC63BD00802009 /* SubscriptionPagesUserScript.swift */,
 				F1FD5B662C2B0AAA0040FA0D /* SubscriptionPagesUseSubscriptionFeature.swift */,
+				F1664A672D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift */,
 				F1C5763D2BFF972900C78647 /* SubscriptionUIHandling.swift */,
 				F1B33DF12BAD929D001128B3 /* SubscriptionAppStoreRestorer.swift */,
 				F1B33DF52BAD970E001128B3 /* SubscriptionErrorReporter.swift */,
@@ -12098,6 +12102,7 @@
 				37197EA42942441D00394917 /* NewWindowPolicy.swift in Sources */,
 				1D72D59D2BFF61B200AEDE36 /* UpdateNotificationPresenter.swift in Sources */,
 				3706FB84293F65D500E42796 /* NSWindowExtension.swift in Sources */,
+				F1664A692D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift in Sources */,
 				3706FB85293F65D500E42796 /* AddBookmarkPopover.swift in Sources */,
 				F18826922BC0105900D9AC4F /* PixelDataRecord.swift in Sources */,
 				F18826932BC0105900D9AC4F /* PixelDataStore.swift in Sources */,
@@ -14032,6 +14037,7 @@
 				37EE55FA2D5F197300D53C7C /* NavigationBarPopovers.swift in Sources */,
 				37EE55FB2D5F197300D53C7C /* NavigationBarViewController.swift in Sources */,
 				37EE55FC2D5F197300D53C7C /* NavigationButtonMenuDelegate.swift in Sources */,
+				F1664A682D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift in Sources */,
 				37EE55FD2D5F197300D53C7C /* NetPPopoverManagerMock.swift in Sources */,
 				37EE55FE2D5F197300D53C7C /* ShowToolbarsOnFullScreenMenuCoordinator.swift in Sources */,
 				37EE55FF2D5F197300D53C7C /* ZoomPopover.swift in Sources */,
