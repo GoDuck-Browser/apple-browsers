@@ -1,7 +1,7 @@
 //
 //  SuggestionContainerTests.swift
 //
-//  Copyright © 2020 DuckDuckGo. All rights reserved.
+//  Copyright © 2025 DuckDuckGo. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 import Combine
 import History
 import NetworkingTestingUtils
+import SnapshotTesting
 import Suggestions
 import XCTest
 
@@ -116,7 +117,10 @@ final class SuggestionContainerTests: XCTestCase {
         let fileURLs = try FileManager.default.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
 
         // Filter for JSON files
-        let jsonFiles = fileURLs.filter { $0.pathExtension == "json" }
+        let jsonFiles = fileURLs.filter {
+            $0.pathExtension == "json"
+            && !$0.deletingPathExtension().lastPathComponent.hasSuffix("schema")
+        }
 
         for fileURL in jsonFiles {
             // Load and decode each JSON file
@@ -137,19 +141,37 @@ final class SuggestionContainerTests: XCTestCase {
     private func runJsonTestScenario(_ testScenario: TestScenario, named name: String) async throws {
         let input = testScenario.input
 
-        // Create tab collection view models for open and burner tabs
-        let tabCollectionViewModels = input.windows.map { window in
-            TabCollectionViewModel(tabCollection: tabCollection(window.tabs.map(OpenTab.init)),
-                                   selectionIndex: window.selectedTab.type == .pinned ? .pinned(window.selectedTab.index) : .unpinned(window.selectedTab.index),
-                                   burnerMode: .regular)
+        // Find window and index containing the tab initiating the search
+        var selectedWindow = 0
+        var selectedTabIndex: TabIndex?
+
+        // Search windows for tab initiating search
+        for (windowIndex, window) in input.windows.enumerated() {
+            if let tabIndex = window.tabs.firstIndex(where: { $0.tabId == input.tabIdInitiatingSearch }) {
+                selectedWindow = windowIndex
+                selectedTabIndex = .unpinned(tabIndex)
+                break
+            }
         }
-        // Index of the window that is currently selected.
-        let selectedWindowIndices = input.windows.enumerated().filter { $0.element.isSelected }.map(\.offset)
-        guard selectedWindowIndices.count == 1 else { return XCTFail("Multiple selected windows are not supported: \(selectedWindowIndices)") }
-        let selectedWindow = selectedWindowIndices[0]
+        // Index of the tab that is currently selected.
+        if selectedTabIndex == nil, let pinnedTabIndex = input.pinnedTabs.firstIndex(where: { $0.tabId == input.tabIdInitiatingSearch }) {
+            selectedTabIndex = .pinned(pinnedTabIndex)
+        }
+        guard let selectedTabIndex else { return XCTFail("Selected Tab Id not found") }
+
+        // Create tab collection view models for each window
+        let tabCollectionViewModels = input.windows.enumerated().map { (idx, window) in
+            let burnerMode = window.type == .fire ? BurnerMode(isBurner: true) : BurnerMode.regular
+            return TabCollectionViewModel(
+                tabCollection: tabCollection(window.tabs.map(OpenTab.init), burnerMode: burnerMode),
+                selectionIndex: idx == selectedWindow ? selectedTabIndex : .unpinned(0),
+                burnerMode: burnerMode
+            )
+        }
+
 
         // Initialize a mock WindowControllersManager with pinned tabs, tab view models, and the selected window index for testing.
-        let windowControllersManagerMock = WindowControllersManagerMock(pinnedTabsManager: pinnedTabsManager(tabs: input.pinnedTabs),
+        let windowControllersManagerMock = WindowControllersManagerMock(pinnedTabsManager: pinnedTabsManager(tabs: input.pinnedTabs.map(OpenTab.init)),
                                                                         tabCollectionViewModels: tabCollectionViewModels,
                                                                         selectedWindow: selectedWindow)
 
@@ -184,26 +206,27 @@ final class SuggestionContainerTests: XCTestCase {
         // Get the compiled suggestions
         let resultPromise = suggestionContainer.$result.dropFirst().timeout(1).first().promise()
         suggestionContainer.getSuggestions(for: input.query)
-        let result = try await resultPromise.get()
+        let actualResult = try await resultPromise.get()
 
-        XCTAssertEqual(result, testScenario.expectation, "Incorrect results for \(name)")
+        assert(TestExpectations(actualResult, windows: testScenario.input.windows), named: name, matches: testScenario.expectations)
     }
 
 }
 
 extension SuggestionContainerTests {
 
-    struct TestScenario: Decodable {
+    fileprivate struct TestScenario: Decodable {
         let description: String
         let input: TestInput
-        let expectation: SuggestionResult
+        let expectations: TestExpectations
     }
 
     struct TestInput: Decodable {
         let query: String
+        let tabIdInitiatingSearch: UUID
         let bookmarks: [Bookmark]
         let history: [HistoryEntry]
-        let pinnedTabs: [OpenTab]
+        let pinnedTabs: [TabMock]
         let windows: [Window]
         let apiSuggestions: ApiSuggestions
 
@@ -241,29 +264,34 @@ extension SuggestionContainerTests {
     }
 
     struct Window: Decodable {
+        // Window types from schema
         enum WindowType: String, Decodable {
-            case regular
-            case fire
+            case regular = "fullyFeatured"
+            case fire = "fireWindow"
             case popup
         }
-        struct SelectedTab: Decodable {
-            enum TabType: String, Decodable {
-                case pinned
-                case regular
-            }
-            let type: TabType
-            let index: Int
-        }
-        let type: String
-        private let selected: Bool?
-        var isSelected: Bool { selected ?? false }
-        let selectedTab: SelectedTab
+
+        // Only fields defined in schema
+        let type: WindowType
         let tabs: [TabMock]
     }
 
-    struct TabMock: Decodable {
+    // Update TabMock to match schema
+    struct TabMock: Equatable, Decodable {
+        let tabId: UUID
         let title: String
         let url: URL
+
+        private enum CodingKeys: String, CodingKey {
+            case tabId, title, uri
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            self.tabId = try container.decode(UUID.self, forKey: .tabId)
+            self.title = try container.decode(String.self, forKey: .title)
+            self.url = try container.decode(URL.self, forKey: .uri)
+        }
     }
 
     struct APISuggestion: Decodable {
@@ -325,6 +353,40 @@ extension SuggestionContainerTests {
         PinnedTabsManager(tabCollection: tabCollection(tabs))
     }
 
+    func assert<Value: Encodable>(
+      _ value: @autoclosure () throws -> Value,
+      named name: String,
+      matches anotherValue: Value,
+      file: StaticString = #file,
+      testName: String = #function,
+      line: UInt = #line
+    ) {
+        let snapshotDirectory = FileManager.default.temporaryDirectory.appendingPathComponent("temp_snapshots")
+        let identifier = sanitizePathComponent(name)
+        let testName = sanitizePathComponent(testName)
+        let fileName = "\(testName).\(identifier).json"
+        let snapshotUrl = snapshotDirectory.appendingPathComponent(fileName)
+        let failure = verifySnapshot(of: try {
+            try FileManager.default.createDirectory(at: snapshotDirectory, withIntermediateDirectories: true)
+            // write anotherValue to the snapshot dir
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            try encoder.encode(anotherValue).write(to: snapshotUrl)
+            return try value()
+        }(), as: .json, named: name, record: false, snapshotDirectory: snapshotDirectory.path, timeout: 0, file: file, testName: testName)
+        defer {
+            try? FileManager.default.removeItem(at: snapshotUrl)
+        }
+        guard let message = failure else { return }
+        XCTFail(message, file: file, line: line)
+    }
+    func sanitizePathComponent(_ string: String) -> String {
+      return
+        string
+        .replacingOccurrences(of: "\\W+", with: "-", options: .regularExpression)
+        .replacingOccurrences(of: "^-|-$", with: "", options: .regularExpression)
+    }
+
 }
 private extension OpenTab {
     init(_ tab: SuggestionContainerTests.TabMock) {
@@ -354,73 +416,42 @@ private class BookmarkProviderMock: SuggestionContainer.BookmarkProvider {
     }
 }
 
-extension Suggestion: Decodable {
-    private enum CodingKeys: String, CodingKey {
-        case type, phrase, url, title, isFavorite, numberOfVisits, value
-    }
+extension SuggestionContainerTests {
+    fileprivate struct TestExpectations: Codable {
+        struct ExpectedSuggestion: Codable {
+            enum SuggestionType: String, Codable {
+                case phrase
+                case website
+                case bookmark
+                case favorite
+                case historyEntry
+                case openTab
+                case internalPage
+            }
 
-    private enum SuggestionType: String, Decodable {
-        case phrase
-        case website
-        case bookmark
-        case historyEntry
-        case internalPage
-        case openTab
-        case unknown
-    }
+            let type: SuggestionType
+            let title: String?
+            let uri: String?
+            let tabId: UUID?
 
-    private enum DecodingError: Error {
-        case invalidType(String)
-        case invalidBookmark(SuggestionContainerTests.Bookmark)
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let type = try container.decode(String.self, forKey: .type)
-
-        switch SuggestionType(rawValue: type) {
-        case .phrase:
-            let phrase = try container.decode(String.self, forKey: .phrase)
-            self = .phrase(phrase: phrase)
-        case .website:
-            let url = try container.decode(URL.self, forKey: .url)
-            self = .website(url: url)
-        case .bookmark:
-            let title = try container.decode(String.self, forKey: .title)
-            let url = try container.decode(String.self, forKey: .url)
-            let isFavorite = try container.decode(Bool.self, forKey: .isFavorite)
-            let bookmark = SuggestionContainerTests.Bookmark(title: title, url: url, isFavorite: isFavorite)
-            self = try .init(bookmark: bookmark) ?? { throw DecodingError.invalidBookmark(bookmark) }()
-        case .historyEntry:
-            let title = try container.decode(String.self, forKey: .title)
-            let url = try container.decode(URL.self, forKey: .url)
-            let numberOfVisits = try container.decode(Int.self, forKey: .numberOfVisits)
-            self = .init(historyEntry: SuggestionContainerTests.HistoryEntry(identifier: UUID(), title: title, url: url, numberOfVisits: numberOfVisits, lastVisit: Date(), failedToLoad: false))
-        case .internalPage:
-            let title = try container.decode(String.self, forKey: .title)
-            let url = try container.decode(URL.self, forKey: .url)
-            self = .internalPage(title: title, url: url)
-        case .openTab:
-            let title = try container.decode(String.self, forKey: .title)
-            let url = try container.decode(URL.self, forKey: .url)
-            self = .openTab(title: title, url: url)
-        case .unknown:
-            let value = try container.decode(String.self, forKey: .value)
-            self = .unknown(value: value)
-        default:
-            throw DecodingError.invalidType(type)
+            enum CodingKeys: String, CodingKey {
+                case type
+                case title
+                case uri
+                case tabId
+            }
         }
-    }
-}
-extension SuggestionResult: Decodable {
-    public init(from decoder: any Decoder) throws {
-        struct TestExpectation: Decodable {
-            let topHits: [Suggestion]
-            let duckduckgoSuggestions: [Suggestion]
-            let localSuggestions: [Suggestion]
+
+        let topHits: [ExpectedSuggestion]
+        let searchSuggestions: [ExpectedSuggestion]
+        let localSuggestions: [ExpectedSuggestion]
+
+        init?(_ result: SuggestionResult?, windows: [SuggestionContainerTests.Window]) {
+            guard let result else { return nil }
+            self.topHits = result.topHits.compactMap { $0.expectedSuggestion(windows: windows) }
+            self.searchSuggestions = result.duckduckgoSuggestions.compactMap { $0.expectedSuggestion(windows: windows) }
+            self.localSuggestions = result.localSuggestions.compactMap { $0.expectedSuggestion(windows: windows) }
         }
-        let result = try TestExpectation(from: decoder)
-        self.init(topHits: result.topHits, duckduckgoSuggestions: result.duckduckgoSuggestions, localSuggestions: result.localSuggestions)
     }
 }
 private extension URLSession {
@@ -428,5 +459,72 @@ private extension URLSession {
         let testConfiguration = URLSessionConfiguration.default
         testConfiguration.protocolClasses = [MockURLProtocol.self]
         return URLSession(configuration: testConfiguration)
+    }
+}
+private extension Suggestion {
+    init(_ expectedSuggestion: SuggestionContainerTests.TestExpectations.ExpectedSuggestion) {
+        switch expectedSuggestion.type {
+        case .phrase:
+            self = .phrase(phrase: expectedSuggestion.title!)
+
+        case .website:
+            guard let url = expectedSuggestion.uri.flatMap(URL.init(string:)) else { fatalError("Invalid URI in: \(expectedSuggestion)") }
+            self = .website(url: url)
+
+        case .bookmark, .favorite:
+            guard let uri = expectedSuggestion.uri else { fatalError("Missing URI in: \(expectedSuggestion)") }
+            guard let title = expectedSuggestion.title else { fatalError("Missing title for bookmark \(expectedSuggestion)") }
+            let bookmark = SuggestionContainerTests.Bookmark(title: title, url: uri, isFavorite: expectedSuggestion.type == .favorite)
+            self = .init(bookmark: bookmark)!
+
+        case .historyEntry:
+            guard let url = expectedSuggestion.uri.flatMap(URL.init(string:)) else { fatalError("Invalid URI in: \(expectedSuggestion)") }
+            self = .historyEntry(title: expectedSuggestion.title, url: url)
+
+        case .openTab:
+            guard let url = expectedSuggestion.uri.flatMap(URL.init(string:)) else { fatalError("Invalid URI in: \(expectedSuggestion)") }
+            guard let title = expectedSuggestion.title else { fatalError("Missing title for bookmark \(expectedSuggestion)") }
+            self = .openTab(title: title, url: url)
+
+        case .internalPage:
+            guard let url = expectedSuggestion.uri.flatMap(URL.init(string:)) else { fatalError("Invalid URI in: \(expectedSuggestion)") }
+            guard let title = expectedSuggestion.title else { fatalError("Missing title for bookmark \(expectedSuggestion)") }
+            self = .internalPage(title: title, url: url)
+        }
+    }
+
+    func expectedSuggestion(windows: [SuggestionContainerTests.Window]) -> SuggestionContainerTests.TestExpectations.ExpectedSuggestion? {
+        switch self {
+        case .phrase(phrase: let phrase):
+            return .init(type: .phrase, title: phrase, uri: nil, tabId: nil)
+
+        case .website(url: let url):
+            return .init(type: .website, title: url.absoluteString, uri: url.absoluteString, tabId: nil)
+
+        case .bookmark(title: let title, url: let url, isFavorite: let isFavorite):
+            return .init(type: isFavorite ? .favorite : .bookmark, title: title, uri: url.absoluteString, tabId: nil)
+
+        case .historyEntry(title: let title, url: let url):
+            return .init(type: .historyEntry, title: title, uri: url.absoluteString, tabId: nil)
+
+        case .openTab(title: let title, url: let url):
+            var tabId: UUID?
+            for window in windows {
+                if let tabs = window.tabs.firstIndex(where: { $0.url == url && $0.title == title }) {
+                    tabId = window.tabs[tabs].tabId
+                }
+                for tab in window.tabs {
+                    if tab.url == url {
+                        tabId = tab.tabId
+                        break
+                    }
+                }
+            }
+            return .init(type: .openTab, title: title, uri: url.absoluteString, tabId: tabId)
+        case .internalPage(title: let title, url: let url):
+            return .init(type: .internalPage, title: title, uri: url.absoluteString, tabId: nil)
+        case .unknown:
+            return nil
+        }
     }
 }

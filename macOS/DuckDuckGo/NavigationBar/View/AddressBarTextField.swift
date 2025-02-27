@@ -349,7 +349,7 @@ final class AddressBarTextField: NSTextField {
                 return .autocompleteClickPhrase(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
             case .website:
                 return .autocompleteClickWebsite(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
-            case .bookmark(_, _, let isFavorite, _):
+            case .bookmark(_, _, let isFavorite):
                 if isFavorite {
                     return .autocompleteClickFavorite(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
                 } else {
@@ -499,8 +499,8 @@ final class AddressBarTextField: NSTextField {
         let finalUrl: URL?
         let userEnteredValue: String
         switch suggestion {
-        case .bookmark(title: _, url: let url, isFavorite: _, allowedInTopHits: _),
-             .historyEntry(title: _, url: let url, allowedInTopHits: _),
+        case .bookmark(title: _, url: let url, isFavorite: _),
+             .historyEntry(title: _, url: let url),
              .website(url: let url),
              .internalPage(title: _, url: let url),
              .openTab(title: _, url: let url):
@@ -616,7 +616,7 @@ final class AddressBarTextField: NSTextField {
     private func suggestionsContainLocalItems() -> SuggestionListChacteristics {
         var characteristics = SuggestionListChacteristics(hasBookmark: false, hasFavorite: false, hasHistoryEntry: false)
         for suggestion in self.suggestionContainerViewModel?.suggestionContainer.result?.all ?? [] {
-            if case .bookmark(title: _, url: _, isFavorite: let isFavorite, allowedInTopHits: _) = suggestion {
+            if case .bookmark(title: _, url: _, isFavorite: let isFavorite) = suggestion {
                 if isFavorite {
                     characteristics.hasFavorite = true
                 } else {
@@ -897,8 +897,8 @@ extension AddressBarTextField {
                 }
                 self = Suffix.visit(host: host)
 
-            case .bookmark(title: _, url: let url, isFavorite: _, allowedInTopHits: _),
-                 .historyEntry(title: _, url: let url, allowedInTopHits: _),
+            case .bookmark(title: _, url: let url, isFavorite: _),
+                 .historyEntry(title: _, url: let url),
                  .internalPage(title: _, url: let url):
                 if let title = suggestionViewModel.title,
                    !title.isEmpty,

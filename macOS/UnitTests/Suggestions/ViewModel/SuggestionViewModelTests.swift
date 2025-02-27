@@ -124,7 +124,7 @@ final class SuggestionViewModelTests: XCTestCase {
     func testWhenSuggestionIsBookmark_ThenStringIsTitle() {
         let url = URL(string: "https://spreadprivacy.com")!
         let title = "Title"
-        let suggestion = Suggestion.bookmark(title: title, url: url, isFavorite: true, allowedInTopHits: true)
+        let suggestion = Suggestion.bookmark(title: title, url: url, isFavorite: true)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.string, title)
@@ -134,7 +134,7 @@ final class SuggestionViewModelTests: XCTestCase {
         let query = "test search"
         let searchUrl = URL.makeSearchUrl(from: query)!
         let title = "Title"
-        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl, allowedInTopHits: true)
+        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.string, query)
@@ -143,7 +143,7 @@ final class SuggestionViewModelTests: XCTestCase {
     func testWhenSuggestionIsHistoryEntryOfDuckDuckGoSearch_ThenSuffixIsSearchDuckDuckGo() {
         let searchUrl = URL.makeSearchUrl(from: "test search")!
         let title = "Title"
-        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl, allowedInTopHits: true)
+        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssert(suggestionViewModel.suffix.hasSuffix(UserText.searchDuckDuckGoSuffix))
@@ -153,7 +153,7 @@ final class SuggestionViewModelTests: XCTestCase {
         let query = "test search"
         let searchUrl = URL.makeSearchUrl(from: query)!
         let title = "Title"
-        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl, allowedInTopHits: true)
+        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.title, query)

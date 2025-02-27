@@ -88,13 +88,13 @@ struct SuggestionViewModel: Equatable {
             return phrase
         case .website(url: let url):
             return url.toString(forUserInput: userStringValue)
-        case .historyEntry(title: let title, url: let url, allowedInTopHits: _):
+        case .historyEntry(title: let title, url: let url):
             if url.isDuckDuckGoSearch {
                 return url.searchQuery ?? url.toString(forUserInput: userStringValue)
             } else {
                 return title ?? url.toString(forUserInput: userStringValue)
             }
-        case .bookmark(title: let title, url: _, isFavorite: _, allowedInTopHits: _),
+        case .bookmark(title: let title, url: _, isFavorite: _),
              .internalPage(title: let title, url: _),
              .openTab(title: let title, url: _):
             return title
@@ -109,13 +109,13 @@ struct SuggestionViewModel: Equatable {
              .website,
              .unknown:
             return nil
-        case .historyEntry(title: let title, url: let url, allowedInTopHits: _):
+        case .historyEntry(title: let title, url: let url):
             if url.isDuckDuckGoSearch {
                 return url.searchQuery
             } else {
                 return title
             }
-        case .bookmark(title: let title, url: _, isFavorite: _, allowedInTopHits: _),
+        case .bookmark(title: let title, url: _, isFavorite: _),
              .internalPage(title: let title, url: _),
              .openTab(title: let title, url: _):
             return title
@@ -124,8 +124,8 @@ struct SuggestionViewModel: Equatable {
 
     var autocompletionString: String {
         switch suggestion {
-        case .historyEntry(title: _, url: let url, allowedInTopHits: _),
-             .bookmark(title: _, url: let url, isFavorite: _, allowedInTopHits: _):
+        case .historyEntry(title: _, url: let url),
+             .bookmark(title: _, url: let url, isFavorite: _):
 
             let userStringValue = self.userStringValue.lowercased()
             let urlString = url.toString(forUserInput: userStringValue)
@@ -154,8 +154,8 @@ struct SuggestionViewModel: Equatable {
             return " – " + UserText.duckDuckGo
         case .openTab(title: _, url: let url) where url.isDuckDuckGoSearch:
             return " – " + UserText.duckDuckGoSearchSuffix
-        case .historyEntry(title: _, url: let url, allowedInTopHits: _),
-             .bookmark(title: _, url: let url, isFavorite: _, allowedInTopHits: _),
+        case .historyEntry(title: _, url: let url),
+             .bookmark(title: _, url: let url, isFavorite: _),
              .openTab(title: _, url: let url):
             if url.isDuckDuckGoSearch {
                 return " – \(UserText.searchDuckDuckGoSuffix)"
@@ -179,9 +179,9 @@ struct SuggestionViewModel: Equatable {
             return .web
         case .historyEntry:
             return .historySuggestion
-        case .bookmark(title: _, url: _, isFavorite: false, allowedInTopHits: _):
+        case .bookmark(title: _, url: _, isFavorite: false):
             return .bookmarkSuggestion
-        case .bookmark(title: _, url: _, isFavorite: true, allowedInTopHits: _):
+        case .bookmark(title: _, url: _, isFavorite: true):
             return .favoritedBookmarkSuggestion
         case .unknown:
             return .web

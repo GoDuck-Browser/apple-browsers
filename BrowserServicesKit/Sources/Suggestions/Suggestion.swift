@@ -22,8 +22,8 @@ public enum Suggestion: Equatable {
 
     case phrase(phrase: String)
     case website(url: URL)
-    case bookmark(title: String, url: URL, isFavorite: Bool, allowedInTopHits: Bool)
-    case historyEntry(title: String?, url: URL, allowedInTopHits: Bool)
+    case bookmark(title: String, url: URL, isFavorite: Bool)
+    case historyEntry(title: String?, url: URL)
     case internalPage(title: String, url: URL)
     case openTab(title: String, url: URL)
     case unknown(value: String)
@@ -31,8 +31,8 @@ public enum Suggestion: Equatable {
     public var url: URL? {
         switch self {
         case .website(url: let url),
-             .historyEntry(title: _, url: let url, allowedInTopHits: _),
-             .bookmark(title: _, url: let url, isFavorite: _, allowedInTopHits: _),
+             .historyEntry(title: _, url: let url),
+             .bookmark(title: _, url: let url, isFavorite: _),
              .internalPage(title: _, url: let url),
              .openTab(title: _, url: let url):
             return url
@@ -43,27 +43,14 @@ public enum Suggestion: Equatable {
 
     var title: String? {
         switch self {
-        case .historyEntry(title: let title, url: _, allowedInTopHits: _):
+        case .historyEntry(title: let title, url: _):
             return title
-        case .bookmark(title: let title, url: _, isFavorite: _, allowedInTopHits: _),
+        case .bookmark(title: let title, url: _, isFavorite: _),
              .internalPage(title: let title, url: _),
              .openTab(title: let title, url: _):
             return title
         case .phrase, .website, .unknown:
             return nil
-        }
-    }
-
-    public var allowedInTopHits: Bool {
-        switch self {
-        case .website, .openTab:
-            return true
-        case .historyEntry(title: _, url: _, allowedInTopHits: let allowedInTopHits):
-            return allowedInTopHits
-        case .bookmark(title: _, url: _, isFavorite: _, allowedInTopHits: let allowedInTopHits):
-            return allowedInTopHits
-        case .internalPage, .phrase, .unknown:
-            return false
         }
     }
 
@@ -91,29 +78,13 @@ public enum Suggestion: Equatable {
 
 extension Suggestion {
 
-    init?(bookmark: Bookmark, allowedInTopHits: Bool) {
-        guard let urlObject = URL(string: bookmark.url) else { return nil }
-        self = .bookmark(title: bookmark.title,
-                         url: urlObject,
-                         isFavorite: bookmark.isFavorite,
-                         allowedInTopHits: allowedInTopHits)
-    }
-
     public init?(bookmark: Bookmark) {
         guard let urlObject = URL(string: bookmark.url) else { return nil }
-        self = .bookmark(title: bookmark.title,
-                         url: urlObject,
-                         isFavorite: bookmark.isFavorite,
-                         allowedInTopHits: bookmark.isFavorite)
+        self = .bookmark(title: bookmark.title, url: urlObject, isFavorite: bookmark.isFavorite)
     }
 
     public init(historyEntry: HistorySuggestion) {
-        let areVisitsLow = historyEntry.numberOfVisits < 4
-        let allowedInTopHits = !(historyEntry.failedToLoad ||
-                                 (areVisitsLow && !historyEntry.url.isRoot))
-        self = .historyEntry(title: historyEntry.title,
-                             url: historyEntry.url,
-                             allowedInTopHits: allowedInTopHits)
+        self = .historyEntry(title: historyEntry.title, url: historyEntry.url)
     }
 
     public init(internalPage: InternalPage) {

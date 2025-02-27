@@ -49,10 +49,10 @@ final class SuggestionProcessing {
         let duckDuckGoSuggestions = (try? self.duckDuckGoSuggestions(from: apiResult)) ?? []
 
         // Get domain suggestions from the DuckDuckGo Suggestions section (for the Top Hits section)
-        let duckDuckGoDomainSuggestions = duckDuckGoSuggestions.compactMap { suggestion -> Suggestion? in
+        let duckDuckGoDomainSuggestions = duckDuckGoSuggestions.compactMap { suggestion -> (suggestion: Suggestion, allowedInTopHits: Bool)? in
             // The JSON response tells us explicitly what is navigational now, so we only need to find website suggestions here
             if case .website = suggestion {
-                return suggestion
+                return (suggestion: suggestion, allowedInTopHits: true)
             }
             return nil
         }
@@ -73,8 +73,8 @@ final class SuggestionProcessing {
 
         // Split the Top Hits and the History and Bookmarks section
         let topHits = topHits(from: dedupedNavigationalSuggestions)
-        let localSuggestions = Array(dedupedNavigationalSuggestions.dropFirst(topHits.count).filter { suggestion in
-            switch suggestion {
+        let localSuggestions = Array(dedupedNavigationalSuggestions.dropFirst(topHits.count).filter {
+            switch $0.suggestion {
             case .bookmark, .openTab, .historyEntry, .internalPage:
                 return true
             default:
@@ -86,38 +86,37 @@ final class SuggestionProcessing {
 
         return makeResult(topHits: topHits,
                           duckduckgoSuggestions: dedupedDuckDuckGoSuggestions,
-                          localSuggestions: localSuggestions)
+                          localSuggestions: localSuggestions.map(\.suggestion))
     }
 
-    private func dedupLocalSuggestions(_ suggestions: [Suggestion]) -> [Suggestion] {
-        return suggestions.reduce([]) { partialResult, suggestion in
-            if partialResult.contains(where: {
-
-                switch $0 {
-                case .bookmark(title: let title, url: let url, isFavorite: let isFavorite, allowedInTopHits: _):
-                    if case .bookmark(let searchTitle, let searchUrl, let searchIsFavorite, _) = suggestion,
+    private func dedupLocalSuggestions(_ suggestions: [(suggestion: Suggestion, allowedInTopHits: Bool)]) -> [(suggestion: Suggestion, allowedInTopHits: Bool)] {
+        return suggestions.reduce([(suggestion: Suggestion, allowedInTopHits: Bool)]()) { partialResult, scoredSuggestion -> [(suggestion: Suggestion, allowedInTopHits: Bool)] in
+            if partialResult.contains(where: { item in
+                switch item.suggestion {
+                case .bookmark(title: let title, url: let url, isFavorite: let isFavorite):
+                    if case .bookmark(let searchTitle, let searchUrl, let searchIsFavorite) = scoredSuggestion.suggestion,
                        searchTitle == title,
                        searchUrl.naked == url.naked,
                        searchIsFavorite == isFavorite {
                         return true
                     }
 
-                case .historyEntry(title: let title, url: let url, allowedInTopHits: _):
-                    if case .historyEntry(let searchTitle, let searchUrl, _) = suggestion,
+                case .historyEntry(title: let title, url: let url):
+                    if case .historyEntry(let searchTitle, let searchUrl) = scoredSuggestion.suggestion,
                        searchTitle == title,
                        searchUrl.naked == url {
                         return true
                     }
 
                 case .internalPage(title: let title, url: let url):
-                    if case .internalPage(let searchTitle, let searchUrl) = suggestion,
+                    if case .internalPage(let searchTitle, let searchUrl) = scoredSuggestion.suggestion,
                        searchTitle == title,
                        searchUrl == url {
                         return true
                     }
 
                 case .openTab(title: let title, url: let url):
-                    if case .openTab(let searchTitle, let searchUrl) = suggestion,
+                    if case .openTab(let searchTitle, let searchUrl) = scoredSuggestion.suggestion,
                        searchTitle == title,
                        searchUrl.naked == url.naked {
                         return true
@@ -132,38 +131,26 @@ final class SuggestionProcessing {
             }) {
                 return partialResult
             }
-            return partialResult + [suggestion]
+            return partialResult + [scoredSuggestion]
         }
     }
 
-    private func replaceHistoryWithBookmarksAndTabs(_ sourceSuggestions: [Suggestion]) -> [Suggestion] {
-        var expanded = [Suggestion]()
+    private func replaceHistoryWithBookmarksAndTabs(_ sourceSuggestions: [(suggestion: Suggestion, allowedInTopHits: Bool)]) -> [(suggestion: Suggestion, allowedInTopHits: Bool)] {
+        var expanded = [(suggestion: Suggestion, allowedInTopHits: Bool)]()
         for i in 0 ..< sourceSuggestions.count {
-            let suggestion = sourceSuggestions[i]
+            let item = sourceSuggestions[i]
+            let suggestion = item.suggestion
             guard case .historyEntry = suggestion else {
-                expanded.append(suggestion)
+                expanded.append(item)
                 continue
             }
 
-            var foundTab = false
-            var foundBookmark = false
-
-            if let tab = sourceSuggestions[i ..< sourceSuggestions.endIndex].first(where: {
-                $0.isOpenTab && $0.url?.naked == suggestion.url?.naked
+            if let bookmark = sourceSuggestions[i ..< sourceSuggestions.endIndex].first(where: {
+                $0.suggestion.isBookmark && $0.suggestion.url?.naked == suggestion.url?.naked
             }) {
-                foundTab = true
-                expanded.append(tab)
-            }
-
-            if case .bookmark(title: let title, url: let url, isFavorite: let isFavorite, allowedInTopHits: _) = sourceSuggestions[i ..< sourceSuggestions.endIndex].first(where: {
-                $0.isBookmark && $0.url?.naked == suggestion.url?.naked
-            }) {
-                foundBookmark = true
-                expanded.append(.bookmark(title: title, url: url, isFavorite: isFavorite, allowedInTopHits: suggestion.allowedInTopHits))
-            }
-
-            if !foundTab && !foundBookmark {
-                expanded.append(suggestion)
+                expanded.append(bookmark)
+            } else {
+                expanded.append(item)
             }
         }
         return expanded
@@ -194,20 +181,38 @@ final class SuggestionProcessing {
 
     // MARK: - History and Bookmarks
 
-    private func localSuggestions(from history: [HistorySuggestion], bookmarks: [Bookmark], internalPages: [InternalPage], openTabs: [BrowserTab], query: Query) -> [Suggestion] {
-        enum LocalSuggestion {
-            case bookmark(Bookmark)
-            case history(HistorySuggestion)
-            case internalPage(InternalPage)
-            case openTab(BrowserTab)
+    fileprivate enum LocalSuggestion {
+        case bookmark(Bookmark)
+        case history(HistorySuggestion)
+        case internalPage(InternalPage)
+        case openTab(BrowserTab)
+
+        func allowedInTopHits(platform: Platform) -> Bool {
+            switch self {
+            case .history(let historyEntry):
+                let areVisitsLow = historyEntry.numberOfVisits < 4
+                let allowedInTopHits = !(historyEntry.failedToLoad ||
+                                         (areVisitsLow && !historyEntry.url.isRoot))
+                return allowedInTopHits
+            case .bookmark(let bookmark):
+                switch platform {
+                case .desktop: return bookmark.isFavorite
+                case .mobile: return true
+                }
+            case .internalPage, .openTab:
+                return false
+            }
         }
+    }
+
+    private func localSuggestions(from history: [HistorySuggestion], bookmarks: [Bookmark], internalPages: [InternalPage], openTabs: [BrowserTab], query: Query) -> [(suggestion: Suggestion, allowedInTopHits: Bool)] {
         let localSuggestions: [LocalSuggestion] = bookmarks.map(LocalSuggestion.bookmark) + openTabs.map(LocalSuggestion.openTab) + history.map(LocalSuggestion.history) + internalPages.map(LocalSuggestion.internalPage)
         let queryTokens = Score.tokens(from: query)
 
-        let result: [Suggestion] = localSuggestions
+        let result: [(suggestion: Suggestion, allowedInTopHits: Bool)] = localSuggestions
             // Score items
-            .map { item -> (item: LocalSuggestion, score: Score) in
-                let score = switch item {
+            .map { suggestion -> (suggestion: LocalSuggestion, score: Score) in
+                let score = switch suggestion {
                 case .bookmark(let bookmark):
                     Score(bookmark: bookmark, query: query, queryTokens: queryTokens)
                 case .history(let historyEntry):
@@ -218,13 +223,13 @@ final class SuggestionProcessing {
                     Score(browserTab: tab, query: query)
                 }
 
-                return (item, score)
+                return (suggestion, score)
             }
             // Filter not relevant
             .filter { $0.score > 0 }
             // Sort according to the score
             .sorted {
-                switch ($0.item, $1.item) {
+                switch ($0.suggestion, $1.suggestion) {
                 // place open tab suggestions on top
                 case (.openTab, .openTab): break
                 case (.openTab, _): return true
@@ -234,20 +239,9 @@ final class SuggestionProcessing {
                 return $0.score > $1.score
             }
             // Create suggestion array
-            .compactMap {
-                switch $0.item {
-                case .bookmark(let bookmark):
-                    switch platform {
-                    case .desktop: return Suggestion(bookmark: bookmark)
-                    case .mobile: return Suggestion(bookmark: bookmark, allowedInTopHits: true)
-                    }
-
-                case .history(let historyEntry):
-                    return Suggestion(historyEntry: historyEntry)
-                case .internalPage(let internalPage):
-                    return Suggestion(internalPage: internalPage)
-                case .openTab(let tab):
-                    return Suggestion(tab: tab)
+            .compactMap { item in
+                Suggestion(localSuggestion: item.suggestion).map { suggestion in
+                    (suggestion: suggestion, allowedInTopHits: item.suggestion.allowedInTopHits(platform: platform))
                 }
             }
 
@@ -257,14 +251,14 @@ final class SuggestionProcessing {
     // MARK: - Top Hits
 
     /// Take the top two items from the suggestions, but only up to the first suggestion that is not allowed in top hits
-    private func topHits(from suggestions: [Suggestion]) -> [Suggestion] {
+    private func topHits(from suggestions: [(suggestion: Suggestion, allowedInTopHits: Bool)]) -> [Suggestion] {
         var topHits = [Suggestion]()
 
-        for suggestion in suggestions {
+        for item in suggestions {
             guard topHits.count < Self.maximumNumberOfTopHits else { break }
 
-            if suggestion.allowedInTopHits {
-                topHits.append(suggestion)
+            if item.allowedInTopHits {
+                topHits.append(item.suggestion)
             } else {
                 break
             }
@@ -303,3 +297,20 @@ final class SuggestionProcessing {
     }
 
 }
+
+private extension Suggestion {
+    init?(localSuggestion: SuggestionProcessing.LocalSuggestion) {
+        switch localSuggestion {
+        case .bookmark(let bookmark):
+            guard let suggestion = Suggestion(bookmark: bookmark) else { return nil }
+            self = suggestion
+        case .history(let historyEntry):
+            self = Suggestion(historyEntry: historyEntry)
+        case .internalPage(let internalPage):
+            self = Suggestion(internalPage: internalPage)
+        case .openTab(let tab):
+            self = Suggestion(tab: tab)
+        }
+    }
+}
+
