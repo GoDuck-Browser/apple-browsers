@@ -227,7 +227,7 @@ struct UserText {
             if #available(macOS 12.0, *) {
                 return NSLocalizedString("history.delete.dialog.message.markdown",
                                          value: "**%@** items will be deleted.",
-                                         comment: "Message in a dialog asking the user to confirm deleting history items. Please make sure to keep **%d** intact. NOTE: This term is only for English. For other languages, please translate the following term: 'History items (**%@**) will be deleted.'")
+                                         comment: "Message in a dialog asking the user to confirm deleting history items. Please make sure to keep **%@** intact. NOTE: This term is only for English. For other languages, please translate the following term: 'History items (**%@**) will be deleted.'")
             } else {
                 return NSLocalizedString("history.delete.dialog.message",
                                          value: "%@ items will be deleted",

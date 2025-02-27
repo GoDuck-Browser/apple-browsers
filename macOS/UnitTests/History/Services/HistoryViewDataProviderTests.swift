@@ -46,11 +46,16 @@ final class MockDomainFireproofStatusProvider: DomainFireproofStatusProviding {
 }
 
 final class CapturingHistoryBurner: HistoryBurning {
+    func burnAll() async {
+        burnAllCallsCount += 1
+    }
+
     func burn(_ visits: [Visit], animated: Bool) async {
         burnCalls.append(.init(visits, animated))
     }
 
     var burnCalls: [BurnCall] = []
+    var burnAllCallsCount: Int = 0
 
     struct BurnCall: Equatable {
         let visits: [Visit]
@@ -302,24 +307,24 @@ final class HistoryViewDataProviderTests: XCTestCase {
         XCTAssertEqual(batch.visits.count, 2)
     }
 
-    func testThatVisitsBatchWithDomainFilterReturnsVisitsWithURLMatchingTheDomain() async throws {
+    func testThatVisitsBatchWithDomainFilterReturnsVisitsWithETLDPlusOneMatchingTheDomain() async throws {
         dateFormatter.date = try date(year: 2025, month: 2, day: 24)
         let today = dateFormatter.currentDate().startOfDay
 
         dataSource.history = [
             .make(url: try XCTUnwrap("https://example12.com".url), visits: [.init(date: today)]),
             .make(url: try XCTUnwrap("https://abcd.example.com/foo".url), visits: [.init(date: today)]),
-            .make(url: try XCTUnwrap("https://abcd.example.com/bar".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example.com/bar".url), visits: [.init(date: today)]),
             .make(url: try XCTUnwrap("https://duckduckgo.com".url), title: "abcd.example.com", visits: [.init(date: today)])
         ]
         await provider.refreshData()
-        let batch = await provider.visitsBatch(for: .domainFilter("abcd.example.com"), limit: 4, offset: 0)
+        let batch = await provider.visitsBatch(for: .domainFilter("example.com"), limit: 4, offset: 0)
         XCTAssertEqual(batch.finished, true)
         XCTAssertEqual(batch.visits.count, 2)
-        XCTAssertEqual(Set(batch.visits.map(\.url)), ["https://abcd.example.com/foo", "https://abcd.example.com/bar"])
+        XCTAssertEqual(Set(batch.visits.map(\.url)), ["https://abcd.example.com/foo", "https://example.com/bar"])
     }
 
-    func testThatVisitsBatchWithDomainFilterRequiresExactMatch() async throws {
+    func testThatVisitsBatchWithDomainFilterMatchesETLDPlusOne() async throws {
         dateFormatter.date = try date(year: 2025, month: 2, day: 24)
         let today = dateFormatter.currentDate().startOfDay
 
@@ -329,7 +334,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
         await provider.refreshData()
         let batch = await provider.visitsBatch(for: .domainFilter("example.com"), limit: 4, offset: 0)
         XCTAssertEqual(batch.finished, true)
-        XCTAssertEqual(batch.visits.count, 0)
+        XCTAssertEqual(batch.visits.count, 1)
     }
 
     // MARK: - countVisibleVisits
@@ -496,7 +501,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
         )
     }
 
-    func testThatBurnAllVisitsBurnsAllVisitsAndAnimates() async throws {
+    func testThatBurnAllVisitsBurnsAllVisits() async throws {
         dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
         let today = dateFormatter.currentDate().startOfDay
         let yesterday = today.daysAgo(1)
@@ -522,11 +527,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
         ]
         await provider.refreshData()
         await provider.burnVisits(matching: .rangeFilter(.all))
-        XCTAssertEqual(burner.burnCalls.count, 1)
-
-        let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
-        XCTAssertEqual(burnVisitsCall.visits.count, 9)
-        XCTAssertEqual(burnVisitsCall.animated, true)
+        XCTAssertEqual(burner.burnAllCallsCount, 1)
     }
 
     func testThatBurnVisitsFromTodayAnimates() async throws {
