@@ -37,24 +37,6 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
         return await visitsBatch(query, limit, offset)
     }
 
-    func countVisibleVisits(for range: DataModel.HistoryRange) async -> Int {
-        countVisibleVisitsForRangeCalls.append(range)
-        return await countVisibleVisitsForRange(range)
-    }
-
-    func countVisibleVisits(matching searchTerm: String) async -> Int {
-        countVisibleVisitsMatchingSearchTermCalls.append(searchTerm)
-        return await countVisibleVisitsMatchingSearchTerm(searchTerm)
-    }
-
-    func deleteVisits(for range: DataModel.HistoryRange) async {
-        deleteVisitsForRangeCalls.append(range)
-    }
-
-    func burnVisits(for range: DataModel.HistoryRange) async {
-        burnVisitsForRangeCalls.append(range)
-    }
-
     func deleteVisits(for identifiers: [VisitIdentifier]) async {
         deleteVisitsForIdentifierCalls.append(identifiers)
     }
@@ -63,13 +45,19 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
         burnVisitsForIdentifiersCalls.append(identifiers)
     }
 
-    func deleteVisits(matching searchTerm: String) async {
-        deleteVisitsMatchingSearchTermCalls.append(searchTerm)
+    func countVisibleVisits(matching query: DataModel.HistoryQueryKind) async -> Int {
+        countVisibleVisitsCalls.append(query)
+        return await countVisibleVisits(query)
     }
 
-    func burnVisits(matching searchTerm: String) async {
-        burnVisitsMatchingSearchTermCalls.append(searchTerm)
+    func deleteVisits(matching query: DataModel.HistoryQueryKind) async {
+        deleteVisitsMatchingQueryCalls.append(query)
     }
+
+    func burnVisits(matching query: DataModel.HistoryQueryKind) async {
+        burnVisitsMatchingQueryCalls.append(query)
+    }
+
 
     func titles(for urls: [URL]) -> [URL : String] {
         titlesForURLsCalls.append(urls)
@@ -81,20 +69,14 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
     var rangesCallCount: Int = 0
     var resetCacheCallCount: Int = 0
 
-    var countVisibleVisitsForRangeCalls: [DataModel.HistoryRange] = []
-    var countVisibleVisitsForRange: (DataModel.HistoryRange) async -> Int = { _ in return 0 }
+    var countVisibleVisitsCalls: [DataModel.HistoryQueryKind] = []
+    var countVisibleVisits: (DataModel.HistoryQueryKind) async -> Int = { _ in return 0 }
 
-    var countVisibleVisitsMatchingSearchTermCalls: [String] = []
-    var countVisibleVisitsMatchingSearchTerm: (String) async -> Int = { _ in return 0 }
-
-    var deleteVisitsForRangeCalls: [DataModel.HistoryRange] = []
-    var burnVisitsForRangeCalls: [DataModel.HistoryRange] = []
+    var deleteVisitsMatchingQueryCalls: [DataModel.HistoryQueryKind] = []
+    var burnVisitsMatchingQueryCalls: [DataModel.HistoryQueryKind] = []
 
     var deleteVisitsForIdentifierCalls: [[VisitIdentifier]] = []
     var burnVisitsForIdentifiersCalls: [[VisitIdentifier]] = []
-
-    var deleteVisitsMatchingSearchTermCalls: [String] = []
-    var burnVisitsMatchingSearchTermCalls: [String] = []
 
     var visitsBatchCalls: [VisitsBatchCall] = []
     var visitsBatch: (DataModel.HistoryQueryKind, Int, Int) async -> DataModel.HistoryItemsBatch = { _, _, _ in .init(finished: true, visits: []) }
@@ -151,49 +133,49 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
     }
 
     func testWhenDataProviderHasNoVisitsForRangeThenShowDeleteDialogReturnsNoAction() async {
-        dataProvider.countVisibleVisitsForRange = { _ in return 0 }
+        dataProvider.countVisibleVisits = { _ in return 0 }
         let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
-        XCTAssertEqual(dataProvider.deleteVisitsForRangeCalls.count, 0)
-        XCTAssertEqual(dataProvider.burnVisitsForRangeCalls.count, 0)
+        XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
+        XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dialogResponse, .noAction)
     }
 
     func testWhenDeleteDialogIsCancelledThenShowDeleteDialogReturnsNoAction() async {
-        dataProvider.countVisibleVisitsForRange = { _ in return 100 }
+        dataProvider.countVisibleVisits = { _ in return 100 }
         dialogPresenter.response = .noAction
         let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
-        XCTAssertEqual(dataProvider.deleteVisitsForRangeCalls.count, 0)
-        XCTAssertEqual(dataProvider.burnVisitsForRangeCalls.count, 0)
+        XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
+        XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dialogResponse, .noAction)
     }
 
     func testWhenDeleteDialogReturnsUnknownResponseThenShowDeleteDialogReturnsNoAction() async {
         // this scenario shouldn't happen in real life anyway but is included for completeness
-        dataProvider.countVisibleVisitsForRange = { _ in return 100 }
+        dataProvider.countVisibleVisits = { _ in return 100 }
         dialogPresenter.response = .unknown
         let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
-        XCTAssertEqual(dataProvider.deleteVisitsForRangeCalls.count, 0)
-        XCTAssertEqual(dataProvider.burnVisitsForRangeCalls.count, 0)
+        XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
+        XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dialogResponse, .noAction)
     }
 
     func testWhenDeleteDialogIsAcceptedWithBurningThenShowDeleteDialogPerformsBurningAndReturnsDeleteAction() async {
         // this scenario shouldn't happen in real life anyway but is included for completeness
-        dataProvider.countVisibleVisitsForRange = { _ in return 100 }
+        dataProvider.countVisibleVisits = { _ in return 100 }
         dialogPresenter.response = .burn
         let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
-        XCTAssertEqual(dataProvider.deleteVisitsForRangeCalls.count, 0)
-        XCTAssertEqual(dataProvider.burnVisitsForRangeCalls.count, 1)
+        XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
+        XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 1)
         XCTAssertEqual(dialogResponse, .delete)
     }
 
     func testWhenDeleteDialogIsAcceptedWithoutBurningThenShowDeleteDialogPerformsDeletiongAndReturnsDeleteAction() async {
         // this scenario shouldn't happen in real life anyway but is included for completeness
-        dataProvider.countVisibleVisitsForRange = { _ in return 100 }
+        dataProvider.countVisibleVisits = { _ in return 100 }
         dialogPresenter.response = .delete
         let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
-        XCTAssertEqual(dataProvider.deleteVisitsForRangeCalls.count, 1)
-        XCTAssertEqual(dataProvider.burnVisitsForRangeCalls.count, 0)
+        XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 1)
+        XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dialogResponse, .delete)
     }
 }

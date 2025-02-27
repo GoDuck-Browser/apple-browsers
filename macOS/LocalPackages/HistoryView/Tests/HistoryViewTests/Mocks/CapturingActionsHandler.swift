@@ -36,6 +36,11 @@ final class CapturingActionsHandler: ActionsHandling {
         return await showDeleteDialogForSearchTerm(searchTerm)
     }
 
+    func showDeleteDialog(forDomain domain: String) async -> HistoryView.DataModel.DeleteDialogResponse {
+        showDeleteDialogForDomainCalls.append(domain)
+        return await showDeleteDialogForDomain(domain)
+    }
+
     func showContextMenu(for entries: [String], using presenter: any ContextMenuPresenting) async -> DataModel.DeleteDialogResponse {
         return .noAction
     }
@@ -49,6 +54,9 @@ final class CapturingActionsHandler: ActionsHandling {
 
     var showDeleteDialogForEntriesCalls: [[String]] = []
     var showDeleteDialogForEntries: ([String]) async -> DataModel.DeleteDialogResponse = { _ in .delete }
+
+    var showDeleteDialogForDomainCalls: [String] = []
+    var showDeleteDialogForDomain: (String) async -> DataModel.DeleteDialogResponse = { _ in .delete }
 
     var showDeleteDialogForSearchTermCalls: [String] = []
     var showDeleteDialogForSearchTerm: (String) async -> DataModel.DeleteDialogResponse = { _ in .delete }

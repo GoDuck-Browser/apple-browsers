@@ -371,13 +371,13 @@ final class HistoryViewDataProviderTests: XCTestCase {
             ])
         ]
         await provider.refreshData()
-        let allCount = await provider.countVisibleVisits(for: .all)
-        let todayCount = await provider.countVisibleVisits(for: .today)
-        let yesterdayCount = await provider.countVisibleVisits(for: .yesterday)
-        let saturdayCount = await provider.countVisibleVisits(for: .saturday)
-        let fridayCount = await provider.countVisibleVisits(for: .friday)
-        let thursdayCount = await provider.countVisibleVisits(for: .thursday)
-        let olderCount = await provider.countVisibleVisits(for: .older)
+        let allCount = await provider.countVisibleVisits(matching: .rangeFilter(.all))
+        let todayCount = await provider.countVisibleVisits(matching: .rangeFilter(.today))
+        let yesterdayCount = await provider.countVisibleVisits(matching: .rangeFilter(.yesterday))
+        let saturdayCount = await provider.countVisibleVisits(matching: .rangeFilter(.saturday))
+        let fridayCount = await provider.countVisibleVisits(matching: .rangeFilter(.friday))
+        let thursdayCount = await provider.countVisibleVisits(matching: .rangeFilter(.thursday))
+        let olderCount = await provider.countVisibleVisits(matching: .rangeFilter(.older))
         XCTAssertEqual(allCount, 15)
         XCTAssertEqual(todayCount, 2)
         XCTAssertEqual(yesterdayCount, 2)
@@ -414,7 +414,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             ])
         ]
         await provider.refreshData()
-        await provider.deleteVisits(for: .yesterday)
+        await provider.deleteVisits(matching: .rangeFilter(.yesterday))
         XCTAssertEqual(dataSource.deleteCalls.count, 1)
 
         let deletedVisits = try XCTUnwrap(dataSource.deleteCalls.first)
@@ -450,7 +450,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             ])
         ]
         await provider.refreshData()
-        await provider.deleteVisits(for: .all)
+        await provider.deleteVisits(matching: .rangeFilter(.all))
         XCTAssertEqual(dataSource.deleteCalls.count, 1)
 
         let deletedVisits = try XCTUnwrap(dataSource.deleteCalls.first)
@@ -484,7 +484,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             ])
         ]
         await provider.refreshData()
-        await provider.burnVisits(for: .yesterday)
+        await provider.burnVisits(matching: .rangeFilter(.yesterday))
         XCTAssertEqual(burner.burnCalls.count, 1)
 
         let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
@@ -521,7 +521,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             ])
         ]
         await provider.refreshData()
-        await provider.burnVisits(for: .all)
+        await provider.burnVisits(matching: .rangeFilter(.all))
         XCTAssertEqual(burner.burnCalls.count, 1)
 
         let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
@@ -537,7 +537,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
             .make(url: try XCTUnwrap("https://example1.com".url), visits: [.init(date: today)])
         ]
         await provider.refreshData()
-        await provider.burnVisits(for: .today)
+        await provider.burnVisits(matching: .rangeFilter(.today))
         XCTAssertEqual(burner.burnCalls.count, 1)
 
         let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
