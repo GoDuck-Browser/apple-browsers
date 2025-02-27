@@ -107,6 +107,7 @@ struct SettingsRootView: View {
 
     /// Navigation Views for DeepLink and programmatic navigation
     @ViewBuilder func navigationDestinationView(for target: SettingsViewModel.SettingsDeepLinkSection) -> some View {
+
         if !AppDependencyProvider.shared.isAuthV2Enabled {
             switch target {
             case .dbp:
@@ -119,9 +120,9 @@ struct SettingsRootView: View {
                                                                    subscriptionManager: AppDependencyProvider.shared.subscriptionManager!,
                                                                    subscriptionFeatureAvailability: viewModel.subscriptionFeatureAvailability,
                                                                    privacyProDataReporter: viewModel.privacyProDataReporter,
-                                                                   tld: AppDependencyProvider.shared.storageCache.tld)
+                                                                   tld: AppDependencyProvider.shared.storageCache.tld,
+                                                                   internalUserDecider: AppDependencyProvider.shared.internalUserDecider)
                 .environmentObject(subscriptionNavigationCoordinator)
-
             case .restoreFlow:
                 SubscriptionContainerViewFactory.makeEmailFlow(navigationCoordinator: subscriptionNavigationCoordinator,
                                                                subscriptionManager: AppDependencyProvider.shared.subscriptionManager!,

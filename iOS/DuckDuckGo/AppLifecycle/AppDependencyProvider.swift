@@ -146,7 +146,8 @@ final class AppDependencyProvider: DependencyProvider {
                                                                  subscriptionEndpointService: subscriptionEndpointService,
                                                                  authEndpointService: authService,
                                                                  subscriptionFeatureMappingCache: subscriptionFeatureMappingCache,
-                                                                 subscriptionEnvironment: subscriptionEnvironment)
+                                                                 subscriptionEnvironment: subscriptionEnvironment,
+                                                                 isInternalUserEnabled: { ContentBlocking.shared.privacyConfigurationManager.internalUserDecider.isInternalUser })
             accountManager.delegate = subscriptionManager
 
             self.subscriptionManager = subscriptionManager
@@ -217,6 +218,9 @@ final class AppDependencyProvider: DependencyProvider {
                                                                    pixelHandler: pixelHandler,
                                                                    autoRecoveryHandler: {
                 // TODO: Implement
+            },
+                                                                   isInternalUserEnabled: {
+                ContentBlocking.shared.privacyConfigurationManager.internalUserDecider.isInternalUser
             })
             self.subscriptionManagerV2 = subscriptionManager
 

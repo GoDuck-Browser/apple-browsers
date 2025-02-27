@@ -158,14 +158,12 @@ final class DefaultSubscriptionPagesUseSubscriptionFeature: SubscriptionPagesUse
     }
     
     weak var broker: UserScriptMessageBroker?
-    
+
     var featureName = SubscriptionPagesUseSubscriptionFeatureConstants.featureName
-    
-    var messageOriginPolicy: MessageOriginPolicy = .only(rules: [
-        .exact(hostname: OriginDomains.duckduckgo),
-        .exact(hostname: OriginDomains.abrown)
+    lazy var messageOriginPolicy: MessageOriginPolicy = .only(rules: [
+        .exact(hostname: subscriptionManager.url(for: .baseURL).host ?? OriginDomains.duckduckgo)
     ])
-    
+
     var originalMessage: WKScriptMessage?
     
     func with(broker: UserScriptMessageBroker) {

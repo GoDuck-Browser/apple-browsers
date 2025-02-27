@@ -35,9 +35,8 @@ final class IdentityTheftRestorationPagesFeature: Subfeature, ObservableObject {
     
     struct OriginDomains {
         static let duckduckgo = "duckduckgo.com"
-        static let abrown = "abrown.duckduckgo.com"
     }
-    
+
     struct Handlers {
         static let getAccessToken = "getAccessToken"
     }
@@ -49,13 +48,12 @@ final class IdentityTheftRestorationPagesFeature: Subfeature, ObservableObject {
     }
 
     weak var broker: UserScriptMessageBroker?
-    var featureName: String = Constants.featureName
 
-    var messageOriginPolicy: MessageOriginPolicy = .only(rules: [
-        .exact(hostname: OriginDomains.duckduckgo),
-        .exact(hostname: OriginDomains.abrown)
+    let featureName: String = Constants.featureName
+    lazy var messageOriginPolicy: MessageOriginPolicy = .only(rules: [
+        .exact(hostname: subscriptionManager.url(for: .baseURL).host ?? OriginDomains.duckduckgo)
     ])
-    
+
     var originalMessage: WKScriptMessage?
 
     func with(broker: UserScriptMessageBroker) {
