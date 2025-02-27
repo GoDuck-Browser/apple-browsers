@@ -19,27 +19,28 @@
 import Foundation
 import Common
 
-//extension NetworkProtectionKeychainTokenStore: SubscriptionTokenHandling {
-//
-//    public func getToken() async throws -> String {
-//        guard let token = try fetchToken() else {
-//            throw NetworkProtectionError.noAuthTokenFound
-//        }
-//        return token
-//    }
-//
-//    public func removeToken() async throws {
-//        try deleteToken()
-//    }
-//
-//    public func refreshToken() async throws {
-//        // Unused in Auth V1
-//    }
-//
-//    public func adoptToken(_ someKindOfToken: Any) async throws {
-//        guard let token = someKindOfToken as? String else {
-//            throw NetworkProtectionError.invalidAuthToken
-//        }
-//        try store(token)
-//    }
-//}
+extension NetworkProtectionKeychainTokenStore: SubscriptionTokenHandling {
+
+    public func getToken() async throws -> String {
+        guard let token = try fetchToken() else {
+            throw NetworkProtectionError.noAuthTokenFound
+        }
+        return token
+    }
+
+    public func removeToken() async throws {
+        try deleteToken()
+    }
+
+    public func refreshToken() async throws {
+        // Unused in Auth V1
+        assertionFailure("refreshToken() should not be called")
+    }
+
+    public func adoptToken(_ someKindOfToken: Any) async throws {
+        guard let token = someKindOfToken as? String else {
+            throw NetworkProtectionError.invalidAuthToken
+        }
+        try store(token)
+    }
+}
