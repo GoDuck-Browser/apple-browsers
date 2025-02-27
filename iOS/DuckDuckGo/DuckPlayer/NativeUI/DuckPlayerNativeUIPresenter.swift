@@ -105,8 +105,12 @@ final class DuckPlayerNativeUIPresenter {
         // Store the videoID
         state.videoID = videoID        
 
-        // If we already have a container view model, just show it again
-        if let existingViewModel = containerViewModel {
+        // Determine the pill type
+        let pillType: PillType = state.hasBeenShown ? .reEntry : .entry
+        
+        // If we already have a container view model, just update the content and show it again
+        if let existingViewModel = containerViewModel, let hostingController = containerViewController {
+            updatePillContent(for: pillType, videoID: videoID, in: hostingController)
             existingViewModel.show()
             return
         }
@@ -121,35 +125,8 @@ final class DuckPlayerNativeUIPresenter {
         // Initialize a generic container
         var containerView: DuckPlayerContainer.Container<AnyView>
         
-        let pillType: PillType = state.hasBeenShown ? .reEntry : .entry
-
-        if pillType == .entry {
-           // Create the pill view model
-            let pillViewModel = DuckPlayerEntryPillViewModel() { [weak self] in
-                self?.videoPlaybackRequest.send(videoID)
-            }
-            // Create the container view with the pill view
-            containerView = DuckPlayerContainer.Container(
-                viewModel: containerViewModel,
-                hasBackground: false
-            ) { _ in
-                AnyView(DuckPlayerEntryPillView(viewModel: pillViewModel))
-            }
-        
-        } else {
-            // Create the mini pill view model for entry type
-            let miniPillViewModel = DuckPlayerMiniPillViewModel() { [weak self] in
-                self?.videoPlaybackRequest.send(videoID)
-            }
-            
-            // Create the container view with the mini pill view
-            containerView = DuckPlayerContainer.Container(
-                viewModel: containerViewModel,
-                hasBackground: false
-            ) { _ in
-                AnyView(DuckPlayerMiniPillView(viewModel: miniPillViewModel))
-            }
-        }
+        // Create the container view with the appropriate pill view
+        containerView = createContainerWithPill(for: pillType, videoID: videoID, containerViewModel: containerViewModel)
         
         // Set up hosting controller
         let hostingController = UIHostingController(rootView: containerView)
@@ -175,10 +152,53 @@ final class DuckPlayerNativeUIPresenter {
         containerViewController = hostingController
         
         // Add delay before showing the pill
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak containerViewModel] in
-            containerViewModel?.show()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak containerViewModel, weak self] in
+            containerViewModel?.show()            
         }
+    }
+    
+    /// Creates a container with the appropriate pill view based on the pill type
+    @MainActor
+    private func createContainerWithPill(for pillType: PillType, videoID: String, containerViewModel: DuckPlayerContainer.ViewModel) -> DuckPlayerContainer.Container<AnyView> {
+        if pillType == .entry {
+            // Create the pill view model for entry type
+            let pillViewModel = DuckPlayerEntryPillViewModel() { [weak self] in
+                self?.videoPlaybackRequest.send(videoID)
+            }
+            
+            // Create the container view with the pill view
+            return DuckPlayerContainer.Container(
+                viewModel: containerViewModel,
+                hasBackground: false
+            ) { _ in
+                AnyView(DuckPlayerEntryPillView(viewModel: pillViewModel))
+            }
+        } else {
+            // Create the mini pill view model for re-entry type
+            let miniPillViewModel = DuckPlayerMiniPillViewModel() { [weak self] in
+                self?.videoPlaybackRequest.send(videoID)
+            }
+            
+            // Create the container view with the mini pill view
+            return DuckPlayerContainer.Container(
+                viewModel: containerViewModel,
+                hasBackground: false
+            ) { _ in
+                AnyView(DuckPlayerMiniPillView(viewModel: miniPillViewModel))
+            }
+        }
+    }
+    
+    /// Updates the content of an existing hosting controller with the appropriate pill view
+    @MainActor
+    private func updatePillContent(for pillType: PillType, videoID: String, in hostingController: UIHostingController<DuckPlayerContainer.Container<AnyView>>) {
+        guard let containerViewModel = self.containerViewModel else { return }
         
+        // Create a new container with the updated content
+        let updatedContainer = createContainerWithPill(for: pillType, videoID: videoID, containerViewModel: containerViewModel)
+        
+        // Update the hosting controller's root view
+        hostingController.rootView = updatedContainer
     }
     
     /// Dismisses the currently presented entry pill
