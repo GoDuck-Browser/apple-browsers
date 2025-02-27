@@ -171,9 +171,8 @@ struct HistoryViewDeleteDialog: ModalView {
                     Text(model.dataClearingExplanation)
                         .fixMultilineScrollableText()
                         .foregroundColor(.blackWhite60)
-                        .frame(width: 242)
                         .font(.system(size: 11))
-                        .padding(.leading, 16)
+                        .padding(.leading, 19)
                 }
                 .padding(.init(top: 16, leading: 12, bottom: 16, trailing: 12))
                 .background(RoundedRectangle(cornerRadius: 8.0).stroke(.blackWhite5))
