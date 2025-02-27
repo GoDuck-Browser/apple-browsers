@@ -27621,6 +27621,18 @@
         }
       }
     },
+    "history.delete.dialog.burn.checkbox.explanation.with.closing.tabs" : {
+      "comment" : "Explanation of what deleting site data means.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "This will close all tabs, log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted."
+          }
+        }
+      }
+    },
     "history.delete.dialog.message" : {
       "comment" : "Message in a dialog asking the user to confirm deleting history",
       "extractionState" : "extracted_with_value",

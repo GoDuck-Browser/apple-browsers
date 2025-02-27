@@ -72,6 +72,16 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
             return UserText.deleteHistory(for: stringDate)
         }
     }
+
+    var dataClearingExplanation: String {
+        switch mode {
+        case .all, .today:
+            return UserText.deleteCookiesAndSiteDataExplanationWithClosingTabs
+        default:
+            return UserText.deleteCookiesAndSiteDataExplanation
+        }
+    }
+
     @Published var shouldBurn: Bool = true
     @Published private(set) var response: Response = .unknown
 
@@ -125,7 +135,7 @@ struct HistoryViewDeleteDialog: ModalView {
                         .fixMultilineScrollableText()
                         .toggleStyle(.checkbox)
 
-                    Text(UserText.deleteCookiesAndSiteDataExplanation)
+                    Text(model.dataClearingExplanation)
                         .fixMultilineScrollableText()
                         .foregroundColor(.blackWhite60)
                         .frame(width: 242)
