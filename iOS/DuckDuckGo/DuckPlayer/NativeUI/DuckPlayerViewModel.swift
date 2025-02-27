@@ -36,6 +36,9 @@ final class DuckPlayerViewModel: ObservableObject {
     
     /// A publisher to notify when the settings button is pressed.    
     let settingsRequestPublisher = PassthroughSubject<Void, Never>()
+
+    /// A publisher to notify when the view is dismissed
+    let dismissPublisher = PassthroughSubject<Void, Never>()
     
     /// Current interface orientation state.
     /// - `true` when device is in landscape orientation
@@ -113,7 +116,7 @@ final class DuckPlayerViewModel: ObservableObject {
     }
     
     /// Opens the current video in the YouTube app or website
-    func openInYouTube() {
+    func openInYouTube() {        
         youtubeNavigationRequestPublisher.send(videoID)
     }
     
@@ -135,6 +138,7 @@ final class DuckPlayerViewModel: ObservableObject {
     /// Called when the view disappears
     /// Removes orientation monitoring
     func onDisappear() {
+        dismissPublisher.send()
         NotificationCenter.default.removeObserver(self,
                                                 name: UIDevice.orientationDidChangeNotification,
                                                 object: nil)

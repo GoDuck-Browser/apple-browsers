@@ -240,7 +240,7 @@ protocol DuckPlayerControlling: AnyObject {
     /// Presents a bottom sheet asking the user how they want to open the video
     ///
     /// - Parameter videoID: The YouTube video ID to be played
-    func presentEntryPill(for videoID: String)
+    func presentPill(for videoID: String)
     
     /// Dismisses the bottom sheet
     func dismissPill()
@@ -613,7 +613,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     ///   - params: Parameters from the web content.
     ///   - message: The script message containing the parameters.
     @MainActor
-    public func handleYoutubeError(params: Any, message: WKScriptMessage) -> Encodable? {
+    public func handleYoutubeError(params: Any, message: WKScriptMessage) async -> Encodable? {
         let (volumePixel, dailyPixel) = getPixelsForYouTubeErrorParams(params)
         DailyPixel.fire(pixel: dailyPixel)
         Pixel.fire(pixel: volumePixel)
@@ -750,11 +750,11 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     ///
     /// - Parameter videoID: The YouTube video ID to be played    
     @MainActor
-    func presentEntryPill(for videoID: String) {        
+    func presentPill(for videoID: String) {        
         guard let hostView = hostView else { return }
         
         Task { @MainActor in
-            nativeUIPresenter.presentEntryPill(for: videoID, in: hostView)
+            nativeUIPresenter.presentPill(for: videoID, in: hostView)
         }
         
         nativeUIPresenter.videoPlaybackRequest
@@ -767,7 +767,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     /// Add cleanup method to remove the sheet
     @MainActor
     func dismissPill() {        
-        Task { await nativeUIPresenter.dismissPill() }
+        Task { await nativeUIPresenter.dismissPill(reset: true) }
     }
 
     @objc private func handleChromeVisibilityChange(_ notification: Notification) {

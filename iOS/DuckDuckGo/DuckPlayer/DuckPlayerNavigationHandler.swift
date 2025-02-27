@@ -51,7 +51,7 @@ final class DuckPlayerNavigationHandler: NSObject {
     
     /// Keeps track of the last YouTube video watched.
     var lastWatchInYoutubeVideo: String?
-       
+    
     // Redirection Throttle
     /// Timestamp of the last Duck Player redirection.
     private var lastDuckPlayerRedirect: Date?
@@ -141,6 +141,7 @@ final class DuckPlayerNavigationHandler: NSObject {
     ///   - pixelFiring: The pixel firing utility for analytics.
     ///   - dailyPixelFiring: The daily pixel firing utility for analytics.
     ///   - tabNavigationHandler: The tab navigation handler delegate.
+    ///   - duckPlayerOverlayUsagePixels: The duck player overlay usage pixels.    
     init(duckPlayer: DuckPlayerControlling = DuckPlayer(),
          featureFlagger: FeatureFlagger = AppDependencyProvider.shared.featureFlagger,
          appSettings: AppSettings,
@@ -154,8 +155,7 @@ final class DuckPlayerNavigationHandler: NSObject {
         self.pixelFiring = pixelFiring
         self.dailyPixelFiring = dailyPixelFiring
         self.tabNavigationHandler = tabNavigationHandler
-        self.duckPlayerOverlayUsagePixels = duckPlayerOverlayUsagePixels
-        
+        self.duckPlayerOverlayUsagePixels = duckPlayerOverlayUsagePixels        
         super.init()
     }
     
@@ -363,7 +363,8 @@ final class DuckPlayerNavigationHandler: NSObject {
     private func loadNativeDuckPlayerVideo(videoID: String) {
         // Only allow native UI on iPhone
         guard UIDevice.current.userInterfaceIdiom == .phone else { return }
-        if referrer == .youtube {
+        
+        if referrer == .youtube {            
             duckPlayer.loadNativeDuckPlayerVideo(videoID: videoID, source: .youtube)
         } else {
             duckPlayer.loadNativeDuckPlayerVideo(videoID: videoID)
@@ -712,8 +713,7 @@ final class DuckPlayerNavigationHandler: NSObject {
     @MainActor
     private func allowYoutubeVideoPlayback(webView: WKWebView) {
         toggleMediaPlayback(webView, pause: false)
-    }
-    
+    }    
 }
 
 extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
@@ -860,10 +860,9 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
 
             // Present the Pill if needed
             Task { @MainActor in
-                try? await Task.sleep(nanoseconds: 1_000_000_000)
                 // Skip URLs for settings and #fragments
                 if url.isYoutubeWatchMainPage {
-                    duckPlayer.presentEntryPill(for: videoID)                
+                    duckPlayer.presentPill(for: videoID)
                 }
             }
 
