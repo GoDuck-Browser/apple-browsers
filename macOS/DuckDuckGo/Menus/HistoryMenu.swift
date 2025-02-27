@@ -152,7 +152,7 @@ final class HistoryMenu: NSMenu {
 
     private func addRecentlyVisited() {
         recentlyVisitedMenuItems = [recentlyVisitedHeaderMenuItem]
-        let recentVisits = historyGroupingProvider.getRecentVisits(maxCount: 14)
+        let recentVisits = historyGroupingProvider.getRecentVisits(maxCount: 12)
         for (index, visit) in zip(
             recentVisits.indices, recentVisits
         ) {
