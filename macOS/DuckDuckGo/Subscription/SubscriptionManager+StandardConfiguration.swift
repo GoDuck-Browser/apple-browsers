@@ -65,6 +65,8 @@ extension DefaultSubscriptionManager {
             }
         }
 
+        let isInternalUserEnabled = { featureFlagger?.internalUserDecider.isInternalUser ?? false }
+
         if #available(macOS 12.0, *) {
             let storePurchaseManager = DefaultStorePurchaseManager(subscriptionFeatureMappingCache: subscriptionFeatureMappingCache,
                                                                    subscriptionFeatureFlagger: subscriptionFeatureFlagger)
@@ -73,13 +75,15 @@ extension DefaultSubscriptionManager {
                       subscriptionEndpointService: subscriptionEndpointService,
                       authEndpointService: authEndpointService,
                       subscriptionFeatureMappingCache: subscriptionFeatureMappingCache,
-                      subscriptionEnvironment: subscriptionEnvironment)
+                      subscriptionEnvironment: subscriptionEnvironment,
+                      isInternalUserEnabled: isInternalUserEnabled)
         } else {
             self.init(accountManager: accountManager,
                       subscriptionEndpointService: subscriptionEndpointService,
                       authEndpointService: authEndpointService,
                       subscriptionFeatureMappingCache: subscriptionFeatureMappingCache,
-                      subscriptionEnvironment: subscriptionEnvironment)
+                      subscriptionEnvironment: subscriptionEnvironment,
+                      isInternalUserEnabled: isInternalUserEnabled)
         }
 
         accountManager.delegate = self

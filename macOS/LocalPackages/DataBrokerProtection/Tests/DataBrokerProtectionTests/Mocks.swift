@@ -1567,6 +1567,7 @@ final class MockDataBrokerProtectionBrokerUpdater: DataBrokerProtectionBrokerUpd
 }
 
 final class MockAuthenticationManager: DataBrokerProtectionAuthenticationManaging {
+
     var isUserAuthenticatedValue = false
     var accessTokenValue: String? = "fake token"
     var shouldAskForInviteCodeValue = false
@@ -1577,7 +1578,7 @@ final class MockAuthenticationManager: DataBrokerProtectionAuthenticationManagin
 
     var isUserAuthenticated: Bool { isUserAuthenticatedValue }
 
-    var accessToken: String? { accessTokenValue }
+    func accessToken() async -> String? { accessTokenValue }
 
     func hasValidEntitlement() async throws -> Bool {
         if shouldThrowEntitlementError {

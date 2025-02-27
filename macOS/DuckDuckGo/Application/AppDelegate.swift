@@ -149,25 +149,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                             pixelHandler: DataBrokerProtectionPixelsHandler())
     }()
 
-    private lazy var vpnRedditSessionWorkaround: VPNRedditSessionWorkaround = {
-        let ipcClient = VPNControllerXPCClient.shared
-        let statusReporter = DefaultNetworkProtectionStatusReporter(
-            statusObserver: ipcClient.connectionStatusObserver,
-            serverInfoObserver: ipcClient.serverInfoObserver,
-            connectionErrorObserver: ipcClient.connectionErrorObserver,
-            connectivityIssuesObserver: ConnectivityIssueObserverThroughDistributedNotifications(),
-            controllerErrorMessageObserver: ControllerErrorMesssageObserverThroughDistributedNotifications(),
-            dataVolumeObserver: ipcClient.dataVolumeObserver,
-            knownFailureObserver: KnownFailureObserverThroughDistributedNotifications()
-        )
-
-        return VPNRedditSessionWorkaround(
-            subscriptionManager: subscriptionAuthV1toV2Bridge,
-            ipcClient: ipcClient,
-            statusReporter: statusReporter
-        )
-    }()
-
     private var didFinishLaunching = false
 
 #if SPARKLE
@@ -598,10 +579,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         Task { @MainActor in
-            await vpnRedditSessionWorkaround.installRedditSessionWorkaround()
-        }
-
-        Task { @MainActor in
             await subscriptionCookieManager.refreshSubscriptionCookie()
         }
     }
@@ -611,12 +588,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         syncService.initializeIfNeeded()
         syncService.scheduler.notifyAppLifecycleEvent()
         SyncDiagnosisHelper(syncService: syncService).diagnoseAccountStatus()
-    }
-
-    func applicationDidResignActive(_ notification: Notification) {
-        Task { @MainActor in
-            await vpnRedditSessionWorkaround.removeRedditSessionWorkaround()
-        }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

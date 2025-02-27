@@ -46,7 +46,6 @@ final class SubscriptionRedirectManagerTests: XCTestCase {
 
         sut = PrivacyProSubscriptionRedirectManager(subscriptionManager: subscriptionManager,
                                                     baseURL: Constants.redirectURL,
-                                                    canPurchase: { [self] in canPurchase },
                                                     tld: TLD(),
                                                     featureFlagger: MockFeatureFlagger(internalUserDecider: DefaultInternalUserDecider(store: mockInternalUserStoring)))
     }

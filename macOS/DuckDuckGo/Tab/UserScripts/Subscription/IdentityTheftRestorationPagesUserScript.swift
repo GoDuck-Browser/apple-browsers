@@ -70,17 +70,23 @@ extension IdentityTheftRestorationPagesUserScript: WKScriptMessageHandler {
 /// Use Subscription sub-feature
 ///
 final class IdentityTheftRestorationPagesFeature: Subfeature {
+
+    private enum OriginDomains {
+        static let duckduckgo = "duckduckgo.com"
+    }
+
     weak var broker: UserScriptMessageBroker?
+    private let subscriptionManager: any SubscriptionAuthV1toV2Bridge
     private let subscriptionFeatureAvailability: SubscriptionFeatureAvailability
 
-    var featureName = "useIdentityTheftRestoration"
-
-    var messageOriginPolicy: MessageOriginPolicy = .only(rules: [
-        .exact(hostname: "duckduckgo.com"),
-        .exact(hostname: "abrown.duckduckgo.com")
+    let featureName = "useIdentityTheftRestoration"
+    lazy var messageOriginPolicy: MessageOriginPolicy = .only(rules: [
+        HostnameMatchingRule.makeExactRule(for: subscriptionManager.url(for: .baseURL)) ?? .exact(hostname: OriginDomains.duckduckgo)
     ])
 
-    init(subscriptionFeatureAvailability: SubscriptionFeatureAvailability = DefaultSubscriptionFeatureAvailability()) {
+    init(subscriptionManager: any SubscriptionAuthV1toV2Bridge,
+         subscriptionFeatureAvailability: SubscriptionFeatureAvailability = DefaultSubscriptionFeatureAvailability()) {
+        self.subscriptionManager = subscriptionManager
         self.subscriptionFeatureAvailability = subscriptionFeatureAvailability
     }
 

@@ -29,7 +29,8 @@ enum SubscriptionContainerViewFactory {
                                   subscriptionManager: SubscriptionManager,
                                   subscriptionFeatureAvailability: SubscriptionFeatureAvailability,
                                   privacyProDataReporter: PrivacyProDataReporting?,
-                                  tld: TLD) -> some View {
+                                  tld: TLD,
+                                  internalUserDecider: InternalUserDecider) -> some View {
         let appStoreRestoreFlow = DefaultAppStoreRestoreFlow(accountManager: subscriptionManager.accountManager,
                                                              storePurchaseManager: subscriptionManager.storePurchaseManager(),
                                                              subscriptionEndpointService: subscriptionManager.subscriptionEndpointService,
@@ -53,6 +54,7 @@ enum SubscriptionContainerViewFactory {
         let viewModel = SubscriptionContainerViewModel(
             subscriptionManager: subscriptionManager,
             redirectPurchaseURL: redirectPurchaseURL,
+            isInternalUser: internalUserDecider.isInternalUser,
             userScript: SubscriptionPagesUserScript(),
             subFeature: DefaultSubscriptionPagesUseSubscriptionFeature(subscriptionManager: subscriptionManager,
                                                                        subscriptionFeatureAvailability: subscriptionFeatureAvailability,

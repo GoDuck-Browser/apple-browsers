@@ -20,7 +20,7 @@ import Foundation
 import Subscription
 @testable import DuckDuckGo_Privacy_Browser
 
-final class MockAccountManager: AccountManager {
+final class MockAccountManager: AccountManager, SubscriptionAuthenticationStateProvider {
 
     var hasEntitlementResult: Result<Bool, any Error> = .success(true)
 
