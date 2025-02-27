@@ -5519,6 +5519,7 @@
 				7B8FE0AA2D6F74C7004CF744 /* SystemExtensionManager in Frameworks */,
 				7B23668E2C09FAFA002D393F /* VPNAppLauncher in Frameworks */,
 				7BA7CC612AD1211C0042E5CE /* Networking in Frameworks */,
+				7B8FE0AA2D6F74C7004CF744 /* SystemExtensionManager in Frameworks */,
 				F198C71C2BD18A61000BF24D /* PixelKit in Frameworks */,
 				02A15D982C88D79D001A4237 /* Persistence in Frameworks */,
 				37E307A92D072A1E00599500 /* Common in Frameworks */,

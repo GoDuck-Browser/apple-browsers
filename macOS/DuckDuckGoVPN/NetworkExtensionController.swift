@@ -44,6 +44,39 @@ final class NetworkExtensionController {
 
 extension NetworkExtensionController {
 
+    /// Whether the controller is using a System Extension or an App Extension.
+    ///
+    var isUsingSystemExtension: Bool {
+        get async {
+            switch availableExtensions {
+            case .both(let appexBundleID, _):
+                return await !isConfigurationInstalled(extensionBundleID: appexBundleID)
+            case .sysex:
+                return true
+            }
+        }
+    }
+
+    private func isConfigurationInstalled(extensionBundleID: String) async -> Bool {
+        await withCheckedContinuation { continuation in
+            let manager = NEVPNManager.shared()
+
+            manager.loadFromPreferences { error in
+                guard error == nil else {
+                    continuation.resume(returning: false)
+                    return
+                }
+
+                if let protocolConfigs = manager.protocolConfiguration as? NETunnelProviderProtocol,
+                   protocolConfigs.providerBundleIdentifier == extensionBundleID {
+                    continuation.resume(returning: true)
+                } else {
+                    continuation.resume(returning: false)
+                }
+            }
+        }
+    }
+
     func activateSystemExtension(waitingForUserApproval: @escaping () -> Void) async throws {
         if let extensionVersion = try await systemExtensionManager.activate(waitingForUserApproval: waitingForUserApproval) {
 
