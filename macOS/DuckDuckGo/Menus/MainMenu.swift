@@ -628,7 +628,7 @@ final class MainMenu: NSMenu {
                 toggleAIChatShortcutMenuItem.isHidden = true
             }
 
-            if DefaultVPNFeatureGatekeeper(subscriptionManager: Application.appDelegate.subscriptionManager).isVPNVisible() {
+            if DefaultVPNFeatureGatekeeper(subscriptionManager: Application.appDelegate.subscriptionAuthV1toV2Bridge).isVPNVisible() {
                 toggleNetworkProtectionShortcutMenuItem.isHidden = false
                 toggleNetworkProtectionShortcutMenuItem.title = LocalPinningManager.shared.shortcutTitle(for: .networkProtection)
             } else {
@@ -758,8 +758,11 @@ final class MainMenu: NSMenu {
                                   updatePurchasingPlatform: updatePurchasingPlatform,
                                   currentViewController: { WindowControllersManager.shared.lastKeyMainWindowController?.mainViewController },
                                   openSubscriptionTab: { WindowControllersManager.shared.showTab(with: .subscription($0)) },
-                                  subscriptionManager: Application.appDelegate.subscriptionManager,
-                                  subscriptionUserDefaults: subscriptionUserDefaults)
+                                  subscriptionAuthV1toV2Bridge: Application.appDelegate.subscriptionAuthV1toV2Bridge,
+                                  subscriptionManagerV1: Application.appDelegate.subscriptionManagerV1,
+                                  subscriptionManagerV2: Application.appDelegate.subscriptionManagerV2,
+                                  subscriptionUserDefaults: subscriptionUserDefaults,
+                                  isAuthV2Enabled: Application.appDelegate.isAuthV2Enabled)
 
             NSMenuItem(title: "TipKit") {
                 NSMenuItem(title: "Reset", action: #selector(MainViewController.resetTipKit))

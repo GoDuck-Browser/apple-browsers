@@ -27,14 +27,3 @@ final public class DataBrokerAuthenticationManagerBuilder {
         return DataBrokerProtectionAuthenticationManager(subscriptionManager: subscriptionManager)
     }
 }
-
-//extension DefaultAccountManager: DataBrokerProtectionAccountManaging {
-//
-//    public func accessToken() async -> String? {
-//        self.accessToken
-//    }
-//    
-//    public func hasEntitlement(for cachePolicy: APICachePolicy) async -> Result<Bool, any Error> {
-//        await hasEntitlement(forProductName: .dataBrokerProtection, cachePolicy: .reloadIgnoringLocalCacheData)
-//    }
-//}

@@ -78,8 +78,8 @@ final class NavigationBarViewController: NSViewController {
 
     private let dragDropManager: BookmarkDragDropManager
 
-    private var subscriptionManager: SubscriptionManager {
-        Application.appDelegate.subscriptionManager
+    private var subscriptionManager: SubscriptionAuthV1toV2Bridge {
+        Application.appDelegate.subscriptionAuthV1toV2Bridge
     }
 
     var addressBarViewController: AddressBarViewController?
