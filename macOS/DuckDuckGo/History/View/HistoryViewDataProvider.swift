@@ -20,6 +20,7 @@ import BrowserServicesKit
 import Foundation
 import History
 import HistoryView
+import PixelKit
 
 protocol HistoryDeleting: AnyObject {
     func delete(_ visits: [Visit]) async
@@ -96,11 +97,13 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         historyDataSource: HistoryDataSource,
         historyBurner: HistoryBurning = FireHistoryBurner(),
         dateFormatter: HistoryViewDateFormatting = DefaultHistoryViewDateFormatter(),
-        featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger
+        featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger,
+        fireDailyPixel: @escaping (PixelKitEvent) -> Void = { PixelKit.fire($0, frequency: .daily) }
     ) {
         self.dateFormatter = dateFormatter
         self.historyDataSource = historyDataSource
         self.historyBurner = historyBurner
+        self.fireDailyPixel = fireDailyPixel
         historyGroupingProvider = HistoryGroupingProvider(dataSource: historyDataSource, featureFlagger: featureFlagger)
     }
 
@@ -113,6 +116,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
     func refreshData() async {
         lastQuery = nil
         await populateVisits()
+        fireDailyPixel(HistoryViewPixel.historyPageShown)
     }
 
     func visitsBatch(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> HistoryView.DataModel.HistoryItemsBatch {
@@ -323,6 +327,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
 
     /// The last query from the FE, i.e. filtered items list.
     private var lastQuery: QueryInfo?
+    private var fireDailyPixel: (PixelKitEvent) -> Void
 }
 
 protocol SearchableHistoryEntry {
