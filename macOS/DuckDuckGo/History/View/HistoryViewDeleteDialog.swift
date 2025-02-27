@@ -17,6 +17,7 @@
 //
 
 import Foundation
+import Persistence
 import SwiftUIExtensions
 
 protocol HistoryViewDeleteDialogPresenting {
@@ -35,6 +36,27 @@ final class DefaultHistoryViewDeleteDialogPresenter: HistoryViewDeleteDialogPres
                 continuation.resume(returning: model.response)
             }
         }
+    }
+}
+
+protocol HistoryViewDeleteDialogSettingsPersisting: AnyObject {
+    var shouldBurnHistoryWhenDeleting: Bool { get set }
+}
+
+final class UserDefaultsHistoryViewDeleteDialogSettingsPersistor: HistoryViewDeleteDialogSettingsPersisting {
+    enum Keys {
+        static let shouldBurnHistoryWhenDeleting = "history.delete.should-burn"
+    }
+
+    private let keyValueStore: KeyValueStoring
+
+    init(_ keyValueStore: KeyValueStoring = UserDefaults.standard) {
+        self.keyValueStore = keyValueStore
+    }
+
+    var shouldBurnHistoryWhenDeleting: Bool {
+        get { return keyValueStore.object(forKey: Keys.shouldBurnHistoryWhenDeleting) as? Bool ?? true }
+        set { keyValueStore.set(newValue, forKey: Keys.shouldBurnHistoryWhenDeleting) }
     }
 }
 
@@ -82,12 +104,22 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
         }
     }
 
-    @Published var shouldBurn: Bool = true
+    @Published var shouldBurn: Bool {
+        didSet {
+            settingsPersistor.shouldBurnHistoryWhenDeleting = shouldBurn
+        }
+    }
     @Published private(set) var response: Response = .unknown
 
-    init(entriesCount: Int, mode: DeleteMode = .unspecified) {
+    init(
+        entriesCount: Int,
+        mode: DeleteMode = .unspecified,
+        settingsPersistor: HistoryViewDeleteDialogSettingsPersisting = UserDefaultsHistoryViewDeleteDialogSettingsPersistor()
+    ) {
         self.entriesCount = entriesCount
         self.mode = mode
+        self.settingsPersistor = settingsPersistor
+        shouldBurn = settingsPersistor.shouldBurnHistoryWhenDeleting
     }
 
     func cancel() {
@@ -99,6 +131,7 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
     }
 
     private let mode: DeleteMode
+    private let settingsPersistor: HistoryViewDeleteDialogSettingsPersisting
 
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
