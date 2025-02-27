@@ -42,6 +42,7 @@ extension HistoryCoordinator: HistoryDataSource {
 
 protocol HistoryBurning: AnyObject {
     func burn(_ visits: [Visit], animated: Bool) async
+    func burnAll() async
 }
 
 final class FireHistoryBurner: HistoryBurning {
@@ -54,9 +55,23 @@ final class FireHistoryBurner: HistoryBurning {
     }
 
     func burn(_ visits: [Visit], animated: Bool) async {
+        guard !visits.isEmpty else {
+            return
+        }
+
         await withCheckedContinuation { continuation in
             Task { @MainActor in
                 await fire().burnVisits(visits, except: fireproofDomains, isToday: animated) {
+                    continuation.resume()
+                }
+            }
+        }
+    }
+
+    func burnAll() async {
+        await withCheckedContinuation { continuation in
+            Task { @MainActor in
+                await fire().burnAll() {
                     continuation.resume()
                 }
             }
@@ -135,32 +150,24 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
     }
 
     func deleteVisits(matching query: DataModel.HistoryQueryKind) async {
-        let visits: [Visit] = await {
-            switch query {
-            case .searchTerm(let searchTerm):
-                return await allVisits(matching: searchTerm)
-            case .domainFilter(let domain):
-                return await allVisits(matchingDomain: domain)
-            case .rangeFilter(let range):
-                return await allVisits(for: range)
-            }
-        }()
+        let visits = await allVisits(matching: query)
         await historyDataSource.delete(visits)
         await refreshData()
     }
 
     func burnVisits(matching query: DataModel.HistoryQueryKind) async {
-        let visits: [Visit] = await {
-            switch query {
-            case .searchTerm(let searchTerm):
-                return await allVisits(matching: searchTerm)
-            case .domainFilter(let domain):
-                return await allVisits(matchingDomain: domain)
-            case .rangeFilter(let range):
-                return await allVisits(for: range)
-            }
-        }()
-        let animated = [DataModel.HistoryQueryKind.rangeFilter(.all), .rangeFilter(.today)].contains(query)
+        guard query != .rangeFilter(.all) else {
+            await historyBurner.burnAll()
+            await refreshData()
+            return
+        }
+        let visits = await allVisits(matching: query)
+
+        guard !visits.isEmpty else {
+            return
+        }
+
+        let animated = query == .rangeFilter(.today)
         await historyBurner.burn(visits, animated: animated)
         await refreshData()
     }
@@ -218,6 +225,17 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         }
 
         self.historyItems = groupings.flatMap(\.items)
+    }
+
+    private func allVisits(matching query: DataModel.HistoryQueryKind) async -> [Visit] {
+        switch query {
+        case .searchTerm(let searchTerm):
+            return await allVisits(matching: searchTerm)
+        case .domainFilter(let domain):
+            return await allVisits(matchingDomain: domain)
+        case .rangeFilter(let range):
+            return await allVisits(for: range)
+        }
     }
 
     private func allVisits(for range: DataModel.HistoryRange) async -> [Visit] {
