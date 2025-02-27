@@ -76,8 +76,6 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
         }
     }
 
-    let entriesCount: Int
-
     var title: String {
         switch mode {
         case .all:
@@ -94,6 +92,8 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
             return UserText.deleteHistory(for: stringDate)
         }
     }
+
+    let entriesCountString: String
 
     var dataClearingExplanation: String {
         switch mode {
@@ -116,7 +116,7 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
         mode: DeleteMode = .unspecified,
         settingsPersistor: HistoryViewDeleteDialogSettingsPersisting = UserDefaultsHistoryViewDeleteDialogSettingsPersistor()
     ) {
-        self.entriesCount = entriesCount
+        self.entriesCountString = Self.numberFormatter.string(from: .init(value: entriesCount)) ?? String(entriesCount)
         self.mode = mode
         self.settingsPersistor = settingsPersistor
         shouldBurn = settingsPersistor.shouldBurnHistoryWhenDeleting
@@ -140,6 +140,12 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
         formatter.formattingContext = .middleOfSentence
         return formatter
     }()
+
+    private static let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        return formatter
+    }()
 }
 
 struct HistoryViewDeleteDialog: ModalView {
@@ -157,7 +163,7 @@ struct HistoryViewDeleteDialog: ModalView {
                     .fixMultilineScrollableText()
                     .font(.system(size: 15).weight(.semibold))
 
-                Text(.init(UserText.deleteHistoryMessage(items: model.entriesCount)))
+                Text(.init(UserText.deleteHistoryMessage(items: model.entriesCountString)))
                     .multilineTextAlignment(.center)
                     .fixMultilineScrollableText()
                     .font(.system(size: 13))

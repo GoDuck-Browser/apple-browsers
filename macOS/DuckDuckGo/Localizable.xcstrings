@@ -27634,25 +27634,25 @@
       }
     },
     "history.delete.dialog.message" : {
-      "comment" : "Message in a dialog asking the user to confirm deleting history",
+      "comment" : "Message in a dialog asking the user to confirm deleting history. NOTE: This term is only for English. For other languages, please translate the following term: 'History items (%@) will be deleted.'",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Do you want to delete history items (%d)?"
+            "value" : "%@ items will be deleted"
           }
         }
       }
     },
     "history.delete.dialog.message.markdown" : {
-      "comment" : "Message in a dialog asking the user to confirm deleting history. Please make sure to keep **%d** intact",
+      "comment" : "Message in a dialog asking the user to confirm deleting history items. Please make sure to keep **%d** intact. NOTE: This term is only for English. For other languages, please translate the following term: 'History items (**%@**) will be deleted.'",
       "extractionState" : "extracted_with_value",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Do you want to delete history items (**%d**)?"
+            "value" : "**%@** items will be deleted."
           }
         }
       }

@@ -222,16 +222,16 @@ struct UserText {
                                           comment: "Title of a dialog asking the user to confirm deleting history for a given date. %@ represents the date")
         return String(format: localized, date)
     }
-    static func deleteHistoryMessage(items: Int) -> String {
+    static func deleteHistoryMessage(items: String) -> String {
         let localized = {
             if #available(macOS 12.0, *) {
                 return NSLocalizedString("history.delete.dialog.message.markdown",
-                                         value: "Do you want to delete history items (**%d**)?",
-                                         comment: "Message in a dialog asking the user to confirm deleting history. Please make sure to keep **%d** intact")
+                                         value: "**%@** items will be deleted.",
+                                         comment: "Message in a dialog asking the user to confirm deleting history items. Please make sure to keep **%d** intact. NOTE: This term is only for English. For other languages, please translate the following term: 'History items (**%@**) will be deleted.'")
             } else {
                 return NSLocalizedString("history.delete.dialog.message",
-                                         value: "Do you want to delete history items (%d)?",
-                                         comment: "Message in a dialog asking the user to confirm deleting history")
+                                         value: "%@ items will be deleted",
+                                         comment: "Message in a dialog asking the user to confirm deleting history. NOTE: This term is only for English. For other languages, please translate the following term: 'History items (%@) will be deleted.'")
             }
         }()
         return String(format: localized, items)
