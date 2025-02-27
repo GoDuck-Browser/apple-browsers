@@ -61,7 +61,7 @@ final class FireHistoryBurner: HistoryBurning {
 
         await withCheckedContinuation { continuation in
             Task { @MainActor in
-                await fire().burnVisits(visits, except: fireproofDomains, isToday: animated) {
+                await fire().burnVisits(visits, except: fireproofDomains, isToday: animated, urlToOpenIfWindowsAreClosed: .history) {
                     continuation.resume()
                 }
             }
@@ -71,7 +71,7 @@ final class FireHistoryBurner: HistoryBurning {
     func burnAll() async {
         await withCheckedContinuation { continuation in
             Task { @MainActor in
-                await fire().burnAll() {
+                await fire().burnAll(opening: .history) {
                     continuation.resume()
                 }
             }
