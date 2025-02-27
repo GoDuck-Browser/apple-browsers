@@ -112,7 +112,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let remoteMessagingClient: RemoteMessagingClient!
     let onboardingStateMachine: ContextualOnboardingStateMachine & ContextualOnboardingStateUpdater
 
-    var isAuthV2Enabled: Bool = false
+    let isAuthV2Enabled: Bool = false
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
     let subscriptionManagerV1: any SubscriptionManager
     let subscriptionManagerV2: any SubscriptionManagerV2

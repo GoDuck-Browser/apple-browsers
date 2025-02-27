@@ -35,7 +35,7 @@ extension DefaultAccountManager: SubscriptionTokenHandling {
     }
 
     public func refreshToken() async throws {
-// TODO: ??
+        assertionFailure("Not implemented")
     }
 
     public func adoptToken(_ someKindOfToken: Any) async throws {

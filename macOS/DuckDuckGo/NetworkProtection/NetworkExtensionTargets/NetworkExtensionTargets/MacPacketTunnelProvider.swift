@@ -29,7 +29,6 @@ import WireGuard
 
 final class MacPacketTunnelProvider: PacketTunnelProvider {
 
-    let isAuthV2Enabled: Bool = false
     var accountManager: (any AccountManager)?
 //    var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
 //    let subscriptionManagerV1: any SubscriptionManager
@@ -444,7 +443,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         var tokenHandler: any SubscriptionTokenHandling
         var entitlementsCheck: (() async -> Result<Bool, Error>)
 
-        if !isAuthV2Enabled {
+        if !PacketTunnelProvider.isAuthV2Enabled {
             // MARK: V1
             let tokenStore = NetworkProtectionKeychainTokenStore(keychainType: Bundle.keychainType,
                                                                                serviceName: Self.tokenServiceName,

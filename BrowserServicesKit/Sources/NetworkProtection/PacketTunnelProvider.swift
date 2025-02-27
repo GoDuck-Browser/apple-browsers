@@ -28,6 +28,8 @@ import os.log
 
 open class PacketTunnelProvider: NEPacketTunnelProvider {
 
+    public static let isAuthV2Enabled: Bool = false
+
     public enum Event {
         case userBecameActive
         case connectionTesterStatusChange(_ status: ConnectionTesterStatus, server: String)
@@ -499,8 +501,11 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         loadDNSSettings(from: options)
         loadTesterEnabled(from: options)
 #if os(macOS)
-        try await loadAuthToken(from: options)
-        // Not used for no: try await loadTokenContainer(from: options)
+        if !Self.isAuthV2Enabled {
+            try await loadAuthToken(from: options)
+        } else {
+            try await loadTokenContainer(from: options)
+        }
 #endif
     }
 
