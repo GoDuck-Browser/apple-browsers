@@ -320,7 +320,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }, eventMapping: SubscriptionCookieManageEventPixelMapping())
 
         // MARK: V2
-
         let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
         let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
         let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
@@ -333,6 +332,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         subscriptionCookieManagerV2 = SubscriptionCookieManagerV2(subscriptionManager: subscriptionManagerV2, currentCookieStore: {
             WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
         }, eventMapping: SubscriptionCookieManageEventPixelMapping())
+
+        // --------
 
         if !isAuthV2Enabled {
             subscriptionAuthV1toV2Bridge = subscriptionManagerV1

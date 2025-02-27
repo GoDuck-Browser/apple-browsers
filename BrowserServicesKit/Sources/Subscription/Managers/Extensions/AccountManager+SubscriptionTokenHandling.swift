@@ -31,14 +31,18 @@ extension DefaultAccountManager: SubscriptionTokenHandling {
     }
 
     public func removeToken() async throws {
-        assertionFailure("Unsupported")
+        try removeAccessToken()
     }
 
     public func refreshToken() async throws {
-        assertionFailure("Unsupported")
+// TODO: ??
     }
 
     public func adoptToken(_ someKindOfToken: Any) async throws {
-        assertionFailure("Unsupported")
+        guard let token = someKindOfToken as? String else {
+            assertionFailure("Wrong token type")
+            return
+        }
+        storeAuthToken(token: token)
     }
 }
