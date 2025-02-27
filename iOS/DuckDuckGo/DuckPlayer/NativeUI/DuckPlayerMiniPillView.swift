@@ -20,8 +20,8 @@
 import SwiftUI
 import DesignResourcesKit
 
-struct DuckPlayerEntryPillView: View {
-    @ObservedObject var viewModel: DuckPlayerEntryPillViewModel
+struct DuckPlayerMiniPillView: View {
+    @ObservedObject var viewModel: DuckPlayerMiniPillViewModel
     
     // Add state to track the height
     @State private var viewHeight: CGFloat = 100
@@ -55,7 +55,7 @@ struct DuckPlayerEntryPillView: View {
                         .resizable()
                         .frame(width: Constants.Layout.iconSize, height: Constants.Layout.iconSize)
                     
-                    Text(UserText.duckPlayerNativeOpenInDuckPlayer)
+                    Text("This is da shit")
                         .font(.system(size: Constants.Layout.fontSize, weight: .semibold))
                         .foregroundColor(Color(designSystemColor: .textPrimary))
                     

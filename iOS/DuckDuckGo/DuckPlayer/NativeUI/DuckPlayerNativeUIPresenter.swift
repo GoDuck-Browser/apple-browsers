@@ -26,15 +26,23 @@ import Combine
 /// This includes presenting entry pills and handling their lifecycle.
 final class DuckPlayerNativeUIPresenter {
     
+    /// The types of the pill available
+    enum PillType {
+        case entry
+        case reEntry
+    }    
+
     /// The container view model for the entry pill
     private var containerViewModel: DuckPlayerContainer.ViewModel?
     
     /// The hosting controller for the container
-    private var containerViewController: UIHostingController<DuckPlayerContainer.Container<DuckPlayerEntryPillView>>?
+    private var containerViewController: UIHostingController<DuckPlayerContainer.Container<AnyView>>?
     
-    /// The host view controller where UI components will be presented
+    /// References to the host view and source
     private weak var hostView: TabViewController?
-    
+    private var source: DuckPlayer.VideoNavigationSource?    
+    private var state: DuckPlayerState = DuckPlayerState()
+
     /// The DuckPlayer instance
     private weak var duckPlayer: DuckPlayerControlling?
     
@@ -92,8 +100,11 @@ final class DuckPlayerNativeUIPresenter {
     ///
     /// - Parameter videoID: The YouTube video ID to be played
     @MainActor
-    func presentEntryPill(for videoID: String, in hostViewController: TabViewController) {
+    func presentPill(for videoID: String, in hostViewController: TabViewController) {
         
+        // Store the videoID
+        state.videoID = videoID        
+
         // If we already have a container view model, just show it again
         if let existingViewModel = containerViewModel {
             existingViewModel.show()
@@ -106,18 +117,38 @@ final class DuckPlayerNativeUIPresenter {
         // Create and configure the container view model
         let containerViewModel = DuckPlayerContainer.ViewModel()
         self.containerViewModel = containerViewModel
+
+        // Initialize a generic container
+        var containerView: DuckPlayerContainer.Container<AnyView>
         
-        // Create the pill view model
-        let pillViewModel = DuckPlayerEntryPillViewModel() { [weak self] in
-            self?.videoPlaybackRequest.send(videoID)
-        }
+        let pillType: PillType = state.hasBeenShown ? .reEntry : .entry
+
+        if pillType == .entry {
+           // Create the pill view model
+            let pillViewModel = DuckPlayerEntryPillViewModel() { [weak self] in
+                self?.videoPlaybackRequest.send(videoID)
+            }
+            // Create the container view with the pill view
+            containerView = DuckPlayerContainer.Container(
+                viewModel: containerViewModel,
+                hasBackground: false
+            ) { _ in
+                AnyView(DuckPlayerEntryPillView(viewModel: pillViewModel))
+            }
         
-        // Create the container view with the pill view
-        let containerView = DuckPlayerContainer.Container(
-            viewModel: containerViewModel,
-            hasBackground: false
-        ) { _ in
-            DuckPlayerEntryPillView(viewModel: pillViewModel)
+        } else {
+            // Create the mini pill view model for entry type
+            let miniPillViewModel = DuckPlayerMiniPillViewModel() { [weak self] in
+                self?.videoPlaybackRequest.send(videoID)
+            }
+            
+            // Create the container view with the mini pill view
+            containerView = DuckPlayerContainer.Container(
+                viewModel: containerViewModel,
+                hasBackground: false
+            ) { _ in
+                AnyView(DuckPlayerMiniPillView(viewModel: miniPillViewModel))
+            }
         }
         
         // Set up hosting controller
@@ -147,11 +178,12 @@ final class DuckPlayerNativeUIPresenter {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak containerViewModel] in
             containerViewModel?.show()
         }
+        
     }
     
     /// Dismisses the currently presented entry pill
     @MainActor
-    func dismissPill() {
+    func dismissPill(reset: Bool = false) {
         // Hide the view first
         containerViewModel?.dismiss()
         
@@ -161,6 +193,10 @@ final class DuckPlayerNativeUIPresenter {
             self?.containerViewController = nil            
             self?.containerViewModel = nil
             self?.containerCancellables.removeAll()
+        }
+
+        if reset {
+            self.state = DuckPlayerState()
         }
     }
     
@@ -188,9 +224,13 @@ final class DuckPlayerNativeUIPresenter {
         let duckPlayerView = DuckPlayerView(viewModel: viewModel, webView: webView)
         
         let hostingController = UIHostingController(rootView: duckPlayerView)
-        hostingController.modalPresentationStyle = .formSheet
+        hostingController.modalPresentationStyle = .pageSheet
         hostingController.isModalInPresentation = false
         
+        // Update State        
+        self.state.hasBeenShown = true
+
+        // Subscribe to Navigation Request Publisher
         viewModel.youtubeNavigationRequestPublisher
             .sink { [weak hostingController] videoID in
                 if source != .youtube {
@@ -201,11 +241,27 @@ final class DuckPlayerNativeUIPresenter {
             }
             .store(in: &playerCancellables)
         
+        // Subscribe to Settings Request Publisher
         viewModel.settingsRequestPublisher
             .sink { settingsRequest.send() }
             .store(in: &playerCancellables)
+
+        // General Dismiss Publisher
+        viewModel.dismissPublisher
+            .sink { [weak self] in
+                guard let self = self else { return }
+                guard let videoID = self.state.videoID, let hostView = self.hostView else { return }
+                self.presentPill(for: videoID, in: hostView)
+            }
+            .store(in: &playerCancellables)
         
         hostViewController.present(hostingController, animated: true)
+
+        // Dismiss the Pill
+        dismissPill()
+
+
+
         return (navigationRequest, settingsRequest)
     }
 
