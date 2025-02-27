@@ -116,7 +116,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
     }
 
     func visitsBatch(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> HistoryView.DataModel.HistoryItemsBatch {
-        let items = perform(query)
+        let items = await perform(query)
         let visits = items.chunk(with: limit, offset: offset)
         let finished = offset + limit >= items.count
         return DataModel.HistoryItemsBatch(finished: finished, visits: visits)
@@ -124,7 +124,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
 
     func countVisibleVisits(matching query: DataModel.HistoryQueryKind) async -> Int {
         guard let lastQuery, lastQuery.query == query else {
-            let items = perform(query)
+            let items = await perform(query)
             return items.count
         }
         return lastQuery.items.count
@@ -277,10 +277,12 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         historyDataSource.history
     }
 
-    private func perform(_ query: DataModel.HistoryQueryKind) -> [DataModel.HistoryItem] {
+    private func perform(_ query: DataModel.HistoryQueryKind) async -> [DataModel.HistoryItem] {
         if let lastQuery, lastQuery.query == query {
             return lastQuery.items
         }
+
+        await refreshData()
 
         let items: [DataModel.HistoryItem] = {
             switch query {
