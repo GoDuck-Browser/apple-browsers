@@ -169,7 +169,6 @@ final class SuggestionContainerTests: XCTestCase {
             )
         }
 
-
         // Initialize a mock WindowControllersManager with pinned tabs, tab view models, and the selected window index for testing.
         let windowControllersManagerMock = WindowControllersManagerMock(pinnedTabsManager: pinnedTabsManager(tabs: input.pinnedTabs.map(OpenTab.init)),
                                                                         tabCollectionViewModels: tabCollectionViewModels,
@@ -412,11 +411,11 @@ class HistoryProviderMock: SuggestionContainer.HistoryProvider {
 }
 private class BookmarkProviderMock: SuggestionContainer.BookmarkProvider {
     let bookmarks: [SuggestionContainerTests.Bookmark]
-    
+
     func bookmarks(for suggestionLoading: any Suggestions.SuggestionLoading) -> [any Suggestions.Bookmark] {
         bookmarks
     }
-    
+
     init(bookmarks: [SuggestionContainerTests.Bookmark]) {
         self.bookmarks = bookmarks
     }
@@ -484,12 +483,7 @@ private extension Suggestion {
             for window in windows {
                 if let tabs = window.tabs.firstIndex(where: { $0.url == url && $0.title == title }) {
                     tabId = window.tabs[tabs].tabId
-                }
-                for tab in window.tabs {
-                    if tab.url == url {
-                        tabId = tab.tabId
-                        break
-                    }
+                    break
                 }
             }
             return .init(type: .openTab, title: title, subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: tabId, score: score)

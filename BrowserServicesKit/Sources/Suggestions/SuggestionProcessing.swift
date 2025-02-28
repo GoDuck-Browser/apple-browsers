@@ -309,4 +309,3 @@ private extension Suggestion {
         }
     }
 }
-
