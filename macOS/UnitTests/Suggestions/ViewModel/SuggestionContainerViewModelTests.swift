@@ -336,7 +336,7 @@ extension SuggestionResult {
 
     static var aSuggestionResult: SuggestionResult {
         let topHits = [
-            Suggestion.bookmark(title: "DuckDuckGo", url: URL.duckDuckGo, isFavorite: true),
+            Suggestion.bookmark(title: "DuckDuckGo", url: URL.duckDuckGo, isFavorite: true, score: 0),
             Suggestion.website(url: URL.duckDuckGoAutocomplete)
         ]
         return SuggestionResult(topHits: topHits,

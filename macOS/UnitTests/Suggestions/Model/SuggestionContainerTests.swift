@@ -208,7 +208,7 @@ final class SuggestionContainerTests: XCTestCase {
         suggestionContainer.getSuggestions(for: input.query)
         let actualResult = try await resultPromise.get()
 
-        assert(TestExpectations(actualResult, windows: testScenario.input.windows), named: name, matches: testScenario.expectations)
+        assert(TestExpectations(actualResult, query: testScenario.input.query, windows: testScenario.input.windows), named: name, matches: testScenario.expectations)
     }
 
 }
@@ -342,8 +342,14 @@ extension SuggestionContainerTests {
 
     @MainActor
     private func tabCollection(_ openTabs: [OpenTab], burnerMode: BurnerMode = .regular) -> TabCollection {
+        let contentBlockingMock = ContentBlockingMock()
+        let privacyFeaturesMock = AppPrivacyFeatures(contentBlocking: contentBlockingMock, httpsUpgradeStore: HTTPSUpgradeStoreMock())
+        // disable waiting for CBR compilation on navigation
+        (contentBlockingMock.privacyConfigurationManager.privacyConfig as! MockPrivacyConfiguration).isFeatureKeyEnabled = { _, _ in
+            return false
+        }
         let tabs = openTabs.map {
-            Tab(content: TabContent.contentFromURL($0.url, source: .link), title: $0.title, burnerMode: burnerMode)
+            Tab(content: TabContent.contentFromURL($0.url, source: .link), webViewConfiguration: WKWebViewConfiguration(), privacyFeatures: privacyFeaturesMock, title: $0.title, burnerMode: burnerMode)
         }
         return TabCollection(tabs: tabs)
     }
@@ -430,27 +436,22 @@ extension SuggestionContainerTests {
             }
 
             let type: SuggestionType
-            let title: String?
+            let title: String
+            let subtitle: String
             let uri: String?
             let tabId: UUID?
-
-            enum CodingKeys: String, CodingKey {
-                case type
-                case title
-                case uri
-                case tabId
-            }
+            let score: Int
         }
 
         let topHits: [ExpectedSuggestion]
         let searchSuggestions: [ExpectedSuggestion]
         let localSuggestions: [ExpectedSuggestion]
 
-        init?(_ result: SuggestionResult?, windows: [SuggestionContainerTests.Window]) {
+        init?(_ result: SuggestionResult?, query: String, windows: [SuggestionContainerTests.Window]) {
             guard let result else { return nil }
-            self.topHits = result.topHits.compactMap { $0.expectedSuggestion(windows: windows) }
-            self.searchSuggestions = result.duckduckgoSuggestions.compactMap { $0.expectedSuggestion(windows: windows) }
-            self.localSuggestions = result.localSuggestions.compactMap { $0.expectedSuggestion(windows: windows) }
+            self.topHits = result.topHits.compactMap { $0.expectedSuggestion(query: query, windows: windows) }
+            self.searchSuggestions = result.duckduckgoSuggestions.compactMap { $0.expectedSuggestion(query: query, windows: windows) }
+            self.localSuggestions = result.localSuggestions.compactMap { $0.expectedSuggestion(query: query, windows: windows) }
         }
     }
 }
@@ -462,52 +463,23 @@ private extension URLSession {
     }
 }
 private extension Suggestion {
-    init(_ expectedSuggestion: SuggestionContainerTests.TestExpectations.ExpectedSuggestion) {
-        switch expectedSuggestion.type {
-        case .phrase:
-            self = .phrase(phrase: expectedSuggestion.title!)
 
-        case .website:
-            guard let url = expectedSuggestion.uri.flatMap(URL.init(string:)) else { fatalError("Invalid URI in: \(expectedSuggestion)") }
-            self = .website(url: url)
-
-        case .bookmark, .favorite:
-            guard let uri = expectedSuggestion.uri else { fatalError("Missing URI in: \(expectedSuggestion)") }
-            guard let title = expectedSuggestion.title else { fatalError("Missing title for bookmark \(expectedSuggestion)") }
-            let bookmark = SuggestionContainerTests.Bookmark(title: title, url: uri, isFavorite: expectedSuggestion.type == .favorite)
-            self = .init(bookmark: bookmark)!
-
-        case .historyEntry:
-            guard let url = expectedSuggestion.uri.flatMap(URL.init(string:)) else { fatalError("Invalid URI in: \(expectedSuggestion)") }
-            self = .historyEntry(title: expectedSuggestion.title, url: url)
-
-        case .openTab:
-            guard let url = expectedSuggestion.uri.flatMap(URL.init(string:)) else { fatalError("Invalid URI in: \(expectedSuggestion)") }
-            guard let title = expectedSuggestion.title else { fatalError("Missing title for bookmark \(expectedSuggestion)") }
-            self = .openTab(title: title, url: url)
-
-        case .internalPage:
-            guard let url = expectedSuggestion.uri.flatMap(URL.init(string:)) else { fatalError("Invalid URI in: \(expectedSuggestion)") }
-            guard let title = expectedSuggestion.title else { fatalError("Missing title for bookmark \(expectedSuggestion)") }
-            self = .internalPage(title: title, url: url)
-        }
-    }
-
-    func expectedSuggestion(windows: [SuggestionContainerTests.Window]) -> SuggestionContainerTests.TestExpectations.ExpectedSuggestion? {
+    func expectedSuggestion(query: String, windows: [SuggestionContainerTests.Window]) -> SuggestionContainerTests.TestExpectations.ExpectedSuggestion? {
+        let viewModel = SuggestionViewModel(isHomePage: false, suggestion: self, userStringValue: query)
         switch self {
         case .phrase(phrase: let phrase):
-            return .init(type: .phrase, title: phrase, uri: nil, tabId: nil)
+            return .init(type: .phrase, title: phrase, subtitle: viewModel.suffix ?? "", uri: nil, tabId: nil, score: 0)
 
         case .website(url: let url):
-            return .init(type: .website, title: url.absoluteString, uri: url.absoluteString, tabId: nil)
+            return .init(type: .website, title: url.absoluteString, subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: nil, score: 0)
 
-        case .bookmark(title: let title, url: let url, isFavorite: let isFavorite):
-            return .init(type: isFavorite ? .favorite : .bookmark, title: title, uri: url.absoluteString, tabId: nil)
+        case .bookmark(title: let title, url: let url, isFavorite: let isFavorite, score: let score):
+            return .init(type: isFavorite ? .favorite : .bookmark, title: title, subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: nil, score: score)
 
-        case .historyEntry(title: let title, url: let url):
-            return .init(type: .historyEntry, title: title, uri: url.absoluteString, tabId: nil)
+        case .historyEntry(title: let title, url: let url, score: let score):
+            return .init(type: .historyEntry, title: title ?? "", subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: nil, score: score)
 
-        case .openTab(title: let title, url: let url):
+        case .openTab(title: let title, url: let url, score: let score):
             var tabId: UUID?
             for window in windows {
                 if let tabs = window.tabs.firstIndex(where: { $0.url == url && $0.title == title }) {
@@ -520,9 +492,9 @@ private extension Suggestion {
                     }
                 }
             }
-            return .init(type: .openTab, title: title, uri: url.absoluteString, tabId: tabId)
-        case .internalPage(title: let title, url: let url):
-            return .init(type: .internalPage, title: title, uri: url.absoluteString, tabId: nil)
+            return .init(type: .openTab, title: title, subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: tabId, score: score)
+        case .internalPage(title: let title, url: let url, score: let score):
+            return .init(type: .internalPage, title: title, subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: nil, score: score)
         case .unknown:
             return nil
         }

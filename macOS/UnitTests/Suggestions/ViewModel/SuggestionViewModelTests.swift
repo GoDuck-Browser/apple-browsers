@@ -124,7 +124,7 @@ final class SuggestionViewModelTests: XCTestCase {
     func testWhenSuggestionIsBookmark_ThenStringIsTitle() {
         let url = URL(string: "https://spreadprivacy.com")!
         let title = "Title"
-        let suggestion = Suggestion.bookmark(title: title, url: url, isFavorite: true)
+        let suggestion = Suggestion.bookmark(title: title, url: url, isFavorite: true, score: 0)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.string, title)
@@ -134,7 +134,7 @@ final class SuggestionViewModelTests: XCTestCase {
         let query = "test search"
         let searchUrl = URL.makeSearchUrl(from: query)!
         let title = "Title"
-        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl)
+        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl, score: 0)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.string, query)
@@ -143,17 +143,17 @@ final class SuggestionViewModelTests: XCTestCase {
     func testWhenSuggestionIsHistoryEntryOfDuckDuckGoSearch_ThenSuffixIsSearchDuckDuckGo() {
         let searchUrl = URL.makeSearchUrl(from: "test search")!
         let title = "Title"
-        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl)
+        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl, score: 0)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
-        XCTAssert(suggestionViewModel.suffix.hasSuffix(UserText.searchDuckDuckGoSuffix))
+        XCTAssert((suggestionViewModel.suffix ?? "").hasSuffix(UserText.searchDuckDuckGoSuffix))
     }
 
     func testWhenSuggestionIsHistoryEntryOfDuckDuckGoSearch_ThenTitleIsSearchQuery() {
         let query = "test search"
         let searchUrl = URL.makeSearchUrl(from: query)!
         let title = "Title"
-        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl)
+        let suggestion = Suggestion.historyEntry(title: title, url: searchUrl, score: 0)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.title, query)
@@ -162,7 +162,7 @@ final class SuggestionViewModelTests: XCTestCase {
     func testWhenSuggestionIsOpenTabWebsite_ThenSuggestionViewModelValuesAreCorrect() {
         let url = URL(string: "https://spreadprivacy.com")!
         let title = "Open Tab Title"
-        let suggestion = Suggestion.openTab(title: title, url: url)
+        let suggestion = Suggestion.openTab(title: title, url: url, score: 0)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.string, title)
@@ -173,7 +173,7 @@ final class SuggestionViewModelTests: XCTestCase {
     func testWhenSuggestionIsOpenTabSERP_ThenSuggestionViewModelValuesAreCorrect() {
         let url = URL.makeSearchUrl(from: "Test search")!
         let title = "SERP Title"
-        let suggestion = Suggestion.openTab(title: title, url: url)
+        let suggestion = Suggestion.openTab(title: title, url: url, score: 0)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.string, title)
@@ -184,7 +184,7 @@ final class SuggestionViewModelTests: XCTestCase {
     func testWhenSuggestionIsOpenTabSettings_ThenSuggestionViewModelValuesAreCorrect() {
         let url = URL.settings
         let title = "Settings"
-        let suggestion = Suggestion.openTab(title: title, url: url)
+        let suggestion = Suggestion.openTab(title: title, url: url, score: 0)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.string, title)
@@ -195,7 +195,7 @@ final class SuggestionViewModelTests: XCTestCase {
     func testWhenSuggestionIsOpenTabBookmarks_ThenSuggestionViewModelValuesAreCorrect() {
         let url = URL.bookmarks
         let title = "Bookmarks"
-        let suggestion = Suggestion.openTab(title: title, url: url)
+        let suggestion = Suggestion.openTab(title: title, url: url, score: 0)
         let suggestionViewModel = SuggestionViewModel(suggestion: suggestion, userStringValue: "")
 
         XCTAssertEqual(suggestionViewModel.string, title)

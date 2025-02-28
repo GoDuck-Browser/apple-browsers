@@ -349,7 +349,7 @@ final class AddressBarTextField: NSTextField {
                 return .autocompleteClickPhrase(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
             case .website:
                 return .autocompleteClickWebsite(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
-            case .bookmark(_, _, let isFavorite):
+            case .bookmark(_, _, let isFavorite, _):
                 if isFavorite {
                     return .autocompleteClickFavorite(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
                 } else {
@@ -368,11 +368,11 @@ final class AddressBarTextField: NSTextField {
             PixelKit.fire(autocompletePixel)
         }
 
-        if case .internalPage(title: let title, url: let url) = suggestion,
+        if case .internalPage(title: let title, url: let url, _) = suggestion,
            url == .bookmarks || url.isSettingsURL {
             // when choosing an internal page suggestion prefer already open tab
             switchTo(OpenTab(title: title, url: url))
-        } else if case .openTab(let title, url: let url) = suggestion {
+        } else if case .openTab(let title, url: let url, _) = suggestion {
             switchTo(OpenTab(title: title, url: url))
         } else if NSApp.isCommandPressed {
             openNew(NSApp.isOptionPressed ? .window : .tab, selected: NSApp.isShiftPressed, suggestion: suggestion)
@@ -499,11 +499,11 @@ final class AddressBarTextField: NSTextField {
         let finalUrl: URL?
         let userEnteredValue: String
         switch suggestion {
-        case .bookmark(title: _, url: let url, isFavorite: _),
-             .historyEntry(title: _, url: let url),
+        case .bookmark(title: _, url: let url, isFavorite: _, _),
+             .historyEntry(title: _, url: let url, _),
              .website(url: let url),
-             .internalPage(title: _, url: let url),
-             .openTab(title: _, url: let url):
+             .internalPage(title: _, url: let url, _),
+             .openTab(title: _, url: let url, _):
             finalUrl = url
             userEnteredValue = url.absoluteString
         case .phrase(phrase: let phrase),
@@ -616,7 +616,7 @@ final class AddressBarTextField: NSTextField {
     private func suggestionsContainLocalItems() -> SuggestionListChacteristics {
         var characteristics = SuggestionListChacteristics(hasBookmark: false, hasFavorite: false, hasHistoryEntry: false)
         for suggestion in self.suggestionContainerViewModel?.suggestionContainer.result?.all ?? [] {
-            if case .bookmark(title: _, url: _, isFavorite: let isFavorite) = suggestion {
+            if case .bookmark(title: _, url: _, isFavorite: let isFavorite, _) = suggestion {
                 if isFavorite {
                     characteristics.hasFavorite = true
                 } else {
@@ -897,9 +897,9 @@ extension AddressBarTextField {
                 }
                 self = Suffix.visit(host: host)
 
-            case .bookmark(title: _, url: let url, isFavorite: _),
-                 .historyEntry(title: _, url: let url),
-                 .internalPage(title: _, url: let url):
+            case .bookmark(title: _, url: let url, isFavorite: _, _),
+                 .historyEntry(title: _, url: let url, _),
+                 .internalPage(title: _, url: let url, _):
                 if let title = suggestionViewModel.title,
                    !title.isEmpty,
                    suggestionViewModel.autocompletionString != title {
@@ -909,7 +909,7 @@ extension AddressBarTextField {
                 } else {
                     self = .url(url)
                 }
-            case .openTab(title: _, url: let url):
+            case .openTab(title: _, url: let url, _):
                 self = .openTab(url)
             case .unknown:
                 self = Suffix.search

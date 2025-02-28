@@ -22,19 +22,19 @@ public enum Suggestion: Equatable {
 
     case phrase(phrase: String)
     case website(url: URL)
-    case bookmark(title: String, url: URL, isFavorite: Bool)
-    case historyEntry(title: String?, url: URL)
-    case internalPage(title: String, url: URL)
-    case openTab(title: String, url: URL)
+    case bookmark(title: String, url: URL, isFavorite: Bool, score: Int)
+    case historyEntry(title: String?, url: URL, score: Int)
+    case internalPage(title: String, url: URL, score: Int)
+    case openTab(title: String, url: URL, score: Int)
     case unknown(value: String)
 
     public var url: URL? {
         switch self {
         case .website(url: let url),
-             .historyEntry(title: _, url: let url),
-             .bookmark(title: _, url: let url, isFavorite: _),
-             .internalPage(title: _, url: let url),
-             .openTab(title: _, url: let url):
+             .historyEntry(title: _, url: let url, _),
+             .bookmark(title: _, url: let url, isFavorite: _, _),
+             .internalPage(title: _, url: let url, _),
+             .openTab(title: _, url: let url, _):
             return url
         case .phrase, .unknown:
             return nil
@@ -43,11 +43,11 @@ public enum Suggestion: Equatable {
 
     var title: String? {
         switch self {
-        case .historyEntry(title: let title, url: _):
+        case .historyEntry(title: let title, url: _, _):
             return title
-        case .bookmark(title: let title, url: _, isFavorite: _),
-             .internalPage(title: let title, url: _),
-             .openTab(title: let title, url: _):
+        case .bookmark(title: let title, url: _, isFavorite: _, _),
+             .internalPage(title: let title, url: _, _),
+             .openTab(title: let title, url: _, _):
             return title
         case .phrase, .website, .unknown:
             return nil
@@ -78,21 +78,21 @@ public enum Suggestion: Equatable {
 
 extension Suggestion {
 
-    public init?(bookmark: Bookmark) {
+    public init?(bookmark: Bookmark, score: Int) {
         guard let urlObject = URL(string: bookmark.url) else { return nil }
-        self = .bookmark(title: bookmark.title, url: urlObject, isFavorite: bookmark.isFavorite)
+        self = .bookmark(title: bookmark.title, url: urlObject, isFavorite: bookmark.isFavorite, score: score)
     }
 
-    public init(historyEntry: HistorySuggestion) {
-        self = .historyEntry(title: historyEntry.title, url: historyEntry.url)
+    public init(historyEntry: HistorySuggestion, score: Int) {
+        self = .historyEntry(title: historyEntry.title, url: historyEntry.url, score: score)
     }
 
-    public init(internalPage: InternalPage) {
-        self = .internalPage(title: internalPage.title, url: internalPage.url)
+    public init(internalPage: InternalPage, score: Int) {
+        self = .internalPage(title: internalPage.title, url: internalPage.url, score: score)
     }
 
-    public init(tab: BrowserTab) {
-        self = .openTab(title: tab.title, url: tab.url)
+    public init(tab: BrowserTab, score: Int) {
+        self = .openTab(title: tab.title, url: tab.url, score: score)
     }
 
     public init(url: URL) {
