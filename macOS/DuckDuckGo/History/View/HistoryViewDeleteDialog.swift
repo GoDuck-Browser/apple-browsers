@@ -20,12 +20,28 @@ import Foundation
 import Persistence
 import SwiftUIExtensions
 
-protocol HistoryViewDeleteDialogPresenting {
+protocol HistoryViewDialogPresenting {
+    @MainActor
+    func showMultipleTabsDialog(for itemsCount: Int) async -> OpenMultipleTabsWarningDialogModel.Response
+
     @MainActor
     func showDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response
 }
 
-final class DefaultHistoryViewDeleteDialogPresenter: HistoryViewDeleteDialogPresenting {
+final class DefaultHistoryViewDialogPresenter: HistoryViewDialogPresenting {
+
+    @MainActor
+    func showMultipleTabsDialog(for itemsCount: Int) async -> OpenMultipleTabsWarningDialogModel.Response {
+        await withCheckedContinuation { continuation in
+            let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
+            let model = OpenMultipleTabsWarningDialogModel(count: itemsCount)
+            let dialog = OpenMultipleTabsWarningDialog(model: model)
+            dialog.show(in: parentWindow) {
+                continuation.resume(returning: model.response)
+            }
+        }
+    }
+
     @MainActor
     func showDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response {
         await withCheckedContinuation { continuation in

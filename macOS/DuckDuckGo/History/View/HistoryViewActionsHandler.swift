@@ -43,16 +43,20 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
     weak var dataProvider: HistoryViewDataProviding?
     private let bookmarkHandler: HistoryViewBookmarksHandling
     private var contextMenuResponse: DataModel.DeleteDialogResponse = .noAction
-    private let deleteDialogPresenter: HistoryViewDeleteDialogPresenting
+    private let dialogPresenter: HistoryViewDialogPresenting
     private var deleteDialogTask: Task<DataModel.DeleteDialogResponse, Never>?
+
+    enum Const {
+        static let numberOfTabsToOpenForDisplayingWarning: Int = 20
+    }
 
     init(
         dataProvider: HistoryViewDataProviding,
-        deleteDialogPresenter: HistoryViewDeleteDialogPresenting = DefaultHistoryViewDeleteDialogPresenter(),
+        deleteDialogPresenter: HistoryViewDialogPresenting = DefaultHistoryViewDialogPresenter(),
         bookmarkHandler: HistoryViewBookmarksHandling = LocalBookmarkManager.shared
     ) {
         self.dataProvider = dataProvider
-        self.deleteDialogPresenter = deleteDialogPresenter
+        self.dialogPresenter = deleteDialogPresenter
         self.bookmarkHandler = bookmarkHandler
     }
 
@@ -76,7 +80,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             }
         }()
 
-        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: adjustedQuery.deleteMode) {
+        switch await dialogPresenter.showDialog(for: visitsCount, deleteMode: adjustedQuery.deleteMode) {
         case .burn:
             await dataProvider.burnVisits(matching: adjustedQuery)
             return .delete
@@ -163,43 +167,66 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         return contextMenuResponse
     }
 
-    @MainActor
     @objc private func openInNewTab(_ sender: NSMenuItem) {
-        guard let urls = sender.representedObject as? [URL], let tabCollectionViewModel else {
-            return
+        Task { @MainActor in
+            guard let urls = sender.representedObject as? [URL], let tabCollectionViewModel else {
+                return
+            }
+
+            let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true) }
+
+            guard await confirmOpeningMultipleTabsIfNeeded(count: tabs.count) else {
+                return
+            }
+
+            tabCollectionViewModel.append(tabs: tabs)
         }
-
-        let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true) }
-
-        tabCollectionViewModel.append(tabs: tabs)
     }
 
-    @MainActor
     @objc private func openInNewWindow(_ sender: NSMenuItem) {
-        guard let urls = sender.representedObject as? [URL], let windowControllersManager else {
-            return
+        Task { @MainActor in
+            guard let urls = sender.representedObject as? [URL], let windowControllersManager else {
+                return
+            }
+
+            let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true) }
+
+            guard await confirmOpeningMultipleTabsIfNeeded(count: tabs.count) else {
+                return
+            }
+
+            let newTabCollection = TabCollection(tabs: tabs)
+            let tabCollectionViewModel = TabCollectionViewModel(tabCollection: newTabCollection)
+            windowControllersManager.openNewWindow(with: tabCollectionViewModel)
         }
-
-        let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true) }
-
-        let newTabCollection = TabCollection(tabs: tabs)
-        let tabCollectionViewModel = TabCollectionViewModel(tabCollection: newTabCollection)
-        windowControllersManager.openNewWindow(with: tabCollectionViewModel)
     }
 
-    @MainActor
     @objc private func openInNewFireWindow(_ sender: NSMenuItem) {
-        guard let urls = sender.representedObject as? [URL], let windowControllersManager else {
-            return
+        Task { @MainActor in
+            guard let urls = sender.representedObject as? [URL], let windowControllersManager else {
+                return
+            }
+
+            let burnerMode = BurnerMode(isBurner: true)
+
+            let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true, burnerMode: burnerMode) }
+
+            guard await confirmOpeningMultipleTabsIfNeeded(count: tabs.count) else {
+                return
+            }
+
+            let newTabCollection = TabCollection(tabs: tabs)
+            let tabCollectionViewModel = TabCollectionViewModel(tabCollection: newTabCollection, burnerMode: burnerMode)
+            windowControllersManager.openNewWindow(with: tabCollectionViewModel, burnerMode: burnerMode)
         }
+    }
 
-        let burnerMode = BurnerMode(isBurner: true)
-
-        let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true, burnerMode: burnerMode) }
-
-        let newTabCollection = TabCollection(tabs: tabs)
-        let tabCollectionViewModel = TabCollectionViewModel(tabCollection: newTabCollection, burnerMode: burnerMode)
-        windowControllersManager.openNewWindow(with: tabCollectionViewModel, burnerMode: burnerMode)
+    private func confirmOpeningMultipleTabsIfNeeded(count: Int) async -> Bool {
+        guard count >= Const.numberOfTabsToOpenForDisplayingWarning else {
+            return true
+        }
+        let response = await dialogPresenter.showMultipleTabsDialog(for: count)
+        return response == .open
     }
 
     @MainActor
@@ -263,7 +290,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
         let visitsCount = identifiers.count
 
-        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: .unspecified) {
+        switch await dialogPresenter.showDialog(for: visitsCount, deleteMode: .unspecified) {
         case .burn:
             await dataProvider.burnVisits(for: identifiers)
             return .delete

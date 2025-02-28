@@ -240,6 +240,14 @@ struct UserText {
     static let deleteCookiesAndSiteDataExplanation = NSLocalizedString("history.delete.dialog.burn.checkbox.explanation", value: "This will log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted.", comment: "Explanation of what deleting site data means.")
     static let deleteCookiesAndSiteDataExplanationWithClosingTabs = NSLocalizedString("history.delete.dialog.burn.checkbox.explanation.with.closing.tabs", value: "This will close all tabs, log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted.", comment: "Explanation of what deleting site data means.")
 
+    static func openMultipleTabsAlertTitle(count: Int) -> String {
+        let localized = NSLocalizedString("open.multiple.tabs.alert.title",
+                                          value: "Open %d items in new tabs?",
+                                          comment: "Title of a dialog warning the user before opening multiple tabs with history items. NOTE: This term is only for English. For other languages, please translate the following term: 'Open multiple items (%d) in new tabs?'")
+        return String(format: localized, count)
+    }
+    static let openMultipleTabsAlertMessage = NSLocalizedString("open.multiple.tabs.alert.message", value: "Opening a lot of tabs at once may cause the browser to slow down.", comment: "Message of a dialog warning the user before opening multiple tabs with history items")
+
     // MARK: -
 
     static let duplicateTab = NSLocalizedString("duplicate.tab", value: "Duplicate Tab", comment: "Menu item. Duplicate as a verb")

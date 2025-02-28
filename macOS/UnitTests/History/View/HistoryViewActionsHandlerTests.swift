@@ -91,7 +91,7 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
     }
 }
 
-final class CapturingHistoryViewDeleteDialogPresenter: HistoryViewDeleteDialogPresenting {
+final class CapturingHistoryViewDeleteDialogPresenter: HistoryViewDialogPresenting {
 
     var response: HistoryViewDeleteDialogModel.Response = .noAction
     var showDialogCalls: [ShowDialogCall] = []

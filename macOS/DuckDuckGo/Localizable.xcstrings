@@ -43756,6 +43756,30 @@
         }
       }
     },
+    "open.multiple.tabs.alert.message" : {
+      "comment" : "Message of a dialog warning the user before opening multiple tabs with history items",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Opening a lot of tabs at once may cause the browser to slow down."
+          }
+        }
+      }
+    },
+    "open.multiple.tabs.alert.title" : {
+      "comment" : "Title of a dialog warning the user before opening multiple tabs with history items. NOTE: This term is only for English. For other languages, please translate the following term: 'Open multiple items (%d) in new tabs?'",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open %d items in new tabs?"
+          }
+        }
+      }
+    },
     "open.preferences" : {
       "comment" : "Open System Preferences (to re-enable permission for the App) (up to and including macOS 12",
       "extractionState" : "extracted_with_value",
