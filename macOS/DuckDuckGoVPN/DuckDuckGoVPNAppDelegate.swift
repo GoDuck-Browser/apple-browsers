@@ -58,26 +58,24 @@ final class DuckDuckGoVPNApplication: NSApplication {
         let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
         let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
 
-//        if !Self.isAuthV2Enabled {
-            // MARK: V1
-            let subscriptionEndpointService = DefaultSubscriptionEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
-            let authEndpointService = DefaultAuthEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
-            let entitlementsCache = UserDefaultsCache<[Entitlement]>(userDefaults: subscriptionUserDefaults,
-                                                                     key: UserDefaultsCacheKey.subscriptionEntitlements,
-                                                                     settings: UserDefaultsCacheSettings(defaultExpirationInterval: .minutes(20)))
-            let accessTokenStorage = SubscriptionTokenKeychainStorage(keychainType: .dataProtection(.named(subscriptionAppGroup)))
-            accountManager = DefaultAccountManager(accessTokenStorage: accessTokenStorage,
-                                                   entitlementsCache: entitlementsCache,
-                                                   subscriptionEndpointService: subscriptionEndpointService,
-                                                   authEndpointService: authEndpointService)
-//        } else {
-            // MARK: V2
+        // MARK: V1
+        let subscriptionEndpointService = DefaultSubscriptionEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
+        let authEndpointService = DefaultAuthEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
+        let entitlementsCache = UserDefaultsCache<[Entitlement]>(userDefaults: subscriptionUserDefaults,
+                                                                 key: UserDefaultsCacheKey.subscriptionEntitlements,
+                                                                 settings: UserDefaultsCacheSettings(defaultExpirationInterval: .minutes(20)))
+        let accessTokenStorage = SubscriptionTokenKeychainStorage(keychainType: .dataProtection(.named(subscriptionAppGroup)))
+        accountManager = DefaultAccountManager(accessTokenStorage: accessTokenStorage,
+                                               entitlementsCache: entitlementsCache,
+                                               subscriptionEndpointService: subscriptionEndpointService,
+                                               authEndpointService: authEndpointService)
+
+        // MARK: V2
         subscriptionManagerV2 = DefaultSubscriptionManagerV2(keychainType: .dataProtection(.named(subscriptionAppGroup)),
-                                                               environment: subscriptionEnvironment,
-                                                               userDefaults: subscriptionUserDefaults,
-                                                               canPerformAuthMigration: false,
-                                                               canHandlePixels: false)
-//        }
+                                                             environment: subscriptionEnvironment,
+                                                             userDefaults: subscriptionUserDefaults,
+                                                             canPerformAuthMigration: false,
+                                                             canHandlePixels: false)
 
         _delegate = DuckDuckGoVPNAppDelegate(accountManager: accountManager,
                                              subscriptionManagerV2: subscriptionManagerV2,
