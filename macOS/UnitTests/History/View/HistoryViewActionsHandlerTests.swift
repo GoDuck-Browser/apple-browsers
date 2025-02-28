@@ -128,13 +128,13 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
 
     func testWhenDataProviderIsNilThenShowDeleteDialogReturnsNoAction() async {
         dataProvider = nil
-        let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
+        let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dialogResponse, .noAction)
     }
 
     func testWhenDataProviderHasNoVisitsForRangeThenShowDeleteDialogReturnsNoAction() async {
         dataProvider.countVisibleVisits = { _ in return 0 }
-        let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
+        let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dialogResponse, .noAction)
@@ -143,7 +143,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
     func testWhenDeleteDialogIsCancelledThenShowDeleteDialogReturnsNoAction() async {
         dataProvider.countVisibleVisits = { _ in return 100 }
         dialogPresenter.response = .noAction
-        let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
+        let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dialogResponse, .noAction)
@@ -153,7 +153,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
         // this scenario shouldn't happen in real life anyway but is included for completeness
         dataProvider.countVisibleVisits = { _ in return 100 }
         dialogPresenter.response = .unknown
-        let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
+        let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dialogResponse, .noAction)
@@ -163,7 +163,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
         // this scenario shouldn't happen in real life anyway but is included for completeness
         dataProvider.countVisibleVisits = { _ in return 100 }
         dialogPresenter.response = .burn
-        let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
+        let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 1)
         XCTAssertEqual(dialogResponse, .delete)
@@ -173,7 +173,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
         // this scenario shouldn't happen in real life anyway but is included for completeness
         dataProvider.countVisibleVisits = { _ in return 100 }
         dialogPresenter.response = .delete
-        let dialogResponse = await actionsHandler.showDeleteDialog(for: .all)
+        let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 1)
         XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dialogResponse, .delete)

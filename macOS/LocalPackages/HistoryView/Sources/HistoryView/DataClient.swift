@@ -111,21 +111,21 @@ public final class DataClient: HistoryViewUserScriptClient {
     @MainActor
     private func deleteDomain(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         guard let request: DataModel.DeleteDomainRequest = DecodableHelper.decode(from: params) else { return nil }
-        let action = await actionsHandler.showDeleteDialog(forDomain: request.domain)
+        let action = await actionsHandler.showDeleteDialog(for: .domainFilter(request.domain))
         return DataModel.DeleteRangeResponse(action: action)
     }
 
     @MainActor
     private func deleteRange(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         guard let request: DataModel.DeleteRangeRequest = DecodableHelper.decode(from: params) else { return nil }
-        let action = await actionsHandler.showDeleteDialog(for: request.range)
+        let action = await actionsHandler.showDeleteDialog(for: .rangeFilter(request.range))
         return DataModel.DeleteRangeResponse(action: action)
     }
 
     @MainActor
     private func deleteTerm(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         guard let request: DataModel.DeleteTermRequest = DecodableHelper.decode(from: params) else { return nil }
-        let action = await actionsHandler.showDeleteDialog(for: request.term)
+        let action = await actionsHandler.showDeleteDialog(for: .searchTerm(request.term))
         return DataModel.DeleteRangeResponse(action: action)
     }
 

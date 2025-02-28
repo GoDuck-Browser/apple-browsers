@@ -56,40 +56,32 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         self.bookmarkHandler = bookmarkHandler
     }
 
-    func showDeleteDialog(for range: DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse {
-        guard let dataProvider else {
+    func showDeleteDialog(for query: DataModel.HistoryQueryKind) async -> DataModel.DeleteDialogResponse {
+        guard let dataProvider, !query.shouldSkipDeleteDialog else {
             return .noAction
         }
 
-        let visitsCount = await dataProvider.countVisibleVisits(matching: .rangeFilter(range))
+        let visitsCount = await dataProvider.countVisibleVisits(matching: query)
         guard visitsCount > 0 else {
             return .noAction
         }
 
-        let deleteMode: HistoryViewDeleteDialogModel.DeleteMode = {
-            switch range {
-            case .all:
-                return .all
-            case .today:
-                return .today
-            case .yesterday:
-                return .yesterday
-            case .older:
-                return .unspecified
+        let adjustedQuery: DataModel.HistoryQueryKind = await {
+            switch query {
+            case .rangeFilter:
+                return query
             default:
-                guard let date = range.date(for: Date()) else {
-                    return .unspecified
-                }
-                return .date(date)
+                let allVisitsCount = await dataProvider.countVisibleVisits(matching: .rangeFilter(.all))
+                return allVisitsCount == visitsCount ? .rangeFilter(.all) : query
             }
         }()
 
-        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: deleteMode) {
+        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: adjustedQuery.deleteMode) {
         case .burn:
-            await dataProvider.burnVisits(matching: .rangeFilter(range))
+            await dataProvider.burnVisits(matching: adjustedQuery)
             return .delete
         case .delete:
-            await dataProvider.deleteVisits(matching: .rangeFilter(range))
+            await dataProvider.deleteVisits(matching: adjustedQuery)
             return .delete
         default:
             return .noAction
@@ -98,44 +90,6 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
     func showDeleteDialog(for entries: [String]) async -> DataModel.DeleteDialogResponse {
         await showDeleteDialog(for: entries.compactMap(VisitIdentifier.init))
-    }
-
-    func showDeleteDialog(for searchTerm: String) async -> DataModel.DeleteDialogResponse {
-        guard let dataProvider, !searchTerm.isEmpty else {
-            return .noAction
-        }
-
-        let visitsCount = await dataProvider.countVisibleVisits(matching: .searchTerm(searchTerm))
-
-        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: .unspecified) {
-        case .burn:
-            await dataProvider.burnVisits(matching: .searchTerm(searchTerm))
-            return .delete
-        case .delete:
-            await dataProvider.deleteVisits(matching: .searchTerm(searchTerm))
-            return .delete
-        default:
-            return .noAction
-        }
-    }
-
-    func showDeleteDialog(forDomain domain: String) async -> DataModel.DeleteDialogResponse {
-        guard let dataProvider, !domain.isEmpty else {
-            return .noAction
-        }
-
-        let visitsCount = await dataProvider.countVisibleVisits(matching: .domainFilter(domain))
-
-        switch await deleteDialogPresenter.showDialog(for: visitsCount, deleteMode: .unspecified) {
-        case .burn:
-            await dataProvider.burnVisits(matching: .domainFilter(domain))
-            return .delete
-        case .delete:
-            await dataProvider.deleteVisits(matching: .domainFilter(domain))
-            return .delete
-        default:
-            return .noAction
-        }
     }
 
     @MainActor
@@ -346,5 +300,38 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
     @MainActor
     private var tabCollectionViewModel: TabCollectionViewModel? {
         windowControllersManager?.lastKeyMainWindowController?.mainViewController.tabCollectionViewModel
+    }
+}
+
+extension DataModel.HistoryQueryKind {
+    var deleteMode: HistoryViewDeleteDialogModel.DeleteMode {
+        guard case let .rangeFilter(range) = self else {
+            return .unspecified
+        }
+
+        switch range {
+        case .all:
+            return .all
+        case .today:
+            return .today
+        case .yesterday:
+            return .yesterday
+        case .older:
+            return .unspecified
+        default:
+            guard let date = range.date(for: Date()) else {
+                return .unspecified
+            }
+            return .date(date)
+        }
+    }
+
+    var shouldSkipDeleteDialog: Bool {
+        switch self {
+        case .searchTerm(let term), .domainFilter(let term):
+            return term.isEmpty
+        case .rangeFilter(_):
+            return false
+        }
     }
 }

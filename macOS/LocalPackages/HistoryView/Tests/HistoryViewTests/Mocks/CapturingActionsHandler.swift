@@ -21,24 +21,14 @@ import HistoryView
 
 final class CapturingActionsHandler: ActionsHandling {
 
-    func showDeleteDialog(for range: DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse {
-        showDeleteDialogForRangeCalls.append(range)
-        return await showDeleteDialogForRange(range)
+    func showDeleteDialog(for query: DataModel.HistoryQueryKind) async -> HistoryView.DataModel.DeleteDialogResponse {
+        showDeleteDialogForQueryCalls.append(query)
+        return await showDeleteDialogForQuery(query)
     }
 
     func showDeleteDialog(for entries: [String]) async -> HistoryView.DataModel.DeleteDialogResponse {
         showDeleteDialogForEntriesCalls.append(entries)
         return await showDeleteDialogForEntries(entries)
-    }
-
-    func showDeleteDialog(for searchTerm: String) async -> HistoryView.DataModel.DeleteDialogResponse {
-        showDeleteDialogForSearchTermCalls.append(searchTerm)
-        return await showDeleteDialogForSearchTerm(searchTerm)
-    }
-
-    func showDeleteDialog(forDomain domain: String) async -> HistoryView.DataModel.DeleteDialogResponse {
-        showDeleteDialogForDomainCalls.append(domain)
-        return await showDeleteDialogForDomain(domain)
     }
 
     func showContextMenu(for entries: [String], using presenter: any ContextMenuPresenting) async -> DataModel.DeleteDialogResponse {
@@ -49,17 +39,11 @@ final class CapturingActionsHandler: ActionsHandling {
         openCalls.append(url)
     }
 
-    var showDeleteDialogForRangeCalls: [DataModel.HistoryRange] = []
-    var showDeleteDialogForRange: (DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse = { _ in .delete }
+    var showDeleteDialogForQueryCalls: [DataModel.HistoryQueryKind] = []
+    var showDeleteDialogForQuery: (DataModel.HistoryQueryKind) async -> DataModel.DeleteDialogResponse = { _ in .delete }
 
     var showDeleteDialogForEntriesCalls: [[String]] = []
     var showDeleteDialogForEntries: ([String]) async -> DataModel.DeleteDialogResponse = { _ in .delete }
-
-    var showDeleteDialogForDomainCalls: [String] = []
-    var showDeleteDialogForDomain: (String) async -> DataModel.DeleteDialogResponse = { _ in .delete }
-
-    var showDeleteDialogForSearchTermCalls: [String] = []
-    var showDeleteDialogForSearchTerm: (String) async -> DataModel.DeleteDialogResponse = { _ in .delete }
 
     var openCalls: [URL] = []
 }

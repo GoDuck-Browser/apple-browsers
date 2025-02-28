@@ -21,10 +21,8 @@ import Foundation
 public protocol ActionsHandling {
     @MainActor func open(_ url: URL)
 
-    @MainActor func showDeleteDialog(for range: DataModel.HistoryRange) async -> DataModel.DeleteDialogResponse
+    @MainActor func showDeleteDialog(for query: DataModel.HistoryQueryKind) async -> DataModel.DeleteDialogResponse
     @MainActor func showDeleteDialog(for entries: [String]) async -> DataModel.DeleteDialogResponse
-    @MainActor func showDeleteDialog(for searchTerm: String) async -> DataModel.DeleteDialogResponse
-    @MainActor func showDeleteDialog(forDomain domain: String) async -> DataModel.DeleteDialogResponse
 
     @MainActor func showContextMenu(for entries: [String], using presenter: ContextMenuPresenting) async -> DataModel.DeleteDialogResponse
 }
