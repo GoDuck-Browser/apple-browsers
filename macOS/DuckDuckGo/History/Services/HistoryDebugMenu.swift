@@ -17,17 +17,24 @@
 //
 
 import AppKit
+import BrowserServicesKit
 import History
 
 final class HistoryDebugMenu: NSMenu {
 
     let historyCoordinator: HistoryCoordinating
+    let featureFlagger: FeatureFlagger
+    let showMenuItem: NSMenuItem
 
     private let environmentMenu = NSMenu()
 
-    init(historyCoordinator: HistoryCoordinating = HistoryCoordinator.shared) {
+    init(historyCoordinator: HistoryCoordinating = HistoryCoordinator.shared, featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger) {
         self.historyCoordinator = historyCoordinator
+        self.featureFlagger = featureFlagger
+        showMenuItem = NSMenuItem(title: "Show History View Onboarding", action: #selector(showHistoryViewOnboarding))
+
         super.init(title: "")
+        showMenuItem.target = self
 
         buildItems {
             NSMenuItem(
@@ -48,11 +55,21 @@ final class HistoryDebugMenu: NSMenu {
                 target: self,
                 representedObject: (100, FakeURLsPool.random200Domains)
             )
+
+            NSMenuItem.separator()
+            showMenuItem
         }
     }
 
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func update() {
+        super.update()
+
+        let isHistoryViewEnabled = featureFlagger.isFeatureOn(.historyView)
+        showMenuItem.isHidden = !isHistoryViewEnabled
     }
 
     @objc func populateFakeHistory(_ sender: NSMenuItem) {
@@ -83,6 +100,16 @@ final class HistoryDebugMenu: NSMenu {
                 visitsPerDay = 0
             }
         }
+    }
+
+    @MainActor
+    @objc func showHistoryViewOnboarding() {
+        let persistor = UserDefaultsHistoryViewOnboardingViewSettingsPersistor()
+        persistor.didShowOnboardingView = false
+        WindowControllersManager.shared.lastKeyMainWindowController?
+            .mainViewController
+            .navigationBarViewController
+            .presentHistoryViewOnboardingIfNeeded(force: true)
     }
 
     enum FakeURLsPool {
