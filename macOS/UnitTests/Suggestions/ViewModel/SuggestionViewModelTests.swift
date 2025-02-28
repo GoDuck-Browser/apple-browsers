@@ -167,7 +167,7 @@ final class SuggestionViewModelTests: XCTestCase {
 
         XCTAssertEqual(suggestionViewModel.string, title)
         XCTAssertEqual(suggestionViewModel.title, title)
-        XCTAssertEqual(suggestionViewModel.suffix, " – spreadprivacy.com")
+        XCTAssertEqual(suggestionViewModel.suffix, "spreadprivacy.com")
     }
 
     func testWhenSuggestionIsOpenTabSERP_ThenSuggestionViewModelValuesAreCorrect() {
@@ -178,7 +178,7 @@ final class SuggestionViewModelTests: XCTestCase {
 
         XCTAssertEqual(suggestionViewModel.string, title)
         XCTAssertEqual(suggestionViewModel.title, title)
-        XCTAssertEqual(suggestionViewModel.suffix, " – \(UserText.duckDuckGoSearchSuffix)")
+        XCTAssertEqual(suggestionViewModel.suffix, UserText.duckDuckGoSearchSuffix)
     }
 
     func testWhenSuggestionIsOpenTabSettings_ThenSuggestionViewModelValuesAreCorrect() {
@@ -189,7 +189,7 @@ final class SuggestionViewModelTests: XCTestCase {
 
         XCTAssertEqual(suggestionViewModel.string, title)
         XCTAssertEqual(suggestionViewModel.title, title)
-        XCTAssertEqual(suggestionViewModel.suffix, " – \(UserText.duckDuckGo)")
+        XCTAssertEqual(suggestionViewModel.suffix, UserText.duckDuckGo)
     }
 
     func testWhenSuggestionIsOpenTabBookmarks_ThenSuggestionViewModelValuesAreCorrect() {
@@ -200,7 +200,7 @@ final class SuggestionViewModelTests: XCTestCase {
 
         XCTAssertEqual(suggestionViewModel.string, title)
         XCTAssertEqual(suggestionViewModel.title, title)
-        XCTAssertEqual(suggestionViewModel.suffix, " – \(UserText.duckDuckGo)")
+        XCTAssertEqual(suggestionViewModel.suffix, UserText.duckDuckGo)
     }
 
 }
