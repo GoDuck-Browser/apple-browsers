@@ -46,10 +46,10 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
     private var freemiumDBPUserStateManager: FreemiumDBPUserStateManager
     private let freemiumDBPPixelExperimentManager: FreemiumDBPPixelExperimentManaging
     private let notificationCenter: NotificationCenter
-    
+
     /// The `FreemiumDBPExperimentPixelHandler` instance used to fire pixels
     private let freemiumDBPExperimentPixelHandler: EventMapping<FreemiumDBPExperimentPixel>
-    
+
     public init(subscriptionManager: SubscriptionManagerV2,
                 subscriptionSuccessPixelHandler: SubscriptionAttributionPixelHandler = PrivacyProSubscriptionAttributionPixelHandler(),
                 stripePurchaseFlow: StripePurchaseFlowV2,
@@ -69,11 +69,11 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         self.notificationCenter = notificationCenter
         self.freemiumDBPExperimentPixelHandler = freemiumDBPExperimentPixelHandler
     }
-    
+
     func with(broker: UserScriptMessageBroker) {
         self.broker = broker
     }
-    
+
     struct Handlers {
         static let getSubscription = "getSubscription"
         static let setSubscription = "setSubscription"
@@ -91,10 +91,10 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         static let subscriptionsWelcomeFaqClicked = "subscriptionsWelcomeFaqClicked"
         static let getAccessToken = "getAccessToken"
     }
-    
+
     func handler(forMethodNamed methodName: String) -> Subfeature.Handler? {
         Logger.subscription.debug("WebView handler: \(methodName)")
-        
+
         switch methodName {
         case Handlers.getSubscription: return getSubscription
         case Handlers.setSubscription: return setSubscription
@@ -115,11 +115,11 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
             return nil
         }
     }
-    
+
     struct Subscription: Encodable {
         let token: String
     }
-    
+
     /// Values that the Frontend can use to determine the current state.
     struct SubscriptionValues: Codable {
         enum CodingKeys: String, CodingKey {
@@ -127,10 +127,10 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         }
         let token: String
     }
-    
+
     func getSubscription(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         guard subscriptionManager.isUserAuthenticated else { return Subscription(token: "") }
-        
+
         do {
             let accessToken = try await subscriptionManager.getTokenContainer(policy: .localValid).accessToken
             return Subscription(token: accessToken)
@@ -139,28 +139,28 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
             return Subscription(token: "")
         }
     }
-    
+
     func setSubscription(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         // Note: This is called by the web FE when a subscription is retrieved, `params` contains an auth token V1 that will need to be exchanged for a V2. This is a temporary workaround until the FE fully supports v2 auth.
-        
+
         PixelKit.fire(PrivacyProPixel.privacyProRestorePurchaseEmailSuccess, frequency: .legacyDailyAndCount)
-        
+
         guard let subscriptionValues: SubscriptionValues = CodableHelper.decode(from: params) else {
             Logger.subscription.fault("SubscriptionPagesUserScript: expected JSON representation of SubscriptionValues")
             PixelKit.fire(PrivacyProPixel.setSubscriptionInvalidSubscriptionValues)
             assertionFailure("SubscriptionPagesUserScript: expected JSON representation of SubscriptionValues")
             return nil
         }
-        
+
         // Clear subscription Cache
         subscriptionManager.clearSubscriptionCache()
-        
+
         guard !subscriptionValues.token.isEmpty else {
             Logger.subscription.fault("Empty token provided, Failed to exchange v1 token for v2")
             PixelKit.fire(PrivacyProPixel.setSubscriptionInvalidSubscriptionValues)
             return nil
         }
-        
+
         do {
             _ = try await subscriptionManager.exchange(tokenV1: subscriptionValues.token)
             Logger.subscription.log("v1 token exchanged for v2")
@@ -172,7 +172,7 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         }
         return nil
     }
-    
+
     func backToSettings(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         _ = try? await subscriptionManager.getTokenContainer(policy: .localForceRefresh)
         DispatchQueue.main.async { [weak self] in
@@ -180,10 +180,10 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         }
         return nil
     }
-    
+
     func getSubscriptionOptions(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         var subscriptionOptions = SubscriptionOptionsV2.empty
-        
+
         switch subscriptionPlatform {
         case .appStore:
             if #available(macOS 12.0, *) {
@@ -199,22 +199,22 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
                 break
             }
         }
-        
+
         guard subscriptionFeatureAvailability.isSubscriptionPurchaseAllowed else { return subscriptionOptions.withoutPurchaseOptions() }
-        
+
         return subscriptionOptions
     }
-    
+
     func subscriptionSelected(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         PixelKit.fire(PrivacyProPixel.privacyProPurchaseAttempt, frequency: .legacyDailyAndCount)
         struct SubscriptionSelection: Decodable {
             let id: String
         }
-        
+
         let message = original
-        
+
         await setPixelOrigin(from: message)
-        
+
         if subscriptionManager.currentEnvironment.purchasePlatform == .appStore {
             if #available(macOS 12.0, *) {
                 guard let subscriptionSelection: SubscriptionSelection = CodableHelper.decode(from: params) else {
@@ -223,11 +223,11 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
                     await uiHandler.dismissProgressViewController()
                     return nil
                 }
-                
+
                 Logger.subscription.log("[Purchase] Starting purchase for: \(subscriptionSelection.id, privacy: .public)")
-                
+
                 await uiHandler.presentProgressViewController(withTitle: UserText.purchasingSubscriptionTitle)
-                
+
                 // Check for active subscriptions
                 if await subscriptionManager.storePurchaseManager().hasActiveSubscription() {
                     // Sandbox note: Looks like our BE is not receiving updates when a subscription transitions from grace period to expired, so during testing we can end up with a subscription in grace period and we will not be able to purchase a new one, only restore it because Transaction.currentEntitlements will not return the subscription to restore.
@@ -238,14 +238,14 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
                     await pushPurchaseUpdate(originalMessage: message, purchaseUpdate: PurchaseUpdate(type: "canceled"))
                     return nil
                 }
-                
+
                 let purchaseTransactionJWS: String
                 let appStoreRestoreFlow = DefaultAppStoreRestoreFlowV2(subscriptionManager: subscriptionManager,
                                                                        storePurchaseManager: subscriptionManager.storePurchaseManager())
                 let appStorePurchaseFlow = DefaultAppStorePurchaseFlowV2(subscriptionManager: subscriptionManager,
                                                                          storePurchaseManager: subscriptionManager.storePurchaseManager(),
                                                                          appStoreRestoreFlow: appStoreRestoreFlow)
-                
+
                 Logger.subscription.log("[Purchase] Purchasing")
                 let purchaseResult = await appStorePurchaseFlow.purchaseSubscription(with: subscriptionSelection.id)
                 switch purchaseResult {
@@ -270,7 +270,7 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
                     case .internalError:
                         assertionFailure("Internal error")
                     }
-                    
+
                     if error != .cancelledByUser {
                         await showSomethingWentWrongAlert()
                     } else {
@@ -279,9 +279,9 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
                     await pushPurchaseUpdate(originalMessage: message, purchaseUpdate: PurchaseUpdate(type: "canceled"))
                     return nil
                 }
-                
+
                 await uiHandler.updateProgressViewController(title: UserText.completingPurchaseTitle)
-                
+
                 let completePurchaseResult = await appStorePurchaseFlow.completeSubscriptionPurchase(with: purchaseTransactionJWS, additionalParams: nil)
                 switch completePurchaseResult {
                 case .success(let purchaseUpdate):
@@ -317,7 +317,7 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
                     case .internalError:
                         assertionFailure("Internal error")
                     }
-                    
+
                     await pushPurchaseUpdate(originalMessage: message, purchaseUpdate: PurchaseUpdate(type: "completed"))
                 }
             }
@@ -338,13 +338,13 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
                 await pushPurchaseUpdate(originalMessage: message, purchaseUpdate: PurchaseUpdate(type: "canceled"))
             }
         }
-        
+
         await uiHandler.dismissProgressViewController()
         return nil
     }
-    
+
     // MARK: functions used in SubscriptionAccessActionHandlers
-    
+
     func activateSubscription(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         PixelKit.fire(PrivacyProPixel.privacyProRestorePurchaseOfferPageEntry)
         Task { @MainActor in
@@ -352,17 +352,17 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         }
         return nil
     }
-    
+
     func featureSelected(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         struct FeatureSelection: Codable {
             let productFeature: SubscriptionEntitlement
         }
-        
+
         guard let featureSelection: FeatureSelection = CodableHelper.decode(from: params) else {
             assertionFailure("SubscriptionPagesUserScript: expected JSON representation of FeatureSelection")
             return nil
         }
-        
+
         switch featureSelection.productFeature {
         case .networkProtection:
             PixelKit.fire(PrivacyProPixel.privacyProWelcomeVPN, frequency: .uniqueByName)
@@ -378,15 +378,15 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         case .unknown:
             break
         }
-        
+
         return nil
     }
-    
+
     func completeStripePayment(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         await uiHandler.presentProgressViewController(withTitle: UserText.completingPurchaseTitle)
         await stripePurchaseFlow.completeSubscriptionPurchase()
         await uiHandler.dismissProgressViewController()
-        
+
         PixelKit.fire(PrivacyProPixel.privacyProPurchaseStripeSuccess, frequency: .legacyDailyAndCount)
         sendFreemiumSubscriptionPixelIfFreemiumActivated()
         saveSubscriptionUpgradeTimestampIfFreemiumActivated()
@@ -394,34 +394,34 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         sendSubscriptionUpgradeFromFreemiumNotificationIfFreemiumActivated()
         return [String: String]() // cannot be nil, the web app expect something back before redirecting the user to the final page
     }
-    
+
     // MARK: Pixel related actions
-    
+
     func subscriptionsMonthlyPriceClicked(params: Any, original: WKScriptMessage) async -> Encodable? {
         PixelKit.fire(PrivacyProPixel.privacyProOfferMonthlyPriceClick)
         return nil
     }
-    
+
     func subscriptionsYearlyPriceClicked(params: Any, original: WKScriptMessage) async -> Encodable? {
         PixelKit.fire(PrivacyProPixel.privacyProOfferYearlyPriceClick)
         return nil
     }
-    
+
     func subscriptionsUnknownPriceClicked(params: Any, original: WKScriptMessage) async -> Encodable? {
         // Not used
         return nil
     }
-    
+
     func subscriptionsAddEmailSuccess(params: Any, original: WKScriptMessage) async -> Encodable? {
         PixelKit.fire(PrivacyProPixel.privacyProAddEmailSuccess, frequency: .uniqueByName)
         return nil
     }
-    
+
     func subscriptionsWelcomeFaqClicked(params: Any, original: WKScriptMessage) async -> Encodable? {
         PixelKit.fire(PrivacyProPixel.privacyProWelcomeFAQClick, frequency: .uniqueByName)
         return nil
     }
-    
+
     func getAccessToken(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         do {
             let accessToken = try await subscriptionManager.getTokenContainer(policy: .localValid).accessToken
@@ -431,13 +431,13 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
             return [String: String]()
         }
     }
-    
+
     // MARK: Push actions
-    
+
     enum SubscribeActionName: String {
         case onPurchaseUpdate
     }
-    
+
     @MainActor
     func pushPurchaseUpdate(originalMessage: WKScriptMessage, purchaseUpdate: PurchaseUpdate) {
         guard let webView = originalMessage.webView else {
@@ -445,24 +445,24 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         }
         pushAction(method: .onPurchaseUpdate, webView: webView, params: purchaseUpdate)
     }
-    
+
     func pushAction(method: SubscribeActionName, webView: WKWebView, params: Encodable) {
         guard let broker else {
             assertionFailure("Cannot continue without broker instance")
             return
         }
-        
+
         broker.push(method: method.rawValue, params: params, for: self, into: webView)
     }
-    
+
     @MainActor
     private func originFrom(originalMessage: WKScriptMessage) -> String? {
         let url = originalMessage.webView?.url
         return url?.getParameter(named: AttributionParameter.origin)
     }
-    
+
     // MARK: - UI interactions
-    
+
     func showSomethingWentWrongAlert() async {
         PixelKit.fire(PrivacyProPixel.privacyProPurchaseFailure, frequency: .legacyDailyAndCount)
         switch await uiHandler.dismissProgressViewAndShow(alertType: .somethingWentWrong, text: nil) {
@@ -473,9 +473,9 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         default: return
         }
     }
-    
+
     func showSubscriptionFoundAlert(originalMessage: WKScriptMessage) async {
-        
+
         switch await uiHandler.dismissProgressViewAndShow(alertType: .subscriptionFound, text: nil) {
         case .alertFirstButtonReturn:
             if #available(macOS 12.0, *) {
@@ -495,7 +495,7 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         default: return
         }
     }
-    
+
     // MARK: - Attribution
     /// Sets the appropriate origin for the subscription success tracking pixel.
     ///
@@ -503,14 +503,14 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
     private func setPixelOrigin(from message: WKScriptMessage) async {
         // If the user has performed a Freemium scan, set a Freemium origin and return
         guard !setFreemiumOriginIfScanPerformed() else { return }
-        
+
         // Else, Extract the origin from the webview URL to use for attribution pixel.
         subscriptionSuccessPixelHandler.origin = await originFrom(originalMessage: message)
     }
 }
 
 extension SubscriptionPagesUseSubscriptionFeatureV2: SubscriptionAccessActionHandling {
-    
+
     func subscriptionAccessActionRestorePurchases(message: WKScriptMessage) {
         if #available(macOS 12.0, *) {
             Task { @MainActor in
@@ -524,13 +524,13 @@ extension SubscriptionPagesUseSubscriptionFeatureV2: SubscriptionAccessActionHan
             }
         }
     }
-    
+
     func subscriptionAccessActionOpenURLHandler(url: URL) {
         Task {
             await self.uiHandler.showTab(with: .subscription(url))
         }
     }
-    
+
     func subscriptionAccessActionHandleAction(event: SubscriptionAccessActionHandlingEvent) {
         switch event {
         case .activateAddEmailClick:
@@ -541,7 +541,7 @@ extension SubscriptionPagesUseSubscriptionFeatureV2: SubscriptionAccessActionHan
 }
 
 private extension SubscriptionPagesUseSubscriptionFeatureV2 {
-    
+
     /**
      Sends a subscription upgrade notification if the freemium state is activated.
      
@@ -557,7 +557,7 @@ private extension SubscriptionPagesUseSubscriptionFeatureV2 {
             notificationCenter.post(name: .subscriptionUpgradeFromFreemium, object: nil)
         }
     }
-    
+
     /// Sends a freemium subscription pixel event if the freemium feature has been activated.
     ///
     /// This function checks whether the user has activated the freemium feature by querying the `freemiumDBPUserStateManager`.
@@ -567,7 +567,7 @@ private extension SubscriptionPagesUseSubscriptionFeatureV2 {
             freemiumDBPExperimentPixelHandler.fire(FreemiumDBPExperimentPixel.subscription, parameters: freemiumDBPPixelExperimentManager.pixelParameters)
         }
     }
-    
+
     /// Saves the current timestamp for a subscription upgrade if the freemium feature has been activated.
     ///
     /// This function checks whether the user has activated the freemium feature and if the subscription upgrade timestamp
@@ -578,7 +578,7 @@ private extension SubscriptionPagesUseSubscriptionFeatureV2 {
             freemiumDBPUserStateManager.upgradeToSubscriptionTimestamp = Date()
         }
     }
-    
+
     /// Sets the origin for attribution if the user has started their first Freemium PIR scan
     ///
     /// This method checks whether the user has started their first Freemium PIR scan.

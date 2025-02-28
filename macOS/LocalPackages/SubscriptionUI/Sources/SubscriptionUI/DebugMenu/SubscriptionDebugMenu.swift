@@ -435,7 +435,7 @@ public final class SubscriptionDebugMenu: NSMenuItem {
             let appStorePurchaseFlow = DefaultAppStorePurchaseFlowV2(subscriptionManager: subscriptionManagerV2,
                                                                    storePurchaseManager: subscriptionManagerV2.storePurchaseManager(),
                                                                    appStoreRestoreFlow: appStoreRestoreFlow)
-
+            // swiftlint:disable:next force_cast
             let vc = DebugPurchaseViewControllerV2(storePurchaseManager: subscriptionManagerV2.storePurchaseManager() as! DefaultStorePurchaseManagerV2,
                                                    appStorePurchaseFlow: appStorePurchaseFlow)
             currentViewController()?.presentAsSheet(vc)

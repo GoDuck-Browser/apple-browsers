@@ -512,7 +512,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                                                                  subscriptionEnvironment: subscriptionEnvironment,
                                                                    pixelHandler: pixelHandler,
                                                                    autoRecoveryHandler: {
-                // TODO: Implement
+                // todo Implement
             })
 
             entitlementsCheck = {

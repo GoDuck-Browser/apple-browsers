@@ -38,7 +38,7 @@ final class RemoteMessagingConfigMatcherProvider: RemoteMessagingConfigMatcherPr
         internalUserDecider: InternalUserDecider,
         statisticsStore: StatisticsStore = LocalStatisticsStore(),
         variantManager: VariantManager = DefaultVariantManager(),
-        subscriptionManager: any SubscriptionAuthV1toV2Bridge = Application.appDelegate.subscriptionAuthV1toV2Bridge
+        subscriptionManager: any SubscriptionAuthV1toV2Bridge
     ) {
         self.bookmarksDatabase = bookmarksDatabase
         self.appearancePreferences = appearancePreferences
@@ -84,13 +84,13 @@ final class RemoteMessagingConfigMatcherProvider: RemoteMessagingConfigMatcherPr
         var isPrivacyProSubscriptionExpired = false
         var privacyProPurchasePlatform: String?
         let surveyActionMapper: RemoteMessagingSurveyActionMapping
-        
+
         do {
             let subscription = try await subscriptionManager.getSubscription(cachePolicy: .returnCacheDataElseLoad)
             privacyProDaysSinceSubscribed = Calendar.current.numberOfDaysBetween(subscription.startedAt, and: Date()) ?? -1
             privacyProDaysUntilExpiry = Calendar.current.numberOfDaysBetween(Date(), and: subscription.expiresOrRenewsAt) ?? -1
             privacyProPurchasePlatform = subscription.platform.rawValue
-            
+
             switch subscription.status {
             case .autoRenewable, .gracePeriod:
                 isPrivacyProSubscriptionActive = true
@@ -102,7 +102,7 @@ final class RemoteMessagingConfigMatcherProvider: RemoteMessagingConfigMatcherPr
             case .unknown:
                 break // Not supported in RMF
             }
-            
+
             surveyActionMapper = DefaultRemoteMessagingSurveyURLBuilder(
                 statisticsStore: statisticsStore,
                 vpnActivationDateStore: DefaultWaitlistActivationDateStore(source: .netP),

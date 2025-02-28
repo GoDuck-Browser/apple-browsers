@@ -171,7 +171,7 @@ private extension DefaultFreemiumDBPFeature {
     }
 }
 
-//extension SubscriptionManager {
+// extension SubscriptionManager {
 //
 //    /// Returns true if a user is a "potential" Privacy Pro subscriber. This means:
 //    ///
@@ -191,7 +191,7 @@ private extension DefaultFreemiumDBPFeature {
 //            return true
 //        }
 //    }
-//}
+// }
 
 extension SubscriptionAuthV1toV2Bridge {
 

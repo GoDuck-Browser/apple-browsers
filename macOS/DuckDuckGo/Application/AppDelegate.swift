@@ -246,32 +246,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 #else
         AppPrivacyFeatures.shared = AppPrivacyFeatures(contentBlocking: AppContentBlocking(internalUserDecider: internalUserDecider, configurationStore: configurationStore), database: Database.shared)
 #endif
-        if NSApplication.runType.requiresEnvironment {
-            remoteMessagingClient = RemoteMessagingClient(
-                database: RemoteMessagingDatabase().db,
-                bookmarksDatabase: BookmarkDatabase.shared.db,
-                appearancePreferences: .shared,
-                pinnedTabsManager: pinnedTabsManager,
-                internalUserDecider: internalUserDecider,
-                configurationStore: configurationStore,
-                remoteMessagingAvailabilityProvider: PrivacyConfigurationRemoteMessagingAvailabilityProvider(
-                    privacyConfigurationManager: ContentBlocking.shared.privacyConfigurationManager
-                )
-            )
-            activeRemoteMessageModel = ActiveRemoteMessageModel(remoteMessagingClient: remoteMessagingClient, openURLHandler: { url in
-                WindowControllersManager.shared.showTab(with: .contentFromURL(url, source: .appOpenUrl))
-            })
-        } else {
-            // As long as remoteMessagingClient is private to App Delegate and activeRemoteMessageModel
-            // is used only by HomePage RootView as environment object,
-            // it's safe to not initialize the client for unit tests to avoid side effects.
-            remoteMessagingClient = nil
-            activeRemoteMessageModel = ActiveRemoteMessageModel(
-                remoteMessagingStore: nil,
-                remoteMessagingAvailabilityProvider: nil,
-                openURLHandler: { _ in }
-            )
-        }
 
         configurationManager = ConfigurationManager(store: configurationStore)
 
@@ -323,6 +297,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         // MARK: -------------------------------------------------------------------------------------------------------------------------------------
+
+        if NSApplication.runType.requiresEnvironment {
+            remoteMessagingClient = RemoteMessagingClient(
+                database: RemoteMessagingDatabase().db,
+                bookmarksDatabase: BookmarkDatabase.shared.db,
+                appearancePreferences: .shared,
+                pinnedTabsManager: pinnedTabsManager,
+                internalUserDecider: internalUserDecider,
+                configurationStore: configurationStore,
+                remoteMessagingAvailabilityProvider: PrivacyConfigurationRemoteMessagingAvailabilityProvider(
+                    privacyConfigurationManager: ContentBlocking.shared.privacyConfigurationManager
+                ),
+                subscriptionManager: subscriptionAuthV1toV2Bridge
+            )
+            activeRemoteMessageModel = ActiveRemoteMessageModel(remoteMessagingClient: remoteMessagingClient, openURLHandler: { url in
+                WindowControllersManager.shared.showTab(with: .contentFromURL(url, source: .appOpenUrl))
+            })
+        } else {
+            // As long as remoteMessagingClient is private to App Delegate and activeRemoteMessageModel
+            // is used only by HomePage RootView as environment object,
+            // it's safe to not initialize the client for unit tests to avoid side effects.
+            remoteMessagingClient = nil
+            activeRemoteMessageModel = ActiveRemoteMessageModel(
+                remoteMessagingStore: nil,
+                remoteMessagingAvailabilityProvider: nil,
+                openURLHandler: { _ in }
+            )
+        }
 
         // Update VPN environment and match the Subscription environment
         vpnSettings.alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)

@@ -616,9 +616,7 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
 
         // AuthV1
         if !isAuthV2Enable {
-            guard let authToken = try fetchAuthToken() else {
-                throw StartError.noAuthToken
-            }
+            let authToken = try fetchAuthToken()
             options[NetworkProtectionOptionKey.authToken] = authToken
         } else {
             // AuthV2
@@ -820,13 +818,13 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         }
     }
 
-    private func fetchAuthToken() throws -> NSString? {
+    private func fetchAuthToken() throws -> NSString {
         if let accessToken = try? accessTokenStorage.getAccessToken() {
             Logger.networkProtection.log("🟢 TunnelController found token")
-            return Self.adaptAccessTokenForVPN(accessToken) as NSString?
+            return Self.adaptAccessTokenForVPN(accessToken) as NSString
         } else {
             Logger.networkProtection.error("🔴 TunnelController found no token")
-            return nil
+            throw StartError.noAuthToken
         }
     }
 

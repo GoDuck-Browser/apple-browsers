@@ -26,7 +26,9 @@ final class MockAccountManager: AccountManager, SubscriptionAuthenticationStateP
 
     var delegate: AccountManagerKeychainAccessDelegate?
 
-    var isUserAuthenticated = false
+    var isUserAuthenticated: Bool {
+        accessToken != nil
+    }
 
     var accessToken: String? = ""
 

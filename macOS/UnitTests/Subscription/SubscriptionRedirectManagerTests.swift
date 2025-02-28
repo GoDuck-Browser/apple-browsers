@@ -62,6 +62,7 @@ final class SubscriptionRedirectManagerTests: XCTestCase {
 
         // WHEN
         subscriptionManager.urlForPurchaseFromRedirect = expectedURL
+        subscriptionManager.canPurchase = true
         let result = sut.redirectURL(for: url)
 
         // THEN
@@ -103,6 +104,7 @@ final class SubscriptionRedirectManagerTests: XCTestCase {
 
         // WHEN
         subscriptionManager.urlForPurchaseFromRedirect = expectedURL
+        subscriptionManager.canPurchase = true
         let result = sut.redirectURL(for: url)
 
         // THEN

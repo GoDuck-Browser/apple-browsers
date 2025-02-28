@@ -852,7 +852,7 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
         let tokenContainer = try? await subscriptionManager.getTokenContainer(policy: .local)
         email = tokenContainer?.decodedAccessToken.email
     }
-    
+
     private func updateSubscription(cachePolicy: SubscriptionCachePolicy) async {
         updateUserAuthenticatedState()
 

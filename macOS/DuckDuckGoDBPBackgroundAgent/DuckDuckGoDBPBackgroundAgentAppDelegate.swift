@@ -86,7 +86,6 @@ final class DuckDuckGoDBPBackgroundAgentApplication: NSApplication {
                                                              canPerformAuthMigration: false,
                                                              canHandlePixels: false)
 
-
         // MARK: -
 
         if !isAuthV2Enabled {

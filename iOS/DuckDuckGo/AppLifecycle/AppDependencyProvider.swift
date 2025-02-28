@@ -217,7 +217,7 @@ final class AppDependencyProvider: DependencyProvider {
                                                                    subscriptionEnvironment: subscriptionEnvironment,
                                                                    pixelHandler: pixelHandler,
                                                                    autoRecoveryHandler: {
-                // TODO: Implement
+                // todo Implement
             },
                                                                    isInternalUserEnabled: {
                 ContentBlocking.shared.privacyConfigurationManager.internalUserDecider.isInternalUser

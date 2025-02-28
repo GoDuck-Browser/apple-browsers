@@ -187,7 +187,7 @@ extension DefaultSubscriptionManagerV2 {
                       subscriptionEnvironment: environment,
                       pixelHandler: pixelHandler,
                       autoRecoveryHandler: {
-                // TODO: Implement
+                // todo Implement
             })
         } else {
             self.init(oAuthClient: authClient,
@@ -195,9 +195,8 @@ extension DefaultSubscriptionManagerV2 {
                       subscriptionEnvironment: environment,
                       pixelHandler: pixelHandler,
                       autoRecoveryHandler: {
-                // TODO: Implement
+                // todo Implement
             })
         }
     }
 }
-

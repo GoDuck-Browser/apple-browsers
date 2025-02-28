@@ -71,7 +71,7 @@ final class DuckDuckGoVPNApplication: NSApplication {
                                                    subscriptionEndpointService: subscriptionEndpointService,
                                                    authEndpointService: authEndpointService)
 //        } else {
-            //MARK: V2
+            // MARK: V2
         subscriptionManagerV2 = DefaultSubscriptionManagerV2(keychainType: .dataProtection(.named(subscriptionAppGroup)),
                                                                environment: subscriptionEnvironment,
                                                                userDefaults: subscriptionUserDefaults,

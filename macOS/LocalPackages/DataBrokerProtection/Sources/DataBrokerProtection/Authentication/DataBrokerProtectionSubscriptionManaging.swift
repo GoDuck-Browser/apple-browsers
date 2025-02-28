@@ -41,7 +41,7 @@ public final class DataBrokerProtectionSubscriptionManager: DataBrokerProtection
         // the tests locally 
         let dbpSettings = DataBrokerProtectionSettings()
         if dbpSettings.storedRunType == .integrationTests,
-           let token = ProcessInfo.processInfo.environment["PRIVACYPRO_STAGING_TOKEN"] { // TODO: auth V1 token??
+           let token = ProcessInfo.processInfo.environment["PRIVACYPRO_STAGING_TOKEN"] { // todo auth V1 token??
             return token
         }
         return try? await subscriptionManager.getAccessToken()

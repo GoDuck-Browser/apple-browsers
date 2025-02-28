@@ -524,7 +524,7 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
                                                                    subscriptionEnvironment: subscriptionEnvironment,
                                                                    pixelHandler: pixelHandler,
                                                                    autoRecoveryHandler: {
-                // TODO Implement
+                // todo Implement
             })
             self.subscriptionManager = subscriptionManager
             
