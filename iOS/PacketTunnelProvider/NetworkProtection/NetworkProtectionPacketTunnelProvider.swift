@@ -38,7 +38,7 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
     private static let persistentPixel: PersistentPixelFiring = PersistentPixel()
     private var cancellables = Set<AnyCancellable>()
 
-    static private var isAuthV2Enabled = false
+    static private let isAuthV2Enabled = false
     private var accountManager: AccountManager?
     private let subscriptionManager: (any SubscriptionManagerV2)?
 

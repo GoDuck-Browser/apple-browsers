@@ -80,7 +80,7 @@ final class AppDependencyProvider: DependencyProvider {
     let pageRefreshMonitor = PageRefreshMonitor(onDidDetectRefreshPattern: PageRefreshMonitor.onDidDetectRefreshPattern)
 
     // Subscription
-    var isAuthV2Enabled: Bool = false
+    let isAuthV2Enabled: Bool = false
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge {
         if !isAuthV2Enabled {
             return subscriptionManager!
