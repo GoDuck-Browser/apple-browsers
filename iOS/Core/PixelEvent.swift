@@ -392,8 +392,6 @@ extension Pixel {
         case networkProtectionTunnelUpdateSuccess
         case networkProtectionTunnelUpdateFailure
 
-        case networkProtectionTunnelWakeAttempt
-        case networkProtectionTunnelWakeSuccess
         case networkProtectionTunnelWakeFailure
 
         case networkProtectionEnableAttemptConnecting
@@ -806,6 +804,9 @@ extension Pixel {
         case privacyProSubscriptionCookieRefreshedWithAccessToken
         case privacyProSubscriptionCookieRefreshedWithEmptyValue
         case privacyProSubscriptionCookieFailedToSetSubscriptionCookie
+        case privacyProDeadTokenDetected
+        case authV1MigrationFailed
+        case authV1MigrationSucceeded
 
         case settingsPrivacyProAccountWithNoSubscriptionFound
 
@@ -1383,8 +1384,6 @@ extension Pixel.Event {
         case .networkProtectionTunnelUpdateAttempt: return "m_netp_tunnel_update_attempt"
         case .networkProtectionTunnelUpdateSuccess: return "m_netp_tunnel_update_success"
         case .networkProtectionTunnelUpdateFailure: return "m_netp_tunnel_update_failure"
-        case .networkProtectionTunnelWakeAttempt: return "m_netp_tunnel_wake_attempt"
-        case .networkProtectionTunnelWakeSuccess: return "m_netp_tunnel_wake_success"
         case .networkProtectionTunnelWakeFailure: return "m_netp_tunnel_wake_failure"
         case .networkProtectionEnableAttemptConnecting: return "m_netp_ev_enable_attempt"
         case .networkProtectionEnableAttemptSuccess: return "m_netp_ev_enable_attempt_success"
@@ -1773,6 +1772,9 @@ extension Pixel.Event {
         case .privacyProSubscriptionCookieRefreshedWithAccessToken: return "m_privacy-pro_subscription-cookie-refreshed_with_access_token"
         case .privacyProSubscriptionCookieRefreshedWithEmptyValue: return "m_privacy-pro_subscription-cookie-refreshed_with_empty_value"
         case .privacyProSubscriptionCookieFailedToSetSubscriptionCookie: return "m_privacy-pro_subscription-cookie-failed_to_set_subscription_cookie"
+        case .privacyProDeadTokenDetected: return "m_privacy-pro_dead_token_detected"
+        case .authV1MigrationFailed: return "m_privacy-pro_v1migration_failed"
+        case .authV1MigrationSucceeded: return "m_privacy-pro_v1migration_succeeded"
 
         case .settingsPrivacyProAccountWithNoSubscriptionFound: return "m_settings_privacy-pro_account_with_no_subscription_found"
 
