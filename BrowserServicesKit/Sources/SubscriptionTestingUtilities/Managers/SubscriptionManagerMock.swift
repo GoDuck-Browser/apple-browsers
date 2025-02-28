@@ -130,19 +130,8 @@ public final class SubscriptionManagerMock: SubscriptionManager {
     }
 
     public func getSubscription(cachePolicy: SubscriptionCachePolicy) async throws -> PrivacyProSubscription {
-
-        var apiCachePolicy: APICachePolicy
-        switch cachePolicy {
-        case .reloadIgnoringLocalCacheData:
-            apiCachePolicy = .reloadIgnoringLocalCacheData
-        case .returnCacheDataElseLoad:
-            apiCachePolicy = .returnCacheDataElseLoad
-        case .returnCacheDataDontLoad:
-            apiCachePolicy = .returnCacheDataDontLoad
-        }
-
         if let accessToken = accountManager.accessToken {
-            let subscriptionResult = await subscriptionEndpointService.getSubscription(accessToken: accessToken, cachePolicy: apiCachePolicy)
+            let subscriptionResult = await subscriptionEndpointService.getSubscription(accessToken: accessToken, cachePolicy: cachePolicy.apiCachePolicy)
             if case let .success(subscription) = subscriptionResult {
                 return subscription
             } else {
