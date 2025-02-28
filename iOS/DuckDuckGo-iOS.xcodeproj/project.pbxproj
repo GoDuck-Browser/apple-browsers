@@ -1307,6 +1307,7 @@
 		F1CA3C371F045878005FADB3 /* PrivacyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CA3C361F045878005FADB3 /* PrivacyStore.swift */; };
 		F1CA3C391F045885005FADB3 /* PrivacyUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CA3C381F045885005FADB3 /* PrivacyUserDefaults.swift */; };
 		F1CA3C3B1F045B65005FADB3 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1CA3C3A1F045B65005FADB3 /* Authenticator.swift */; };
+		F1D2D2572D71F6BD00985A2C /* SubscriptionSettingsViewModelV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D2D2562D71F6BD00985A2C /* SubscriptionSettingsViewModelV2.swift */; };
 		F1D43AFA2B99C1D300BAB743 /* BareBonesBrowserKit in Frameworks */ = {isa = PBXBuildFile; productRef = F1D43AF92B99C1D300BAB743 /* BareBonesBrowserKit */; };
 		F1D43AFC2B99C56000BAB743 /* RootDebugViewController+VanillaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D43AFB2B99C56000BAB743 /* RootDebugViewController+VanillaBrowser.swift */; };
 		F1D477C61F2126CC0031ED49 /* OmniBarState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D477C51F2126CC0031ED49 /* OmniBarState.swift */; };
@@ -3363,6 +3364,7 @@
 		F1CA3C381F045885005FADB3 /* PrivacyUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrivacyUserDefaults.swift; sourceTree = "<group>"; };
 		F1CA3C3A1F045B65005FADB3 /* Authenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
 		F1CB8EA21F26B39000A7171B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F1D2D2562D71F6BD00985A2C /* SubscriptionSettingsViewModelV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionSettingsViewModelV2.swift; sourceTree = "<group>"; };
 		F1D43AFB2B99C56000BAB743 /* RootDebugViewController+VanillaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RootDebugViewController+VanillaBrowser.swift"; sourceTree = "<group>"; };
 		F1D477C51F2126CC0031ED49 /* OmniBarState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OmniBarState.swift; sourceTree = "<group>"; };
 		F1D477C81F2139410031ED49 /* SmallOmniBarStateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmallOmniBarStateTests.swift; sourceTree = "<group>"; };
@@ -4993,13 +4995,7 @@
 				C1047CA32CA59BDC00B916FD /* Autofill */,
 				6FB1FE9C2C24D4060075B68B /* NewTabPageSectionsDebugView */,
 				9F9A922F2C86AACB001D036D /* OnboardingDebugView */,
-				31206F6F2D3804E800A95D76 /* AIChatDebugView.swift */,
 				853807912D6E638000CE1455 /* AlertPlaygroundView.swift */,
-				98A860EE2C4682E00077FE4D /* BookmarksDebugViewController.swift */,
-				4B0295182537BC6700E00CEF /* ConfigurationDebugViewController.swift */,
-				CBFCB30D2B2CD47800253E9E /* ConfigurationURLDebugViewController.swift */,
-				8590CB602684D0600089F6BF /* CookieDebugViewController.swift */,
-				8530BB4F2D677AEF00B518AC /* CrashDebugScreen.swift */,
 				858566E7252E4F56007501B8 /* Debug.storyboard */,
 				D6F93E3B2B4FFA97004C268D /* SubscriptionDebugViewController.swift */,
 				8590CB602684D0600089F6BF /* CookieDebugViewController.swift */,
@@ -6275,6 +6271,7 @@
 				D668D9262B6937D2008E2FF2 /* SubscriptionITPViewModel.swift */,
 				D64648AE2B5993890033090B /* SubscriptionEmailViewModel.swift */,
 				D652498D2B515A6A0056B0DE /* SubscriptionSettingsViewModel.swift */,
+				F1D2D2562D71F6BD00985A2C /* SubscriptionSettingsViewModelV2.swift */,
 				D6BFCB602B7525160051FF81 /* SubscriptionPIRViewModel.swift */,
 			);
 			path = ViewModel;
@@ -8624,6 +8621,7 @@
 				6F40D15B2C34423800BF22F0 /* HomePageDisplayDailyPixelBucket.swift in Sources */,
 				311BD1AF2836BB4200AEF6C1 /* AutofillItemsLockedView.swift in Sources */,
 				85DE681A2B6A8BB000DED4FE /* MainViewCoordinator.swift in Sources */,
+				F1D2D2572D71F6BD00985A2C /* SubscriptionSettingsViewModelV2.swift in Sources */,
 				F1617C151E57336D00DEDCAF /* TabManager.swift in Sources */,
 				85449EF523FDA02800512AAF /* KeyboardSettingsViewController.swift in Sources */,
 				85C11E4C2090888C00BFFEB4 /* HomeRowReminder.swift in Sources */,
