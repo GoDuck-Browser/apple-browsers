@@ -21,6 +21,14 @@ import HistoryView
 import XCTest
 @testable import DuckDuckGo_Privacy_Browser
 
+final class CapturingContextMenuPresenter: HistoryView.ContextMenuPresenting {
+    func showContextMenu(_ menu: NSMenu) {
+        showContextMenuCallCount += 1
+    }
+
+    var showContextMenuCallCount: Int = 0
+}
+
 final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
 
     var ranges: [DataModel.HistoryRange] {
@@ -125,10 +133,12 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
     var actionsHandler: HistoryViewActionsHandler!
     var dataProvider: CapturingHistoryViewDataProvider!
     var dialogPresenter: CapturingHistoryViewDeleteDialogPresenter!
+    var contextMenuPresenter: CapturingContextMenuPresenter!
 
     override func setUp() async throws {
         dataProvider = CapturingHistoryViewDataProvider()
         dialogPresenter = CapturingHistoryViewDeleteDialogPresenter()
+        contextMenuPresenter = CapturingContextMenuPresenter()
         actionsHandler = HistoryViewActionsHandler(dataProvider: dataProvider, deleteDialogPresenter: dialogPresenter)
     }
 
@@ -288,5 +298,16 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
         XCTAssertEqual(dataProvider.deleteVisitsForIdentifierCalls.count, 1)
         XCTAssertEqual(dataProvider.burnVisitsForIdentifiersCalls.count, 0)
         XCTAssertEqual(dialogResponse, .delete)
+    }
+
+    // MARK: - showContextMenu
+
+    func testWhenShowContextMenuIsCalledWithNoValidIdentifiersThenItDoesNotShowMenuAndReturnsNoAction() async {
+
+        let response1 = await actionsHandler.showContextMenu(for: [], using: contextMenuPresenter)
+        let response2 = await actionsHandler.showContextMenu(for: ["invalid-identifier"], using: contextMenuPresenter)
+        XCTAssertEqual(response1, .noAction)
+        XCTAssertEqual(response2, .noAction)
+        XCTAssertEqual(contextMenuPresenter.showContextMenuCallCount, 0)
     }
 }

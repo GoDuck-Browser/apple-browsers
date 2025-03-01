@@ -44,6 +44,25 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
     private let bookmarkHandler: HistoryViewBookmarksHandling
     private var contextMenuResponse: DataModel.DeleteDialogResponse = .noAction
     private let dialogPresenter: HistoryViewDialogPresenting
+
+    /**
+     * This is a handle to a Task that calls `showDeleteDialog` in response to a context menu 'Delete' action.
+     *
+     * `showContextMenu` function is expected to return a value indicating whether some items have been deleted
+     * as a result of showing it. Deleting multiple items via context menu requires that the user confirms a delete dialog.
+     * So the flow is:
+     * 1. `showContextMenu` called
+     * 2. context menu shown
+     * 3. delete action triggered
+     * 4. delete dialog shown and accepted
+     * 5. deleting data
+     * 6. return from the function
+     * Context menu itself blocks main thread, but once 'Delete' action is selected, the context menu stops blocking the thread
+     * and would return from the function. In order to wait for the dialog, we're showing that dialog in an async @MainActor Task
+     * and then at the bottom of `showContextMenu` function we're awaiting that task (if it's not nil).
+     *
+     * This ensures that the dialog response is returned form the `showContextMenu` function.
+     */
     private var deleteDialogTask: Task<DataModel.DeleteDialogResponse, Never>?
 
     enum Const {
@@ -160,6 +179,8 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         }
 
         presenter.showContextMenu(menu)
+
+        // If 'Delete' action was selected and it displayed a dialog, await the response from that dialog before continuing.
         if let deleteDialogResponse = await deleteDialogTask?.value {
             deleteDialogTask = nil
             contextMenuResponse = deleteDialogResponse
