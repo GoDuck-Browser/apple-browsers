@@ -80,7 +80,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             }
         }()
 
-        switch await dialogPresenter.showDialog(for: visitsCount, deleteMode: adjustedQuery.deleteMode) {
+        switch await dialogPresenter.showDeleteDialog(for: visitsCount, deleteMode: adjustedQuery.deleteMode) {
         case .burn:
             await dataProvider.burnVisits(matching: adjustedQuery)
             return .delete
@@ -290,7 +290,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
         let visitsCount = identifiers.count
 
-        switch await dialogPresenter.showDialog(for: visitsCount, deleteMode: .unspecified) {
+        switch await dialogPresenter.showDeleteDialog(for: visitsCount, deleteMode: .unspecified) {
         case .burn:
             await dataProvider.burnVisits(for: identifiers)
             return .delete
@@ -357,7 +357,7 @@ extension DataModel.HistoryQueryKind {
         switch self {
         case .searchTerm(let term), .domainFilter(let term):
             return term.isEmpty
-        case .rangeFilter(_):
+        case .rangeFilter:
             return false
         }
     }

@@ -25,7 +25,7 @@ protocol HistoryViewDialogPresenting {
     func showMultipleTabsDialog(for itemsCount: Int) async -> OpenMultipleTabsWarningDialogModel.Response
 
     @MainActor
-    func showDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response
+    func showDeleteDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response
 }
 
 final class DefaultHistoryViewDialogPresenter: HistoryViewDialogPresenting {
@@ -43,7 +43,7 @@ final class DefaultHistoryViewDialogPresenter: HistoryViewDialogPresenting {
     }
 
     @MainActor
-    func showDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response {
+    func showDeleteDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response {
         await withCheckedContinuation { continuation in
             let parentWindow = WindowControllersManager.shared.lastKeyMainWindowController?.window
             let model = HistoryViewDeleteDialogModel(entriesCount: itemsCount, mode: deleteMode)

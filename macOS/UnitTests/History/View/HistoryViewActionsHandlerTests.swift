@@ -93,8 +93,11 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
 
 final class CapturingHistoryViewDeleteDialogPresenter: HistoryViewDialogPresenting {
 
-    var response: HistoryViewDeleteDialogModel.Response = .noAction
-    var showDialogCalls: [ShowDialogCall] = []
+    var multipleTabsDialogResponse: OpenMultipleTabsWarningDialogModel.Response = .cancel
+    var showMultipleTabsDialogCalls: [Int] = []
+
+    var deleteDialogResponse: HistoryViewDeleteDialogModel.Response = .noAction
+    var showDeleteDialogCalls: [ShowDialogCall] = []
 
     struct ShowDialogCall: Equatable {
         let itemsCount: Int
@@ -106,9 +109,14 @@ final class CapturingHistoryViewDeleteDialogPresenter: HistoryViewDialogPresenti
         }
     }
 
-    func showDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response {
-        showDialogCalls.append(.init(itemsCount, deleteMode))
-        return response
+    func showDeleteDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response {
+        showDeleteDialogCalls.append(.init(itemsCount, deleteMode))
+        return deleteDialogResponse
+    }
+
+    func showMultipleTabsDialog(for itemsCount: Int) async -> OpenMultipleTabsWarningDialogModel.Response {
+        showMultipleTabsDialogCalls.append(itemsCount)
+        return multipleTabsDialogResponse
     }
 }
 
@@ -142,7 +150,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
 
     func testWhenDeleteDialogIsCancelledThenShowDeleteDialogReturnsNoAction() async {
         dataProvider.countVisibleVisits = { _ in return 100 }
-        dialogPresenter.response = .noAction
+        dialogPresenter.deleteDialogResponse = .noAction
         let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
@@ -152,7 +160,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
     func testWhenDeleteDialogReturnsUnknownResponseThenShowDeleteDialogReturnsNoAction() async {
         // this scenario shouldn't happen in real life anyway but is included for completeness
         dataProvider.countVisibleVisits = { _ in return 100 }
-        dialogPresenter.response = .unknown
+        dialogPresenter.deleteDialogResponse = .unknown
         let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)
@@ -162,7 +170,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
     func testWhenDeleteDialogIsAcceptedWithBurningThenShowDeleteDialogPerformsBurningAndReturnsDeleteAction() async {
         // this scenario shouldn't happen in real life anyway but is included for completeness
         dataProvider.countVisibleVisits = { _ in return 100 }
-        dialogPresenter.response = .burn
+        dialogPresenter.deleteDialogResponse = .burn
         let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 0)
         XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 1)
@@ -172,7 +180,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
     func testWhenDeleteDialogIsAcceptedWithoutBurningThenShowDeleteDialogPerformsDeletiongAndReturnsDeleteAction() async {
         // this scenario shouldn't happen in real life anyway but is included for completeness
         dataProvider.countVisibleVisits = { _ in return 100 }
-        dialogPresenter.response = .delete
+        dialogPresenter.deleteDialogResponse = .delete
         let dialogResponse = await actionsHandler.showDeleteDialog(for: .rangeFilter(.all))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 1)
         XCTAssertEqual(dataProvider.burnVisitsMatchingQueryCalls.count, 0)

@@ -571,7 +571,7 @@ extension MainViewController {
                 let visitsCount = await historyViewDataProvider.countVisibleVisits(matching: .rangeFilter(.all))
 
                 let presenter = DefaultHistoryViewDialogPresenter()
-                switch await presenter.showDialog(for: visitsCount, deleteMode: .all) {
+                switch await presenter.showDeleteDialog(for: visitsCount, deleteMode: .all) {
                 case .burn:
                     FireCoordinator.fireViewModel.fire.burnAll()
                 case .delete:
@@ -609,7 +609,7 @@ extension MainViewController {
 
             Task {
                 let presenter = DefaultHistoryViewDialogPresenter()
-                switch await presenter.showDialog(for: visits.count, deleteMode: deleteMode) {
+                switch await presenter.showDeleteDialog(for: visits.count, deleteMode: deleteMode) {
                 case .burn:
                     FireCoordinator.fireViewModel.fire.burnVisits(visits,
                                                                   except: FireproofDomains.shared,

@@ -40,45 +40,6 @@ extension HistoryCoordinator: HistoryDataSource {
     }
 }
 
-protocol HistoryBurning: AnyObject {
-    func burn(_ visits: [Visit], animated: Bool) async
-    func burnAll() async
-}
-
-final class FireHistoryBurner: HistoryBurning {
-    let fireproofDomains: DomainFireproofStatusProviding
-    let fire: () async -> Fire
-
-    init(fireproofDomains: DomainFireproofStatusProviding = FireproofDomains.shared, fire: (() async -> Fire)? = nil) {
-        self.fireproofDomains = fireproofDomains
-        self.fire = fire ?? { @MainActor in FireCoordinator.fireViewModel.fire }
-    }
-
-    func burn(_ visits: [Visit], animated: Bool) async {
-        guard !visits.isEmpty else {
-            return
-        }
-
-        await withCheckedContinuation { continuation in
-            Task { @MainActor in
-                await fire().burnVisits(visits, except: fireproofDomains, isToday: animated, urlToOpenIfWindowsAreClosed: .history) {
-                    continuation.resume()
-                }
-            }
-        }
-    }
-
-    func burnAll() async {
-        await withCheckedContinuation { continuation in
-            Task { @MainActor in
-                await fire().burnAll(opening: .history) {
-                    continuation.resume()
-                }
-            }
-        }
-    }
-}
-
 struct HistoryViewGrouping {
     let range: DataModel.HistoryRange
     let items: [DataModel.HistoryItem]
@@ -275,6 +236,17 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         }
     }
 
+    /**
+     * Fetches all visits matching given `identifiers`.
+     *
+     * This function is used for deleting items in History View. Items in history view
+     * are deduplicated by day, so if an item is requested to be deleted, we have to
+     * find and delete all visits matching that item for a given day (because only
+     * the newest one on a given day is shown in the History View).
+     *
+     * The procedure here is to go through all identifiers and retrieve visits from history
+     * that match identifier's URL and are on the same date as identifier's date.
+     */
     private func visits(for identifiers: [VisitIdentifier]) async -> [Visit] {
         guard let historyDictionary = historyDataSource.historyDictionary else {
             return []
@@ -354,10 +326,21 @@ protocol SearchableHistoryEntry {
 }
 
 extension HistoryEntry: SearchableHistoryEntry {
+    /**
+     * Search term matching checks title and URL (case insensitive).
+     */
     func matches(_ searchTerm: String) -> Bool {
         (title ?? "").localizedCaseInsensitiveContains(searchTerm) || url.absoluteString.localizedCaseInsensitiveContains(searchTerm)
     }
 
+    /**
+     * Domain matching is done by etld+1.
+     *
+     * This means that that `example.com` would match all of the following:
+     * - `example.com`
+     * - `www.example.com`
+     * - `www.cdn.example.com`
+     */
     func matchesDomain(_ domain: String) -> Bool {
         (etldPlusOne ?? url.host) == domain
     }
@@ -410,36 +393,4 @@ extension HistoryView.DataModel.HistoryItem {
             favicon: favicon
         )
     }
-}
-
-struct VisitIdentifier: LosslessStringConvertible {
-    init?(_ description: String) {
-        let components = description.components(separatedBy: "|")
-        guard components.count == 3, let url = components[1].url, let date = Self.timestampFormatter.date(from: components[2]) else {
-            return nil
-        }
-        self.init(uuid: components[0], url: url, date: date)
-    }
-
-    init(historyEntry: HistoryEntry, date: Date) {
-        self.uuid = historyEntry.identifier.uuidString
-        self.url = historyEntry.url
-        self.date = date
-    }
-
-    init(uuid: String, url: URL, date: Date) {
-        self.uuid = uuid
-        self.url = url
-        self.date = date
-    }
-
-    var description: String {
-        [uuid, url.absoluteString, Self.timestampFormatter.string(from: date)].joined(separator: "|")
-    }
-
-    let uuid: String
-    let url: URL
-    let date: Date
-
-    static let timestampFormatter = ISO8601DateFormatter()
 }
