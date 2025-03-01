@@ -127,4 +127,3 @@ final class HistoryViewDeleteDialogModel: ObservableObject {
         return formatter
     }()
 }
-
