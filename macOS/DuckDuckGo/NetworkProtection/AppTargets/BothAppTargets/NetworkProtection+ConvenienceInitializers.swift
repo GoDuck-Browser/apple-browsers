@@ -45,15 +45,7 @@ extension NetworkProtectionKeychainTokenStore {
 
     convenience init(useAccessTokenProvider: Bool) {
         let accessTokenProvider = {
-            var token: String?
-            // extremely ugly hack, will be removed as soon auth v1 is removed
-            let semaphore = DispatchSemaphore(value: 0)
-            Task {
-                token = try? await Application.appDelegate.subscriptionAuthV1toV2Bridge.getAccessToken()
-                semaphore.signal()
-            }
-            semaphore.wait()
-            return { token }
+            return { Application.appDelegate.subscriptionManagerV1.accountManager.accessToken }
         }()
         self.init(keychainType: .default,
                   errorEvents: .networkProtectionAppDebugEvents,

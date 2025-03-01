@@ -585,20 +585,24 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
 #if os(macOS)
     private func loadAuthToken(from options: StartupOptions) async throws {
+        Logger.networkProtection.log("Load auth token")
         switch options.authToken {
         case .set(let newAuthToken):
+            Logger.networkProtection.log("Set new token")
             if let currentAuthToken = try? await tokenHandler.getToken(), currentAuthToken == newAuthToken {
                 return
             }
 
             try await tokenHandler.adoptToken(newAuthToken)
         case .useExisting:
+            Logger.networkProtection.log("Use existing token")
             do {
                 try await tokenHandler.getToken()
             } catch {
                 throw TunnelError.startingTunnelWithoutAuthToken(internalError: error)
             }
         case .reset:
+            Logger.networkProtection.log("Reset token")
             // This case should in theory not be possible, but it's ideal to have this in place
             // in case an error in the controller on the client side allows it.
             try? await tokenHandler.removeToken()
@@ -610,7 +614,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         Logger.networkProtection.log("Load token container")
         switch options.tokenContainer {
         case .set(let newTokenContainer):
-            Logger.networkProtection.log("Set new token - \(newTokenContainer.debugDescription, privacy: .public)")
+            Logger.networkProtection.log("Set new token")
             do {
                 try await tokenHandler.adoptToken(newTokenContainer)
                 // Important: Here we force the token refresh in order to immediately branch the system extension token from the main app one.
@@ -685,6 +689,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
     @MainActor
     open override func startTunnel(options: [String: NSObject]? = nil) async throws {
+        Logger.networkProtection.log("Starting tunnel")
 
         // It's important to have this as soon as possible since it helps setup PixelKit
         prepareToConnect(using: tunnelProviderProtocol)

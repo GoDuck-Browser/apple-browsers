@@ -121,10 +121,8 @@ final class NavigationBarViewController: NSViewController {
     static private let homeButtonLeftPosition = 0
 
     private let networkProtectionButtonModel: NetworkProtectionNavBarButtonModel
-    private let networkProtectionFeatureActivation: NetworkProtectionFeatureActivation
 
     static func create(tabCollectionViewModel: TabCollectionViewModel,
-                       networkProtectionFeatureActivation: NetworkProtectionFeatureActivation = NetworkProtectionKeychainTokenStore(),
                        downloadListCoordinator: DownloadListCoordinator = .shared,
                        dragDropManager: BookmarkDragDropManager = .shared,
                        networkProtectionPopoverManager: NetPPopoverManager,
@@ -133,17 +131,29 @@ final class NavigationBarViewController: NSViewController {
                        aiChatMenuConfig: AIChatMenuVisibilityConfigurable,
                        brokenSitePromptLimiter: BrokenSitePromptLimiter) -> NavigationBarViewController {
         NSStoryboard(name: "NavigationBar", bundle: nil).instantiateInitialController { coder in
-            self.init(coder: coder, tabCollectionViewModel: tabCollectionViewModel, networkProtectionFeatureActivation: networkProtectionFeatureActivation, downloadListCoordinator: downloadListCoordinator, dragDropManager: dragDropManager, networkProtectionPopoverManager: networkProtectionPopoverManager, networkProtectionStatusReporter: networkProtectionStatusReporter, autofillPopoverPresenter: autofillPopoverPresenter, aiChatMenuConfig: aiChatMenuConfig, brokenSitePromptLimiter: brokenSitePromptLimiter)
+            self.init(coder: coder, tabCollectionViewModel: tabCollectionViewModel,
+                      downloadListCoordinator: downloadListCoordinator,
+                      dragDropManager: dragDropManager,
+                      networkProtectionPopoverManager: networkProtectionPopoverManager,
+                      networkProtectionStatusReporter: networkProtectionStatusReporter,
+                      autofillPopoverPresenter: autofillPopoverPresenter,
+                      aiChatMenuConfig: aiChatMenuConfig,
+                      brokenSitePromptLimiter: brokenSitePromptLimiter)
         }!
     }
 
-    init?(coder: NSCoder, tabCollectionViewModel: TabCollectionViewModel, networkProtectionFeatureActivation: NetworkProtectionFeatureActivation, downloadListCoordinator: DownloadListCoordinator, dragDropManager: BookmarkDragDropManager, networkProtectionPopoverManager: NetPPopoverManager, networkProtectionStatusReporter: NetworkProtectionStatusReporter, autofillPopoverPresenter: AutofillPopoverPresenter,
-          aiChatMenuConfig: AIChatMenuVisibilityConfigurable, brokenSitePromptLimiter: BrokenSitePromptLimiter) {
+    init?(coder: NSCoder, tabCollectionViewModel: TabCollectionViewModel,
+          downloadListCoordinator: DownloadListCoordinator,
+          dragDropManager: BookmarkDragDropManager,
+          networkProtectionPopoverManager: NetPPopoverManager,
+          networkProtectionStatusReporter: NetworkProtectionStatusReporter,
+          autofillPopoverPresenter: AutofillPopoverPresenter,
+          aiChatMenuConfig: AIChatMenuVisibilityConfigurable,
+          brokenSitePromptLimiter: BrokenSitePromptLimiter) {
 
         self.popovers = NavigationBarPopovers(networkProtectionPopoverManager: networkProtectionPopoverManager, autofillPopoverPresenter: autofillPopoverPresenter, isBurner: tabCollectionViewModel.isBurner)
         self.tabCollectionViewModel = tabCollectionViewModel
         self.networkProtectionButtonModel = NetworkProtectionNavBarButtonModel(popoverManager: networkProtectionPopoverManager, statusReporter: networkProtectionStatusReporter)
-        self.networkProtectionFeatureActivation = networkProtectionFeatureActivation
         self.downloadListCoordinator = downloadListCoordinator
         self.dragDropManager = dragDropManager
         self.aiChatMenuConfig = aiChatMenuConfig
@@ -342,7 +352,7 @@ final class NavigationBarViewController: NSViewController {
     }
 
     private func toggleNetworkProtectionPopover() {
-        guard NetworkProtectionKeychainTokenStore().isFeatureActivated else {
+        guard Application.appDelegate.subscriptionAuthV1toV2Bridge.isUserAuthenticated else {
             return
         }
 

@@ -21,24 +21,28 @@ import Common
 import Networking
 import os.log
 
-extension DefaultAccountManager: SubscriptionTokenHandling {
-
-    public func getToken() async throws -> String {
-        guard let accessToken = accessToken else {
-            throw SubscriptionManagerError.tokenUnavailable(error: nil)
-        }
-        return accessToken
-    }
-
-    public func removeToken() async throws {
-        assertionFailure("Unsupported")
-    }
-
-    public func refreshToken() async throws {
-        assertionFailure("Unsupported")
-    }
-
-    public func adoptToken(_ someKindOfToken: Any) async throws {
-        assertionFailure("Unsupported")
-    }
-}
+//extension DefaultAccountManager: SubscriptionTokenHandling {
+//
+//    public func getToken() async throws -> String {
+//        guard let accessToken = accessToken else {
+//            throw SubscriptionManagerError.tokenUnavailable(error: nil)
+//        }
+//        return accessToken
+//    }
+//
+//    public func removeToken() async throws {
+//        assertionFailure("Unsupported")
+//    }
+//
+//    public func refreshToken() async throws {
+//        assertionFailure("Unsupported")
+//    }
+//
+//    public func adoptToken(_ someKindOfToken: Any) async throws {
+//        guard let token = someKindOfToken as? String else {
+//            Logger.subscription.fault("Failed to adopt token: \(String(describing: someKindOfToken))")
+//            return
+//        }
+//        self.storeAuthToken(token: token)
+//    }
+//}

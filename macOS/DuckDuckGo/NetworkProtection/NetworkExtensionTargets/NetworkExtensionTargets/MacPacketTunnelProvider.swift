@@ -456,8 +456,9 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
             entitlementsCheck = {
                 await accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
             }
+
             self.accountManager = accountManager
-            tokenHandler = accountManager
+            tokenHandler = tokenStore
         } else {
             // MARK: V2
             let configuration = URLSessionConfiguration.default
@@ -521,6 +522,12 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                 Logger.networkProtection.log("Network protection is \( isNetworkProtectionEnabled ? "🟢 Enabled" : "⚫️ Disabled", privacy: .public)")
                 return .success(isNetworkProtectionEnabled)
             }
+
+            // Subscription initial tasks
+            Task {
+                await subscriptionManager.loadInitialData()
+            }
+
             self.accountManager = nil
             tokenHandler = subscriptionManager
         }
@@ -631,6 +638,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
     // MARK: - NEPacketTunnelProvider
 
     public override func load(options: StartupOptions) async throws {
+        Logger.networkProtection.log("Loading startup options...")
         try await super.load(options: options)
 
 #if NETP_SYSTEM_EXTENSION
