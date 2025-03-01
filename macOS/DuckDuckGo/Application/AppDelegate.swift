@@ -260,8 +260,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             for: FeatureFlag.self
         )
 
-        onboardingStateMachine = ContextualOnboardingStateMachine()
-
         // MARK: - Subscription configuration --------------------------------------------------------------------------------------------------------
 
         subscriptionUIHandler = SubscriptionUIHandler(windowControllersManagerProvider: {
@@ -297,6 +295,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         // MARK: -------------------------------------------------------------------------------------------------------------------------------------
+
+        onboardingStateMachine = ContextualOnboardingStateMachine()
 
         if NSApplication.runType.requiresEnvironment {
             remoteMessagingClient = RemoteMessagingClient(
