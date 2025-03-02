@@ -46,4 +46,3 @@ final class CapturingHistoryViewDeleteDialogPresenter: HistoryViewDialogPresenti
         return multipleTabsDialogResponse
     }
 }
-

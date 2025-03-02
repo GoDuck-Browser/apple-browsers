@@ -56,7 +56,7 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
         burnVisitsMatchingQueryCalls.append(query)
     }
 
-    func titles(for urls: [URL]) -> [URL : String] {
+    func titles(for urls: [URL]) -> [URL: String] {
         titlesForURLsCalls.append(urls)
         return titlesForURLs(urls)
     }
@@ -87,4 +87,3 @@ final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
         let offset: Int
     }
 }
-
