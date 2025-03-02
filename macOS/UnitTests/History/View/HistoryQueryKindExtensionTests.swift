@@ -60,11 +60,4 @@ final class HistoryQueryKindExtensionTests: XCTestCase {
         XCTAssertTrue(DataModel.HistoryQueryKind.searchTerm("").shouldSkipDeleteDialog)
         XCTAssertTrue(DataModel.HistoryQueryKind.domainFilter("").shouldSkipDeleteDialog)
     }
-
-    // MARK: - helpers
-
-    private func date(year: Int?, month: Int?, day: Int?, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) throws -> Date {
-        let components = DateComponents(year: year, month: month, day: day, hour: hour, minute: minute, second: second)
-        return try XCTUnwrap(Calendar.autoupdatingCurrent.date(from: components))
-    }
 }

@@ -1,5 +1,5 @@
 //
-//  HistoryViewTabOpener.swift
+//  HistoryViewTabOpening.swift
 //
 //  Copyright © 2025 DuckDuckGo. All rights reserved.
 //
@@ -85,16 +85,13 @@ final class DefaultHistoryViewTabOpener: HistoryViewTabOpening {
         await urlOpener().openInNewFireWindow(urls)
     }
 
+    // MARK: - Private
+
     private func confirmOpeningMultipleTabsIfNeeded(count: Int) async -> Bool {
         guard count >= Const.numberOfTabsToOpenForDisplayingWarning else {
             return true
         }
         let response = await dialogPresenter?.showMultipleTabsDialog(for: count)
         return response == .open
-    }
-
-    @MainActor
-    private var windowControllersManager: WindowControllersManager? {
-        WindowControllersManager.shared
     }
 }

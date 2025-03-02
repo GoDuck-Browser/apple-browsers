@@ -36,7 +36,7 @@ extension WindowControllersManager: URLOpening {
     }
 
     func openInNewTab(_ urls: [URL]) {
-        guard let tabCollectionViewModel else {
+        guard let tabCollectionViewModel, !urls.isEmpty else {
             return
         }
         let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true) }
@@ -44,6 +44,9 @@ extension WindowControllersManager: URLOpening {
     }
 
     func openInNewWindow(_ urls: [URL]) {
+        guard !urls.isEmpty else {
+            return
+        }
         let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true) }
 
         let newTabCollection = TabCollection(tabs: tabs)
@@ -52,6 +55,9 @@ extension WindowControllersManager: URLOpening {
     }
 
     func openInNewFireWindow(_ urls: [URL]) {
+        guard !urls.isEmpty else {
+            return
+        }
         let burnerMode = BurnerMode(isBurner: true)
         let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true, burnerMode: burnerMode) }
         let newTabCollection = TabCollection(tabs: tabs)
@@ -59,6 +65,7 @@ extension WindowControllersManager: URLOpening {
         openNewWindow(with: tabCollectionViewModel, burnerMode: burnerMode)
     }
 
+    // MARK: - Private
 
     @MainActor
     private var tabCollectionViewModel: TabCollectionViewModel? {
