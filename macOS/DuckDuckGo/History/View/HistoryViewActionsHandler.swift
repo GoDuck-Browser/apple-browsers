@@ -41,9 +41,18 @@ extension LocalBookmarkManager: HistoryViewBookmarksHandling {
 final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
     weak var dataProvider: HistoryViewDataProviding?
-    private let bookmarkHandler: HistoryViewBookmarksHandling
-    private var contextMenuResponse: DataModel.DeleteDialogResponse = .noAction
+    private let bookmarksHandler: HistoryViewBookmarksHandling
+    private let tabOpener: HistoryViewTabOpening
     private let dialogPresenter: HistoryViewDialogPresenting
+
+    /**
+     * A handle to the context menu response. This is returned to FE from `showContextMenu(for:using:)`.
+     *
+     * Context menu response is a local variable because it may be modified by context
+     * menu actions. The action handlers are Objective-C selectors and we can't easily
+     * pass the response to action handlers - hence a local variable.
+     */
+    private var contextMenuResponse: DataModel.DeleteDialogResponse = .noAction
 
     /**
      * This is a handle to a Task that calls `showDeleteDialog` in response to a context menu 'Delete' action.
@@ -65,18 +74,17 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
      */
     private var deleteDialogTask: Task<DataModel.DeleteDialogResponse, Never>?
 
-    enum Const {
-        static let numberOfTabsToOpenForDisplayingWarning: Int = 20
-    }
-
     init(
         dataProvider: HistoryViewDataProviding,
-        deleteDialogPresenter: HistoryViewDialogPresenting = DefaultHistoryViewDialogPresenter(),
-        bookmarkHandler: HistoryViewBookmarksHandling = LocalBookmarkManager.shared
+        dialogPresenter: HistoryViewDialogPresenting = DefaultHistoryViewDialogPresenter(),
+        tabOpener: HistoryViewTabOpening = DefaultHistoryViewTabOpener(),
+        bookmarksHandler: HistoryViewBookmarksHandling = LocalBookmarkManager.shared
     ) {
         self.dataProvider = dataProvider
-        self.dialogPresenter = deleteDialogPresenter
-        self.bookmarkHandler = bookmarkHandler
+        self.dialogPresenter = dialogPresenter
+        self.tabOpener = tabOpener
+        self.tabOpener.dialogPresenter = dialogPresenter
+        self.bookmarksHandler = bookmarksHandler
     }
 
     func showDeleteDialog(for query: DataModel.HistoryQueryKind) async -> DataModel.DeleteDialogResponse {
@@ -117,6 +125,8 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
     @MainActor
     func showContextMenu(for entries: [String], using presenter: any ContextMenuPresenting) async -> DataModel.DeleteDialogResponse {
+        // Reset context menu response every time before showing a context menu.
+        // Context menu actions may udpate the response before it's returned.
         contextMenuResponse = .noAction
 
         let identifiers = entries.compactMap(VisitIdentifier.init)
@@ -160,15 +170,15 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
                 NSMenuItem.separator()
                 NSMenuItem(title: UserText.copy, action: #selector(copy(_:)), target: self, representedObject: url)
                     .withAccessibilityIdentifier("HistoryView.copy")
-                if !bookmarkHandler.isUrlBookmarked(url: url) {
+                if !bookmarksHandler.isUrlBookmarked(url: url) {
                     NSMenuItem(title: UserText.addToBookmarks, action: #selector(addBookmarks(_:)), target: self, representedObject: [url])
                         .withAccessibilityIdentifier("HistoryView.addBookmark")
                 }
-                if !bookmarkHandler.isUrlFavorited(url: url) {
+                if !bookmarksHandler.isUrlFavorited(url: url) {
                     NSMenuItem(title: UserText.addToFavorites, action: #selector(addFavorite(_:)), target: self, representedObject: url)
                         .withAccessibilityIdentifier("HistoryView.addFavorite")
                 }
-            } else if urls.contains(where: { !bookmarkHandler.isUrlBookmarked(url: $0) }) {
+            } else if urls.contains(where: { !bookmarksHandler.isUrlBookmarked(url: $0) }) {
                 NSMenuItem(title: UserText.addAllToBookmarks, action: #selector(addBookmarks(_:)), target: self, representedObject: urls)
                     .withAccessibilityIdentifier("HistoryView.addBookmark")
             }
@@ -188,66 +198,35 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         return contextMenuResponse
     }
 
+    func open(_ url: URL) async {
+        await tabOpener.open(url)
+    }
+
     @objc private func openInNewTab(_ sender: NSMenuItem) {
-        Task { @MainActor in
-            guard let urls = sender.representedObject as? [URL], let tabCollectionViewModel else {
-                return
-            }
-
-            let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true) }
-
-            guard await confirmOpeningMultipleTabsIfNeeded(count: tabs.count) else {
-                return
-            }
-
-            tabCollectionViewModel.append(tabs: tabs)
+        guard let urls = sender.representedObject as? [URL] else {
+            return
+        }
+        Task {
+            await tabOpener.openInNewTab(urls)
         }
     }
 
     @objc private func openInNewWindow(_ sender: NSMenuItem) {
-        Task { @MainActor in
-            guard let urls = sender.representedObject as? [URL], let windowControllersManager else {
-                return
-            }
-
-            let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true) }
-
-            guard await confirmOpeningMultipleTabsIfNeeded(count: tabs.count) else {
-                return
-            }
-
-            let newTabCollection = TabCollection(tabs: tabs)
-            let tabCollectionViewModel = TabCollectionViewModel(tabCollection: newTabCollection)
-            windowControllersManager.openNewWindow(with: tabCollectionViewModel)
+        guard let urls = sender.representedObject as? [URL] else {
+            return
+        }
+        Task {
+            await tabOpener.openInNewWindow(urls)
         }
     }
 
     @objc private func openInNewFireWindow(_ sender: NSMenuItem) {
-        Task { @MainActor in
-            guard let urls = sender.representedObject as? [URL], let windowControllersManager else {
-                return
-            }
-
-            let burnerMode = BurnerMode(isBurner: true)
-
-            let tabs = urls.map { Tab(content: .url($0, source: .historyEntry), shouldLoadInBackground: true, burnerMode: burnerMode) }
-
-            guard await confirmOpeningMultipleTabsIfNeeded(count: tabs.count) else {
-                return
-            }
-
-            let newTabCollection = TabCollection(tabs: tabs)
-            let tabCollectionViewModel = TabCollectionViewModel(tabCollection: newTabCollection, burnerMode: burnerMode)
-            windowControllersManager.openNewWindow(with: tabCollectionViewModel, burnerMode: burnerMode)
+        guard let urls = sender.representedObject as? [URL] else {
+            return
         }
-    }
-
-    private func confirmOpeningMultipleTabsIfNeeded(count: Int) async -> Bool {
-        guard count >= Const.numberOfTabsToOpenForDisplayingWarning else {
-            return true
+        Task {
+            await tabOpener.openInNewFireWindow(urls)
         }
-        let response = await dialogPresenter.showMultipleTabsDialog(for: count)
-        return response == .open
     }
 
     @MainActor
@@ -266,7 +245,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
 
         let titles = dataProvider.titles(for: urls)
         let websiteInfos = urls.map { WebsiteInfo(url: $0, title: titles[$0]) }
-        bookmarkHandler.addNewBookmarks(for: websiteInfos)
+        bookmarksHandler.addNewBookmarks(for: websiteInfos)
     }
 
     @MainActor
@@ -275,10 +254,10 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return
         }
         let titles = dataProvider.titles(for: [url])
-        if let bookmark = bookmarkHandler.getBookmark(for: url) {
-            bookmarkHandler.markAsFavorite(bookmark)
+        if let bookmark = bookmarksHandler.getBookmark(for: url) {
+            bookmarksHandler.markAsFavorite(bookmark)
         } else {
-            bookmarkHandler.addNewFavorite(for: url, title: titles[url] ?? url.absoluteString)
+            bookmarksHandler.addNewFavorite(for: url, title: titles[url] ?? url.absoluteString)
         }
     }
 
@@ -321,33 +300,6 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         default:
             return .noAction
         }
-    }
-
-    @MainActor
-    func open(_ url: URL) {
-        guard let tabCollectionViewModel else {
-            return
-        }
-
-        if NSApplication.shared.isCommandPressed && NSApplication.shared.isOptionPressed {
-            WindowsManager.openNewWindow(with: url, source: .bookmark, isBurner: tabCollectionViewModel.isBurner)
-        } else if NSApplication.shared.isCommandPressed && NSApplication.shared.isShiftPressed {
-            tabCollectionViewModel.insertOrAppendNewTab(.contentFromURL(url, source: .bookmark), selected: true)
-        } else if NSApplication.shared.isCommandPressed {
-            tabCollectionViewModel.insertOrAppendNewTab(.contentFromURL(url, source: .bookmark), selected: false)
-        } else {
-            tabCollectionViewModel.selectedTabViewModel?.tab.setContent(.contentFromURL(url, source: .historyEntry))
-        }
-    }
-
-    @MainActor
-    private var windowControllersManager: WindowControllersManager? {
-        WindowControllersManager.shared
-    }
-
-    @MainActor
-    private var tabCollectionViewModel: TabCollectionViewModel? {
-        windowControllersManager?.lastKeyMainWindowController?.mainViewController.tabCollectionViewModel
     }
 }
 

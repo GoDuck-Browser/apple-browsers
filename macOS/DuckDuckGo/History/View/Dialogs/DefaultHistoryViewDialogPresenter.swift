@@ -18,7 +18,7 @@
 
 import Foundation
 
-protocol HistoryViewDialogPresenting {
+protocol HistoryViewDialogPresenting: AnyObject {
     @MainActor
     func showMultipleTabsDialog(for itemsCount: Int) async -> OpenMultipleTabsWarningDialogModel.Response
 

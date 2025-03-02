@@ -16,117 +16,11 @@
 //  limitations under the License.
 //
 
+import AppKit
 import History
 import HistoryView
 import XCTest
 @testable import DuckDuckGo_Privacy_Browser
-
-final class CapturingContextMenuPresenter: HistoryView.ContextMenuPresenting {
-    func showContextMenu(_ menu: NSMenu) {
-        showContextMenuCallCount += 1
-    }
-
-    var showContextMenuCallCount: Int = 0
-}
-
-final class CapturingHistoryViewDataProvider: HistoryViewDataProviding {
-
-    var ranges: [DataModel.HistoryRange] {
-        rangesCallCount += 1
-        return _ranges
-    }
-
-    func refreshData() {
-        resetCacheCallCount += 1
-    }
-
-    func visitsBatch(for query: DataModel.HistoryQueryKind, limit: Int, offset: Int) async -> DataModel.HistoryItemsBatch {
-        visitsBatchCalls.append(.init(query: query, limit: limit, offset: offset))
-        return await visitsBatch(query, limit, offset)
-    }
-
-    func deleteVisits(for identifiers: [VisitIdentifier]) async {
-        deleteVisitsForIdentifierCalls.append(identifiers)
-    }
-
-    func burnVisits(for identifiers: [VisitIdentifier]) async {
-        burnVisitsForIdentifiersCalls.append(identifiers)
-    }
-
-    func countVisibleVisits(matching query: DataModel.HistoryQueryKind) async -> Int {
-        countVisibleVisitsCalls.append(query)
-        return await countVisibleVisits(query)
-    }
-
-    func deleteVisits(matching query: DataModel.HistoryQueryKind) async {
-        deleteVisitsMatchingQueryCalls.append(query)
-    }
-
-    func burnVisits(matching query: DataModel.HistoryQueryKind) async {
-        burnVisitsMatchingQueryCalls.append(query)
-    }
-
-
-    func titles(for urls: [URL]) -> [URL : String] {
-        titlesForURLsCalls.append(urls)
-        return titlesForURLs(urls)
-    }
-
-    // swiftlint:disable:next identifier_name
-    var _ranges: [DataModel.HistoryRange] = []
-    var rangesCallCount: Int = 0
-    var resetCacheCallCount: Int = 0
-
-    var countVisibleVisitsCalls: [DataModel.HistoryQueryKind] = []
-    var countVisibleVisits: (DataModel.HistoryQueryKind) async -> Int = { _ in return 0 }
-
-    var deleteVisitsMatchingQueryCalls: [DataModel.HistoryQueryKind] = []
-    var burnVisitsMatchingQueryCalls: [DataModel.HistoryQueryKind] = []
-
-    var deleteVisitsForIdentifierCalls: [[VisitIdentifier]] = []
-    var burnVisitsForIdentifiersCalls: [[VisitIdentifier]] = []
-
-    var visitsBatchCalls: [VisitsBatchCall] = []
-    var visitsBatch: (DataModel.HistoryQueryKind, Int, Int) async -> DataModel.HistoryItemsBatch = { _, _, _ in .init(finished: true, visits: []) }
-
-    var titlesForURLsCalls: [[URL]] = []
-    var titlesForURLs: ([URL]) -> [URL: String] = { _ in [:] }
-
-    struct VisitsBatchCall: Equatable {
-        let query: DataModel.HistoryQueryKind
-        let limit: Int
-        let offset: Int
-    }
-}
-
-final class CapturingHistoryViewDeleteDialogPresenter: HistoryViewDialogPresenting {
-
-    var multipleTabsDialogResponse: OpenMultipleTabsWarningDialogModel.Response = .cancel
-    var showMultipleTabsDialogCalls: [Int] = []
-
-    var deleteDialogResponse: HistoryViewDeleteDialogModel.Response = .noAction
-    var showDeleteDialogCalls: [ShowDialogCall] = []
-
-    struct ShowDialogCall: Equatable {
-        let itemsCount: Int
-        let deleteMode: HistoryViewDeleteDialogModel.DeleteMode
-
-        init(_ itemsCount: Int, _ deleteMode: HistoryViewDeleteDialogModel.DeleteMode) {
-            self.itemsCount = itemsCount
-            self.deleteMode = deleteMode
-        }
-    }
-
-    func showDeleteDialog(for itemsCount: Int, deleteMode: HistoryViewDeleteDialogModel.DeleteMode) async -> HistoryViewDeleteDialogModel.Response {
-        showDeleteDialogCalls.append(.init(itemsCount, deleteMode))
-        return deleteDialogResponse
-    }
-
-    func showMultipleTabsDialog(for itemsCount: Int) async -> OpenMultipleTabsWarningDialogModel.Response {
-        showMultipleTabsDialogCalls.append(itemsCount)
-        return multipleTabsDialogResponse
-    }
-}
 
 final class HistoryViewActionsHandlerTests: XCTestCase {
 
@@ -134,12 +28,21 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
     var dataProvider: CapturingHistoryViewDataProvider!
     var dialogPresenter: CapturingHistoryViewDeleteDialogPresenter!
     var contextMenuPresenter: CapturingContextMenuPresenter!
+    var tabOpener: CapturingHistoryViewTabOpener!
+    var bookmarksHandler: CapturingHistoryViewBookmarksHandler!
 
     override func setUp() async throws {
         dataProvider = CapturingHistoryViewDataProvider()
         dialogPresenter = CapturingHistoryViewDeleteDialogPresenter()
         contextMenuPresenter = CapturingContextMenuPresenter()
-        actionsHandler = HistoryViewActionsHandler(dataProvider: dataProvider, deleteDialogPresenter: dialogPresenter)
+        tabOpener = CapturingHistoryViewTabOpener()
+        bookmarksHandler = CapturingHistoryViewBookmarksHandler()
+        actionsHandler = HistoryViewActionsHandler(
+            dataProvider: dataProvider,
+            dialogPresenter: dialogPresenter,
+            tabOpener: tabOpener,
+            bookmarksHandler: bookmarksHandler
+        )
     }
 
     // MARK: - showDeleteDialogForQuery
@@ -205,7 +108,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
             }
         }
         dialogPresenter.deleteDialogResponse = .delete
-        let dialogResponse = await actionsHandler.showDeleteDialog(for: .searchTerm("hello"))
+        _ = await actionsHandler.showDeleteDialog(for: .searchTerm("hello"))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 1)
         let deleteVisitsCall = try XCTUnwrap(dataProvider.deleteVisitsMatchingQueryCalls.first)
         XCTAssertEqual(deleteVisitsCall, .searchTerm("hello"))
@@ -214,7 +117,7 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
     func testThatShowDeleteDialogForNonRangeQueryMatchingAllVisitsAdjustsQueryToAllRange() async throws {
         dataProvider.countVisibleVisits = { _ in return 100 } // this ensures that all queries are treated as "all range"
         dialogPresenter.deleteDialogResponse = .delete
-        let dialogResponse = await actionsHandler.showDeleteDialog(for: .searchTerm("hello"))
+        _ = await actionsHandler.showDeleteDialog(for: .searchTerm("hello"))
         XCTAssertEqual(dataProvider.deleteVisitsMatchingQueryCalls.count, 1)
         let deleteVisitsCall = try XCTUnwrap(dataProvider.deleteVisitsMatchingQueryCalls.first)
         XCTAssertEqual(deleteVisitsCall, .rangeFilter(.all))
@@ -303,11 +206,292 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
     // MARK: - showContextMenu
 
     func testWhenShowContextMenuIsCalledWithNoValidIdentifiersThenItDoesNotShowMenuAndReturnsNoAction() async {
-
         let response1 = await actionsHandler.showContextMenu(for: [], using: contextMenuPresenter)
         let response2 = await actionsHandler.showContextMenu(for: ["invalid-identifier"], using: contextMenuPresenter)
         XCTAssertEqual(response1, .noAction)
         XCTAssertEqual(response2, .noAction)
-        XCTAssertEqual(contextMenuPresenter.showContextMenuCallCount, 0)
+        XCTAssertEqual(contextMenuPresenter.showContextMenuCalls.count, 0)
+    }
+
+    func testWhenShowContextMenuIsCalledForSingleItemThenItShowsMenuForSingleItem() async throws {
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: try XCTUnwrap("https://example.com".url), date: Date()),
+        ]
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        XCTAssertEqual(contextMenuPresenter.showContextMenuCalls.count, 1)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+
+        XCTAssertEqual(menu.items.count, 11)
+
+        XCTAssertEqual(menu.items[0].title, UserText.openInNewTab)
+        XCTAssertEqual(menu.items[1].title, UserText.openInNewWindow)
+        XCTAssertEqual(menu.items[2].title, UserText.openInNewFireWindow)
+        XCTAssertTrue(menu.items[3].isSeparatorItem)
+        XCTAssertEqual(menu.items[4].title, UserText.showAllHistoryFromThisSite)
+        XCTAssertTrue(menu.items[5].isSeparatorItem)
+        XCTAssertEqual(menu.items[6].title, UserText.copy)
+        XCTAssertEqual(menu.items[7].title, UserText.addToBookmarks)
+        XCTAssertEqual(menu.items[8].title, UserText.addToFavorites)
+        XCTAssertTrue(menu.items[9].isSeparatorItem)
+        XCTAssertEqual(menu.items[10].title, UserText.delete)
+    }
+
+    func testWhenURLIsBookmaredThenShowContextMenuPresentsContextMenuWithoutBookmarkItem() async throws {
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: try XCTUnwrap("https://example.com".url), date: Date()),
+        ]
+        bookmarksHandler.isUrlBookmarked = { _ in true }
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        XCTAssertEqual(contextMenuPresenter.showContextMenuCalls.count, 1)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+
+        XCTAssertEqual(menu.items.count, 10)
+        XCTAssertFalse(menu.items.map(\.title).contains(UserText.addToBookmarks))
+    }
+
+    func testWhenURLIsFavoritedThenShowContextMenuPresentsContextMenuWithoutBookmarkAndFavoriteItem() async throws {
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: try XCTUnwrap("https://example.com".url), date: Date()),
+        ]
+        bookmarksHandler.isUrlBookmarked = { _ in true }
+        bookmarksHandler.isUrlFavorited = { _ in true }
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        XCTAssertEqual(contextMenuPresenter.showContextMenuCalls.count, 1)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+
+        XCTAssertEqual(menu.items.count, 9)
+        XCTAssertFalse(menu.items.map(\.title).contains(UserText.addToBookmarks))
+        XCTAssertFalse(menu.items.map(\.title).contains(UserText.addToFavorites))
+    }
+
+    func testWhenShowContextMenuIsCalledForMultipleItemsThenItShowsMenuForMultipleItems() async throws {
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: try XCTUnwrap("https://example.com".url), date: Date()),
+            .init(uuid: "efgh", url: try XCTUnwrap("https://example2.com".url), date: Date()),
+            .init(uuid: "ijkl", url: try XCTUnwrap("https://example3.com".url), date: Date()),
+        ]
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        XCTAssertEqual(contextMenuPresenter.showContextMenuCalls.count, 1)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+
+        XCTAssertEqual(menu.items.count, 7)
+
+        XCTAssertEqual(menu.items[0].title, UserText.openAllInNewTabs)
+        XCTAssertEqual(menu.items[1].title, UserText.openAllTabsInNewWindow)
+        XCTAssertEqual(menu.items[2].title, UserText.openAllInNewFireWindow)
+        XCTAssertTrue(menu.items[3].isSeparatorItem)
+        XCTAssertEqual(menu.items[4].title, UserText.addAllToBookmarks)
+        XCTAssertTrue(menu.items[5].isSeparatorItem)
+        XCTAssertEqual(menu.items[6].title, UserText.delete)
+    }
+
+    func testWhenSomeURLsAreBookmaredThenShowContextMenuForMultipleItemsPresentsContextMenuWithBookmarksItem() async throws {
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: try XCTUnwrap("https://example.com".url), date: Date()),
+            .init(uuid: "efgh", url: try XCTUnwrap("https://example2.com".url), date: Date()),
+            .init(uuid: "ijkl", url: try XCTUnwrap("https://example3.com".url), date: Date()),
+        ]
+        bookmarksHandler.isUrlBookmarked = { url in
+            return url == "https://example.com".url
+        }
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        XCTAssertEqual(contextMenuPresenter.showContextMenuCalls.count, 1)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+
+        XCTAssertEqual(menu.items.count, 7)
+        XCTAssertTrue(menu.items.map(\.title).contains(UserText.addAllToBookmarks))
+    }
+
+    func testWhenAllURLsAreBookmaredThenShowContextMenuForMultipleItemsPresentsContextMenuWithoutBookmarksItem() async throws {
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: try XCTUnwrap("https://example.com".url), date: Date()),
+            .init(uuid: "efgh", url: try XCTUnwrap("https://example2.com".url), date: Date()),
+            .init(uuid: "ijkl", url: try XCTUnwrap("https://example3.com".url), date: Date()),
+        ]
+        bookmarksHandler.isUrlBookmarked = { _ in true }
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        XCTAssertEqual(contextMenuPresenter.showContextMenuCalls.count, 1)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+
+        XCTAssertEqual(menu.items.count, 6)
+        XCTAssertFalse(menu.items.map(\.title).contains(UserText.addAllToBookmarks))
+    }
+
+    // MARK: - open
+
+    func testThatOpenCallsTabOpener() async throws {
+        let url = try XCTUnwrap("https://example.com".url)
+        await actionsHandler.open(url)
+        XCTAssertEqual(tabOpener.openCalls, [url])
+    }
+
+    @MainActor
+    func testThatOpenInNewTabCallsTabOpener() async throws {
+        let url = try XCTUnwrap("https://example.com".url)
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: url, date: Date())
+        ]
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+        menu.performActionForItem(at: 0) // items[0] is openInNewTab
+
+        // Wait for a short time to allow the async task to complete
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertEqual(tabOpener.openInNewTabCalls, [[url]])
+    }
+
+    @MainActor
+    func testThatOpenInNewWindowCallsTabOpener() async throws {
+        let url = try XCTUnwrap("https://example.com".url)
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: url, date: Date())
+        ]
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+        menu.performActionForItem(at: 1) // items[1] is openInNewWindow
+
+        // Wait for a short time to allow the async task to complete
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertEqual(tabOpener.openInNewWindowCalls, [[url]])
+    }
+
+    @MainActor
+    func testThatOpenInNewFireWindowCallsTabOpener() async throws {
+        let url = try XCTUnwrap("https://example.com".url)
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: url, date: Date())
+        ]
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+        menu.performActionForItem(at: 2) // items[2] is openInNewFireWindow
+
+        // Wait for a short time to allow the async task to complete
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertEqual(tabOpener.openInNewFireWindowCalls, [[url]])
+    }
+
+    // MARK: - addBookmarks
+
+    @MainActor
+    func testThatAddBookmarksForSingleItemCallsBookmarksHandler() async throws {
+        let url = try XCTUnwrap("https://example.com".url)
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: url, date: Date())
+        ]
+        dataProvider.titlesForURLs = { _ in [url: "a bookmark title"] }
+        bookmarksHandler.isUrlBookmarked = { _ in false }
+
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+        menu.performActionForItem(at: 7) // items[7] is addToBookmarks
+
+        XCTAssertEqual(bookmarksHandler.addNewBookmarksCalls, [[.init(url: url, title: "a bookmark title")]])
+    }
+
+    @MainActor
+    func testThatAddBookmarksForMultipleItemsCallsBookmarksHandler() async throws {
+        let url1 = try XCTUnwrap("https://example.com".url)
+        let url2 = try XCTUnwrap("https://example2.com".url)
+        let url3 = try XCTUnwrap("https://example3.com".url)
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: url1, date: Date()),
+            .init(uuid: "efgh", url: url2, date: Date()),
+            .init(uuid: "ijkl", url: url3, date: Date())
+        ]
+        dataProvider.titlesForURLs = { _ in
+            [
+                url1: "Example",
+                url2: "Example 2",
+                url3: "Example 3"
+            ]
+        }
+        bookmarksHandler.isUrlBookmarked = { _ in false }
+
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+        menu.performActionForItem(at: 4) // items[4] is addToBookmarks
+
+        XCTAssertEqual(bookmarksHandler.addNewBookmarksCalls, [[
+            .init(url: url1, title: "Example"),
+            .init(url: url2, title: "Example 2"),
+            .init(url: url3, title: "Example 3")
+        ]])
+    }
+
+    // MARK: - addFavorite
+
+    @MainActor
+    func testThatAddFavoriteForBookmarkedItemCallsMarkAsFavorite() async throws {
+        let url = try XCTUnwrap("https://example.com".url)
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: url, date: Date())
+        ]
+        let bookmark = Bookmark(id: "abcd", url: url.absoluteString, title: "a bookmark title", isFavorite: false)
+        bookmarksHandler.getBookmark = { _ in bookmark }
+
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+        menu.performActionForItem(at: 8) // items[7] is addToFavorites
+
+        XCTAssertEqual(bookmarksHandler.markAsFavoriteCalls, [bookmark])
+    }
+
+    @MainActor
+    func testThatAddFavoriteForNonBookmarkedItemCallsAddNewFavorite() async throws {
+        let url = try XCTUnwrap("https://example.com".url)
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: url, date: Date())
+        ]
+        dataProvider.titlesForURLs = { _ in [url: "a bookmark title"] }
+        bookmarksHandler.getBookmark = { _ in nil }
+
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+        menu.performActionForItem(at: 8) // items[7] is addToFavorites
+
+        XCTAssertEqual(bookmarksHandler.addNewFavoriteCalls, [.init(url, "a bookmark title")])
+    }
+
+    // MARK: - delete
+
+    @MainActor
+    func testThatDeleteForSingleItemDoesNotShowDeleteDialog() async throws {
+        let url = try XCTUnwrap("https://example.com".url)
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: url, date: Date())
+        ]
+//        dataProvider.titlesForURLs = { _ in [url: "a bookmark title"] }
+
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+        menu.performActionForItem(at: 10) // items[10] is delete
+
+        // Wait for a short time to allow the async task to complete
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertEqual(dialogPresenter.showDeleteDialogCalls.count, 0)
+    }
+
+    @MainActor
+    func testThatDeleteForMultipleItemsShowsDeleteDialog() async throws {
+        let url1 = try XCTUnwrap("https://example1.com".url)
+        let url2 = try XCTUnwrap("https://example2.com".url)
+        let identifiers: [VisitIdentifier] = [
+            .init(uuid: "abcd", url: url1, date: Date()),
+            .init(uuid: "efgh", url: url2, date: Date())
+        ]
+//        dataProvider.titlesForURLs = { _ in [url: "a bookmark title"] }
+
+        _ = await actionsHandler.showContextMenu(for: identifiers.map(\.description), using: contextMenuPresenter)
+        let menu = try XCTUnwrap(contextMenuPresenter.showContextMenuCalls.first)
+        menu.performActionForItem(at: 6) // items[6] is delete
+
+        // Wait for a short time to allow the async task to complete
+        try? await Task.sleep(nanoseconds: 100_000_000)
+
+        XCTAssertEqual(dialogPresenter.showDeleteDialogCalls, [.init(2, .unspecified)])
     }
 }

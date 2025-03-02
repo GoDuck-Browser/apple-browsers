@@ -143,7 +143,7 @@ public final class DataClient: HistoryViewUserScriptClient {
             return nil
         }
         guard let url = URL(string: action.url), url.isValid else { return nil }
-        actionsHandler.open(url)
+        await actionsHandler.open(url)
         return nil
     }
 
