@@ -143,8 +143,8 @@ final class HistoryViewDataProviderTests: XCTestCase {
         XCTAssertEqual(provider.ranges, [.all, .today, .yesterday])
     }
 
-    func testThatRangesIncludesOlderWhenHistoryContainsEntriesOlderThan5Days() async throws {
-        dateFormatter.date = try date(year: 2025, month: 2, day: 24)
+    func testThatRangesIncludesAllRangesUntilTheOldestRangeThatContainsEntries() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
         let today = dateFormatter.currentDate().startOfDay
 
         dataSource.history = [
@@ -153,7 +153,20 @@ final class HistoryViewDataProviderTests: XCTestCase {
             ])
         ]
         await provider.refreshData()
-        XCTAssertEqual(provider.ranges, [.all, .older])
+        XCTAssertEqual(provider.ranges, [.all, .today, .yesterday, .saturday, .friday, .thursday, .wednesday])
+    }
+
+    func testThatRangesIncludesAllDaysAndOlderWhenHistoryContainsEntriesOlderThan7Days() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example.com".url), visits: [
+                .init(date: today.daysAgo(8))
+            ])
+        ]
+        await provider.refreshData()
+        XCTAssertEqual(provider.ranges, [.all, .today, .yesterday, .saturday, .friday, .thursday, .wednesday, .tuesday, .older])
     }
 
     func testThatRangesIncludesNamedWeekdaysWhenHistoryContainsEntriesFrom2To4DaysAgo() async throws {
@@ -170,25 +183,25 @@ final class HistoryViewDataProviderTests: XCTestCase {
         }
 
         try await populateHistory(for: date(year: 2025, month: 2, day: 24)) // Monday
-        XCTAssertEqual(provider.ranges, [.all, .saturday, .friday, .thursday])
+        XCTAssertEqual(provider.ranges, [.all, .today, .yesterday, .saturday, .friday, .thursday])
 
         try await populateHistory(for: date(year: 2025, month: 2, day: 25)) // Tuesday
-        XCTAssertEqual(provider.ranges, [.all, .sunday, .saturday, .friday])
+        XCTAssertEqual(provider.ranges, [.all, .today, .yesterday, .sunday, .saturday, .friday])
 
         try await populateHistory(for: date(year: 2025, month: 2, day: 26)) // Wednesday
-        XCTAssertEqual(provider.ranges, [.all, .monday, .sunday, .saturday])
+        XCTAssertEqual(provider.ranges, [.all, .today, .yesterday, .monday, .sunday, .saturday])
 
         try await populateHistory(for: date(year: 2025, month: 2, day: 27)) // Thursday
-        XCTAssertEqual(provider.ranges, [.all, .tuesday, .monday, .sunday])
+        XCTAssertEqual(provider.ranges, [.all, .today, .yesterday, .tuesday, .monday, .sunday])
 
         try await populateHistory(for: date(year: 2025, month: 2, day: 28)) // Friday
-        XCTAssertEqual(provider.ranges, [.all, .wednesday, .tuesday, .monday])
+        XCTAssertEqual(provider.ranges, [.all, .today, .yesterday, .wednesday, .tuesday, .monday])
 
         try await populateHistory(for: date(year: 2025, month: 3, day: 1)) // Saturday
-        XCTAssertEqual(provider.ranges, [.all, .thursday, .wednesday, .tuesday])
+        XCTAssertEqual(provider.ranges, [.all, .today, .yesterday, .thursday, .wednesday, .tuesday])
 
         try await populateHistory(for: date(year: 2025, month: 3, day: 2)) // Sunday
-        XCTAssertEqual(provider.ranges, [.all, .friday, .thursday, .wednesday])
+        XCTAssertEqual(provider.ranges, [.all, .today, .yesterday, .friday, .thursday, .wednesday])
     }
 
     // MARK: - visitsBatch
@@ -350,9 +363,11 @@ final class HistoryViewDataProviderTests: XCTestCase {
         let saturday = today.daysAgo(2)
         let friday = today.daysAgo(3)
         let thursday = today.daysAgo(4)
-        let older1 = today.daysAgo(5)
-        let older2 = today.daysAgo(6)
-        let older3 = today.daysAgo(7)
+        let wednesday = today.daysAgo(5)
+        let tuesday = today.daysAgo(6)
+        let older1 = today.daysAgo(7)
+        let older2 = today.daysAgo(8)
+        let older3 = today.daysAgo(9)
 
         dataSource.history = [
             .make(url: try XCTUnwrap("https://example1.com".url), visits: [
@@ -362,6 +377,8 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: saturday),
                 .init(date: saturday),
                 .init(date: thursday),
+                .init(date: wednesday),
+                .init(date: tuesday),
                 .init(date: older1),
                 .init(date: older2),
                 .init(date: older3)
@@ -370,11 +387,13 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: today),
                 .init(date: yesterday),
                 .init(date: friday),
-                .init(date: older1)
+                .init(date: wednesday),
+                .init(date: older2)
             ]),
             .make(url: try XCTUnwrap("https://example3.com".url), visits: [
                 .init(date: saturday),
                 .init(date: thursday),
+                .init(date: wednesday),
                 .init(date: older1),
                 .init(date: older3)
             ])
@@ -386,13 +405,17 @@ final class HistoryViewDataProviderTests: XCTestCase {
         let saturdayCount = await provider.countVisibleVisits(matching: .rangeFilter(.saturday))
         let fridayCount = await provider.countVisibleVisits(matching: .rangeFilter(.friday))
         let thursdayCount = await provider.countVisibleVisits(matching: .rangeFilter(.thursday))
+        let wednesdayCount = await provider.countVisibleVisits(matching: .rangeFilter(.wednesday))
+        let tuesdayCount = await provider.countVisibleVisits(matching: .rangeFilter(.tuesday))
         let olderCount = await provider.countVisibleVisits(matching: .rangeFilter(.older))
-        XCTAssertEqual(allCount, 15)
+        XCTAssertEqual(allCount, 19)
         XCTAssertEqual(todayCount, 2)
         XCTAssertEqual(yesterdayCount, 2)
         XCTAssertEqual(saturdayCount, 2)
         XCTAssertEqual(fridayCount, 1)
         XCTAssertEqual(thursdayCount, 2)
+        XCTAssertEqual(wednesdayCount, 3)
+        XCTAssertEqual(tuesdayCount, 1)
         XCTAssertEqual(olderCount, 6)
     }
 
