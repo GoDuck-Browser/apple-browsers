@@ -72,7 +72,6 @@ public class ScanOrPasteCodeViewModel: ObservableObject {
         self.showConnectMode = showConnectMode
         self.recoveryCode = recoveryCode
         showQRCodeModel = ShowQRCodeViewModel()
-        showQRCodeModel.code = recoveryCode
     }
 
     func codeScanned(_ code: String) async -> Bool {

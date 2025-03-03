@@ -94,44 +94,44 @@ public struct ScanOrSeeCode: View {
             return 180
         }
         VStack(spacing: 8) {
-            HStack(alignment: .top, spacing: 20) {
-                QRCodeView(string: qrCodeModel.code ?? "", size: 120)
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Text(UserText.scanOrSeeCodeScanCodeInstructionsTitle)
-                            .daxBodyBold()
+            if let code = qrCodeModel.code {
+                HStack(alignment: .top, spacing: 20) {
+                    QRCodeView(string: code, size: 120)
+                    VStack(alignment: .leading, spacing: 10) {
+                        HStack {
+                            Text(UserText.scanOrSeeCodeScanCodeInstructionsTitle)
+                                .daxBodyBold()
+                                .fixedSize(horizontal: false, vertical: true)
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                            Image("SyncDeviceType_phone")
+                                .padding(2)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .fill(Color(designSystemColor: .lines))
+                                )
+                        }
+                        Text(UserText.scanOrSeeCodeScanCodeInstructionsBody)
+                            .foregroundColor(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                             .multilineTextAlignment(.leading)
-                        Spacer()
-                        Image("SyncDeviceType_phone")
-                            .padding(2)
-                            .background(
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(Color(designSystemColor: .lines))
-                            )
                     }
-                    Text(UserText.scanOrSeeCodeScanCodeInstructionsBody)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .multilineTextAlignment(.leading)
+                    .frame(maxWidth: maxWidth)
                 }
-                .frame(maxWidth: maxWidth)
+                .frame(width: width)
+                .padding(20)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(designSystemColor: .panel))
+                        .frame(width: width - 20)
+                )
+                .padding(20)
             }
-            .frame(width: width)
-            .padding(20)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(designSystemColor: .panel))
-                    .frame(width: width - 20)
-            )
-            .padding(20)
             cantScanView()
         }
         .padding(.bottom, 40)
         .onAppear {
-            if let recoveryCode = model.recoveryCode {
-                self.qrCodeModel.code = recoveryCode
-            } else {
+            if model.recoveryCode == nil {
                 self.qrCodeModel = model.startConnectMode()
             }
         }
