@@ -140,8 +140,19 @@ private struct SheetView<Content: View>: View {
     .animation(.easeInOut(duration: DuckPlayerContainer.Constants.Animation.easeInOutDuration), value: opacity)
     
     .onAppear {
-      sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
+      // Always start with the initial large offset value
+      sheetOffset = DuckPlayerContainer.Constants.Offset.initialValue
       opacity = viewModel.sheetVisible ? 1 : 0
+      
+      // If the sheet should be visible, animate it into view after a tiny delay
+      // To allow it to render first
+      if viewModel.sheetVisible {        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+          withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
+            sheetOffset = calculateSheetOffset(for: true, containerHeight: containerHeight)
+          }
+        }
+      }
     }
         
     .onChange(of: viewModel.sheetVisible) { sheetVisible in

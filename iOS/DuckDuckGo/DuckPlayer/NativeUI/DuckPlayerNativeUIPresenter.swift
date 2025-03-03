@@ -33,10 +33,9 @@ final class DuckPlayerNativeUIPresenter {
     }    
 
     struct Constants {
-        // Is is actually a few points smaller than the pill
-        // to account for rounded corners
-        static let entryPillHeight: CGFloat = 115
-        static let miniPillHeight: CGFloat = 100
+        // Used to update the WebView's bottom constraint
+        // When pill is visible
+        static let webViewRequiredBottomConstraint: CGFloat = 80        
     }
 
     /// The container view model for the entry pill
@@ -122,7 +121,7 @@ final class DuckPlayerNativeUIPresenter {
         if let existingViewModel = containerViewModel, let hostingController = containerViewController {
             updatePillContent(for: pillType, videoID: videoID, in: hostingController)
             existingViewModel.show()
-            pillHeight = pillType == .entry ? Constants.entryPillHeight : Constants.miniPillHeight                        
+            pillHeight = Constants.webViewRequiredBottomConstraint
             updateWebViewConstraintForPillHeight()            
             return
         }
@@ -170,8 +169,9 @@ final class DuckPlayerNativeUIPresenter {
     /// Creates a container with the appropriate pill view based on the pill type
     @MainActor
     private func createContainerWithPill(for pillType: PillType, videoID: String, containerViewModel: DuckPlayerContainer.ViewModel) -> DuckPlayerContainer.Container<AnyView> {
+        
         // Set pill height based on type
-        pillHeight = pillType == .entry ? Constants.entryPillHeight : Constants.miniPillHeight
+        pillHeight = Constants.webViewRequiredBottomConstraint
         
         // Update webView constraint with the new height
         updateWebViewConstraintForPillHeight()
