@@ -65,7 +65,8 @@ final class DuckDuckGoVPNApplication: NSApplication {
                                                                  key: UserDefaultsCacheKey.subscriptionEntitlements,
                                                                  settings: UserDefaultsCacheSettings(defaultExpirationInterval: .minutes(20)))
         let accessTokenStorage = SubscriptionTokenKeychainStorage(keychainType: .dataProtection(.named(subscriptionAppGroup)))
-        accountManager = DefaultAccountManager(accessTokenStorage: accessTokenStorage,
+        accountManager = DefaultAccountManager(storage: AccountKeychainStorage(),
+                                               accessTokenStorage: accessTokenStorage,
                                                entitlementsCache: entitlementsCache,
                                                subscriptionEndpointService: subscriptionEndpointService,
                                                authEndpointService: authEndpointService)

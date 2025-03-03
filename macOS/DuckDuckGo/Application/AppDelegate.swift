@@ -116,7 +116,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
     let subscriptionManagerV1: any SubscriptionManager
     let subscriptionManagerV2: any SubscriptionManagerV2
-//    let subscriptionTokenHandling: any SubscriptionTokenHandling
 
     public let subscriptionUIHandler: SubscriptionUIHandling
     private let subscriptionCookieManager: any SubscriptionCookieManaging
@@ -261,7 +260,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             for: FeatureFlag.self
         )
 
-        // MARK: - Subscription configuration --------------------------------------------------------------------------------------------------------
+        // MARK: - Subscription configuration
 
         subscriptionUIHandler = SubscriptionUIHandler(windowControllersManagerProvider: {
             return WindowControllersManager.shared
@@ -291,13 +290,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if !isAuthV2Enabled {
             subscriptionAuthV1toV2Bridge = subscriptionManagerV1
-//            subscriptionTokenHandling = subscriptionManagerV1.accountManager as! DefaultAccountManager
         } else {
             subscriptionAuthV1toV2Bridge = subscriptionManagerV2
-//            subscriptionTokenHandling = subscriptionManagerV2 as! DefaultSubscriptionManagerV2
         }
 
-        // MARK: -------------------------------------------------------------------------------------------------------------------------------------
+        // MARK:
 
         onboardingStateMachine = ContextualOnboardingStateMachine()
 

@@ -30,9 +30,6 @@ import WireGuard
 final class MacPacketTunnelProvider: PacketTunnelProvider {
 
     var accountManager: (any AccountManager)?
-//    var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
-//    let subscriptionManagerV1: any SubscriptionManager
-//    let subscriptionManagerV2: any SubscriptionManagerV2
 
     static var isAppex: Bool {
 #if NETP_SYSTEM_EXTENSION
@@ -411,7 +408,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         NetworkProtectionLastVersionRunStore(userDefaults: defaults).lastExtensionVersionRun = AppVersion.shared.versionAndBuildNumber
         let settings = VPNSettings(defaults: defaults)
 
-        // MARK: - Subscription configuration --------------------------------------------------------------------------------------------------------
+        // MARK: - Subscription configuration
 
         // Align Subscription environment to the VPN environment
         var subscriptionEnvironment = SubscriptionEnvironment.default
@@ -448,7 +445,8 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
 
             let subscriptionEndpointService = DefaultSubscriptionEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
             let authEndpointService = DefaultAuthEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
-            let accountManager = DefaultAccountManager(accessTokenStorage: tokenStore,
+            let accountManager = DefaultAccountManager(storage: AccountKeychainStorage(),
+                                                       accessTokenStorage: tokenStore,
                                                        entitlementsCache: entitlementsCache,
                                                        subscriptionEndpointService: subscriptionEndpointService,
                                                        authEndpointService: authEndpointService)
@@ -532,7 +530,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
             tokenHandler = subscriptionManager
         }
 
-        // MARK: -------------------------------------------------------------------------------------------------------------------------------------
+        // MARK: -
 
         let tunnelHealthStore = NetworkProtectionTunnelHealthStore(notificationCenter: notificationCenter)
         let notificationsPresenter = NetworkProtectionNotificationsPresenterFactory().make(settings: settings, defaults: defaults)

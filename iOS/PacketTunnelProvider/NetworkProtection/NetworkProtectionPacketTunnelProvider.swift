@@ -37,8 +37,7 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
     private static var vpnLogger = VPNLogger()
     private static let persistentPixel: PersistentPixelFiring = PersistentPixel()
     private var cancellables = Set<AnyCancellable>()
-
-    static private let isAuthV2Enabled = false
+    
     private var accountManager: AccountManager?
     private let subscriptionManager: (any SubscriptionManagerV2)?
 
@@ -436,7 +435,7 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
             subscriptionEnvironment.serviceEnvironment = .staging
         }
 
-        // MARK: - Configure Subscription ------------------------------------------------------------------------------------------------------------
+        // MARK: - Configure Subscription
 
         var tokenHandler: any SubscriptionTokenHandling
         var entitlementsCheck: (() async -> Result<Bool, Error>)
@@ -451,7 +450,8 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
             let accessTokenStorage = SubscriptionTokenKeychainStorage(keychainType: .dataProtection(.named(subscriptionAppGroup)))
             let subscriptionEndpointService = DefaultSubscriptionEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
             let authService = DefaultAuthEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
-            let accountManager = DefaultAccountManager(accessTokenStorage: accessTokenStorage,
+            let accountManager = DefaultAccountManager(storage: AccountKeychainStorage(),
+                                                       accessTokenStorage: accessTokenStorage,
                                                        entitlementsCache: entitlementsCache,
                                                        subscriptionEndpointService: subscriptionEndpointService,
                                                        authEndpointService: authService)
@@ -538,7 +538,7 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
             self.accountManager = nil
         }
 
-        // MARK: - -----------------------------------------------------------------------------------------------------------------------------------
+        // MARK: -
 
         let errorStore = NetworkProtectionTunnelErrorStore()
         let notificationsPresenter = NetworkProtectionUNNotificationPresenter()

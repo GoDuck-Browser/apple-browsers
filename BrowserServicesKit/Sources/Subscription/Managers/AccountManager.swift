@@ -76,14 +76,14 @@ public final class DefaultAccountManager: AccountManager {
 
     // MARK: - Initialisers
 
-    public init(storage: AccountStoring = AccountKeychainStorage(),
+    public init(storage: AccountStoring,
                 accessTokenStorage: SubscriptionTokenStoring,
                 entitlementsCache: UserDefaultsCache<[Entitlement]>,
                 subscriptionEndpointService: SubscriptionEndpointService,
                 authEndpointService: AuthEndpointService) {
         self.storage = storage
-        self.entitlementsCache = entitlementsCache
         self.accessTokenStorage = accessTokenStorage
+        self.entitlementsCache = entitlementsCache
         self.subscriptionEndpointService = subscriptionEndpointService
         self.authEndpointService = authEndpointService
     }

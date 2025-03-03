@@ -42,7 +42,8 @@ extension DefaultSubscriptionManager {
         let subscriptionFeatureMappingCache = DefaultSubscriptionFeatureMappingCache(subscriptionEndpointService: subscriptionEndpointService,
                                                                                      userDefaults: subscriptionUserDefaults)
 
-        let accountManager = DefaultAccountManager(accessTokenStorage: accessTokenStorage,
+        let accountManager = DefaultAccountManager(storage: AccountKeychainStorage(),
+                                                   accessTokenStorage: accessTokenStorage,
                                                    entitlementsCache: entitlementsCache,
                                                    subscriptionEndpointService: subscriptionEndpointService,
                                                    authEndpointService: authEndpointService)

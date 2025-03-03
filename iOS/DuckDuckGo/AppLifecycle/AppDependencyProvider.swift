@@ -115,7 +115,7 @@ final class AppDependencyProvider: DependencyProvider {
 
         configurationManager = ConfigurationManager(store: configurationStore)
 
-        // MARK: - Configure Subscription ------------------------------------------------------------------------------------------------------------
+        // MARK: - Configure Subscription
 
         let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
         let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
@@ -134,7 +134,8 @@ final class AppDependencyProvider: DependencyProvider {
             let authService = DefaultAuthEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
             let subscriptionFeatureMappingCache = DefaultSubscriptionFeatureMappingCache(subscriptionEndpointService: subscriptionEndpointService,
                                                                                          userDefaults: subscriptionUserDefaults)
-            let accountManager = DefaultAccountManager(accessTokenStorage: accessTokenStorage,
+            let accountManager = DefaultAccountManager(storage: AccountKeychainStorage(),
+                                                       accessTokenStorage: accessTokenStorage,
                                                        entitlementsCache: entitlementsCache,
                                                        subscriptionEndpointService: subscriptionEndpointService,
                                                        authEndpointService: authService)

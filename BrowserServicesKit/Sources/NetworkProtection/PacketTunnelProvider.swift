@@ -588,10 +588,11 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         Logger.networkProtection.log("Load auth token")
         switch options.authToken {
         case .set(let newAuthToken):
-            Logger.networkProtection.log("Set new token")
-            if let currentAuthToken = try? await tokenHandler.getToken(), currentAuthToken == newAuthToken {
-                return
-            }
+            Logger.networkProtection.log("Set new token: \(newAuthToken)")
+//            if let currentAuthToken = try? await tokenHandler.getToken(), currentAuthToken == newAuthToken {
+//                Logger.networkProtection.log("Token unchanged, using the current one")
+//                return
+//            }
 
             try await tokenHandler.adoptToken(newAuthToken)
         case .useExisting:

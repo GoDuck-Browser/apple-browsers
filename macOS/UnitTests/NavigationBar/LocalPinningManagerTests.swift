@@ -43,7 +43,7 @@ final class LocalPinningManagerTests: XCTestCase {
     }
 
     private func createManager() -> LocalPinningManager {
-        return LocalPinningManager(networkProtectionFeatureActivation: NetworkProtectionFeatureActivationMock())
+        return LocalPinningManager()
     }
 
     func testWhenTogglingPinningForAView_AndViewIsNotPinned_ThenViewBecomesPinned() {
