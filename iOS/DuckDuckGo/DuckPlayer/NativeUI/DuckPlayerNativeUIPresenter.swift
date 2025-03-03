@@ -104,6 +104,9 @@ final class DuckPlayerNativeUIPresenter {
     /// - Parameter hostViewController: The view controller that will host the UI components
     func setHostViewController(_ hostViewController: UIViewController) {
         self.hostView = hostViewController as? TabViewController
+        if state.videoID != nil, let hostView = self.hostView {
+            Task { await self.presentPill(for: state.videoID!, in: hostView, timestamp: state.timestamp) }
+        }     
     }
     
     /// Presents a bottom sheet asking the user how they want to open the video

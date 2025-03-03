@@ -362,9 +362,12 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     /// - Parameter vc: The view controller to set as host.
     public func setHostViewController(_ vc: TabViewController) {
         hostView = vc
-        Task { @MainActor in
-            nativeUIPresenter.setHostViewController(vc)
-        }
+        
+        if settings.mode == .alwaysAsk && settings.nativeUI {
+            Task { @MainActor in
+                nativeUIPresenter.setHostViewController(vc)                
+            }    
+        }        
     }
     
     private func addTapGestureRecognizer() {
