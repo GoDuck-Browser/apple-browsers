@@ -122,32 +122,8 @@ final class DuckPlayerNativeUIPresenter {
         if let existingViewModel = containerViewModel, let hostingController = containerViewController {
             updatePillContent(for: pillType, videoID: videoID, in: hostingController)
             existingViewModel.show()
-            
-            // Set pill height based on type
-            pillHeight = pillType == .entry ? Constants.entryPillHeight : Constants.miniPillHeight
-            
-            // Add a delay to allow the pill animation to start first
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self, weak hostViewController] in
-                guard let self = self, let hostViewController = hostViewController else { return }
-                
-                // Adjust the WebView Bottom constraing to account for the pill
-                if let webViewBottomConstraint = hostViewController.webViewBottomAnchorConstraint {
-                    
-                    // Adjust based on pill height
-                    if self.appSettings.currentAddressBarPosition == .bottom {
-                        let targetHeight = hostViewController.chromeDelegate?.barsMaxHeight ?? 0.0
-                        webViewBottomConstraint.constant = -targetHeight - self.pillHeight
-                    } else {
-                        webViewBottomConstraint.constant = -self.pillHeight
-                    }
-                    
-                    // Animate the constraint change to make it smooth
-                    //UIView.animate(withDuration: 0.3) {
-                        hostViewController.view.layoutIfNeeded()
-                    //}
-                }
-            }
-            
+            pillHeight = pillType == .entry ? Constants.entryPillHeight : Constants.miniPillHeight                        
+            updateWebViewConstraintForPillHeight()            
             return
         }
                 
@@ -231,12 +207,13 @@ final class DuckPlayerNativeUIPresenter {
     
     /// Updates the webView constraint based on the current pill height
     @MainActor
-    private func updateWebViewConstraintForPillHeight() {
-        // Add a delay to allow the pill animation to start first
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+    private func updateWebViewConstraintForPillHeight(animated: Bool = false, delay: TimeInterval = 0.5) {
+        
+        // Add a delay to allow the pill to show, so constraint is
+        // Updated behind it.
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }
-            
-            // Update webView constraint with the current pill height
+                        
             if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
                 if self.appSettings.currentAddressBarPosition == .bottom {
                     let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
@@ -245,8 +222,11 @@ final class DuckPlayerNativeUIPresenter {
                     webViewBottomConstraint.constant = -self.pillHeight
                 }
                 
-                // Animate the constraint change
-                UIView.animate(withDuration: 0.3) {
+                if animated {
+                    UIView.animate(withDuration: 0.3) {
+                        hostView.view.layoutIfNeeded()
+                    }
+                } else {
                     hostView.view.layoutIfNeeded()
                 }
             }
@@ -268,18 +248,10 @@ final class DuckPlayerNativeUIPresenter {
     /// Dismisses the currently presented entry pill
     @MainActor
     func dismissPill(reset: Bool = false) {
-        // Hide the view first
-        containerViewModel?.dismiss()
-        
         // Restore the webView bottom constraint to its original position
-        if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
-            // Reset to the default value based on address bar position
-            let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
-            webViewBottomConstraint.constant = appSettings.currentAddressBarPosition == .bottom ? -targetHeight : 0
-            
-            // Force layout update to ensure the constraint is applied immediately
-            hostView.view.layoutIfNeeded()
-        }
+        resetWebViewConstraint()
+
+        containerViewModel?.dismiss()
         
         // Remove the view after the animation completes
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in                               
@@ -294,47 +266,38 @@ final class DuckPlayerNativeUIPresenter {
         }
     }
     
-    /// Hides the bottom sheet when browser chrome is hidden
+    /// Resets the webView constraint to its default value
     @MainActor
-    func hideBottomSheetForHiddenChrome() {
-        containerViewModel?.dismiss()
-        
-        // Also reset the webView constraint when hiding the sheet
+    private func resetWebViewConstraint(animated: Bool = false) {
         if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
+            
             // Reset to the default value based on address bar position
             let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
             webViewBottomConstraint.constant = appSettings.currentAddressBarPosition == .bottom ? -targetHeight : 0
             
-            // Force layout update
-            hostView.view.layoutIfNeeded()
+            // Update layout
+            if animated {
+                UIView.animate(withDuration: 0.3) {
+                    hostView.view.layoutIfNeeded()
+                }
+            } else {
+                hostView.view.layoutIfNeeded()
+            }
         }
+    }
+    
+    /// Hides the bottom sheet when browser chrome is hidden
+    @MainActor
+    func hideBottomSheetForHiddenChrome() {
+        containerViewModel?.dismiss()        
+        resetWebViewConstraint()
     }
     
     /// Shows the bottom sheet when browser chrome is visible
     @MainActor
     func showBottomSheetForVisibleChrome() {
         containerViewModel?.show()
-        
-        // Ensure the webView constraint is set correctly when showing the sheet
-        // Add a delay to allow the pill animation to start first
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            guard let self = self else { return }
-            
-            if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
-                // Adjust based on pill height
-                if self.appSettings.currentAddressBarPosition == .bottom {
-                    let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
-                    webViewBottomConstraint.constant = -targetHeight - self.pillHeight
-                } else {
-                    webViewBottomConstraint.constant = -self.pillHeight
-                }
-                
-                // Animate the constraint change
-                UIView.animate(withDuration: 0.3) {
-                    hostView.view.layoutIfNeeded()
-                }
-            }
-        }
+        updateWebViewConstraintForPillHeight(animated: true)
     }
     
     @MainActor
@@ -384,8 +347,6 @@ final class DuckPlayerNativeUIPresenter {
 
         // Dismiss the Pill
         dismissPill()
-
-
 
         return (navigationRequest, settingsRequest)
     }
