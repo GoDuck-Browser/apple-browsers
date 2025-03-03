@@ -86,9 +86,8 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
     }
 
     var ranges: [DataModel.HistoryRange] {
-        var ranges: [DataModel.HistoryRange] = [.all]
-        ranges.append(contentsOf: groupings.map(\.range))
-        return ranges
+        var ranges = DataModel.HistoryRange.displayedRanges(for: dateFormatter.currentDate())
+        return ranges.reversed().drop(while: { visitsByRange[$0]?.isEmpty != false }).reversed()
     }
 
     func refreshData() async {
@@ -164,6 +163,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         var olderHistoryItems = [DataModel.HistoryItem]()
         var olderVisits = [Visit]()
 
+        visitsByRange.removeAll()
         // generate groupings by day and set aside "older" days.
         groupings = await historyGroupingProvider().getVisitGroupings()
             .compactMap { historyGrouping -> HistoryViewGrouping? in
