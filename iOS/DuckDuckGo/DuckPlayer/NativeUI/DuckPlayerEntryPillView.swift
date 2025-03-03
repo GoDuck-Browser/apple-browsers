@@ -1,5 +1,5 @@
 //
-//  DuckPlayerBottomSheetView.swift
+//  DuckPlayerEntryPillView.swift
 //  DuckDuckGo
 //
 //  Copyright 2024 DuckDuckGo. All rights reserved.
@@ -48,7 +48,7 @@ struct DuckPlayerEntryPillView: View {
 
 
     private var sheetContent: some View {
-        Button(action: { viewModel.openInDuckPlayer()}) {
+        Button(action: {  viewModel.openInDuckPlayer()} ) {
             VStack(spacing: Constants.Layout.stackSpacing) {
                 HStack(spacing: Constants.Layout.stackSpacing) {
                     Image(Constants.daxLogo)
@@ -69,20 +69,20 @@ struct DuckPlayerEntryPillView: View {
                         .clipShape(Circle())
             
                 }
-                .padding(Constants.Layout.regularPadding)                
+                .padding(Constants.Layout.regularPadding)
             }
-            .background(Color(designSystemColor: .surface))        
-            .cornerRadius(Constants.Layout.cornerRadius)        
-            .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)   
+            .background(Color(designSystemColor: .surface))
+            .cornerRadius(Constants.Layout.cornerRadius)
+            .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius,x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
             .padding(.horizontal, Constants.Layout.regularPadding)
             .padding(.vertical, Constants.Layout.regularPadding)
             .padding(.bottom, Constants.Layout.bottomSpacer) // Add padding to cover boder during animation                      
         }
     }
     
-    var body: some View {        
+    var body: some View {
         ZStack(alignment: .bottom) {
-            Color(designSystemColor: .panel)                
+            Color(designSystemColor: .panel)
             sheetContent
         }
         .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))          
