@@ -44,9 +44,7 @@ extension NetworkProtectionKeychainTokenStore {
     }
 
     convenience init(useAccessTokenProvider: Bool) {
-        let accessTokenProvider = {
-            return { Application.appDelegate.subscriptionManagerV1.accountManager.accessToken }
-        }()
+        let accessTokenProvider = { Application.appDelegate.subscriptionManagerV1.accountManager.accessToken }
         self.init(keychainType: .default,
                   errorEvents: .networkProtectionAppDebugEvents,
                   useAccessTokenProvider: useAccessTokenProvider,
