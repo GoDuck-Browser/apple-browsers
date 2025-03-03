@@ -116,7 +116,7 @@ final class DuckPlayerViewModel: ObservableObject {
     }
     
     /// Opens the current video in the YouTube app or website
-    func openInYouTube() {        
+    func openInYouTube() {
         youtubeNavigationRequestPublisher.send(videoID)
     }
     
