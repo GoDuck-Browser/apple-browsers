@@ -5506,6 +5506,7 @@
 				7B23668C2C09FAF1002D393F /* VPNAppLauncher in Frameworks */,
 				EE7295ED2A545C0A008C0991 /* NetworkProtection in Frameworks */,
 				EE2F9C5B2B90F2FF00D45FC9 /* Subscription in Frameworks */,
+				7B7844482D75D9A500A96B77 /* NetworkExtensionResolver in Frameworks */,
 				7BEC182F2AD5D8DC00D30536 /* SystemExtensionManager in Frameworks */,
 				9D9DE5812C63BA0B00D20B15 /* AppKitExtensions in Frameworks */,
 			);
@@ -5522,6 +5523,7 @@
 				7B8FE0AA2D6F74C7004CF744 /* SystemExtensionManager in Frameworks */,
 				F198C71C2BD18A61000BF24D /* PixelKit in Frameworks */,
 				02A15D982C88D79D001A4237 /* Persistence in Frameworks */,
+				7B78444A2D75D9AA00A96B77 /* NetworkExtensionResolver in Frameworks */,
 				37E307A92D072A1E00599500 /* Common in Frameworks */,
 				7BEEA5142AD1236300A9E72B /* NetworkProtectionIPC in Frameworks */,
 				02A15D962C88D797001A4237 /* Configuration in Frameworks */,
@@ -6406,6 +6408,7 @@
 				9DF2DB592C73B52F0025F43C /* Freemium */,
 				379D7A422D384E4F00E6E1CC /* HistoryView */,
 				9DB6E7222AA0DA7A00A17F3C /* LoginItems */,
+				7B7844462D75D92900A96B77 /* NetworkExtensionResolver */,
 				7B25FE322AD12C990012AFAB /* NetworkProtectionMac */,
 				374F18B32D006F940032EA4E /* NewTabPage */,
 				7BC5F7DF2D49044C0005B3D9 /* PreferencesUI-macOS */,
@@ -16813,6 +16816,14 @@
 		7B624F162BA25C1F00A6C544 /* NetworkProtectionUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = NetworkProtectionUI;
+		};
+		7B7844472D75D9A500A96B77 /* NetworkExtensionResolver */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NetworkExtensionResolver;
+		};
+		7B7844492D75D9AA00A96B77 /* NetworkExtensionResolver */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NetworkExtensionResolver;
 		};
 		7B7DFB212B7E7473009EA1A3 /* Networking */ = {
 			isa = XCSwiftPackageProductDependency;
