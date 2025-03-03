@@ -43792,6 +43792,30 @@
         }
       }
     },
+    "open.multiple.tabs.alert.message" : {
+      "comment" : "Message of a dialog warning the user before opening multiple tabs with history items",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Opening a lot of tabs at once may cause the browser to slow down."
+          }
+        }
+      }
+    },
+    "open.multiple.tabs.alert.title" : {
+      "comment" : "Title of a dialog warning the user before opening multiple tabs with history items. NOTE: This term is only for English. For other languages, please translate the following term: 'Open multiple items (%d) in new tabs?'",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open %d items in new tabs?"
+          }
+        }
+      }
+    },
     "open.preferences" : {
       "comment" : "Open System Preferences (to re-enable permission for the App) (up to and including macOS 12",
       "extractionState" : "extracted_with_value",
@@ -56598,7 +56622,7 @@
     },
     "preferences.about.duckduckgo-tagline" : {
       "comment" : "About screen",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -56652,6 +56676,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ваша защита — наш приоритет."
+          }
+        }
+      }
+    },
+    "preferences.about.duckduckgo-tagline-new" : {
+      "comment" : "About screen",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schutz. Privatsphäre. Extra an Sicherheit."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Protection. Privacy. Peace of Mind."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protección. Privacidad. Tranquilidad."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protection. Confidentialité. Tranquillité d'esprit."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protezione. Privacy.  Serenità."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bescherming. Privacy. Gemoedsrust."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ochrona. Prywatność. Spokój."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proteção. Privacidade. Tranquilidade."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Защита. Конфиденциальность. Спокойствие."
           }
         }
       }

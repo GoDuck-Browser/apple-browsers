@@ -19,7 +19,7 @@
 import Foundation
 
 public protocol ActionsHandling {
-    @MainActor func open(_ url: URL)
+    @MainActor func open(_ url: URL) async
 
     @MainActor func showDeleteDialog(for query: DataModel.HistoryQueryKind) async -> DataModel.DeleteDialogResponse
     @MainActor func showDeleteDialog(for entries: [String]) async -> DataModel.DeleteDialogResponse

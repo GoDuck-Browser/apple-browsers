@@ -74,7 +74,11 @@ final class CapturingHistoryDataSource: HistoryDataSource {
     }
 
     var history: BrowsingHistory? = []
-    var historyDictionary: [URL: HistoryEntry]? = [:]
+    var historyDictionary: [URL: HistoryEntry]? {
+        history?.reduce(into: [URL: HistoryEntry](), { partialResult, entry in
+            partialResult[entry.url] = entry
+        })
+    }
     var deleteCalls: [[Visit]] = []
 }
 
@@ -392,9 +396,9 @@ final class HistoryViewDataProviderTests: XCTestCase {
         XCTAssertEqual(olderCount, 6)
     }
 
-    // MARK: - deleteVisits
+    // MARK: - deleteVisitsMatchingQuery
 
-    func testThatDeleteVisitsDeletesAllVisitsInTheGivenRange() async throws {
+    func testThatDeleteVisitsWithRangeFilterDeletesAllVisitsInTheGivenRange() async throws {
         dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
         let today = dateFormatter.currentDate().startOfDay
         let yesterday = today.daysAgo(1)
@@ -411,7 +415,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: yesterday),
                 .init(date: yesterday),
                 .init(date: yesterday),
-                .init(date: yesterday),
+                .init(date: yesterday)
             ]),
             .make(url: try XCTUnwrap("https://example3.com".url), visits: [
                 .init(date: saturday),
@@ -427,6 +431,78 @@ final class HistoryViewDataProviderTests: XCTestCase {
         XCTAssertEqual(
             Set(deletedVisits.compactMap(\.historyEntry?.url.absoluteString)),
             ["https://example1.com", "https://example2.com"]
+        )
+    }
+
+    func testThatDeleteVisitsWithSearchFilterDeletesAllVisitsMatchingSearchTerm() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+        let thursday = today.daysAgo(4)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday)
+            ]),
+            .make(url: try XCTUnwrap("https://example12.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday)
+            ]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [
+                .init(date: saturday),
+                .init(date: thursday)
+            ])
+        ]
+        await provider.refreshData()
+        await provider.deleteVisits(matching: .searchTerm("example1"))
+        XCTAssertEqual(dataSource.deleteCalls.count, 1)
+
+        let deletedVisits = try XCTUnwrap(dataSource.deleteCalls.first)
+        XCTAssertEqual(deletedVisits.count, 7)
+        XCTAssertEqual(
+            Set(deletedVisits.compactMap(\.historyEntry?.url.absoluteString)),
+            ["https://example1.com", "https://example12.com"]
+        )
+    }
+
+    func testThatDeleteVisitsWithDomainFilterDeletesAllVisitsMatchingDomain() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+        let thursday = today.daysAgo(4)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://www1.example.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday)
+            ]),
+            .make(url: try XCTUnwrap("https://www2.example.com".url), visits: [
+                .init(date: today),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday),
+                .init(date: yesterday)
+            ]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [
+                .init(date: saturday),
+                .init(date: thursday)
+            ])
+        ]
+        await provider.refreshData()
+        await provider.deleteVisits(matching: .domainFilter("example.com"))
+        XCTAssertEqual(dataSource.deleteCalls.count, 1)
+
+        let deletedVisits = try XCTUnwrap(dataSource.deleteCalls.first)
+        XCTAssertEqual(deletedVisits.count, 7)
+        XCTAssertEqual(
+            Set(deletedVisits.compactMap(\.historyEntry?.url.absoluteString)),
+            ["https://www1.example.com", "https://www2.example.com"]
         )
     }
 
@@ -447,7 +523,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: yesterday),
                 .init(date: yesterday),
                 .init(date: yesterday),
-                .init(date: yesterday),
+                .init(date: yesterday)
             ]),
             .make(url: try XCTUnwrap("https://example3.com".url), visits: [
                 .init(date: saturday),
@@ -462,7 +538,90 @@ final class HistoryViewDataProviderTests: XCTestCase {
         XCTAssertEqual(deletedVisits.count, 9)
     }
 
-    // MARK: - burnVisits
+    // MARK: - deleteVisitsForIdentifiers
+
+    func testThatDeleteVisitsForIdentifiersDeletesVisitsWithMatchingIdentifiers() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+        let friday = today.daysAgo(3)
+        let thursday = today.daysAgo(4)
+
+        let entry1 = HistoryEntry.make(url: try XCTUnwrap("https://example1.com".url), visits: [
+            .init(date: today),
+            .init(date: yesterday)
+        ])
+
+        let entry2 = HistoryEntry.make(url: try XCTUnwrap("https://example2.com".url), visits: [
+            .init(date: today),
+            .init(date: yesterday),
+            .init(date: friday)
+        ])
+
+        let entry3 = HistoryEntry.make(url: try XCTUnwrap("https://example3.com".url), visits: [
+            .init(date: saturday),
+            .init(date: thursday)
+        ])
+
+        dataSource.history = [entry1, entry2, entry3]
+
+        let identifiers: [VisitIdentifier] =  [
+            .init(historyEntry: entry2, date: yesterday),
+            .init(historyEntry: entry3, date: saturday)
+        ]
+        await provider.refreshData()
+        await provider.deleteVisits(for: identifiers)
+        XCTAssertEqual(dataSource.deleteCalls.count, 1)
+
+        let deletedVisits = try XCTUnwrap(dataSource.deleteCalls.first)
+        XCTAssertEqual(deletedVisits.count, 2)
+        XCTAssertEqual(
+            Set(deletedVisits.compactMap(\.historyEntry?.url.absoluteString)),
+            ["https://example2.com", "https://example3.com"]
+        )
+    }
+
+    func testThatDeleteVisitsForIdentifiersDeletesAllMatchingVisitsFromGivenDay() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+
+        let entry = HistoryEntry.make(url: try XCTUnwrap("https://example.com".url), visits: [
+            .init(date: today),
+            .init(date: yesterday),
+            .init(date: yesterday.addingTimeInterval(1)),
+            .init(date: yesterday.addingTimeInterval(2)),
+            .init(date: yesterday.addingTimeInterval(3))
+        ])
+
+        dataSource.history = [entry]
+
+        let identifiers: [VisitIdentifier] =  [
+            .init(historyEntry: entry, date: yesterday)
+        ]
+        await provider.refreshData()
+        await provider.deleteVisits(for: identifiers)
+        XCTAssertEqual(dataSource.deleteCalls.count, 1)
+
+        let deletedVisits = try XCTUnwrap(dataSource.deleteCalls.first)
+        XCTAssertEqual(deletedVisits.count, 4)
+        XCTAssertEqual(
+            Set(deletedVisits.compactMap(\.historyEntry?.url.absoluteString)),
+            ["https://example.com"]
+        )
+        XCTAssertEqual(
+            Set(deletedVisits.compactMap(\.date)),
+            [
+                yesterday,
+                yesterday.addingTimeInterval(1),
+                yesterday.addingTimeInterval(2),
+                yesterday.addingTimeInterval(3)
+            ]
+        )
+    }
+
+    // MARK: - burnVisitsMatchingQuery
 
     func testThatBurnVisitsBurnsAllVisitsInTheGivenRange() async throws {
         dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
@@ -481,7 +640,7 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 .init(date: yesterday),
                 .init(date: yesterday),
                 .init(date: yesterday),
-                .init(date: yesterday),
+                .init(date: yesterday)
             ]),
             .make(url: try XCTUnwrap("https://example3.com".url), visits: [
                 .init(date: saturday),
@@ -501,33 +660,37 @@ final class HistoryViewDataProviderTests: XCTestCase {
         )
     }
 
-    func testThatBurnAllVisitsBurnsAllVisits() async throws {
+    func testThatBurnVisitsForAllHistoryBurnsAllVisits() async throws {
         dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
         let today = dateFormatter.currentDate().startOfDay
         let yesterday = today.daysAgo(1)
         let saturday = today.daysAgo(2)
-        let thursday = today.daysAgo(4)
 
         dataSource.history = [
-            .make(url: try XCTUnwrap("https://example1.com".url), visits: [
-                .init(date: today),
-                .init(date: yesterday)
-            ]),
-            .make(url: try XCTUnwrap("https://example2.com".url), visits: [
-                .init(date: today),
-                .init(date: yesterday),
-                .init(date: yesterday),
-                .init(date: yesterday),
-                .init(date: yesterday),
-            ]),
-            .make(url: try XCTUnwrap("https://example3.com".url), visits: [
-                .init(date: saturday),
-                .init(date: thursday)
-            ])
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [.init(date: yesterday)]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: saturday)])
         ]
         await provider.refreshData()
         await provider.burnVisits(matching: .rangeFilter(.all))
         XCTAssertEqual(burner.burnAllCallsCount, 1)
+    }
+
+    func testThatBurnVisitsDoesNothingWhenThereAreNoMatchingVisits() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), visits: [.init(date: today)]),
+            .make(url: try XCTUnwrap("https://example2.com".url), visits: [.init(date: yesterday)]),
+            .make(url: try XCTUnwrap("https://example3.com".url), visits: [.init(date: saturday)])
+        ]
+        await provider.refreshData()
+        await provider.burnVisits(matching: .rangeFilter(.older))
+        XCTAssertEqual(burner.burnAllCallsCount, 0)
+        XCTAssertEqual(burner.burnCalls.count, 0)
     }
 
     func testThatBurnVisitsFromTodayAnimates() async throws {
@@ -544,6 +707,116 @@ final class HistoryViewDataProviderTests: XCTestCase {
         let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
         XCTAssertEqual(burnVisitsCall.visits.count, 1)
         XCTAssertEqual(burnVisitsCall.animated, true)
+    }
+
+    // MARK: - burnVisitsForIdentifiers
+
+    func testThatBurnVisitsForIdentifiersBurnsVisitsWithMatchingIdentifiers() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+        let saturday = today.daysAgo(2)
+        let friday = today.daysAgo(3)
+        let thursday = today.daysAgo(4)
+
+        let entry1 = HistoryEntry.make(url: try XCTUnwrap("https://example1.com".url), visits: [
+            .init(date: today),
+            .init(date: yesterday)
+        ])
+
+        let entry2 = HistoryEntry.make(url: try XCTUnwrap("https://example2.com".url), visits: [
+            .init(date: today),
+            .init(date: yesterday),
+            .init(date: friday)
+        ])
+
+        let entry3 = HistoryEntry.make(url: try XCTUnwrap("https://example3.com".url), visits: [
+            .init(date: saturday),
+            .init(date: thursday)
+        ])
+
+        dataSource.history = [entry1, entry2, entry3]
+
+        let identifiers: [VisitIdentifier] =  [
+            .init(historyEntry: entry2, date: yesterday),
+            .init(historyEntry: entry3, date: saturday)
+        ]
+        await provider.refreshData()
+        await provider.burnVisits(for: identifiers)
+        XCTAssertEqual(burner.burnCalls.count, 1)
+
+        let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
+        XCTAssertEqual(burnVisitsCall.visits.count, 2)
+        XCTAssertEqual(burnVisitsCall.animated, false)
+        XCTAssertEqual(
+            Set(burnVisitsCall.visits.compactMap(\.historyEntry?.url.absoluteString)),
+            ["https://example2.com", "https://example3.com"]
+        )
+    }
+
+    func testThatBurnVisitsForIdentifiersBurnsAllMatchingVisitsFromGivenDay() async throws {
+        dateFormatter.date = try date(year: 2025, month: 2, day: 24) // Monday
+        let today = dateFormatter.currentDate().startOfDay
+        let yesterday = today.daysAgo(1)
+
+        let entry = HistoryEntry.make(url: try XCTUnwrap("https://example.com".url), visits: [
+            .init(date: today),
+            .init(date: yesterday),
+            .init(date: yesterday.addingTimeInterval(1)),
+            .init(date: yesterday.addingTimeInterval(2)),
+            .init(date: yesterday.addingTimeInterval(3))
+        ])
+
+        dataSource.history = [entry]
+
+        let identifiers: [VisitIdentifier] =  [
+            .init(historyEntry: entry, date: yesterday)
+        ]
+        await provider.refreshData()
+        await provider.burnVisits(for: identifiers)
+        XCTAssertEqual(burner.burnCalls.count, 1)
+
+        let burnVisitsCall = try XCTUnwrap(burner.burnCalls.first)
+        XCTAssertEqual(burnVisitsCall.visits.count, 4)
+        XCTAssertEqual(burnVisitsCall.animated, false)
+        XCTAssertEqual(
+            Set(burnVisitsCall.visits.compactMap(\.historyEntry?.url.absoluteString)),
+            ["https://example.com"]
+        )
+        XCTAssertEqual(
+            Set(burnVisitsCall.visits.compactMap(\.date)),
+            [
+                yesterday,
+                yesterday.addingTimeInterval(1),
+                yesterday.addingTimeInterval(2),
+                yesterday.addingTimeInterval(3)
+            ]
+        )
+    }
+
+    // MARK: - titlesForURLs
+
+    func testThatTitlesForURLsReturnsTitlesMappingForMatchingURLs() async throws {
+        dataSource.history = [
+            .make(url: try XCTUnwrap("https://example1.com".url), title: "Example 1", visits: []),
+            .make(url: try XCTUnwrap("https://example1.com/index2.html".url), title: "Example 1 Index 2", visits: []),
+            .make(url: try XCTUnwrap("https://wikipedia.org".url), title: "Wikipedia", visits: []),
+            .make(url: try XCTUnwrap("https://en.wikipedia.org".url), title: "English Wikipedia", visits: []),
+            .make(url: try XCTUnwrap("https://duckduckgo.com".url), title: "DuckDuckGo", visits: [])
+        ]
+
+        XCTAssertEqual(
+            provider.titles(for: [
+                try XCTUnwrap("https://example1.com".url),
+                try XCTUnwrap("https://example1.com/index2.html".url),
+                try XCTUnwrap("https://en.wikipedia.org".url)
+            ]),
+            [
+                try XCTUnwrap("https://example1.com".url): "Example 1",
+                try XCTUnwrap("https://example1.com/index2.html".url): "Example 1 Index 2",
+                try XCTUnwrap("https://en.wikipedia.org".url): "English Wikipedia"
+            ]
+        )
     }
 
     // MARK: - helpers

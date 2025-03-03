@@ -335,7 +335,7 @@ extension TabContent {
 
     var canBePinned: Bool {
         switch self {
-        case .subscription, .identityTheftRestoration, .dataBrokerProtection, .releaseNotes:
+        case .subscription, .identityTheftRestoration, .dataBrokerProtection, .releaseNotes, .history:
             return false
         default:
             return isUrl
@@ -347,6 +347,15 @@ extension TabContent {
         case .newtab, .onboardingDeprecated, .onboarding, .none:
             return false
         case .url, .settings, .bookmarks, .history, .subscription, .identityTheftRestoration, .dataBrokerProtection, .releaseNotes, .webExtensionUrl:
+            return true
+        }
+    }
+
+    var canBeMuted: Bool {
+        switch self {
+        case .newtab, .settings, .bookmarks, .history, .onboarding, .onboardingDeprecated, .dataBrokerProtection, .none, .releaseNotes, .identityTheftRestoration, .subscription:
+            return false
+        default:
             return true
         }
     }
