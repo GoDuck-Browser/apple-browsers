@@ -48,7 +48,7 @@ struct DuckPlayerEntryPillView: View {
 
 
     private var sheetContent: some View {
-        Button(action: {  viewModel.openInDuckPlayer()} ) {
+        Button(action: { viewModel.openInDuckPlayer() }) {
             VStack(spacing: Constants.Layout.stackSpacing) {
                 HStack(spacing: Constants.Layout.stackSpacing) {
                     Image(Constants.daxLogo)
@@ -73,10 +73,13 @@ struct DuckPlayerEntryPillView: View {
             }
             .background(Color(designSystemColor: .surface))
             .cornerRadius(Constants.Layout.cornerRadius)
-            .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius,x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
+            .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity),
+                    radius: Constants.Layout.shadowRadius,
+                    x: Constants.Layout.shadowOffset.width,
+                    y: Constants.Layout.shadowOffset.height)
             .padding(.horizontal, Constants.Layout.regularPadding)
             .padding(.vertical, Constants.Layout.regularPadding)
-            .padding(.bottom, Constants.Layout.bottomSpacer) // Add padding to cover boder during animation                      
+            .padding(.bottom, Constants.Layout.bottomSpacer) // Add padding to cover border during animation                      
         }
     }
     
@@ -85,8 +88,10 @@ struct DuckPlayerEntryPillView: View {
             Color(designSystemColor: .panel)
             sheetContent
         }
-        .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))          
-        .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
+        .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius,
+                                        corners: [.topLeft, .topRight]))
+        .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity),
+                radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
         .offset(y: Constants.Layout.viewOffset)
     }
 }
