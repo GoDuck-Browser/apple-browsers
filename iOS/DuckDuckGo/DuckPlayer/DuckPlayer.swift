@@ -753,6 +753,8 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     func presentPill(for videoID: String) {        
         guard let hostView = hostView else { return }
         
+        print("Presenting da shit....")
+
         Task { @MainActor in
             nativeUIPresenter.presentPill(for: videoID, in: hostView)
         }

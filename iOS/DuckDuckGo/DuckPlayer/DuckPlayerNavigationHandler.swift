@@ -800,8 +800,8 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
     /// - Parameter webView: The `WKWebView` whose URL has changed.
     /// - Returns: A result indicating whether the URL change was handled.
     @MainActor
-    func handleURLChange(webView: WKWebView) -> DuckPlayerNavigationHandlerURLChangeResult {        
-
+    func handleURLChange(webView: WKWebView, previousURL: URL?, newURL: URL?) -> DuckPlayerNavigationHandlerURLChangeResult {        
+        
         // We want to prevent multiple simultaneous redirects
         // This can be caused by Duplicate Nav events, and quick URL changes
         if let lastTimestamp = lastURLChangeHandling,
@@ -825,29 +825,30 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         // Check if DuckPlayer feature is enabled
         guard isDuckPlayerFeatureEnabled else {
             return .notHandled(.featureOff)
-        }
-        
-        guard let url = webView.url, let (videoID, _) = url.youtubeVideoParams else {            
+        }        
+
+        guard let url = newURL, let (videoID, _) = url.youtubeVideoParams else {            
             duckPlayer.dismissPill()
             return .notHandled(.invalidURL)
         }
-        
+
         guard url.isYoutubeWatch else {            
             duckPlayer.dismissPill()
             return .notHandled(.isNotYoutubeWatch)
         }
-
-        // Rest of the function remains the same
-        guard videoID != lastWatchInYoutubeVideo else {
-            lastURLChangeHandling = Date()
-            return .handled(.newVideo)
-        }
-        
+                
         let parameters = getDuckPlayerParameters(url: url)
             
         // Present Bottom Sheet (Native entry point) with delay
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
             
+            // Ensure we only handle videos once
+            if let (previousVideoId, _) = previousURL?.youtubeVideoParams,
+                videoID == previousVideoId {
+                lastURLChangeHandling = Date()
+                return .notHandled(.duplicateNavigation)
+            }
+
             // Pause video
             Task { await pauseVideoStart(webView: webView) }
             
