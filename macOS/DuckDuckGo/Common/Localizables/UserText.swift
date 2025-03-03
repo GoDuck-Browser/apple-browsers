@@ -226,6 +226,17 @@ struct UserText {
                                           comment: "Title of a dialog asking the user to confirm deleting history for a given date. %@ represents the date")
         return String(format: localized, date)
     }
+    static var delete1HistoryItemMessage: String {
+        if #available(macOS 12.0, *) {
+            return NSLocalizedString("history.item.delete.dialog.message.markdown",
+                                     value: "**1** item will be deleted.",
+                                     comment: "Message in a dialog asking the user to confirm deleting a single history item. Please make sure to keep **%@** intact.")
+        } else {
+            return NSLocalizedString("history.item.delete.dialog.message",
+                                     value: "1 item will be deleted",
+                                     comment: "Message in a dialog asking the user to confirm deleting a single history item.")
+        }
+    }
     static func deleteHistoryMessage(items: String) -> String {
         let localized = {
             if #available(macOS 12.0, *) {

@@ -27693,6 +27693,30 @@
         }
       }
     },
+    "history.item.delete.dialog.message" : {
+      "comment" : "Message in a dialog asking the user to confirm deleting a single history item.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "1 item will be deleted"
+          }
+        }
+      }
+    },
+    "history.item.delete.dialog.message.markdown" : {
+      "comment" : "Message in a dialog asking the user to confirm deleting a single history item. Please make sure to keep **%@** intact.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "**1** item will be deleted."
+          }
+        }
+      }
+    },
     "history.menu.clear.all.history.description" : {
       "comment" : "Description in the alert with the confirmation to clear all data",
       "extractionState" : "extracted_with_value",
