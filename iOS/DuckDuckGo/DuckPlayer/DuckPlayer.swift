@@ -239,8 +239,10 @@ protocol DuckPlayerControlling: AnyObject {
     
     /// Presents a bottom sheet asking the user how they want to open the video
     ///
-    /// - Parameter videoID: The YouTube video ID to be played
-    func presentPill(for videoID: String)
+    /// - Parameters:
+    ///   - videoID: The YouTube video ID to be played
+    ///   - timestamp: The timestamp of the video
+    func presentPill(for videoID: String, timestamp: String?)
     
     /// Dismisses the bottom sheet
     func dismissPill()
@@ -418,7 +420,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
         guard let hostView = hostView else { return }
         
         Task { @MainActor in
-            let publishers = nativeUIPresenter.presentDuckPlayer(videoID: videoID, source: source, in: hostView)
+            let publishers = nativeUIPresenter.presentDuckPlayer(videoID: videoID, source: source, in: hostView, title: nil, timestamp: nil)
             
             publishers.navigation
                 .sink { [weak self] url in
@@ -748,15 +750,14 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     
     /// Presents a bottom sheet asking the user how they want to open the video
     ///
-    /// - Parameter videoID: The YouTube video ID to be played    
-    @MainActor
-    func presentPill(for videoID: String) {        
+    /// - Parameters:
+    ///   - videoID: The YouTube video ID to be played
+    ///   - timestamp: The timestamp of the video    
+    func presentPill(for videoID: String, timestamp: String?) {
         guard let hostView = hostView else { return }
-        
-        print("Presenting da shit....")
-
-        Task { @MainActor in
-            nativeUIPresenter.presentPill(for: videoID, in: hostView)
+                
+        Task { 
+            await nativeUIPresenter.presentPill(for: videoID, in: hostView, timestamp: timestamp)
         }
         
         nativeUIPresenter.videoPlaybackRequest
@@ -766,14 +767,18 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
             .store(in: &presentationCancellables)
     }
 
-    /// Add cleanup method to remove the sheet
-    @MainActor
+    /// Add cleanup method to remove the sheet    
     func dismissPill() {        
-        Task { await nativeUIPresenter.dismissPill(reset: true) }
+        Task { 
+            await nativeUIPresenter.dismissPill(reset: true) 
+        }
     }
 
     @objc private func handleChromeVisibilityChange(_ notification: Notification) {
-        if let isHidden = notification.userInfo?["isHidden"] as? Bool {
+        if let url = hostView?.webView.url, 
+            url.isYoutubeWatchMainPage, 
+            let isHidden = notification.userInfo?["isHidden"] as? Bool {
+            
             if isHidden {
                 hideBottomSheetForHiddenChrome()
             } else {

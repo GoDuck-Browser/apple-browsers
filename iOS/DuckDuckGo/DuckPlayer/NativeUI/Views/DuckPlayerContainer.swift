@@ -33,7 +33,7 @@ public enum DuckPlayerContainer {
     
     enum Offset {
       static let extraHeight: Double = 200.0
-      static let initialValue: Double = 10000.0
+      static let initialValue: Double = 500.0
       static let fixedContainerHeight: Double = 300.0
     }
   }

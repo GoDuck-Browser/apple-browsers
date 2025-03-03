@@ -47,7 +47,7 @@ final class DuckPlayerNativeUIPresenter {
     /// References to the host view and source
     private weak var hostView: TabViewController?
     private var source: DuckPlayer.VideoNavigationSource?    
-    private var state: DuckPlayerState = DuckPlayerState()
+    private var state: DuckPlayerState
 
     /// The DuckPlayer instance
     private weak var duckPlayer: DuckPlayerControlling?
@@ -75,8 +75,9 @@ final class DuckPlayerNativeUIPresenter {
     // MARK: - Public Methods
     ///
     /// - Parameter appSettings: The application settings
-    init(appSettings: AppSettings = AppDependencyProvider.shared.appSettings) {
+    init(appSettings: AppSettings = AppDependencyProvider.shared.appSettings, state: DuckPlayerState = DuckPlayerState()) {
         self.appSettings = appSettings
+        self.state = state
         setupNotificationObservers()
     }
 
@@ -107,12 +108,17 @@ final class DuckPlayerNativeUIPresenter {
     
     /// Presents a bottom sheet asking the user how they want to open the video
     ///
-    /// - Parameter videoID: The YouTube video ID to be played
+    /// - Parameters:
+    ///   - videoID: The YouTube video ID to be played
+    ///   - timestamp: The timestamp of the video
     @MainActor
-    func presentPill(for videoID: String, in hostViewController: TabViewController) {
+    func presentPill(for videoID: String, in hostViewController: TabViewController, timestamp: String?) {
         
-        // Store the videoID
-        state.videoID = videoID        
+        // Store the videoID & Update State
+        if state.videoID != videoID {
+            state.hasBeenShown = false
+            state.videoID = videoID        
+        }
 
         // Determine the pill type
         let pillType: PillType = state.hasBeenShown ? .reEntry : .entry
@@ -191,9 +197,9 @@ final class DuckPlayerNativeUIPresenter {
             }
         } else {
             // Create the mini pill view model for re-entry type
-            let miniPillViewModel = DuckPlayerMiniPillViewModel() { [weak self] in
+            let miniPillViewModel = DuckPlayerMiniPillViewModel(onOpen: { [weak self] in
                 self?.videoPlaybackRequest.send(videoID)
-            }
+            }, videoID: videoID)
             
             // Create the container view with the mini pill view
             return DuckPlayerContainer.Container(
@@ -301,7 +307,7 @@ final class DuckPlayerNativeUIPresenter {
     }
     
     @MainActor
-    func presentDuckPlayer(videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>) {
+    func presentDuckPlayer(videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController, title: String?, timestamp: String?) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>) {
         let navigationRequest = PassthroughSubject<URL, Never>()
         let settingsRequest = PassthroughSubject<Void, Never>()
         
@@ -339,7 +345,7 @@ final class DuckPlayerNativeUIPresenter {
             .sink { [weak self] in
                 guard let self = self else { return }
                 guard let videoID = self.state.videoID, let hostView = self.hostView else { return }
-                self.presentPill(for: videoID, in: hostView)
+                self.presentPill(for: videoID, in: hostView, timestamp: nil)
             }
             .store(in: &playerCancellables)
         

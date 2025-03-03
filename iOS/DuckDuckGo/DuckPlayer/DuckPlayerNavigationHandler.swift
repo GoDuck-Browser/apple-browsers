@@ -863,7 +863,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             Task { @MainActor in
                 // Skip URLs for settings and #fragments
                 if url.isYoutubeWatchMainPage {
-                    duckPlayer.presentPill(for: videoID)
+                    duckPlayer.presentPill(for: videoID, timestamp: nil)
                 }
             }
 
