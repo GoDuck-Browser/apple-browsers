@@ -12,4 +12,4 @@ jobs:
       - name: SwiftLint
         uses: docker://norionomura/swiftlint:0.54.0_swift-5.9.0
         with:
-          args: swiftlint --reporter github-actions-logging --strict --progress
+          args: swiftlint --reporter github-actions-logging --strict --quiet
