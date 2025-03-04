@@ -87,9 +87,9 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
 
     var ranges: [DataModel.HistoryRangeWithCount] {
         let ranges = DataModel.HistoryRange.displayedRanges(for: dateFormatter.currentDate())
-        var rangesWithCounts = ranges.map { DataModel.HistoryRangeWithCount(range: $0, count: groupingsByRange[$0]?.items.count ?? 0) }
-        let filteredRanges = rangesWithCounts.reversed().drop(while: { visitsByRange[$0.range]?.isEmpty != false }).reversed()
-        return filteredRanges.isEmpty ? [.init(range: .all, count: 0)] : Array(filteredRanges)
+        var rangesWithCounts = ranges.map { DataModel.HistoryRangeWithCount(id: $0, count: groupingsByRange[$0]?.items.count ?? 0) }
+        let filteredRanges = rangesWithCounts.reversed().drop(while: { visitsByRange[$0.id]?.isEmpty != false }).reversed()
+        return filteredRanges.isEmpty ? [.init(id: .all, count: 0)] : Array(filteredRanges)
     }
 
     func refreshData() async {

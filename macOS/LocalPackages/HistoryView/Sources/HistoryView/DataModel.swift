@@ -49,11 +49,11 @@ public enum DataModel {
     }
 
     public struct HistoryRangeWithCount: Codable, Equatable {
-        public let range: HistoryRange
+        public let id: HistoryRange
         public let count: Int
 
-        public init(range: HistoryRange, count: Int) {
-            self.range = range
+        public init(id: HistoryRange, count: Int) {
+            self.id = id
             self.count = count
         }
     }
