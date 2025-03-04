@@ -39,6 +39,11 @@ analyzer_rules: # Rules run by `swiftlint analyze`
   - explicit_self
 
 # Rule Config
+vertical_whitespace:
+  max_empty_lines: 2
+trailing_whitespace:
+  ignores_empty_lines: true
+  ignores_comments: true
 cyclomatic_complexity:
   ignores_case_statements: true
 identifier_name:
@@ -87,3 +92,6 @@ excluded:
   - macOS/release
   - macOS/DerivedData
   - macOS/.ruby-lsp
+  - vendor
+  - .build
+  - .ruby-lsp
