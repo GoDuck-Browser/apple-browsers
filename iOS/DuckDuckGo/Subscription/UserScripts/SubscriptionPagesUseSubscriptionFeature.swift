@@ -194,8 +194,8 @@ final class DefaultSubscriptionPagesUseSubscriptionFeature: SubscriptionPagesUse
         }
     }
 
-    /// Values that the Frontend can use to determine the current state.
     // swiftlint:disable nesting
+    /// Values that the Frontend can use to determine the current state.
     struct SubscriptionValues: Codable {
         enum CodingKeys: String, CodingKey {
             case token
@@ -683,8 +683,8 @@ final class DefaultSubscriptionPagesUseSubscriptionFeatureV2: SubscriptionPagesU
         }
     }
 
-    /// Values that the Frontend can use to determine the current state.
     // swiftlint:disable nesting
+    /// Values that the Frontend can use to determine the current state.
     struct SubscriptionValues: Codable {
         enum CodingKeys: String, CodingKey {
             case token

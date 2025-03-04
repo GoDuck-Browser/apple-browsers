@@ -18,6 +18,7 @@ disabled_rules:
   - type_body_length
   - static_over_final_class
   - non_optional_string_data_conversion
+  - todo
 
 opt_in_rules:
   - file_header
@@ -55,7 +56,7 @@ large_tuple:
 file_header:
   required_pattern: |
                     \/\/
-                    \/\/  SWIFTLINT_CURRENT_FILENAME
+                    \/\/  SWIFTLINT_CURRENT_FILENAME(?:\n\/\/.*)?
                     \/\/
                     \/\/  Copyright © \d{4} DuckDuckGo\. All rights reserved\.
                     \/\/
@@ -92,6 +93,7 @@ excluded:
   - macOS/release
   - macOS/DerivedData
   - macOS/.ruby-lsp
+  - macOS/vendor
   - vendor
   - .build
   - .ruby-lsp

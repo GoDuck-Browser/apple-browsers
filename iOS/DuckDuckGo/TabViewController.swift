@@ -3237,7 +3237,7 @@ extension TabViewController {
     
     /// Stores WebView settings and
     /// Updates its properties when displaying video in landscape mode
-    // This is used by DuckPlayer when rotating to landscape
+    /// This is used by DuckPlayer when rotating to landscape
     func setupWebViewForLandscapeVideo() {
         guard let webView = webView else { return }
         
