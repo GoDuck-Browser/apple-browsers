@@ -26,6 +26,11 @@ struct SyncWithAnotherDeviceView: View {
     let code: String
 
     @State private var selectedSegment = 0
+    @State private var showQRCode = true
+
+    var recoveryMode: Bool {
+        return recoveryCodeModel.recoveryCode.isEmpty == false
+    }
 
     var body: some View {
         SyncDialog(spacing: 20.0) {
@@ -44,7 +49,11 @@ struct SyncWithAnotherDeviceView: View {
             VStack(spacing: 20) {
                 pickerView()
                 if selectedSegment == 0 {
-                    showTextCodeView()
+                    if showQRCode && !recoveryMode {
+                        scanQRCodeView()
+                    } else {
+                        showTextCodeView()
+                    }
                 } else {
                     enterCodeView()
                 }
@@ -108,6 +117,19 @@ struct SyncWithAnotherDeviceView: View {
         .buttonStyle(.plain)
     }
 
+    fileprivate func scanQRCodeView() -> some View {
+        return  Group {
+            Text(UserText.syncWithAnotherDeviceShowQRCodeExplanation)
+            QRCode(string: code, size: CGSize(width: 164, height: 164))
+            Text(UserText.syncWithAnotherDeviceViewTextCode)
+                .fontWeight(.semibold)
+                .foregroundColor(Color(.linkBlue))
+                .onTapGesture {
+                    showQRCode = false
+                }
+        }
+    }
+
     fileprivate func enterCodeView() -> some View {
         Group {
             Text(UserText.syncWithAnotherDeviceEnterCodeExplanation)
@@ -160,6 +182,14 @@ struct SyncWithAnotherDeviceView: View {
                     }
                 }
                 .frame(width: 348, height: 32)
+                if !recoveryMode {
+                    Text(UserText.syncWithAnotherDeviceViewQRCode)
+                        .fontWeight(.semibold)
+                        .foregroundColor(Color(.linkBlue))
+                        .onTapGesture {
+                            showQRCode = true
+                        }
+                }
             }
         }
         .frame(width: 348)
