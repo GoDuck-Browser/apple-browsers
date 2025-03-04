@@ -323,10 +323,12 @@ final class DuckPlayerNavigationHandler: NSObject {
             loadNativeDuckPlayerVideo(videoID: videoID)
 
             // Subscribe to player dismissal
-            duckPlayerDismissalCancellable = duckPlayer.playerDismissedPublisher
-                .sink { [weak self] in
-                    self?.allowYoutubeVideoPlayback(webView: webView)
-                }
+            if let publisher = duckPlayer.playerDismissedPublisher {
+                duckPlayerDismissalCancellable = publisher
+                    .sink { [weak self] in
+                        self?.allowYoutubeVideoPlayback(webView: webView)
+                    }
+            }
 
             return
         }
@@ -647,10 +649,12 @@ final class DuckPlayerNavigationHandler: NSObject {
     /// Used when DuckPlayer requires direct Youtube Navigation
     @MainActor
     private func setupYoutubeNavigationRequestObserver(webView: WKWebView) {
-        duckPlayerNavigationRequestCancellable = duckPlayer.youtubeNavigationRequest
-            .sink { [weak self] url in
-                self?.redirectToYouTubeVideo(url: url, webView: webView)
-            }
+        if let publisher = duckPlayer.youtubeNavigationRequest {
+            duckPlayerNavigationRequestCancellable = publisher
+                .sink { [weak self] url in
+                    self?.redirectToYouTubeVideo(url: url, webView: webView)
+                }
+        }
     }
     
     /// // Handle "open in YouTube" links (duck://player/openInYoutube)
