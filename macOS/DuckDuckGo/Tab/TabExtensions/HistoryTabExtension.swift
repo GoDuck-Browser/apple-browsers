@@ -22,6 +22,7 @@ import ContentBlocking
 import Foundation
 import Navigation
 import History
+import PixelKit
 
 final class HistoryTabExtension: NSObject {
 
@@ -223,7 +224,6 @@ extension HistoryTabExtension: NavigationResponder {
         default: break
         }
     }
-
 }
 
 protocol HistoryExtensionProtocol: AnyObject, NavigationResponder {

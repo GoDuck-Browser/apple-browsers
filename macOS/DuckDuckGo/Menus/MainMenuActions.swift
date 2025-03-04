@@ -711,6 +711,13 @@ extension MainViewController {
     @objc func showHistory(_ sender: Any?) {
         makeKeyIfNeeded()
         browserTabViewController.openNewTab(with: .history)
+        if let menuItem = sender as? NSMenuItem {
+            if menuItem.representedObject as? HistoryMenu.Location == .moreOptionsMenu {
+                PixelKit.fire(HistoryViewPixel.historyPageShown(.sideMenu))
+            } else {
+                PixelKit.fire(HistoryViewPixel.historyPageShown(.topMenu))
+            }
+        }
     }
 
     // MARK: - Window

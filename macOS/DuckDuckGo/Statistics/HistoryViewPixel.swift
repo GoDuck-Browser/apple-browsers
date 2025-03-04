@@ -17,6 +17,7 @@
 //
 
 import Foundation
+import HistoryView
 import PixelKit
 
 /**
@@ -24,6 +25,7 @@ import PixelKit
  */
 enum HistoryViewPixel: PixelKitEventV2 {
 
+    // MARK: - Permanent Pixels
     /**
      * Event Trigger: History View is displayed to user.
      *
@@ -36,7 +38,56 @@ enum HistoryViewPixel: PixelKitEventV2 {
      * Anomaly Investigation:
      * - Anomaly in this pixel may mean an increase/drop in app use.
      */
-    case historyPageShown
+    case historyPageShown(HistoryPageSource)
+    case filterSet(FilterKind)
+    case filterCleared
+    case itemOpened
+    case delete
+    case singleItemDeleted
+    case multipleItemsDeleted(DeletedBatchKind, burn: Bool)
+
+    // MARK: - Temporary Pixels
+    case onboardingDialogShown
+    case onboardingDialogDismissed
+    case onboardingDialogAccepted
+
+    // MARK: -
+
+    enum HistoryPageSource: String {
+        case topMenu = "top-menu", sideMenu = "side-menu", introDialog = "intro-dialog"
+    }
+
+    enum FilterKind: String {
+        case range, searchTerm = "search-term", domain
+
+        init(_ queryKind: DataModel.HistoryQueryKind) {
+            switch queryKind {
+            case .rangeFilter:
+                self = .range
+            case .domainFilter:
+                self = .domain
+            case .searchTerm:
+                self = .searchTerm
+            }
+        }
+    }
+
+    enum DeletedBatchKind: String {
+        case all, range, searchTerm = "search-term", domain, multiSelect = "multi-select"
+
+        init(_ queryKind: DataModel.HistoryQueryKind) {
+            switch queryKind {
+            case .rangeFilter(.all):
+                self = .all
+            case .rangeFilter:
+                self = .range
+            case .domainFilter:
+                self = .domain
+            case .searchTerm:
+                self = .searchTerm
+            }
+        }
+    }
 
     // MARK: - Debug
 
@@ -58,19 +109,53 @@ enum HistoryViewPixel: PixelKitEventV2 {
         switch self {
         case .historyPageShown: return "history-page_shown"
         case .historyPageExceptionReported: return "history-page_exception-reported"
+        case .filterSet: return "history-page_filter-set"
+        case .filterCleared: return "history-page_filter-cleared"
+        case .itemOpened: return "history-page_item-opened"
+        case .delete: return "history-page_any-delete"
+        case .singleItemDeleted: return "history-page_item-deleted"
+        case .multipleItemsDeleted: return "history-page_items-deleted"
+        case .onboardingDialogShown: return "history-page_intro_dialog_shown"
+        case .onboardingDialogDismissed: return "history-page_intro_dialog_not_now"
+        case .onboardingDialogAccepted: return "history-page_intro_dialog_view_history"
         }
     }
 
     var parameters: [String: String]? {
         switch self {
-        case .historyPageShown:
-            return nil
+        case .historyPageShown(let source):
+            return [Parameters.source: source.rawValue]
         case .historyPageExceptionReported(let message):
-            return [PixelKit.Parameters.assertionMessage: message]
+            return [Parameters.message: message]
+        case .filterSet(let filter):
+            return [Parameters.filter: filter.rawValue]
+        case .filterCleared:
+            return nil
+        case .itemOpened:
+            return nil
+        case .delete:
+            return nil
+        case .singleItemDeleted:
+            return nil
+        case .multipleItemsDeleted(let batchKind, let burn):
+            return [Parameters.filter: batchKind.rawValue, Parameters.deleteType: burn ? "burn" : "delete"]
+        case .onboardingDialogShown:
+            return nil
+        case .onboardingDialogDismissed:
+            return nil
+        case .onboardingDialogAccepted:
+            return nil
         }
     }
 
     var error: (any Error)? {
         nil
+    }
+
+    enum Parameters {
+        static let filter = "filter"
+        static let deleteType = "type"
+        static let message = "message"
+        static let source = "source"
     }
 }

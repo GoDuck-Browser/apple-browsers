@@ -93,12 +93,18 @@ public enum DataModel {
         }
     }
 
+    public enum HistoryQuerySource: String, Codable {
+        case initial, user, auto
+    }
+
     public struct HistoryQuery: Codable, Equatable {
+        let source: HistoryQuerySource
         let query: HistoryQueryKind
         let limit: Int
         let offset: Int
 
-        public init(query: HistoryQueryKind, limit: Int, offset: Int) {
+        public init(source: HistoryQuerySource, query: HistoryQueryKind, limit: Int, offset: Int) {
+            self.source = source
             self.query = query
             self.limit = limit
             self.offset = offset

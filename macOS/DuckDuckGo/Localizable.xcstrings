@@ -63557,6 +63557,9 @@
         }
       }
     },
+    "Show All History…" : {
+      "comment" : "Main Menu History item"
+    },
     "Show Autofill Shortcut" : {
       "comment" : "Main Menu View item",
       "localizations" : {
