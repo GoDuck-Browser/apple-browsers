@@ -137,14 +137,10 @@ protocol DuckPlayerControlling: AnyObject {
     var hostView: TabViewController? { get }
         
     // Navigation Request Publisher to notify when DuckPlayer needs direct Youtube Nav
-    var youtubeNavigationRequest: PassthroughSubject<URL, Never> { get }
+    var youtubeNavigationRequest: PassthroughSubject<URL, Never>? { get }
     
     /// Publisher that emits when Native DuckPlayer is dismissed
-    var playerDismissedPublisher: PassthroughSubject<Void, Never> { get }
-
-    /// The view and viewModel for the bottom sheet
-    var bottomSheetViewModel: DuckPlayerEntryPillViewModel? { get }
-    var bottomSheetHostingController: UIHostingController<DuckPlayerEntryPillView>? { get }
+    var playerDismissedPublisher: PassthroughSubject<Void, Never>? { get }
     
     /// Initializes a new instance of DuckPlayer with the provided settings and feature flagger.
     ///
@@ -318,10 +314,6 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     
     /// Publisher to notify when DuckPlayer is dismissed
     var playerDismissedPublisher: PassthroughSubject<Void, Never>
-
-    /// The view and viewModel for the bottom sheet
-    var bottomSheetViewModel: DuckPlayerEntryPillViewModel?
-    var bottomSheetHostingController: UIHostingController<DuckPlayerEntryPillView>?
     
     private let nativeUIPresenter = DuckPlayerNativeUIPresenter()
     private var presentationCancellables = Set<AnyCancellable>()
