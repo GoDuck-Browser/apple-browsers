@@ -85,10 +85,11 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         }
     }
 
-    var ranges: [DataModel.HistoryRange] {
-        var ranges = DataModel.HistoryRange.displayedRanges(for: dateFormatter.currentDate())
-        let filteredRanges = ranges.reversed().drop(while: { visitsByRange[$0]?.isEmpty != false }).reversed()
-        return filteredRanges.isEmpty ? [.all] : Array(filteredRanges)
+    var ranges: [DataModel.HistoryRangeWithCount] {
+        let ranges = DataModel.HistoryRange.displayedRanges(for: dateFormatter.currentDate())
+        var rangesWithCounts = ranges.map { DataModel.HistoryRangeWithCount(range: $0, count: groupingsByRange[$0]?.items.count ?? 0) }
+        let filteredRanges = rangesWithCounts.reversed().drop(while: { visitsByRange[$0.range]?.isEmpty != false }).reversed()
+        return filteredRanges.isEmpty ? [.init(range: .all, count: 0)] : Array(filteredRanges)
     }
 
     func refreshData() async {
@@ -165,30 +166,32 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
         var olderVisits = [Visit]()
 
         visitsByRange.removeAll()
+        historyItems.removeAll()
+
         // generate groupings by day and set aside "older" days.
-        groupings = await historyGroupingProvider().getVisitGroupings()
-            .compactMap { historyGrouping -> HistoryViewGrouping? in
+        groupingsByRange = await historyGroupingProvider().getVisitGroupings()
+            .reduce(into: [DataModel.HistoryRange: HistoryViewGrouping]()) { partialResult, historyGrouping in
                 guard let grouping = HistoryViewGrouping(historyGrouping, dateFormatter: dateFormatter) else {
-                    return nil
+                    return
                 }
                 guard grouping.range != .older else {
                     olderHistoryItems.append(contentsOf: grouping.items)
                     olderVisits.append(contentsOf: historyGrouping.visits)
-                    return nil
+                    return
                 }
                 visitsByRange[grouping.range] = historyGrouping.visits
-                return grouping
+                partialResult[grouping.range] = grouping
+                historyItems.append(contentsOf: grouping.items)
             }
 
         // collect all "older" days into a single grouping
         if !olderHistoryItems.isEmpty {
-            groupings.append(.init(range: .older, visits: olderHistoryItems))
+            groupingsByRange[.older] = .init(range: .older, visits: olderHistoryItems)
+            historyItems.append(contentsOf: olderHistoryItems)
         }
         if !olderVisits.isEmpty {
             visitsByRange[.older] = olderVisits
         }
-
-        self.historyItems = groupings.flatMap(\.items)
     }
 
     private func allVisits(matching query: DataModel.HistoryQueryKind) async -> [Visit] {
@@ -286,7 +289,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
             case .rangeFilter(.all), .searchTerm(""), .domainFilter(""):
                 return historyItems
             case .rangeFilter(let range):
-                return groupings.first(where: { $0.range == range })?.items ?? []
+                return groupingsByRange[range]?.items ?? []
             case .searchTerm(let term):
                 return historyItems.filter { $0.matches(term) }
             case .domainFilter(let domain):
@@ -305,7 +308,7 @@ final class HistoryViewDataProvider: HistoryViewDataProviding {
     private let dateFormatter: HistoryViewDateFormatting
     private let historyBurner: HistoryBurning
 
-    private var groupings: [HistoryViewGrouping] = []
+    private var groupingsByRange: [DataModel.HistoryRange: HistoryViewGrouping] = [:]
     private var historyItems: [DataModel.HistoryItem] = []
 
     private var visitsByRange: [DataModel.HistoryRange: [Visit]] = [:]
