@@ -1,5 +1,5 @@
 //
-//  DuckPlayerEntryPillViewModel.swift
+//  DuckPlayerViewUtils.swift
 //  DuckDuckGo
 //
 //  Copyright © 2025 DuckDuckGo. All rights reserved.
@@ -17,35 +17,18 @@
 //  limitations under the License.
 //
 
-import Foundation
-import Combine
 import SwiftUI
 
-@MainActor
-final class DuckPlayerEntryPillViewModel: ObservableObject {
-    var onOpen: () -> Void
+struct CustomRoundedCorners: Shape {
+    var radius: CGFloat
+    var corners: UIRectCorner
     
-    @Published var isVisible: Bool = false    
-    private(set) var shouldAnimate: Bool = true
-    
-    init(onOpen: @escaping () -> Void) {
-        self.onOpen = onOpen
-    }
-    
-    func updateOnOpen(_ onOpen: @escaping () -> Void) {
-        self.onOpen = onOpen
-        shouldAnimate = false
-    }
-    
-    func openInDuckPlayer() {
-        onOpen()
-    }
-    
-    func show() {
-        self.isVisible = true
-    }
-    
-    func hide() {
-        isVisible = false
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(
+            roundedRect: rect,
+            byRoundingCorners: corners,
+            cornerRadii: CGSize(width: radius, height: radius)
+        )
+        return Path(path.cgPath)
     }
 }
