@@ -392,7 +392,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
             let orientation = UIDevice.current.orientation
             if orientation.isLandscape {
                 hostView?.chromeDelegate?.setBarsHidden(false, animated: true, customAnimationDuration: Constants.chromeShowHideAnimationDuration)
-                showBottomSheetForVisibleChrome()                
+                showBottomSheetForVisibleChrome()
             }
         }
     }
@@ -750,7 +750,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     ///
     /// - Parameter videoID: The YouTube video ID to be played    
     @MainActor
-    func presentPill(for videoID: String) {        
+    func presentPill(for videoID: String) {
         guard let hostView = hostView else { return }
         
         Task { @MainActor in
