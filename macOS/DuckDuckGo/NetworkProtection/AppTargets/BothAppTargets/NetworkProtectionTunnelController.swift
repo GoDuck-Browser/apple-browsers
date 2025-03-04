@@ -23,7 +23,6 @@ import Common
 import FeatureFlags
 import Foundation
 import NetworkExtension
-import NetworkExtensionResolver
 import NetworkProtection
 import NetworkProtectionProxy
 import NetworkProtectionUI

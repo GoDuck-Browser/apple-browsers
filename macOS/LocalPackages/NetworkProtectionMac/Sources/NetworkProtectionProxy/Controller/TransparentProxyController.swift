@@ -19,7 +19,6 @@
 import Combine
 import Foundation
 import NetworkExtension
-import NetworkExtensionResolver
 import NetworkProtection
 import os.log
 import PixelKit

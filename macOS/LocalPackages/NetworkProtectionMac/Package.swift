@@ -38,7 +38,6 @@ let package = Package(
         .package(path: "../../BrowserServicesKit"),
         .package(path: "../AppInfoRetriever"),
         .package(path: "../AppLauncher"),
-        .package(path: "../NetworkExtensionResolver"),
         .package(path: "../UDSHelper"),
         .package(path: "../XPCHelper"),
         .package(path: "../SwiftUIExtensions"),
