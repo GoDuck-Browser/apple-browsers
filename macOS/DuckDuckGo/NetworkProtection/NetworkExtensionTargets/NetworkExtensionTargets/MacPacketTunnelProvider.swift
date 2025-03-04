@@ -420,7 +420,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         }
         // The SysExt doesn't care about the purchase platform because the only operations executed here are about the Auth token. No purchase or
         // platforms-related operations are performed.
-        subscriptionEnvironment.purchasePlatform = .stripe
+        subscriptionEnvironment.purchasePlatform = .appStore
         Logger.networkProtection.debug("Subscription ServiceEnvironment: \(subscriptionEnvironment.serviceEnvironment.rawValue, privacy: .public)")
 
         let subscriptionUserDefaults = UserDefaults(suiteName: MacPacketTunnelProvider.subscriptionsAppGroup)!
@@ -451,7 +451,8 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                                                        authEndpointService: authEndpointService)
 
             entitlementsCheck = {
-                await accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
+                Logger.networkProtection.log("Subscription Entitlements check...")
+                return await accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
             }
 
             self.accountManager = accountManager
