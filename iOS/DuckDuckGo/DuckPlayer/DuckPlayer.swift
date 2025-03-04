@@ -310,10 +310,10 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     }
     
     // A published subject to notify when a Youtube navigation request is needed
-    var youtubeNavigationRequest: PassthroughSubject<URL, Never>
+    var youtubeNavigationRequest: PassthroughSubject<URL, Never>?
     
     /// Publisher to notify when DuckPlayer is dismissed
-    var playerDismissedPublisher: PassthroughSubject<Void, Never>
+    var playerDismissedPublisher: PassthroughSubject<Void, Never>?
     
     private let nativeUIPresenter = DuckPlayerNativeUIPresenter()
     private var presentationCancellables = Set<AnyCancellable>()
@@ -414,7 +414,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
             
             publishers.navigation
                 .sink { [weak self] url in
-                    self?.youtubeNavigationRequest.send(url)
+                    self?.youtubeNavigationRequest?.send(url)
                 }
                 .store(in: &presentationCancellables)
                 
@@ -809,6 +809,6 @@ extension DuckPlayer: UIGestureRecognizerDelegate {
 // Add UIAdaptivePresentationControllerDelegate to handle sheet dismissal
 extension DuckPlayer: UIAdaptivePresentationControllerDelegate {
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-        playerDismissedPublisher.send()
+        playerDismissedPublisher?.send()
     }
 }
