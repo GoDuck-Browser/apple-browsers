@@ -73,7 +73,7 @@ final class HistoryRangeExtensionTests: XCTestCase {
 
     // MARK: - displayedRanges
 
-    func testThatDisplayedRanges() throws {
+    func testDisplayedRanges() throws {
         let sun = try date(year: 2025, month: 2, day: 23)
         let mon = try date(year: 2025, month: 2, day: 24)
         let tue = try date(year: 2025, month: 2, day: 25)
