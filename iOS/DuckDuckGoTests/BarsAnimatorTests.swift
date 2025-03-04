@@ -55,7 +55,7 @@ class BarsAnimatorTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Wait for bars state to update to hidden")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             XCTAssertEqual(sut.barsState, .hidden)
-            XCTAssertEqual(delegate.receivedMessages, [.setBarsVisibility(0.0), .setBarsVisibility(0.0)])
+            XCTAssertEqual(delegate.receivedMessages, [.setBarsVisibility(0.0), .setBarsVisibility(0.0), .setBarsVisibility(0.0)])
             expectation.fulfill()
         }
 
