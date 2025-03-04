@@ -270,7 +270,9 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
     // MARK: - Registration Key
 
-    private var keyStore: any NetworkProtectionKeyStore
+    private lazy var keyStore = NetworkProtectionKeychainKeyStore(keychainType: keychainType,
+                                                                  errorEvents: debugEvents)
+
     private let tokenHandler: any SubscriptionTokenHandling
 
     private func resetRegistrationKey() {
@@ -389,7 +391,12 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }()
 
-    private let deviceManager: NetworkProtectionDeviceManagement
+    private lazy var deviceManager: NetworkProtectionDeviceManagement = NetworkProtectionDeviceManager(
+        environment: self.settings.selectedEnvironment,
+        tokenHandler: self.tokenHandler,
+        keyStore: self.keyStore,
+        errorEvents: self.debugEvents
+    )
 
     private lazy var tunnelFailureMonitor = NetworkProtectionTunnelFailureMonitor(handshakeReporter: adapter)
 
@@ -447,12 +454,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         self.settings = settings
         self.defaults = defaults
         self.entitlementCheck = entitlementCheck
-        self.keyStore = NetworkProtectionKeychainKeyStore(keychainType: keychainType,
-                                                          errorEvents: debugEvents)
-        self.deviceManager = NetworkProtectionDeviceManager(environment: self.settings.selectedEnvironment,
-                                                            tokenHandler: tokenHandler,
-                                                            keyStore: self.keyStore,
-                                                            errorEvents: self.debugEvents)
+
         super.init()
 
         observeSettingChanges()
