@@ -2592,7 +2592,7 @@ extension TabViewController: UserContentControllerDelegate {
         specialErrorPageNavigationHandler.setUserScript(userScripts.specialErrorPageUserScript)
 
         // Setup DuckPlayer Scripts if not using native UI
-        if ((duckPlayer?.settings.nativeUI) != nil) {
+        if (duckPlayer?.settings.nativeUI) != nil {
             userScripts.duckPlayer = duckPlayerNavigationHandler?.duckPlayer
             userScripts.youtubeOverlayScript?.webView = webView
             userScripts.youtubePlayerUserScript?.webView = webView
