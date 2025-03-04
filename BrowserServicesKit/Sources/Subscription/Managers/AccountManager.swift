@@ -82,8 +82,8 @@ public final class DefaultAccountManager: AccountManager {
                 subscriptionEndpointService: SubscriptionEndpointService,
                 authEndpointService: AuthEndpointService) {
         self.storage = storage
-        self.accessTokenStorage = accessTokenStorage
         self.entitlementsCache = entitlementsCache
+        self.accessTokenStorage = accessTokenStorage
         self.subscriptionEndpointService = subscriptionEndpointService
         self.authEndpointService = authEndpointService
     }

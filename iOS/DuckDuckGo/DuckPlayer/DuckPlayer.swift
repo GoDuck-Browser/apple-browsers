@@ -681,7 +681,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     /// Returns tuple of Pixels for firing when a YouTube Error occurs
     private func getPixelsForYouTubeErrorParams(_ params: Any) -> (Pixel.Event, Pixel.Event) {
         if let paramsDict = params as? [String: Any],
-           let errorParam = paramsDict["error"] as? String {
+           let errorParam = paramsDict["error"] as? String{
                 switch errorParam {
                 case "sign-in-required":
                     return (.duckPlayerYouTubeSignInErrorImpression, .duckPlayerYouTubeSignInErrorDaily)

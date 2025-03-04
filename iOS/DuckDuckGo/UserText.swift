@@ -617,7 +617,7 @@ public struct UserText {
         public static let windowsWaitlistMac = NSLocalizedString("windows-waitlist.join-waitlist-screen.mac-waitlist", value: "Looking for the Mac version?", comment: "Title for the Windows waitlist button redirecting to Mac waitlist")
     public static let windowsWaitlistBrowsePrivately = NSLocalizedString("windows-waitlist.settings.browse-privately", value: "Browse privately with our app for Windows", comment: "Title for the settings subtitle")
 
-    // MARK: - Get Desktop Browser
+    //MARK: - Get Desktop Browser
     public static let getBrowserTitle = NSLocalizedString("get.browser.title", value: "Get DuckDuckGo for Mac or Windows", comment: "Title for the get desktop browser feature")
     public static let getBrowserOnYourDesktopGoTo = NSLocalizedString("get.browser.on-your-desktop-go-to", value: "On your computer, go to:", comment: "Description text above the Share Link button")
     public static let getBrowserShareLink = NSLocalizedString("get.browser.share-link", value: "Share Download Link", comment: "Title for the Share Download Link button")
@@ -1665,7 +1665,7 @@ Duck.ai is an optional feature that lets you chat anonymously with popular 3rd-p
         }
     }
 
-    // MARK: - Data Import
+    // MARK :- Data Import
 
     public static let dataImportPasswordsTitle = NSLocalizedString("data.import.passwords.title", value:"Import Passwords to DuckDuckGo", comment: "Title for screen to import passwords")
     public static let dataImportPasswordsSubtitle = NSLocalizedString("data.import.passwords.subtitle", value:"Select the file containing passwords exported from Safari or Chrome. This is usually a ZIP or CSV file.", comment: "Subtitle for screen to import passwords")
