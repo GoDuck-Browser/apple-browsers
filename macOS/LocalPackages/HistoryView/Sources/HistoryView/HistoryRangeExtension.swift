@@ -91,6 +91,12 @@ public extension DataModel.HistoryRange {
         return self == .today ? startOfDayReferenceDate : calendar.firstWeekday(weekday, before: startOfDayReferenceDate)
     }
 
+    /**
+     * Returns a list of 7 ranges to be displayed in the History View for a given `referenceDate`.
+     *
+     * This function only generates the ranges. They may be filtered and some of them removed
+     * before being presented.
+     */
     static func displayedRanges(for referenceDate: Date) -> [DataModel.HistoryRange] {
         var currentRange: DataModel.HistoryRange? = .today
         var ranges = (0..<7).reduce(into: [DataModel.HistoryRange]()) { partialResult, _ in
@@ -101,36 +107,6 @@ public extension DataModel.HistoryRange {
         }
         ranges.append(.older)
         return ranges
-    }
-
-    func previousRange(for referenceDate: Date) -> Self? {
-        switch self {
-        case .all:
-            return .today
-        case .today:
-            return .yesterday
-        case .yesterday:
-            guard let oneDayAgo = date(for: referenceDate)?.daysAgo(1) else {
-                return nil
-            }
-            return DataModel.HistoryRange(date: oneDayAgo, referenceDate: referenceDate)
-        case .sunday:
-            return .saturday
-        case .monday:
-            return .sunday
-        case .tuesday:
-            return .monday
-        case .wednesday:
-            return .tuesday
-        case .thursday:
-            return .wednesday
-        case .friday:
-            return .thursday
-        case .saturday:
-            return .friday
-        case .older:
-            return nil
-        }
     }
 
     // MARK: - Private
@@ -181,6 +157,41 @@ public extension DataModel.HistoryRange {
             return 6
         case .saturday:
             return 7
+        }
+    }
+
+    /**
+     * This function returns the range that would appear below the receiver in the History View ranges list.
+     *
+     * For example, for `.today`, it returns `.yesterday`.
+     */
+    private func previousRange(for referenceDate: Date) -> Self? {
+        switch self {
+        case .all:
+            return .today
+        case .today:
+            return .yesterday
+        case .yesterday:
+            guard let oneDayAgo = date(for: referenceDate)?.daysAgo(1) else {
+                return nil
+            }
+            return DataModel.HistoryRange(date: oneDayAgo, referenceDate: referenceDate)
+        case .sunday:
+            return .saturday
+        case .monday:
+            return .sunday
+        case .tuesday:
+            return .monday
+        case .wednesday:
+            return .tuesday
+        case .thursday:
+            return .wednesday
+        case .friday:
+            return .thursday
+        case .saturday:
+            return .friday
+        case .older:
+            return nil
         }
     }
 }
