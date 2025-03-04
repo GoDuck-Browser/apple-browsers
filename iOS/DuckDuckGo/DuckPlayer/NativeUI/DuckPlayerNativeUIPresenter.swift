@@ -30,7 +30,7 @@ final class DuckPlayerNativeUIPresenter {
     enum PillType {
         case entry
         case reEntry
-    }    
+    }
 
     /// The container view model for the entry pill
     private var containerViewModel: DuckPlayerContainer.ViewModel?
@@ -40,7 +40,7 @@ final class DuckPlayerNativeUIPresenter {
     
     /// References to the host view and source
     private weak var hostView: TabViewController?
-    private var source: DuckPlayer.VideoNavigationSource?    
+    private var source: DuckPlayer.VideoNavigationSource?
     private var state: DuckPlayerState = DuckPlayerState()
 
     /// The DuckPlayer instance
@@ -103,7 +103,7 @@ final class DuckPlayerNativeUIPresenter {
     func presentPill(for videoID: String, in hostViewController: TabViewController) {
         
         // Store the videoID
-        state.videoID = videoID        
+        state.videoID = videoID
 
         // Determine the pill type
         let pillType: PillType = state.hasBeenShown ? .reEntry : .entry
@@ -138,14 +138,14 @@ final class DuckPlayerNativeUIPresenter {
         
         // Calculate bottom constraints based on URL Bar position
         // If at the bottom, the Container should be placed above it
-        bottomConstraint = appSettings.currentAddressBarPosition == .bottom ? 
-                    hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor, constant: -omniBarHeight) : 
+        bottomConstraint = appSettings.currentAddressBarPosition == .bottom ?
+                    hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor, constant: -omniBarHeight) :
                     hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor)
 
-        NSLayoutConstraint.activate([   
+        NSLayoutConstraint.activate([
             hostingController.view.leadingAnchor.constraint(equalTo: hostView.view.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: hostView.view.trailingAnchor),
-            bottomConstraint!           
+            bottomConstraint!
         ])
                 
         // Store reference to the hosting controller
@@ -153,7 +153,7 @@ final class DuckPlayerNativeUIPresenter {
         
         // Add delay before showing the pill
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak containerViewModel, weak self] in
-            containerViewModel?.show()            
+            containerViewModel?.show()
         }
     }
     
@@ -162,7 +162,7 @@ final class DuckPlayerNativeUIPresenter {
     private func createContainerWithPill(for pillType: PillType, videoID: String, containerViewModel: DuckPlayerContainer.ViewModel) -> DuckPlayerContainer.Container<AnyView> {
         if pillType == .entry {
             // Create the pill view model for entry type
-            let pillViewModel = DuckPlayerEntryPillViewModel() { [weak self] in
+            let pillViewModel = DuckPlayerEntryPillViewModel { [weak self] in
                 self?.videoPlaybackRequest.send(videoID)
             }
             
@@ -175,7 +175,7 @@ final class DuckPlayerNativeUIPresenter {
             }
         } else {
             // Create the mini pill view model for re-entry type
-            let miniPillViewModel = DuckPlayerMiniPillViewModel() { [weak self] in
+            let miniPillViewModel = DuckPlayerMiniPillViewModel { [weak self] in
                 self?.videoPlaybackRequest.send(videoID)
             }
             
@@ -208,9 +208,9 @@ final class DuckPlayerNativeUIPresenter {
         containerViewModel?.dismiss()
         
         // Remove the view after the animation completes
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in                               
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             self?.containerViewController?.view.removeFromSuperview()
-            self?.containerViewController = nil            
+            self?.containerViewController = nil
             self?.containerViewModel = nil
             self?.containerCancellables.removeAll()
         }
@@ -279,8 +279,6 @@ final class DuckPlayerNativeUIPresenter {
 
         // Dismiss the Pill
         dismissPill()
-
-
 
         return (navigationRequest, settingsRequest)
     }

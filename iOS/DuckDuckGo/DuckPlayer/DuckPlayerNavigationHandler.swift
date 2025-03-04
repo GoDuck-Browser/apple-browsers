@@ -93,7 +93,7 @@ final class DuckPlayerNavigationHandler: NSObject {
             return ""
         }
         return script
-    }()    
+    }()
 
     /// Script to mute/unmute audio
     private let muteAudioScript: String = {
@@ -155,7 +155,7 @@ final class DuckPlayerNavigationHandler: NSObject {
         self.pixelFiring = pixelFiring
         self.dailyPixelFiring = dailyPixelFiring
         self.tabNavigationHandler = tabNavigationHandler
-        self.duckPlayerOverlayUsagePixels = duckPlayerOverlayUsagePixels        
+        self.duckPlayerOverlayUsagePixels = duckPlayerOverlayUsagePixels
         super.init()
     }
     
@@ -364,7 +364,7 @@ final class DuckPlayerNavigationHandler: NSObject {
         // Only allow native UI on iPhone
         guard UIDevice.current.userInterfaceIdiom == .phone else { return }
         
-        if referrer == .youtube {            
+        if referrer == .youtube {
             duckPlayer.loadNativeDuckPlayerVideo(videoID: videoID, source: .youtube)
         } else {
             duckPlayer.loadNativeDuckPlayerVideo(videoID: videoID)
@@ -703,17 +703,17 @@ final class DuckPlayerNavigationHandler: NSObject {
     ///   - webView: The `WKWebView` to manipulate
     ///   - pause: When true, blocks media playback. When false, allows playback
     @MainActor
-    private func toggleMediaPlayback(_ webView: WKWebView, pause: Bool) {        
+    private func toggleMediaPlayback(_ webView: WKWebView, pause: Bool) {
         if let url = webView.url, url.isYoutubeWatch {
-            webView.evaluateJavaScript("\(mediaControlScript); mediaControl(\(pause))")          
-        }        
+            webView.evaluateJavaScript("\(mediaControlScript); mediaControl(\(pause))")
+        }
     }
     
     /// Cleans up timers and audio state when DuckPlayer is dismissed
     @MainActor
     private func allowYoutubeVideoPlayback(webView: WKWebView) {
         toggleMediaPlayback(webView, pause: false)
-    }    
+    }
 }
 
 extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
@@ -798,9 +798,10 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
     /// Observes URL changes and redirects to Duck Player when appropriate, avoiding duplicate handling.
     ///
     /// - Parameter webView: The `WKWebView` whose URL has changed.
-    /// - Returns: A result indicating whether the URL change was handled.
+    /// - Returns: A result indicating whether the URL change was handled.    
+    // swiftlint:disable cyclomatic_complexity
     @MainActor
-    func handleURLChange(webView: WKWebView) -> DuckPlayerNavigationHandlerURLChangeResult {        
+    func handleURLChange(webView: WKWebView) -> DuckPlayerNavigationHandlerURLChangeResult {
 
         // We want to prevent multiple simultaneous redirects
         // This can be caused by Duplicate Nav events, and quick URL changes
@@ -827,12 +828,12 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             return .notHandled(.featureOff)
         }
         
-        guard let url = webView.url, let (videoID, _) = url.youtubeVideoParams else {            
+        guard let url = webView.url, let (videoID, _) = url.youtubeVideoParams else {
             duckPlayer.dismissPill()
             return .notHandled(.invalidURL)
         }
         
-        guard url.isYoutubeWatch else {            
+        guard url.isYoutubeWatch else {
             duckPlayer.dismissPill()
             return .notHandled(.isNotYoutubeWatch)
         }
@@ -896,6 +897,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         toggleMediaPlayback(webView, pause: false)
         return .notHandled(.isNotYoutubeWatch)
     }
+    // swiftlint:enable cyclomatic_complexity
     
     // Temporarily pause media playback during page transition
     // The pause is applied repeatedly for 1 second to ensure it takes effect
@@ -905,7 +907,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
     private func pauseVideoStart(webView: WKWebView) async {
         // First phase: try every 0.05s for 1 second
         Task { @MainActor in
-            let startTime = Date()            
+            let startTime = Date()
             
             while Date().timeIntervalSince(startTime) < 1.0 {
                 self.toggleMediaPlayback(webView, pause: true)

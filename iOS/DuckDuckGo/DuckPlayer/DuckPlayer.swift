@@ -766,7 +766,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
 
     /// Add cleanup method to remove the sheet
     @MainActor
-    func dismissPill() {        
+    func dismissPill() {
         Task { await nativeUIPresenter.dismissPill(reset: true) }
     }
 

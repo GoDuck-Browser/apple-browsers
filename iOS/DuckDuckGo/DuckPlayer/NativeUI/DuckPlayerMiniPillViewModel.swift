@@ -16,13 +16,13 @@ import Combine
 import SwiftUI
 
 @MainActor
-final class DuckPlayerMiniPillViewModel: ObservableObject {    
+final class DuckPlayerMiniPillViewModel: ObservableObject {
     var onOpen: () -> Void
     
     @Published var isVisible: Bool = false
     private(set) var shouldAnimate: Bool = true
     
-    init(onOpen: @escaping () -> Void) {        
+    init(onOpen: @escaping () -> Void) {
         self.onOpen = onOpen
     }
     
@@ -35,11 +35,10 @@ final class DuckPlayerMiniPillViewModel: ObservableObject {
         onOpen()
     }
     
-    func show() {        
-        self.isVisible = true
+    func show() {        self.isVisible = true
     }
     
     func hide() {
         isVisible = false
     }
-} 
+}

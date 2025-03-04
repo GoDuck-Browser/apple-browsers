@@ -44,7 +44,7 @@ public enum DuckPlayerContainer {
 
   @MainActor
   public final class ViewModel: ObservableObject {
-    @Published public private(set) var sheetVisible = false        
+    @Published public private(set) var sheetVisible = false
 
     private var subscriptions = Set<AnyCancellable>()
     
@@ -54,12 +54,12 @@ public enum DuckPlayerContainer {
       shouldAnimate ? .spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0) : nil
     }
 
-    public func show() {      
+    public func show() {
       sheetVisible = true
     }
 
     public func dismiss() {
-      sheetVisible = false        
+      sheetVisible = false
     }
   }
 
@@ -95,12 +95,12 @@ public enum DuckPlayerContainer {
           Color.black
             .ignoresSafeArea()
             .opacity(viewModel.sheetVisible ? 1 : 0)
-            .animation(viewModel.springAnimation, value: viewModel.sheetVisible)                          
+            .animation(viewModel.springAnimation, value: viewModel.sheetVisible)
         }
         
         // Use a fixed container height for offset calculations
         sheet(containerHeight: DuckPlayerContainer.Constants.Offset.fixedContainerHeight)
-          .frame(alignment: .bottom)            
+          .frame(alignment: .bottom)
       }
     }
   }
@@ -125,7 +125,7 @@ private struct SheetView<Content: View>: View {
   @State private var sheetOffset = DuckPlayerContainer.Constants.Offset.initialValue
 
   var body: some View {
-    VStack(alignment: .center) {      
+    VStack(alignment: .center) {
       
       if let sheetWidth {
         content(DuckPlayerContainer.PresentationMetrics(contentWidth: sheetWidth))
@@ -160,7 +160,7 @@ private struct SheetView<Content: View>: View {
       withAnimation(viewModel.springAnimation) {
         opacity = viewModel.sheetVisible ? 1 : 0
       }
-    }    
+    }
     
     .onHeightChange { newHeight in
       sheetHeight = newHeight
