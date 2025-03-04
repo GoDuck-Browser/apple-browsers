@@ -92,8 +92,8 @@ public extension DataModel.HistoryRange {
     }
 
     static func displayedRanges(for referenceDate: Date) -> [DataModel.HistoryRange] {
-        var currentRange: DataModel.HistoryRange? = .all
-        var ranges = (0...7).reduce(into: [DataModel.HistoryRange]()) { partialResult, _ in
+        var currentRange: DataModel.HistoryRange? = .today
+        var ranges = (0..<7).reduce(into: [DataModel.HistoryRange]()) { partialResult, _ in
             if let currentRange {
                 partialResult.append(currentRange)
             }
