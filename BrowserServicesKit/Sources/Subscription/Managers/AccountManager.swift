@@ -68,7 +68,7 @@ public final class DefaultAccountManager: AccountManager {
 
     private let storage: AccountStoring
     private let entitlementsCache: UserDefaultsCache<[Entitlement]>
-    private let accessTokenStorage: SubscriptionTokenStoringV1
+    private let accessTokenStorage: SubscriptionTokenStoring
     private let subscriptionEndpointService: SubscriptionEndpointService
     private let authEndpointService: AuthEndpointService
 
@@ -77,7 +77,7 @@ public final class DefaultAccountManager: AccountManager {
     // MARK: - Initialisers
 
     public init(storage: AccountStoring,
-                accessTokenStorage: SubscriptionTokenStoringV1,
+                accessTokenStorage: SubscriptionTokenStoring,
                 entitlementsCache: UserDefaultsCache<[Entitlement]>,
                 subscriptionEndpointService: SubscriptionEndpointService,
                 authEndpointService: AuthEndpointService) {
