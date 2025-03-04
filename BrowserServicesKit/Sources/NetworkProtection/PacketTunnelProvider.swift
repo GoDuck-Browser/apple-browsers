@@ -270,9 +270,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
     // MARK: - Registration Key
 
-    private lazy var keyStore = NetworkProtectionKeychainKeyStore(keychainType: keychainType,
-                                                                  errorEvents: debugEvents)
-
+    private var keyStore: any NetworkProtectionKeyStore
     private let tokenHandler: any SubscriptionTokenHandling
 
     private func resetRegistrationKey() {
@@ -391,12 +389,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }()
 
-    private lazy var deviceManager: NetworkProtectionDeviceManagement = NetworkProtectionDeviceManager(
-        environment: self.settings.selectedEnvironment,
-        tokenHandler: self.tokenHandler,
-        keyStore: self.keyStore,
-        errorEvents: self.debugEvents
-    )
+    private let deviceManager: NetworkProtectionDeviceManagement
 
     private lazy var tunnelFailureMonitor = NetworkProtectionTunnelFailureMonitor(handshakeReporter: adapter)
 
@@ -454,7 +447,12 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         self.settings = settings
         self.defaults = defaults
         self.entitlementCheck = entitlementCheck
-
+        self.keyStore = NetworkProtectionKeychainKeyStore(keychainType: keychainType,
+                                                          errorEvents: debugEvents)
+        self.deviceManager = NetworkProtectionDeviceManager(environment: self.settings.selectedEnvironment,
+                                                            tokenHandler: tokenHandler,
+                                                            keyStore: self.keyStore,
+                                                            errorEvents: self.debugEvents)
         super.init()
 
         observeSettingChanges()
@@ -494,6 +492,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
     }
 
     open func load(options: StartupOptions) async throws {
+        Logger.networkProtection.log("Loading startup options")
         loadKeyValidity(from: options)
         loadSelectedEnvironment(from: options)
         loadSelectedServer(from: options)
@@ -589,10 +588,10 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         switch options.authToken {
         case .set(let newAuthToken):
             Logger.networkProtection.log("Set new token: \(newAuthToken)")
-//            if let currentAuthToken = try? await tokenHandler.getToken(), currentAuthToken == newAuthToken {
-//                Logger.networkProtection.log("Token unchanged, using the current one")
-//                return
-//            }
+            if let currentAuthToken = try? await tokenHandler.getToken(), currentAuthToken == newAuthToken {
+                Logger.networkProtection.log("Token unchanged, using the current one")
+                return
+            }
 
             try await tokenHandler.adoptToken(newAuthToken)
         case .useExisting:
@@ -1016,7 +1015,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         let resolvedServerSelectionMethod = await serverSelectionResolver.resolvedServerSelectionMethod()
 
         do {
-            configurationResult = try await deviceManager.generateTunnelConfiguration(
+            configurationResult = try await deviceManager.generateTunnelConfiguration( // WARNING: Fails here
                 resolvedSelectionMethod: resolvedServerSelectionMethod,
                 excludeLocalNetworks: settings.excludeLocalNetworks,
                 dnsSettings: dnsSettings,

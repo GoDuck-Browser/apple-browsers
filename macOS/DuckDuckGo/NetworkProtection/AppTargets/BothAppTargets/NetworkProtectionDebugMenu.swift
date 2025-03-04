@@ -51,6 +51,8 @@ final class NetworkProtectionDebugMenu: NSMenu {
 
     private let excludeLocalNetworksMenuItem = NSMenuItem(title: "excludeLocalNetworks", action: #selector(NetworkProtectionDebugMenu.toggleShouldExcludeLocalRoutes))
 
+    private let networkProtectionDeviceManager: NetworkProtectionDeviceManager
+
     init() {
         preferredServerMenu = NSMenu { [preferredServerAutomaticItem] in
             preferredServerAutomaticItem
@@ -58,6 +60,16 @@ final class NetworkProtectionDebugMenu: NSMenu {
         registrationKeyValidityMenu = NSMenu { [registrationKeyValidityAutomaticItem] in
             registrationKeyValidityAutomaticItem
         }
+
+        let settings = Application.appDelegate.vpnSettings
+        let keyStore = NetworkProtectionKeychainKeyStore(keychainType: .default,
+                                                         errorEvents: .networkProtectionAppDebugEvents)
+        let tokenStore = NetworkProtectionKeychainTokenStore()
+        networkProtectionDeviceManager = NetworkProtectionDeviceManager(environment: settings.selectedEnvironment,
+                                                                        tokenHandler: tokenStore,
+                                                                        keyStore: keyStore,
+                                                                        errorEvents: .networkProtectionAppDebugEvents)
+
         super.init(title: "VPN")
 
         buildItems {
@@ -356,7 +368,7 @@ final class NetworkProtectionDebugMenu: NSMenu {
 
     @MainActor
     private func populateNetworkProtectionServerListMenuItems() async throws {
-        let servers = try await NetworkProtectionDeviceManager.create().refreshServerList()
+        let servers = try await networkProtectionDeviceManager.refreshServerList()
 
         preferredServerAutomaticItem.target = self
         if servers.isEmpty {
@@ -523,7 +535,7 @@ final class NetworkProtectionDebugMenu: NSMenu {
         settings.selectedEnvironment = selectedEnvironment
 
         Task {
-            _ = try await NetworkProtectionDeviceManager.create().refreshServerList()
+            _ = try await networkProtectionDeviceManager.refreshServerList()
             try? await populateNetworkProtectionServerListMenuItems()
 
             settings.selectedServer = .automatic

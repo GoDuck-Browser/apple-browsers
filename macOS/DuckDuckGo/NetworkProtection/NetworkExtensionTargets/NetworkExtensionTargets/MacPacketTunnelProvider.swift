@@ -456,7 +456,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
             }
 
             self.accountManager = accountManager
-            tokenHandler = tokenStore
+            tokenHandler = accountManager
         } else {
             // MARK: V2
             let configuration = URLSessionConfiguration.default
@@ -512,7 +512,8 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                                                                    pixelHandler: pixelHandler,
                                                                    autoRecoveryHandler: {
                 // todo Implement
-            })
+            },
+                                                                   initForPurchase: false)
 
             entitlementsCheck = {
                 Logger.networkProtection.log("Subscription Entitlements check...")
@@ -636,7 +637,6 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
     // MARK: - NEPacketTunnelProvider
 
     public override func load(options: StartupOptions) async throws {
-        Logger.networkProtection.log("Loading startup options...")
         try await super.load(options: options)
 
 #if NETP_SYSTEM_EXTENSION

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -3366,8 +3366,6 @@
 		F1D042952BFBA12300A31506 /* DataBrokerProtectionSettings+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D042932BFBA12300A31506 /* DataBrokerProtectionSettings+Environment.swift */; };
 		F1D042992BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D042982BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift */; };
 		F1D0429A2BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D042982BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift */; };
-		F1D0429B2BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D042982BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift */; };
-		F1D0429C2BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D042982BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift */; };
 		F1D0429D2BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D042982BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift */; };
 		F1D0429E2BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D042982BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift */; };
 		F1D0429F2BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D042982BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift */; };
@@ -5276,6 +5274,10 @@
 		FD23FD2A28816606007F6985 /* AutoconsentMessageProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AutoconsentMessageProtocolTests.swift; path = UnitTests/Autoconsent/AutoconsentMessageProtocolTests.swift; sourceTree = SOURCE_ROOT; };
 		FD23FD2C2886A81D007F6985 /* AutoconsentManagement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoconsentManagement.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		F19D87A22D7607AB009AEF51 /* scripts */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = scripts; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		3706FCA6293F65D500E42796 /* Frameworks */ = {
@@ -8401,27 +8403,28 @@
 		AA585D75248FD31100E9A3E2 = {
 			isa = PBXGroup;
 			children = (
-				378B5886295CF2A4002C0CC0 /* Configuration */,
+				AA585D80248FD31100E9A3E2 /* DuckDuckGo */,
+				9D9AE9132AAA3B450026E7DC /* DuckDuckGoDBPBackgroundAgent */,
+				7B96D0D02ADFDA7F007E02C8 /* DuckDuckGoDBPTests */,
+				4B4BEC312A11B509001D9AC5 /* DuckDuckGoNotifications */,
+				7BA7CC0D2AD11DC80042E5CE /* DuckDuckGoVPN */,
+				85AE2FF024A33A2D002D507F /* Frameworks */,
+				4B1AD89E25FC27E200261379 /* IntegrationTests */,
 				378E279C2970217400FCADA2 /* LocalPackages */,
 				7BB108552A43375D000AB95F /* LocalThirdParty */,
+				4B5F14F72A148B230060320F /* NetworkProtectionAppExtension */,
+				4B25375C2A11BE7500610219 /* NetworkProtectionSystemExtension */,
+				AA585D7F248FD31100E9A3E2 /* Products */,
 				AA68C3D62490F821001B8783 /* README.md */,
-				AA585D80248FD31100E9A3E2 /* DuckDuckGo */,
-				4B4BEC312A11B509001D9AC5 /* DuckDuckGoNotifications */,
-				AA585D93248FD31400E9A3E2 /* UnitTests */,
 				B6E6B9F42BA1FD90008AA7E1 /* sandbox-test-tool */,
-				4B1AD89E25FC27E200261379 /* IntegrationTests */,
+				F19D87A22D7607AB009AEF51 /* scripts */,
+				565E46DE2B2725DD0013AC2A /* SyncE2EUITests */,
+				B6EC37E929B5DA2A001ACE79 /* tests-server */,
+				378B5886295CF2A4002C0CC0 /* Configuration */,
 				9D84E3F52CD4E6660046CD8B /* DBPE2ETests */,
 				7B4CE8DB26F02108009134B1 /* UITests */,
-				B6EC37E929B5DA2A001ACE79 /* tests-server */,
-				7B96D0D02ADFDA7F007E02C8 /* DuckDuckGoDBPTests */,
-				4B5F14F72A148B230060320F /* NetworkProtectionAppExtension */,
+				AA585D93248FD31400E9A3E2 /* UnitTests */,
 				7BDA36E72B7E037200AD5388 /* VPNProxyExtension */,
-				4B25375C2A11BE7500610219 /* NetworkProtectionSystemExtension */,
-				9D9AE9132AAA3B450026E7DC /* DuckDuckGoDBPBackgroundAgent */,
-				7BA7CC0D2AD11DC80042E5CE /* DuckDuckGoVPN */,
-				565E46DE2B2725DD0013AC2A /* SyncE2EUITests */,
-				AA585D7F248FD31100E9A3E2 /* Products */,
-				85AE2FF024A33A2D002D507F /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -13251,7 +13254,6 @@
 				F1C70D7F2BFF510000599292 /* SubscriptionEnvironment+Default.swift in Sources */,
 				EEF12E6F2A2111880023E6BF /* MacPacketTunnelProvider.swift in Sources */,
 				4B2D06292A11C0C900DE1F49 /* Bundle+VPN.swift in Sources */,
-				F1D0429C2BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift in Sources */,
 				F1DA51972BF6083A00CF29FA /* PrivacyProPixel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -13377,7 +13379,6 @@
 				F1DA51962BF6083700CF29FA /* PrivacyProPixel.swift in Sources */,
 				EEBCA0C62BD7CE2C004DF19C /* VPNFailureRecoveryPixel.swift in Sources */,
 				4B4D60A12A0B2D6100BCD287 /* NetworkProtectionOptionKeyExtension.swift in Sources */,
-				F1D0429B2BFBABA100A31506 /* SubscriptionManager+StandardConfiguration.swift in Sources */,
 				B602E8182A1E2570006D261F /* URL+NetworkProtection.swift in Sources */,
 				F1664A6C2D70B2530034CCB8 /* NetworkProtectionKeychainStore+TokenStoring.swift in Sources */,
 				B65DA5F52A77D3FA00CBEE8D /* BundleExtension.swift in Sources */,

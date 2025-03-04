@@ -24,20 +24,6 @@ import Subscription
 import BrowserServicesKit
 import Networking
 
-extension NetworkProtectionDeviceManager {
-
-    @MainActor
-    static func create() -> NetworkProtectionDeviceManager {
-        let settings = Application.appDelegate.vpnSettings
-        let keyStore = NetworkProtectionKeychainKeyStore()
-        let tokenStore = NetworkProtectionKeychainTokenStore()
-        return NetworkProtectionDeviceManager(environment: settings.selectedEnvironment,
-                                              tokenHandler: tokenStore,
-                                              keyStore: keyStore,
-                                              errorEvents: .networkProtectionAppDebugEvents)
-    }
-}
-
 extension NetworkProtectionKeychainTokenStore {
     convenience init() {
         self.init(useAccessTokenProvider: true)
@@ -49,13 +35,6 @@ extension NetworkProtectionKeychainTokenStore {
                   errorEvents: .networkProtectionAppDebugEvents,
                   useAccessTokenProvider: useAccessTokenProvider,
                   accessTokenProvider: accessTokenProvider)
-    }
-}
-
-extension NetworkProtectionKeychainKeyStore {
-    convenience init() {
-        self.init(keychainType: .default,
-                  errorEvents: .networkProtectionAppDebugEvents)
     }
 }
 

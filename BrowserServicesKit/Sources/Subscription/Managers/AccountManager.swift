@@ -68,7 +68,7 @@ public final class DefaultAccountManager: AccountManager {
 
     private let storage: AccountStoring
     private let entitlementsCache: UserDefaultsCache<[Entitlement]>
-    private let accessTokenStorage: SubscriptionTokenStoring
+    private let accessTokenStorage: SubscriptionTokenStoringV1
     private let subscriptionEndpointService: SubscriptionEndpointService
     private let authEndpointService: AuthEndpointService
 
@@ -77,7 +77,7 @@ public final class DefaultAccountManager: AccountManager {
     // MARK: - Initialisers
 
     public init(storage: AccountStoring,
-                accessTokenStorage: SubscriptionTokenStoring,
+                accessTokenStorage: SubscriptionTokenStoringV1,
                 entitlementsCache: UserDefaultsCache<[Entitlement]>,
                 subscriptionEndpointService: SubscriptionEndpointService,
                 authEndpointService: AuthEndpointService) {
@@ -154,6 +154,20 @@ public final class DefaultAccountManager: AccountManager {
         } catch {
             if let error = error as? AccountKeychainAccessError {
                 delegate?.accountManagerKeychainAccessFailed(accessType: .storeAuthToken, error: error)
+            } else {
+                assertionFailure("Expected AccountKeychainAccessError")
+            }
+        }
+    }
+
+    public func storeAccessToken(token: String) {
+        Logger.subscription.info("[AccountManager] storeAccessToken")
+
+        do {
+            try accessTokenStorage.store(accessToken: token)
+        } catch {
+            if let error = error as? AccountKeychainAccessError {
+                delegate?.accountManagerKeychainAccessFailed(accessType: .storeAccessToken, error: error)
             } else {
                 assertionFailure("Expected AccountKeychainAccessError")
             }

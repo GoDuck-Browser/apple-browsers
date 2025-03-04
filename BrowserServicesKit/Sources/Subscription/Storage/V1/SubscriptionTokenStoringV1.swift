@@ -1,5 +1,5 @@
 //
-//  SubscriptionTokenStoring.swift
+//  SubscriptionTokenStoringV1.swift
 //
 //  Copyright © 2024 DuckDuckGo. All rights reserved.
 //
@@ -18,7 +18,7 @@
 
 import Foundation
 
-public protocol SubscriptionTokenStoring: AnyObject {
+public protocol SubscriptionTokenStoringV1: AnyObject {
     func getAccessToken() throws -> String?
     func store(accessToken: String) throws
     func removeAccessToken() throws

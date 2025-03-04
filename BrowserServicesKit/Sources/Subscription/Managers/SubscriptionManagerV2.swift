@@ -161,6 +161,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
                 subscriptionEnvironment: SubscriptionEnvironment,
                 pixelHandler: @escaping PixelHandler,
                 autoRecoveryHandler: @escaping AutoRecoveryHandler,
+                initForPurchase: Bool = true,
                 isInternalUserEnabled: @escaping () -> Bool =  { false }) {
         self._storePurchaseManager = storePurchaseManager
         self.oAuthClient = oAuthClient
@@ -170,18 +171,18 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
         self.autoRecoveryHandler = autoRecoveryHandler
         self.isInternalUserEnabled = isInternalUserEnabled
 
-#if !NETP_SYSTEM_EXTENSION
-        switch currentEnvironment.purchasePlatform {
-        case .appStore:
-            if #available(macOS 12.0, iOS 15.0, *) {
-                setupForAppStore()
-            } else {
-                assertionFailure("Trying to setup AppStore where not supported")
+        if initForPurchase {
+            switch currentEnvironment.purchasePlatform {
+            case .appStore:
+                if #available(macOS 12.0, iOS 15.0, *) {
+                    setupForAppStore()
+                } else {
+                    assertionFailure("Trying to setup AppStore where not supported")
+                }
+            case .stripe:
+                break
             }
-        case .stripe:
-            break
         }
-#endif
     }
 
     public var canPurchase: Bool {

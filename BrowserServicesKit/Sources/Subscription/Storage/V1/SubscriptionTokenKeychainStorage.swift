@@ -19,7 +19,7 @@
 import Foundation
 import Common
 
-public final class SubscriptionTokenKeychainStorage: SubscriptionTokenStoring {
+public final class SubscriptionTokenKeychainStorage: SubscriptionTokenStoringV1 {
 
     private let keychainType: KeychainType
     let errorHandler: ((AccountKeychainAccessType, AccountKeychainAccessError) -> Void)?

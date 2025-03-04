@@ -22,7 +22,7 @@ import NetworkProtection
 import Common
 import os.log
 
-extension NetworkProtectionKeychainTokenStore: SubscriptionTokenStoring {
+extension NetworkProtectionKeychainTokenStore: SubscriptionTokenStoringV1 {
 
     public func store(accessToken: String) throws {
         try store(accessToken)

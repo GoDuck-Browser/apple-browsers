@@ -19,7 +19,7 @@
 import Foundation
 import Subscription
 
-public final class SubscriptionTokenKeychainStorageMock: SubscriptionTokenStoring {
+public final class SubscriptionTokenKeychainStorageMock: SubscriptionTokenStoringV1 {
 
     public var accessToken: String?
 
