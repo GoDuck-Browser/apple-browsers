@@ -76,13 +76,13 @@ final class DuckDuckGoVPNApplication: NSApplication {
                                                              userDefaults: subscriptionUserDefaults,
                                                              canPerformAuthMigration: false,
                                                              canHandlePixels: false)
+        // MARK: -
 
         _delegate = DuckDuckGoVPNAppDelegate(accountManager: accountManager,
                                              subscriptionManagerV2: subscriptionManagerV2,
                                              accessTokenStorage: accessTokenStorage,
                                              subscriptionEnvironment: subscriptionEnvironment)
 
-        // MARK: -
         super.init()
 
         setupPixelKit()
