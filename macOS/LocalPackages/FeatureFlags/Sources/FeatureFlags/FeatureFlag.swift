@@ -125,9 +125,6 @@ extension FeatureFlag: FeatureFlagDescribing {
 public extension FeatureFlagger {
 
     func isFeatureOn(_ featureFlag: FeatureFlag) -> Bool {
-        if featureFlag == .historyView {
-            return true
-        }
-        return isFeatureOn(for: featureFlag)
+        isFeatureOn(for: featureFlag)
     }
 }
