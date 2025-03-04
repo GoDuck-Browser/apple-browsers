@@ -450,8 +450,7 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
             let accessTokenStorage = SubscriptionTokenKeychainStorage(keychainType: .dataProtection(.named(subscriptionAppGroup)))
             let subscriptionEndpointService = DefaultSubscriptionEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
             let authService = DefaultAuthEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
-            let accountManager = DefaultAccountManager(storage: AccountKeychainStorage(),
-                                                       accessTokenStorage: accessTokenStorage,
+            let accountManager = DefaultAccountManager(accessTokenStorage: accessTokenStorage,
                                                        entitlementsCache: entitlementsCache,
                                                        subscriptionEndpointService: subscriptionEndpointService,
                                                        authEndpointService: authService)

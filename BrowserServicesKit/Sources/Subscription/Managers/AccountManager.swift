@@ -76,7 +76,7 @@ public final class DefaultAccountManager: AccountManager {
 
     // MARK: - Initialisers
 
-    public init(storage: AccountStoring,
+    public init(storage: AccountStoring = AccountKeychainStorage(),
                 accessTokenStorage: SubscriptionTokenStoring,
                 entitlementsCache: UserDefaultsCache<[Entitlement]>,
                 subscriptionEndpointService: SubscriptionEndpointService,
