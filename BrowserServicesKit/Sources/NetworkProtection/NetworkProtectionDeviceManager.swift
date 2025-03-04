@@ -131,12 +131,7 @@ public actor NetworkProtectionDeviceManager: NetworkProtectionDeviceManagement {
                                             excludeLocalNetworks: Bool,
                                             dnsSettings: NetworkProtectionDNSSettings,
                                             regenerateKey: Bool) async throws -> GenerateTunnelConfigurationResult {
-        Logger.networkProtection.debug("""
-                Generating tunnel configuration
-                Selection method: \(resolvedSelectionMethod.debugDescription)
-                ExcludeLocalNetworks: \(excludeLocalNetworks)
-                RegenerateKey: \(regenerateKey)
-                """)
+        Logger.networkProtection.debug("Generating tunnel configuration")
         var keyPair: KeyPair
 
         if regenerateKey {

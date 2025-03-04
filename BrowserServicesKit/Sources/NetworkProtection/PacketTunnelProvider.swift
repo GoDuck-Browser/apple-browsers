@@ -1015,7 +1015,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         let resolvedServerSelectionMethod = await serverSelectionResolver.resolvedServerSelectionMethod()
 
         do {
-            configurationResult = try await deviceManager.generateTunnelConfiguration( // WARNING: Fails here
+            configurationResult = try await deviceManager.generateTunnelConfiguration(
                 resolvedSelectionMethod: resolvedServerSelectionMethod,
                 excludeLocalNetworks: settings.excludeLocalNetworks,
                 dnsSettings: dnsSettings,
