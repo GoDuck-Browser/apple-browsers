@@ -24,27 +24,27 @@ import SwiftUI
 @MainActor
 final class DuckPlayerEntryPillViewModel: ObservableObject {
     var onOpen: () -> Void
-    
-    @Published var isVisible: Bool = false    
+
+    @Published var isVisible: Bool = false
     private(set) var shouldAnimate: Bool = true
-    
+
     init(onOpen: @escaping () -> Void) {
         self.onOpen = onOpen
     }
-    
+
     func updateOnOpen(_ onOpen: @escaping () -> Void) {
         self.onOpen = onOpen
         shouldAnimate = false
     }
-    
+
     func openInDuckPlayer() {
         onOpen()
     }
-    
+
     func show() {
         self.isVisible = true
     }
-    
+
     func hide() {
         isVisible = false
     }

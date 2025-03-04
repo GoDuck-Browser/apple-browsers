@@ -25,36 +25,36 @@ import Combine
 /// A presenter class responsible for managing the native UI components of DuckPlayer.
 /// This includes presenting entry pills and handling their lifecycle.
 final class DuckPlayerNativeUIPresenter {
-    
+
     /// The types of the pill available
     enum PillType {
         case entry
         case reEntry
-    }    
+    }
 
     struct Constants {
         // Used to update the WebView's bottom constraint
         // When pill is visible
-        static let webViewRequiredBottomConstraint: CGFloat = 80        
+        static let webViewRequiredBottomConstraint: CGFloat = 80
     }
 
     /// The container view model for the entry pill
     private var containerViewModel: DuckPlayerContainer.ViewModel?
-    
+
     /// The hosting controller for the container
     private var containerViewController: UIHostingController<DuckPlayerContainer.Container<AnyView>>?
-    
+
     /// References to the host view and source
     private weak var hostView: TabViewController?
-    private var source: DuckPlayer.VideoNavigationSource?    
+    private var source: DuckPlayer.VideoNavigationSource?
     private var state: DuckPlayerState
 
     /// The DuckPlayer instance
     private weak var duckPlayer: DuckPlayerControlling?
-    
+
     /// The view model for the player
     private var playerViewModel: DuckPlayerViewModel?
-    
+
     /// A publisher to notify when a video playback request is needed
     let videoPlaybackRequest = PassthroughSubject<String, Never>()
     private var playerCancellables = Set<AnyCancellable>()
@@ -65,10 +65,10 @@ final class DuckPlayerNativeUIPresenter {
 
     /// Current height of the OmniBar
     private var omniBarHeight: CGFloat = 0
-    
+
     /// Bottom constraint for the container view
     private var bottomConstraint: NSLayoutConstraint?
-    
+
     /// Height of the current pill view
     private var pillHeight: CGFloat = 0
 
@@ -106,9 +106,9 @@ final class DuckPlayerNativeUIPresenter {
         self.hostView = hostViewController as? TabViewController
         if state.videoID != nil, let hostView = self.hostView {
             Task { await self.presentPill(for: state.videoID!, in: hostView, timestamp: state.timestamp) }
-        }     
+        }
     }
-    
+
     /// Presents a bottom sheet asking the user how they want to open the video
     ///
     /// - Parameters:
@@ -116,81 +116,80 @@ final class DuckPlayerNativeUIPresenter {
     ///   - timestamp: The timestamp of the video
     @MainActor
     func presentPill(for videoID: String, in hostViewController: TabViewController, timestamp: String?) {
-        
+
         // Store the videoID & Update State
         if state.videoID != videoID {
             state.hasBeenShown = false
-            state.videoID = videoID        
+            state.videoID = videoID
         }
 
         // Determine the pill type
         let pillType: PillType = state.hasBeenShown ? .reEntry : .entry
-        
+
         // If we already have a container view model, just update the content and show it again
         if let existingViewModel = containerViewModel, let hostingController = containerViewController {
             updatePillContent(for: pillType, videoID: videoID, in: hostingController)
             existingViewModel.show()
             pillHeight = Constants.webViewRequiredBottomConstraint
-            updateWebViewConstraintForPillHeight()            
+            updateWebViewConstraintForPillHeight()
             return
         }
-                
+
         self.hostView = hostViewController
         guard let hostView = self.hostView else { return }
-        
+
         // Create and configure the container view model
         let containerViewModel = DuckPlayerContainer.ViewModel()
         self.containerViewModel = containerViewModel
 
         // Initialize a generic container
         var containerView: DuckPlayerContainer.Container<AnyView>
-        
+
         // Create the container view with the appropriate pill view
         containerView = createContainerWithPill(for: pillType, videoID: videoID, containerViewModel: containerViewModel)
-        
+
         // Set up hosting controller
         let hostingController = UIHostingController(rootView: containerView)
         hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        
+
         // Add to host view
         hostView.view.addSubview(hostingController.view)
-        
+
         // Calculate bottom constraints based on URL Bar position
         // If at the bottom, the Container should be placed above it
-        bottomConstraint = appSettings.currentAddressBarPosition == .bottom ? 
-                    hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor, constant: -omniBarHeight) : 
+        bottomConstraint = appSettings.currentAddressBarPosition == .bottom ?
+                    hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor, constant: -omniBarHeight) :
                     hostingController.view.bottomAnchor.constraint(equalTo: hostView.view.bottomAnchor)
 
-        NSLayoutConstraint.activate([   
+        NSLayoutConstraint.activate([
             hostingController.view.leadingAnchor.constraint(equalTo: hostView.view.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: hostView.view.trailingAnchor),
-            bottomConstraint!           
+            bottomConstraint!
         ])
-                
+
         // Store reference to the hosting controller
-        containerViewController = hostingController                            
-        containerViewModel.show()            
-        
-        
+        containerViewController = hostingController
+        containerViewModel.show()
+
     }
-    
+
     /// Creates a container with the appropriate pill view based on the pill type
     @MainActor
     private func createContainerWithPill(for pillType: PillType, videoID: String, containerViewModel: DuckPlayerContainer.ViewModel) -> DuckPlayerContainer.Container<AnyView> {
-        
+
         // Set pill height based on type
         pillHeight = Constants.webViewRequiredBottomConstraint
-        
+
         // Update webView constraint with the new height
         updateWebViewConstraintForPillHeight()
-        
+
         if pillType == .entry {
             // Create the pill view model for entry type
-            let pillViewModel = DuckPlayerEntryPillViewModel() { [weak self] in
+            let pillViewModel = DuckPlayerEntryPillViewModel { [weak self] in
                 self?.videoPlaybackRequest.send(videoID)
             }
-            
+
             // Create the container view with the pill view
             return DuckPlayerContainer.Container(
                 viewModel: containerViewModel,
@@ -203,7 +202,7 @@ final class DuckPlayerNativeUIPresenter {
             let miniPillViewModel = DuckPlayerMiniPillViewModel(onOpen: { [weak self] in
                 self?.videoPlaybackRequest.send(videoID)
             }, videoID: videoID)
-            
+
             // Create the container view with the mini pill view
             return DuckPlayerContainer.Container(
                 viewModel: containerViewModel,
@@ -213,16 +212,16 @@ final class DuckPlayerNativeUIPresenter {
             }
         }
     }
-    
+
     /// Updates the webView constraint based on the current pill height
     @MainActor
     private func updateWebViewConstraintForPillHeight(animated: Bool = false, delay: TimeInterval = 0.5) {
-        
+
         // Add a delay to allow the pill to show, so constraint is
         // Updated behind it.
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }
-                        
+
             if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
                 if self.appSettings.currentAddressBarPosition == .bottom {
                     let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
@@ -230,7 +229,7 @@ final class DuckPlayerNativeUIPresenter {
                 } else {
                     webViewBottomConstraint.constant = -self.pillHeight
                 }
-                
+
                 if animated {
                     UIView.animate(withDuration: 0.3) {
                         hostView.view.layoutIfNeeded()
@@ -241,19 +240,19 @@ final class DuckPlayerNativeUIPresenter {
             }
         }
     }
-    
+
     /// Updates the content of an existing hosting controller with the appropriate pill view
     @MainActor
     private func updatePillContent(for pillType: PillType, videoID: String, in hostingController: UIHostingController<DuckPlayerContainer.Container<AnyView>>) {
         guard let containerViewModel = self.containerViewModel else { return }
-        
+
         // Create a new container with the updated content
         let updatedContainer = createContainerWithPill(for: pillType, videoID: videoID, containerViewModel: containerViewModel)
-        
+
         // Update the hosting controller's root view
         hostingController.rootView = updatedContainer
     }
-    
+
     /// Dismisses the currently presented entry pill
     @MainActor
     func dismissPill(reset: Bool = false) {
@@ -261,11 +260,11 @@ final class DuckPlayerNativeUIPresenter {
         resetWebViewConstraint()
 
         containerViewModel?.dismiss()
-        
+
         // Remove the view after the animation completes
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in                               
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
             self?.containerViewController?.view.removeFromSuperview()
-            self?.containerViewController = nil            
+            self?.containerViewController = nil
             self?.containerViewModel = nil
             self?.containerCancellables.removeAll()
         }
@@ -274,16 +273,16 @@ final class DuckPlayerNativeUIPresenter {
             self.state = DuckPlayerState()
         }
     }
-    
+
     /// Resets the webView constraint to its default value
     @MainActor
     private func resetWebViewConstraint(animated: Bool = false) {
         if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
-            
+
             // Reset to the default value based on address bar position
             let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
             webViewBottomConstraint.constant = appSettings.currentAddressBarPosition == .bottom ? -targetHeight : 0
-            
+
             // Update layout
             if animated {
                 UIView.animate(withDuration: 0.3) {
@@ -294,36 +293,36 @@ final class DuckPlayerNativeUIPresenter {
             }
         }
     }
-    
+
     /// Hides the bottom sheet when browser chrome is hidden
     @MainActor
     func hideBottomSheetForHiddenChrome() {
-        containerViewModel?.dismiss()        
+        containerViewModel?.dismiss()
         resetWebViewConstraint()
     }
-    
+
     /// Shows the bottom sheet when browser chrome is visible
     @MainActor
     func showBottomSheetForVisibleChrome() {
         containerViewModel?.show()
         updateWebViewConstraintForPillHeight(animated: true)
     }
-    
+
     @MainActor
     func presentDuckPlayer(videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController, title: String?, timestamp: String?) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>) {
         let navigationRequest = PassthroughSubject<URL, Never>()
         let settingsRequest = PassthroughSubject<Void, Never>()
-        
+
         let viewModel = DuckPlayerViewModel(videoID: videoID)
         self.playerViewModel = viewModel // Keep strong reference
-        
+
         let webView = DuckPlayerWebView(viewModel: viewModel)
         let duckPlayerView = DuckPlayerView(viewModel: viewModel, webView: webView)
-        
+
         let hostingController = UIHostingController(rootView: duckPlayerView)
-        hostingController.modalPresentationStyle = .pageSheet
+        hostingController.modalPresentationStyle = .fullScreen
         hostingController.isModalInPresentation = false
-        
+
         // Update State        
         self.state.hasBeenShown = true
 
@@ -337,7 +336,7 @@ final class DuckPlayerNativeUIPresenter {
                 hostingController?.dismiss(animated: true)
             }
             .store(in: &playerCancellables)
-        
+
         // Subscribe to Settings Request Publisher
         viewModel.settingsRequestPublisher
             .sink { settingsRequest.send() }
@@ -351,7 +350,7 @@ final class DuckPlayerNativeUIPresenter {
                 self.presentPill(for: videoID, in: hostView, timestamp: nil)
             }
             .store(in: &playerCancellables)
-        
+
         hostViewController.present(hostingController, animated: true)
 
         // Dismiss the Pill

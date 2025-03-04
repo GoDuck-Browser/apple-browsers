@@ -31,7 +31,7 @@ public enum DuckPlayerContainer {
       static let springDuration: Double = 0.5
       static let springBounce: Double = 0.2
     }
-    
+
     enum Offset {
       static let extraHeight: Double = 200.0
       static let initialValue: Double = 500.0
@@ -48,9 +48,9 @@ public enum DuckPlayerContainer {
     @Published public private(set) var sheetVisible = false
 
     private var subscriptions = Set<AnyCancellable>()
-    
+
     private var shouldAnimate = true
-    
+
     public var springAnimation: Animation? {
       shouldAnimate ? .spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0) : nil
     }
@@ -66,7 +66,7 @@ public enum DuckPlayerContainer {
 
   public struct Container<Content: View>: View {
     @ObservedObject var viewModel: ViewModel
-    
+
     @State private var sheetHeight = 0.0
 
     let hasBackground: Bool
@@ -77,7 +77,7 @@ public enum DuckPlayerContainer {
       self.hasBackground = hasBackground
       self.content = content
     }
-  
+
     @ViewBuilder private func sheet(containerHeight: Double) -> some View {
       SheetView(
         viewModel: viewModel,
@@ -91,14 +91,14 @@ public enum DuckPlayerContainer {
       VStack(spacing: 0) {
         // Add a spacer at the top to push content to the bottom
         Spacer(minLength: 0)
-        
+
         if hasBackground {
           Color.black
             .ignoresSafeArea()
             .opacity(viewModel.sheetVisible ? 1 : 0)
             .animation(viewModel.springAnimation, value: viewModel.sheetVisible)
         }
-        
+
         // Use a fixed container height for offset calculations
         sheet(containerHeight: DuckPlayerContainer.Constants.Offset.fixedContainerHeight)
           .frame(alignment: .bottom)
@@ -127,7 +127,7 @@ private struct SheetView<Content: View>: View {
 
   var body: some View {
     VStack(alignment: .center) {
-      
+
       if let sheetWidth {
         content(DuckPlayerContainer.PresentationMetrics(contentWidth: sheetWidth))
       }
@@ -139,15 +139,15 @@ private struct SheetView<Content: View>: View {
     .offset(y: sheetOffset)
     .opacity(opacity)
     .animation(.easeInOut(duration: DuckPlayerContainer.Constants.Animation.easeInOutDuration), value: opacity)
-    
+
     .onAppear {
       // Always start with the initial large offset value
       sheetOffset = DuckPlayerContainer.Constants.Offset.initialValue
       opacity = viewModel.sheetVisible ? 1 : 0
-      
+
       // If the sheet should be visible, animate it into view after a tiny delay
       // To allow it to render first
-      if viewModel.sheetVisible {        
+      if viewModel.sheetVisible {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
           withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
             sheetOffset = calculateSheetOffset(for: true, containerHeight: containerHeight)
@@ -155,7 +155,7 @@ private struct SheetView<Content: View>: View {
         }
       }
     }
-        
+
     .onChange(of: viewModel.sheetVisible) { sheetVisible in
       withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
         sheetOffset = calculateSheetOffset(for: sheetVisible, containerHeight: containerHeight)
@@ -173,7 +173,7 @@ private struct SheetView<Content: View>: View {
         opacity = viewModel.sheetVisible ? 1 : 0
       }
     }
-    
+
     .onHeightChange { newHeight in
       sheetHeight = newHeight
       onHeightChange(newHeight)
@@ -193,7 +193,7 @@ extension View {
       }
     )
   }
-  
+
   func onHeightChange(perform action: @escaping (Double) -> Void) -> some View {
     background(
       GeometryReader { geometry in

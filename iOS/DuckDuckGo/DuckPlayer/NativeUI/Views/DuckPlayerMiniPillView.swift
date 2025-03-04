@@ -22,7 +22,7 @@ import DesignResourcesKit
 
 struct DuckPlayerMiniPillView: View {
     @ObservedObject var viewModel: DuckPlayerMiniPillViewModel
-    
+
     // Add state to track the height
     @State private var viewHeight: CGFloat = 100
     @State private var iconSize: CGFloat = 40
@@ -70,7 +70,7 @@ struct DuckPlayerMiniPillView: View {
                     }
                     .frame(width: Constants.Layout.thumbnailSize.w, height: Constants.Layout.thumbnailSize.h)
                     .clipShape(RoundedRectangle(cornerRadius: Constants.Layout.thumbnailCornerRadius))
-                    
+
                     VStack(alignment: .leading) {
                         Text(UserText.duckPlayerNativeOpenInDuckPlayer)
                             .daxHeadline()
@@ -85,7 +85,7 @@ struct DuckPlayerMiniPillView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .layoutPriority(1)
-                    
+
                     // Play button
                     Image(systemName: Constants.playImage)
                         .font(.system(size: Constants.Layout.playButtonFont))
@@ -94,23 +94,23 @@ struct DuckPlayerMiniPillView: View {
                         .background(Color(designSystemColor: .accent))
                         .clipShape(Circle())
                 }
-                .padding(Constants.Layout.regularPadding)                
+                .padding(Constants.Layout.regularPadding)
             }
-            .background(Color(designSystemColor: .surface))        
-            .cornerRadius(Constants.Layout.cornerRadius)        
-            .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)   
+            .background(Color(designSystemColor: .surface))
+            .cornerRadius(Constants.Layout.cornerRadius)
+            .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
             .padding(.horizontal, Constants.Layout.regularPadding)
             .padding(.vertical, Constants.Layout.regularPadding)
             .padding(.bottom, Constants.Layout.bottomSpacer) // Add padding to cover border during animation                      
         }
     }
-    
-    var body: some View {        
+
+    var body: some View {
         ZStack(alignment: .bottom) {
-            Color(designSystemColor: .panel)                
+            Color(designSystemColor: .panel)
             sheetContent
         }
-        .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))          
+        .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))
         .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
         .offset(y: Constants.Layout.viewOffset)
     }

@@ -16,44 +16,44 @@ import Combine
 import SwiftUI
 import WebKit
 
-final class DuckPlayerMiniPillViewModel: ObservableObject {    
+final class DuckPlayerMiniPillViewModel: ObservableObject {
     var onOpen: () -> Void
-    var videoID: String = ""    
+    var videoID: String = ""
 
     @Published var isVisible: Bool = false
     @Published var title: String = ""
-    @Published var thumbnailURL: URL? = nil
-    @Published var authorName: String? = nil
-    
-    private(set) var shouldAnimate: Bool = true    
+    @Published var thumbnailURL: URL?
+    @Published var authorName: String?
+
+    private(set) var shouldAnimate: Bool = true
     private var titleUpdateTask: Task<Void, Error>?
     private var oEmbedService: YoutubeOembedService
-    
-   init(onOpen: @escaping () -> Void, videoID: String, oEmbedService: YoutubeOembedService = DefaultYoutubeOembedService()) {        
+
+   init(onOpen: @escaping () -> Void, videoID: String, oEmbedService: YoutubeOembedService = DefaultYoutubeOembedService()) {
     self.onOpen = onOpen
     self.videoID = videoID
-    self.oEmbedService = oEmbedService 
+    self.oEmbedService = oEmbedService
     Task { try await updateMetadata() }
-    
+
 }
-    
+
     func updateOnOpen(_ onOpen: @escaping () -> Void) {
         self.onOpen = onOpen
         shouldAnimate = false
     }
-    
+
     func openInDuckPlayer() {
         onOpen()
     }
-    
-    func show() {        
+
+    func show() {
         self.isVisible = true
     }
-    
+
     func hide() {
         isVisible = false
-    }        
-    
+    }
+
     // Gets the video title from the Youtube API oembed endpoint
     private func updateMetadata() async throws {
         if let response = await oEmbedService.fetchMetadata(for: videoID) {
@@ -61,7 +61,7 @@ final class DuckPlayerMiniPillViewModel: ObservableObject {
             self.authorName = response.author_name
             self.thumbnailURL = URL(string: response.thumbnail_url)
         }
-        
+
     }
 
-} 
+}

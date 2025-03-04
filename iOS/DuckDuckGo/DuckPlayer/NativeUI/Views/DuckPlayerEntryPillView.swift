@@ -22,7 +22,7 @@ import DesignResourcesKit
 
 struct DuckPlayerEntryPillView: View {
     @ObservedObject var viewModel: DuckPlayerEntryPillViewModel
-    
+
     // Add state to track the height
     @State private var viewHeight: CGFloat = 100
     @State private var iconSize: CGFloat = 40
@@ -47,16 +47,15 @@ struct DuckPlayerEntryPillView: View {
         }
     }
 
-
     private var sheetContent: some View {
         Button(action: { viewModel.openInDuckPlayer()}) {
             VStack(spacing: Constants.Layout.vStackSpacing) {
                 HStack(spacing: Constants.Layout.hStackSpacing) {
-                                        
+
                     Image(Constants.daxLogo)
                         .resizable()
                         .frame(width: Constants.Layout.iconSize, height: Constants.Layout.iconSize)
-                                        
+
                     VStack(alignment: .leading) {
                         Text(UserText.duckPlayerNativeOpenInDuckPlayer)
                             .daxHeadline()
@@ -67,11 +66,11 @@ struct DuckPlayerEntryPillView: View {
                         Text(UserText.duckPlayerTapToWatchWithoutAds)
                             .daxFootnoteRegular()
                             .foregroundColor(Color(designSystemColor: .textPrimary))
-                            .multilineTextAlignment(.leading)                            
+                            .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .layoutPriority(1)
-                    
+
                     Spacer()
 
                     Image(systemName: Constants.playImage)
@@ -81,23 +80,23 @@ struct DuckPlayerEntryPillView: View {
                         .background(Color.blue)
                         .clipShape(Circle())
                 }
-                .padding(Constants.Layout.regularPadding)                
+                .padding(Constants.Layout.regularPadding)
             }
-            .background(Color(designSystemColor: .surface))        
-            .cornerRadius(Constants.Layout.cornerRadius)        
-            .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)   
+            .background(Color(designSystemColor: .surface))
+            .cornerRadius(Constants.Layout.cornerRadius)
+            .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
             .padding(.horizontal, Constants.Layout.regularPadding)
             .padding(.vertical, Constants.Layout.regularPadding)
             .padding(.bottom, Constants.Layout.bottomSpacer) // Add padding to cover border during animation                      
         }
     }
-    
-    var body: some View {        
+
+    var body: some View {
         ZStack(alignment: .bottom) {
-            Color(designSystemColor: .panel)                
+            Color(designSystemColor: .panel)
             sheetContent
         }
-        .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))          
+        .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))
         .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
         .offset(y: Constants.Layout.viewOffset)
     }

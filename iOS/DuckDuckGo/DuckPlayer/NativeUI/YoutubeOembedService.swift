@@ -28,11 +28,10 @@ protocol YoutubeOembedService {
     func fetchMetadata(for videoID: String) async -> OEmbedResponse?
 }
 
-
 // Uses Youtube's oembed API to fetch video metadata
 // See: https://oembed.com 
 public final class DefaultYoutubeOembedService: YoutubeOembedService {
-    
+
     public func fetchMetadata(for videoID: String) async -> OEmbedResponse? {
         do {
             let oembedURL = URL.youtubeOembed(videoID)
@@ -43,7 +42,6 @@ public final class DefaultYoutubeOembedService: YoutubeOembedService {
         }
     }
 }
-
 
 extension URL {
 
