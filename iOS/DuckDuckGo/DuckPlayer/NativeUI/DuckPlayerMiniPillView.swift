@@ -55,7 +55,7 @@ struct DuckPlayerMiniPillView: View {
                         .resizable()
                         .frame(width: Constants.Layout.iconSize, height: Constants.Layout.iconSize)
                     
-                    Text("This is da shit")
+                    Text("Watch In Duck Player")
                         .font(.system(size: Constants.Layout.fontSize, weight: .semibold))
                         .foregroundColor(Color(designSystemColor: .textPrimary))
                     
