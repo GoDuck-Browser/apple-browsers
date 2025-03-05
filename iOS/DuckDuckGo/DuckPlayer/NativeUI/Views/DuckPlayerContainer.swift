@@ -46,21 +46,35 @@ public enum DuckPlayerContainer {
   @MainActor
   public final class ViewModel: ObservableObject {
     @Published public private(set) var sheetVisible = false
-
+    
     private var subscriptions = Set<AnyCancellable>()
-
     private var shouldAnimate = true
-
+    private var didAppearHandlers: [() -> Void] = []
+    
     public var springAnimation: Animation? {
       shouldAnimate ? .spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0) : nil
     }
-
+    
     public func show() {
       sheetVisible = true
     }
-
+    
     public func dismiss() {
       sheetVisible = false
+    }
+    
+    /// Register a callback to be executed when the view has fully appeared
+    public func onDidAppear(perform handler: @escaping () -> Void) {
+      didAppearHandlers.append(handler)
+    }
+    
+    /// Notify that the view has fully appeared
+    fileprivate func notifyDidAppear() {
+      for handler in didAppearHandlers {
+        handler()
+      }
+      // Clear handlers after executing them
+      didAppearHandlers.removeAll()
     }
   }
 
@@ -151,6 +165,11 @@ private struct SheetView<Content: View>: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
           withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
             sheetOffset = calculateSheetOffset(for: true, containerHeight: containerHeight)
+            
+            // Notify that the view has fully appeared after the animation completes
+            DispatchQueue.main.asyncAfter(deadline: .now() + DuckPlayerContainer.Constants.Animation.springDuration) {
+              viewModel.notifyDidAppear()
+            }
           }
         }
       }

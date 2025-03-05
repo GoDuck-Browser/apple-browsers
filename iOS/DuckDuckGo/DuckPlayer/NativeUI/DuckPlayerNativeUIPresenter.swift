@@ -35,7 +35,7 @@ final class DuckPlayerNativeUIPresenter {
     struct Constants {
         // Used to update the WebView's bottom constraint
         // When pill is visible
-        static let webViewRequiredBottomConstraint: CGFloat = 80
+        static let webViewRequiredBottomConstraint: CGFloat = 90
     }
 
     /// The container view model for the entry pill
@@ -48,7 +48,7 @@ final class DuckPlayerNativeUIPresenter {
     private weak var hostView: TabViewController?
     private var source: DuckPlayer.VideoNavigationSource?
     private var state: DuckPlayerState
-
+    
     /// The DuckPlayer instance
     private weak var duckPlayer: DuckPlayerControlling?
 
@@ -129,9 +129,9 @@ final class DuckPlayerNativeUIPresenter {
         // If we already have a container view model, just update the content and show it again
         if let existingViewModel = containerViewModel, let hostingController = containerViewController {
             updatePillContent(for: pillType, videoID: videoID, in: hostingController)
-            existingViewModel.show()
             pillHeight = Constants.webViewRequiredBottomConstraint
             updateWebViewConstraintForPillHeight()
+            existingViewModel.show()
             return
         }
 
@@ -151,6 +151,8 @@ final class DuckPlayerNativeUIPresenter {
         // Set up hosting controller
         let hostingController = UIHostingController(rootView: containerView)
         hostingController.view.backgroundColor = .clear
+        hostingController.view.isOpaque = false
+        hostingController.modalPresentationStyle = .overCurrentContext
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
 
         // Add to host view
@@ -215,13 +217,11 @@ final class DuckPlayerNativeUIPresenter {
 
     /// Updates the webView constraint based on the current pill height
     @MainActor
-    private func updateWebViewConstraintForPillHeight(animated: Bool = false, delay: TimeInterval = 0.5) {
-
-        // Add a delay to allow the pill to show, so constraint is
-        // Updated behind it.
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+    private func updateWebViewConstraintForPillHeight(animated: Bool = false) {
+        // Register a callback to update the constraint after the view appears
+        containerViewModel?.onDidAppear { [weak self] in
             guard let self = self else { return }
-
+            
             if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
                 if self.appSettings.currentAddressBarPosition == .bottom {
                     let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
@@ -229,7 +229,7 @@ final class DuckPlayerNativeUIPresenter {
                 } else {
                     webViewBottomConstraint.constant = -self.pillHeight
                 }
-
+                
                 if animated {
                     UIView.animate(withDuration: 0.3) {
                         hostView.view.layoutIfNeeded()
@@ -320,7 +320,7 @@ final class DuckPlayerNativeUIPresenter {
         let duckPlayerView = DuckPlayerView(viewModel: viewModel, webView: webView)
 
         let hostingController = UIHostingController(rootView: duckPlayerView)
-        hostingController.modalPresentationStyle = .fullScreen
+        hostingController.modalPresentationStyle = .custom
         hostingController.isModalInPresentation = false
 
         // Update State        

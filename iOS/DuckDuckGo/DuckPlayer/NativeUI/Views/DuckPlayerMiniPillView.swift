@@ -1,8 +1,8 @@
 //
-//  DuckPlayerBottomSheetView.swift
+//  DuckPlayerMiniPillView.swift
 //  DuckDuckGo
 //
-//  Copyright 2024 DuckDuckGo. All rights reserved.
+//  Copyright © 2025 DuckDuckGo. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -19,6 +19,47 @@
 
 import SwiftUI
 import DesignResourcesKit
+
+/// A view that loads an image asynchronously with animation
+struct AnimatedAsyncImage: View {
+    let url: URL?
+    let width: CGFloat
+    let height: CGFloat
+    
+    var body: some View {
+        if let url = url {
+            ZStack {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        Rectangle()
+                            .foregroundColor(Color.gray.opacity(0.3))
+                            .frame(width: width, height: height)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .transition(.opacity.combined(with: .scale))
+                    case .failure:
+                        Rectangle()
+                            .foregroundColor(Color.gray.opacity(0.3))
+                            .frame(width: width, height: height)
+                    @unknown default:
+                        Rectangle()
+                            .foregroundColor(Color.gray.opacity(0.3))
+                            .frame(width: width, height: height)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.3), value: url)
+                .id(url.absoluteString)
+            }
+        } else {
+            Rectangle()
+                .foregroundColor(Color.gray.opacity(0.3))
+                .frame(width: width, height: height)
+        }
+    }
+}
 
 struct DuckPlayerMiniPillView: View {
     @ObservedObject var viewModel: DuckPlayerMiniPillViewModel
@@ -52,21 +93,11 @@ struct DuckPlayerMiniPillView: View {
                 HStack(spacing: Constants.Layout.stackSpacing) {
                     // YouTube thumbnail image
                     Group {
-                        if let thumbnailURL = viewModel.thumbnailURL {
-                            AsyncImage(url: thumbnailURL) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            } placeholder: {
-                                Rectangle()
-                                    .foregroundColor(Color.gray.opacity(0.3))
-                                    .frame(width: Constants.Layout.thumbnailSize.w, height: Constants.Layout.thumbnailSize.h)
-                            }
-                        } else {
-                            Rectangle()
-                                .foregroundColor(Color.gray.opacity(0.3))
-                                .frame(width: Constants.Layout.thumbnailSize.w, height: Constants.Layout.thumbnailSize.h)
-                        }
+                        AnimatedAsyncImage(
+                            url: viewModel.thumbnailURL,
+                            width: Constants.Layout.thumbnailSize.w,
+                            height: Constants.Layout.thumbnailSize.h
+                        )
                     }
                     .frame(width: Constants.Layout.thumbnailSize.w, height: Constants.Layout.thumbnailSize.h)
                     .clipShape(RoundedRectangle(cornerRadius: Constants.Layout.thumbnailCornerRadius))

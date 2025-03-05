@@ -827,6 +827,15 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             return .notHandled(.duplicateNavigation)
         }
 
+        // Send SERP message
+        // This sends a mesasge to SERP about DuckPlayer
+        // being enabled.
+        // Normally, this message is sent by the legacy Duckplayer overlay
+        // script, but this is no longer included in the native version            
+        if newURL?.isDuckDuckGoSearch ?? false && duckPlayerMode == .alwaysAsk {
+            webView.evaluateJavaScript(serpOverlayScript)
+        }
+
         // Ensure all media playback is allowed by default
         self.toggleMediaPlayback(webView, pause: false)
 
@@ -849,13 +858,6 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
 
         // Present Bottom Sheet (Native entry point) with delay
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
-
-            // Send SERP message
-            // This sends a mesasge to SERP about DuckPlayer
-            // being enabled.
-            // Normally, this message is sent by the legacy Duckplayer overlay
-            // script, but this is no longer included in the native version            
-            webView.evaluateJavaScript(serpOverlayScript)
 
             // Ensure we only handle videos once
             if let (previousVideoId, _) = previousURL?.youtubeVideoParams,

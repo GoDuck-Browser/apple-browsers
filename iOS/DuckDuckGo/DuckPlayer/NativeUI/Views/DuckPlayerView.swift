@@ -42,8 +42,10 @@ struct DuckPlayerView: View {
 
     var body: some View {
         ZStack {
-            // Background
-            Color.black.edgesIgnoringSafeArea(.all)
+            // Background with blur effect
+            Color(.black)
+            .opacity(0.97)
+            .edgesIgnoringSafeArea(.all)
 
             VStack(spacing: 0) {
                 // Header
@@ -150,6 +152,5 @@ struct DuckPlayerView: View {
             })
         }
         .padding(.horizontal, Constants.horizontalPadding)
-        .background(Color.black)
     }
 }
