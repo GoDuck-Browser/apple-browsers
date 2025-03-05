@@ -135,8 +135,7 @@ private struct SheetView<Content: View>: View {
       withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
         sheetOffset = calculateSheetOffset(for: visible, containerHeight: containerHeight)
       } completion: {
-        viewModel.sheetAnimationCompleted = true
-        print("sheetAnimationCompleted: \(viewModel.sheetAnimationCompleted)")
+        viewModel.sheetAnimationCompleted = true        
       }
     } else {
       withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
