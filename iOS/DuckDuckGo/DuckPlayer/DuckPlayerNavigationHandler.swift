@@ -105,16 +105,6 @@ final class DuckPlayerNavigationHandler: NSObject {
         return script
     }()
 
-    /// Script to notify SERP about DuckPlayer
-    private let serpOverlayScript: String = {
-        guard let url = Bundle.main.url(forResource: "serpOverlay", withExtension: "js"),
-              let script = try? String(contentsOf: url) else {
-            assertionFailure("Failed to load SERP overlay script")
-            return ""
-        }
-        return script
-    }()
-
     private struct Constants {
         static let SERPURL =  "duckduckgo.com/"
         static let refererHeader = "Referer"
@@ -826,15 +816,6 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
         if let lastTimestamp = lastNavigationHandling,
            Date().timeIntervalSince(lastTimestamp) < lastNavigationHandlingThrottleDuration {
             return .notHandled(.duplicateNavigation)
-        }
-
-        // Send SERP message
-        // This sends a mesasge to SERP about DuckPlayer
-        // being enabled.
-        // Normally, this message is sent by the legacy Duckplayer overlay
-        // script, but this is no longer included in the native version            
-        if newURL?.isDuckDuckGoSearch ?? false && duckPlayerMode == .alwaysAsk {
-            webView.evaluateJavaScript(serpOverlayScript)
         }
 
         // Ensure all media playback is allowed by default
