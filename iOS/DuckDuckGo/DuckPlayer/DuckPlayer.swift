@@ -147,7 +147,8 @@ protocol DuckPlayerControlling: AnyObject {
     /// - Parameters:
     ///   - settings: The Duck Player settings.
     ///   - featureFlagger: The feature flag manager.
-    init(settings: DuckPlayerSettings, featureFlagger: FeatureFlagger)
+    ///   - nativeUIPresenter: The native UI presenter.
+    init(settings: DuckPlayerSettings, featureFlagger: FeatureFlagger, nativeUIPresenter: DuckPlayerNativeUIPresenting)
 
     /// Sets user values received from the web content.
     ///
@@ -316,8 +317,8 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     /// Publisher to notify when DuckPlayer is dismissed
     var playerDismissedPublisher: PassthroughSubject<Void, Never>
 
-    private let nativeUIPresenter = DuckPlayerNativeUIPresenter()
-    private var presentationCancellables = Set<AnyCancellable>()
+    private let nativeUIPresenter: DuckPlayerNativeUIPresenting
+    private var nativeUIPresenterCancellables = Set<AnyCancellable>()
 
     /// Initializes a new instance of DuckPlayer with the provided settings and feature flagger.
     ///
@@ -325,11 +326,13 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     ///   - settings: The Duck Player settings.
     ///   - featureFlagger: The feature flag manager.
     init(settings: DuckPlayerSettings = DuckPlayerSettingsDefault(),
-         featureFlagger: FeatureFlagger = AppDependencyProvider.shared.featureFlagger) {
+         featureFlagger: FeatureFlagger = AppDependencyProvider.shared.featureFlagger, 
+         nativeUIPresenter: DuckPlayerNativeUIPresenting = DuckPlayerNativeUIPresenter()) {
         self.settings = settings
         self.featureFlagger = featureFlagger
         self.youtubeNavigationRequest = PassthroughSubject<URL, Never>()
         self.playerDismissedPublisher = PassthroughSubject<Void, Never>()
+        self.nativeUIPresenter = nativeUIPresenter
         super.init()
         setupSubscriptions()
 
@@ -353,12 +356,6 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     /// - Parameter vc: The view controller to set as host.
     public func setHostViewController(_ vc: TabViewController) {
         hostView = vc
-
-        if settings.mode == .alwaysAsk && settings.nativeUI {
-            Task { @MainActor in
-                nativeUIPresenter.setHostViewController(vc)
-            }
-        }
     }
 
     private func addTapGestureRecognizer() {
@@ -419,13 +416,13 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
                 .sink { [weak self] url in
                     self?.youtubeNavigationRequest.send(url)
                 }
-                .store(in: &presentationCancellables)
+                .store(in: &nativeUIPresenterCancellables)
 
             publishers.settings
                 .sink { [weak self] in
                     self?.openDuckPlayerSettings()
                 }
-                .store(in: &presentationCancellables)
+                .store(in: &nativeUIPresenterCancellables)
         }
     }
 
@@ -757,7 +754,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
             .sink { [weak self] videoID in
                 self?.loadNativeDuckPlayerVideo(videoID: videoID, source: .youtube)
             }
-            .store(in: &presentationCancellables)
+            .store(in: &nativeUIPresenterCancellables)
     }
 
     /// Add cleanup method to remove the sheet    
@@ -786,7 +783,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
             .sink { [weak self] videoID in
                 self?.loadNativeDuckPlayerVideo(videoID: videoID, source: .youtube)
             }
-            .store(in: &presentationCancellables)
+            .store(in: &nativeUIPresenterCancellables)
     }
     /// Returns tuple of Pixels for firing when a YouTube Error occurs
     private func getPixelsForYouTubeErrorParams(_ params: Any) -> (Pixel.Event, Pixel.Event) {

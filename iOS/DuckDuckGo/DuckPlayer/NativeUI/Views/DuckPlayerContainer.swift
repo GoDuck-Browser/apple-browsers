@@ -46,6 +46,7 @@ public enum DuckPlayerContainer {
   @MainActor
   public final class ViewModel: ObservableObject {
     @Published public private(set) var sheetVisible = false
+    @Published var sheetAnimationCompleted = false
 
     private var subscriptions = Set<AnyCancellable>()
     private var shouldAnimate = true
@@ -55,10 +56,12 @@ public enum DuckPlayerContainer {
     }
 
     public func show() {
+      sheetAnimationCompleted = false
       sheetVisible = true
     }
 
     public func dismiss() {
+      sheetAnimationCompleted = false
       sheetVisible = false
     }
    
@@ -125,6 +128,25 @@ private struct SheetView<Content: View>: View {
   @State private var opacity: Double = 0
   @State private var sheetOffset = DuckPlayerContainer.Constants.Offset.initialValue
 
+  // Animate the sheet offset with a spring animation
+  private func animateOffset(to visible: Bool) {
+    
+    if #available(iOS 17.0, *) {
+      withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
+        sheetOffset = calculateSheetOffset(for: visible, containerHeight: containerHeight)
+      } completion: {
+        viewModel.sheetAnimationCompleted = true
+        print("sheetAnimationCompleted: \(viewModel.sheetAnimationCompleted)")
+      }
+    } else {
+      withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
+        sheetOffset = calculateSheetOffset(for: visible, containerHeight: containerHeight)
+      }
+      // For earlier iOS versions, set completed immediately
+      viewModel.sheetAnimationCompleted = true
+    }
+  }
+
   var body: some View {
     VStack(alignment: .center) {
 
@@ -141,34 +163,30 @@ private struct SheetView<Content: View>: View {
     .animation(.easeInOut(duration: DuckPlayerContainer.Constants.Animation.easeInOutDuration), value: opacity)
 
     .onAppear {
+      
       // Always start with the initial large offset value
       sheetOffset = DuckPlayerContainer.Constants.Offset.initialValue
       opacity = viewModel.sheetVisible ? 1 : 0
 
       // If the sheet should be visible, animate it into view after a tiny delay
-      // To allow it to render first
       if viewModel.sheetVisible {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-          withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
-            sheetOffset = calculateSheetOffset(for: true, containerHeight: containerHeight)    
-          }
+          animateOffset(to: true)
         }
       }
     }
 
     .onChange(of: viewModel.sheetVisible) { sheetVisible in
-      withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
-        sheetOffset = calculateSheetOffset(for: sheetVisible, containerHeight: containerHeight)
-      }
+      animateOffset(to: sheetVisible)
+      
       withAnimation(viewModel.springAnimation) {
         opacity = sheetVisible ? 1 : 0
       }
     }
 
     .onChange(of: containerHeight) { containerHeight in
-      withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
-        sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
-      }
+      animateOffset(to: viewModel.sheetVisible)
+      
       withAnimation(viewModel.springAnimation) {
         opacity = viewModel.sheetVisible ? 1 : 0
       }
