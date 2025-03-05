@@ -244,10 +244,10 @@ protocol DuckPlayerControlling: AnyObject {
     func dismissPill()
 
     /// Hides the bottom sheet when browser chrome is hidden
-    func hideBottomSheetForHiddenChrome()
+    func hidePillForHiddenChrome()
 
     /// Shows the bottom sheet when browser chrome is visible
-    func showBottomSheetForVisibleChrome()
+    func showPillForVisibleChrome()
 }
 
 extension DuckPlayerControlling {
@@ -388,7 +388,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
             let orientation = UIDevice.current.orientation
             if orientation.isLandscape {
                 hostView?.chromeDelegate?.setBarsHidden(false, animated: true, customAnimationDuration: Constants.chromeShowHideAnimationDuration)
-                showBottomSheetForVisibleChrome()
+                showPillForVisibleChrome()
             }
         }
     }
@@ -732,12 +732,12 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
     }
 
     /// Hides the bottom sheet when browser chrome is hidden
-    func hideBottomSheetForHiddenChrome() {
+    func hidePillForHiddenChrome() {
         Task { await nativeUIPresenter.hideBottomSheetForHiddenChrome() }
     }
 
     /// Shows the bottom sheet when browser chrome is visible
-    func showBottomSheetForVisibleChrome() {
+    func showPillForVisibleChrome() {
         Task { await nativeUIPresenter.showBottomSheetForVisibleChrome() }
     }
 
@@ -773,9 +773,9 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
             let isHidden = notification.userInfo?["isHidden"] as? Bool {
 
             if isHidden {
-                hideBottomSheetForHiddenChrome()
+                hidePillForHiddenChrome()
             } else {
-                showBottomSheetForVisibleChrome()
+                showPillForVisibleChrome()
             }
         }
     }

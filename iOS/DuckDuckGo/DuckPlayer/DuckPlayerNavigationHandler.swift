@@ -857,7 +857,7 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
 
         let parameters = getDuckPlayerParameters(url: url)
 
-        // Present Bottom Sheet (Native entry point) with delay
+        // Present Duck Player Pill (Native entry point)
         if duckPlayer.settings.mode == .alwaysAsk && duckPlayer.settings.nativeUI {
 
             // Ensure we only handle videos once
