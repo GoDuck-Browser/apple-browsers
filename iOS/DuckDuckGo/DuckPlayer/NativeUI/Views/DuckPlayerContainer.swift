@@ -150,12 +150,7 @@ private struct SheetView<Content: View>: View {
       if viewModel.sheetVisible {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
           withAnimation(.spring(duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)) {
-            sheetOffset = calculateSheetOffset(for: true, containerHeight: containerHeight)
-
-            // Notify that the view has fully appeared after the animation completes
-            DispatchQueue.main.asyncAfter(deadline: .now() + DuckPlayerContainer.Constants.Animation.springDuration) {
-              viewModel.notifyDidAppear()
-            }
+            sheetOffset = calculateSheetOffset(for: true, containerHeight: containerHeight)    
           }
         }
       }
