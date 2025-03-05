@@ -152,14 +152,11 @@ private enum MockError: Error {
 private class MockFeatureAvailability: SubscriptionFeatureAvailability {
     var mockFeatureAvailable: Bool = false
     var mockSubscriptionPurchaseAllowed: Bool = false
-    var mockUsesUnifiedFeedbackForm: Bool = false
 
     var isSubscriptionPurchaseAllowed: Bool { mockSubscriptionPurchaseAllowed }
-    var usesUnifiedFeedbackForm: Bool { mockUsesUnifiedFeedbackForm }
 
     func reset() {
         mockFeatureAvailable = false
         mockSubscriptionPurchaseAllowed = false
-        mockUsesUnifiedFeedbackForm = false
     }
 }

@@ -21,7 +21,7 @@ import SwiftUI
 import SwiftUIExtensions
 import BrowserServicesKit
 
-public struct PreferencesSubscriptionView: View {
+public struct PreferencesSubscriptionViewV1: View {
 
     @State private var state: PreferencesSubscriptionState = .noSubscription
 
@@ -305,7 +305,7 @@ public struct PreferencesSubscriptionView: View {
             VStack(alignment: .leading, spacing: 16) {
                 TextButton(UserText.viewFaqsButton, weight: .semibold) { model.openFAQ() }
 
-                if subscriptionFeatureAvailability.usesUnifiedFeedbackForm, state == .subscriptionActive {
+                if state == .subscriptionActive {
                     TextButton(UserText.preferencesSubscriptionFeedbackButton, weight: .semibold) { model.openUnifiedFeedbackForm() }
                 }
 
@@ -666,7 +666,7 @@ public struct PreferencesSubscriptionViewV2: View {
             VStack(alignment: .leading, spacing: 16) {
                 TextButton(UserText.viewFaqsButton, weight: .semibold) { model.openFAQ() }
 
-                if subscriptionFeatureAvailability.usesUnifiedFeedbackForm, state == .subscriptionActive {
+                if state == .subscriptionActive {
                     TextButton(UserText.preferencesSubscriptionFeedbackButton, weight: .semibold) { model.openUnifiedFeedbackForm() }
                 }
 
