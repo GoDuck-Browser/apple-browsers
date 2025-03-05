@@ -25,7 +25,7 @@ struct AnimatedAsyncImage: View {
     let url: URL?
     let width: CGFloat
     let height: CGFloat
-    
+
     var body: some View {
         if let url = url {
             ZStack {

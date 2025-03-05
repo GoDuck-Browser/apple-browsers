@@ -48,7 +48,7 @@ final class DuckPlayerNativeUIPresenter {
     private weak var hostView: TabViewController?
     private var source: DuckPlayer.VideoNavigationSource?
     private var state: DuckPlayerState
-    
+
     /// The DuckPlayer instance
     private weak var duckPlayer: DuckPlayerControlling?
 
@@ -221,7 +221,7 @@ final class DuckPlayerNativeUIPresenter {
         // Register a callback to update the constraint after the view appears
         containerViewModel?.onDidAppear { [weak self] in
             guard let self = self else { return }
-            
+
             if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
                 if self.appSettings.currentAddressBarPosition == .bottom {
                     let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
@@ -229,7 +229,7 @@ final class DuckPlayerNativeUIPresenter {
                 } else {
                     webViewBottomConstraint.constant = -self.pillHeight
                 }
-                
+
                 if animated {
                     UIView.animate(withDuration: 0.3) {
                         hostView.view.layoutIfNeeded()
