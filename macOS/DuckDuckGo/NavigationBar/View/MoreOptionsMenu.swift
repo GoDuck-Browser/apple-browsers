@@ -1029,7 +1029,7 @@ final class SubscriptionSubMenu: NSMenu, NSMenuDelegate {
         guard subscriptionManager.isUserAuthenticated else { return }
 
         @Sendable func hasEntitlement(for productName: Entitlement.ProductName) async -> Bool {
-            await self.subscriptionManager.isEnabled(feature: productName)
+            (try? await subscriptionManager.isEnabled(feature: productName)) ?? false
         }
 
         Task.detached(priority: .background) { [weak self] in

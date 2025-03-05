@@ -80,7 +80,7 @@ struct DefaultDataBrokerProtectionFeatureGatekeeper: DataBrokerProtectionFeature
 
     /// Checks DBP prerequisites
     ///
-    /// Prerequisites are satisified if either:
+    /// Prerequisites are satisfied if either:
     /// 1. The user is an active freemium user (e.g has activated freemium and is not authenticated)
     /// 2. The user has a subscription with valid entitlements
     ///
@@ -89,8 +89,13 @@ struct DefaultDataBrokerProtectionFeatureGatekeeper: DataBrokerProtectionFeature
 
         let isAuthenticated = subscriptionManager.isUserAuthenticated
         if !isAuthenticated && freemiumDBPUserStateManager.didActivate { return true }
-        var hasEntitlements = await subscriptionManager.isEnabled(feature: .dataBrokerProtection)
+
+        // NOTE: This check In AuthV1 this can fail in case of bad network, in AuthV2 works as expected in any network condition
+        let hasEntitlements = (try? await subscriptionManager.isEnabled(feature: .dataBrokerProtection,
+                                                                        cachePolicy: .reloadIgnoringLocalCacheData)) ?? false
+
         firePrerequisitePixelsAndLogIfNecessary(hasEntitlements: hasEntitlements, isAuthenticatedResult: isAuthenticated)
+
         return hasEntitlements && isAuthenticated
     }
 }

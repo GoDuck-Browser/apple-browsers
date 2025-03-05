@@ -61,7 +61,7 @@ struct DefaultVPNFeatureGatekeeper: VPNFeatureGatekeeper {
     /// For subscription users this means they have entitlements.
     ///
     func canStartVPN() async throws -> Bool {
-        await subscriptionManager.isEnabled(feature: .networkProtection)
+        try await subscriptionManager.isEnabled(feature: .networkProtection)
     }
 
     /// Whether the user can see the VPN entry points in the UI.

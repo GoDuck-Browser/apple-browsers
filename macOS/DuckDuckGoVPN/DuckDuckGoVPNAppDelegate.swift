@@ -89,13 +89,18 @@ final class DuckDuckGoVPNApplication: NSApplication {
         self.delegate = _delegate
         accountManager.delegate = _delegate
 
-#if DEBUG
-        if accountManager.accessToken != nil {
-            Logger.networkProtection.error("🟢 VPN Agent found token")
+        var tokenFound: Bool
+        if !Self.isAuthV2Enabled {
+            tokenFound = accountManager.accessToken != nil
         } else {
-            Logger.networkProtection.error("VPN Agent found no token")
+            tokenFound = subscriptionManagerV2.isUserAuthenticated
         }
-#endif
+
+        if tokenFound {
+            Logger.networkProtection.debug("🟢 VPN Agent found token")
+        } else {
+            Logger.networkProtection.error("🔴 VPN Agent found no token")
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -517,11 +522,21 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
     private lazy var entitlementMonitor = NetworkProtectionEntitlementMonitor()
 
     private func setUpSubscriptionMonitoring() {
-        guard accountManager.isUserAuthenticated else { return }
 
-        let entitlementsCheck = {
-            await self.accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
+        var isUserAuthenticated: Bool
+        let entitlementsCheck: () async -> Swift.Result<Bool, Error>
+        if !DuckDuckGoVPNApplication.isAuthV2Enabled {
+            isUserAuthenticated = accountManager.isUserAuthenticated
+            entitlementsCheck = {
+                await self.accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
+            }
+        } else {
+            isUserAuthenticated = subscriptionManagerV2.isUserAuthenticated
+            entitlementsCheck = {
+                .success(await self.subscriptionManagerV2.isFeatureAvailableForUser(.networkProtection))
+            }
         }
+        guard isUserAuthenticated else { return }
 
         Task {
             await entitlementMonitor.start(entitlementCheck: entitlementsCheck) { [weak self] result in

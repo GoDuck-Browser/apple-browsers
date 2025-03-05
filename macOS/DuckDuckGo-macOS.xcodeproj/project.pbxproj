@@ -243,8 +243,8 @@
 		1EC7115A2D035BC30009EB5C /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 1EC711572D035BC30009EB5C /* Localizable.xcstrings */; };
 		1ED910D52B63BFB300936947 /* IdentityTheftRestorationPagesUserScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED910D42B63BFB300936947 /* IdentityTheftRestorationPagesUserScript.swift */; };
 		1ED910D62B63BFB300936947 /* IdentityTheftRestorationPagesUserScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ED910D42B63BFB300936947 /* IdentityTheftRestorationPagesUserScript.swift */; };
-		1EEB2D7A2C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureTestsForStripe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB2D792C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureTestsForStripe.swift */; };
-		1EEB2D7B2C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureTestsForStripe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB2D792C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureTestsForStripe.swift */; };
+		1EEB2D7A2C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureForStripeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB2D792C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureForStripeTests.swift */; };
+		1EEB2D7B2C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureForStripeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEB2D792C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureForStripeTests.swift */; };
 		1EFA1A072C7C7F0E0099F508 /* PrivacyProPixel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F188267F2BBEB58100D9AC4F /* PrivacyProPixel.swift */; };
 		1EFA1A082C7C7F0F0099F508 /* PrivacyProPixel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F188267F2BBEB58100D9AC4F /* PrivacyProPixel.swift */; };
 		31031EB72CC94C6E00684340 /* AIChatRemoteSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31031EB62CC94C6C00684340 /* AIChatRemoteSettingsTests.swift */; };
@@ -3732,7 +3732,7 @@
 		1EC711542D03421B0009EB5C /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		1EC711572D035BC30009EB5C /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		1ED910D42B63BFB300936947 /* IdentityTheftRestorationPagesUserScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityTheftRestorationPagesUserScript.swift; sourceTree = "<group>"; };
-		1EEB2D792C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureTestsForStripe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPagesUseSubscriptionFeatureTestsForStripe.swift; sourceTree = "<group>"; };
+		1EEB2D792C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureForStripeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPagesUseSubscriptionFeatureForStripeTests.swift; sourceTree = "<group>"; };
 		31031EB62CC94C6C00684340 /* AIChatRemoteSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatRemoteSettingsTests.swift; sourceTree = "<group>"; };
 		31031EB92CC9736500684340 /* AIChatOnboardingTabExtensionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatOnboardingTabExtensionTests.swift; sourceTree = "<group>"; };
 		310E79BE294A19A8007C49E8 /* FireproofingReferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FireproofingReferenceTests.swift; sourceTree = "<group>"; };
@@ -8207,7 +8207,7 @@
 				F1AFDBD12C231B7A00710F2C /* SubscriptionAppStoreRestorerTests.swift */,
 				F1AFDBD32C231B9700710F2C /* SubscriptionErrorReporterTests.swift */,
 				1E2BEAE32C8B00B5002741A3 /* SubscriptionPagesUseSubscriptionFeatureTests.swift */,
-				1EEB2D792C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureTestsForStripe.swift */,
+				1EEB2D792C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureForStripeTests.swift */,
 			);
 			path = Subscription;
 			sourceTree = "<group>";
@@ -12772,7 +12772,7 @@
 				31031EBB2CC9736500684340 /* AIChatOnboardingTabExtensionTests.swift in Sources */,
 				56534DEE29DF252C00121467 /* CapturingDefaultBrowserProvider.swift in Sources */,
 				561D29C32BDA745B007B91D0 /* MockSyncPausedStateManaging.swift in Sources */,
-				1EEB2D7B2C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureTestsForStripe.swift in Sources */,
+				1EEB2D7B2C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureForStripeTests.swift in Sources */,
 				3706FDF8293F661700E42796 /* FileStoreTests.swift in Sources */,
 				1D838A342C44F0320078373F /* ReleaseNotesParserTests.swift in Sources */,
 				5603D90729B7B746007F9F01 /* MockTabViewItemDelegate.swift in Sources */,
@@ -14757,7 +14757,7 @@
 				4BBF09232830812900EE1418 /* FileSystemDSL.swift in Sources */,
 				7B4C5CF52BE51D640007A164 /* VPNUninstallerTests.swift in Sources */,
 				4B9DB05C2A983B55000927DB /* WaitlistViewModelTests.swift in Sources */,
-				1EEB2D7A2C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureTestsForStripe.swift in Sources */,
+				1EEB2D7A2C986A40000D908B /* SubscriptionPagesUseSubscriptionFeatureForStripeTests.swift in Sources */,
 				37A0BA282D747BC900130447 /* CapturingHistoryViewDataProvider.swift in Sources */,
 				1D1C36E329FAE8DA001FA40C /* FaviconManagerTests.swift in Sources */,
 				9F0FFFB42BCCAE37007C87DD /* BookmarkAllTabsDialogCoordinatorViewModelTests.swift in Sources */,

@@ -52,7 +52,7 @@ public final class DataBrokerProtectionSubscriptionManager: DataBrokerProtection
     }
 
     public func hasValidEntitlement() async throws -> Bool {
-        await subscriptionManager.isEnabled(feature: .dataBrokerProtection)
+        try await subscriptionManager.isEnabled(feature: .dataBrokerProtection)
     }
 }
 
