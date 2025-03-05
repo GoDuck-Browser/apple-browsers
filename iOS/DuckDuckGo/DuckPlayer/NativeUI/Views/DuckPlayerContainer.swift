@@ -49,7 +49,6 @@ public enum DuckPlayerContainer {
 
     private var subscriptions = Set<AnyCancellable>()
     private var shouldAnimate = true
-    private var didAppearHandlers: [() -> Void] = []
 
     public var springAnimation: Animation? {
       shouldAnimate ? .spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0) : nil
@@ -62,20 +61,7 @@ public enum DuckPlayerContainer {
     public func dismiss() {
       sheetVisible = false
     }
-
-    /// Register a callback to be executed when the view has fully appeared
-    public func onDidAppear(perform handler: @escaping () -> Void) {
-      didAppearHandlers.append(handler)
-    }
-
-    /// Notify that the view has fully appeared
-    fileprivate func notifyDidAppear() {
-      for handler in didAppearHandlers {
-        handler()
-      }
-      // Clear handlers after executing them
-      didAppearHandlers.removeAll()
-    }
+   
   }
 
   public struct Container<Content: View>: View {
