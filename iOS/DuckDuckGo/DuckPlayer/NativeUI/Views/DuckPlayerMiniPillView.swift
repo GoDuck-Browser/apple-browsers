@@ -26,6 +26,10 @@ struct AnimatedAsyncImage: View {
     let width: CGFloat
     let height: CGFloat
 
+    struct Constants {
+        static let backgroundColor: Color = .gray.opacity(0.3)
+    }
+
     var body: some View {
         if let url = url {
             ZStack {
@@ -33,7 +37,7 @@ struct AnimatedAsyncImage: View {
                     switch phase {
                     case .empty:
                         Rectangle()
-                            .foregroundColor(Color.gray.opacity(0.3))
+                            .foregroundColor(Constants.backgroundColor)
                             .frame(width: width, height: height)
                     case .success(let image):
                         image
@@ -42,11 +46,11 @@ struct AnimatedAsyncImage: View {
                             .transition(.opacity.combined(with: .scale))
                     case .failure:
                         Rectangle()
-                            .foregroundColor(Color.gray.opacity(0.3))
+                            .foregroundColor(Constants.backgroundColor)
                             .frame(width: width, height: height)
                     @unknown default:
                         Rectangle()
-                            .foregroundColor(Color.gray.opacity(0.3))
+                            .foregroundColor(Constants.backgroundColor)
                             .frame(width: width, height: height)
                     }
                 }
