@@ -873,18 +873,17 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
             // If we're not in a Watch main page, hide
             // the pill.  Youtube adds #fragments to Watch main pages
             // When presenting settings and preferences
-            if !url.isYoutubeWatchMainPage {
+            if !url.isYoutubeWatch {
                 duckPlayer.dismissPill()
             }
 
             // Present the Pill if needed
             Task { @MainActor in
                 // Skip URLs for settings and #fragments
-                if url.isYoutubeWatchMainPage {
+                if url.isYoutubeWatch {
                     duckPlayer.presentPill(for: videoID, timestamp: nil)
                 }
             }
-
         }
 
         // If this is an internal Youtube Link (i.e Clicking in youtube logo in the player)

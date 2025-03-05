@@ -142,10 +142,6 @@ protocol DuckPlayerControlling: AnyObject {
     /// Publisher that emits when Native DuckPlayer is dismissed
     var playerDismissedPublisher: PassthroughSubject<Void, Never> { get }
 
-    /// The view and viewModel for the bottom sheet
-    var bottomSheetViewModel: DuckPlayerEntryPillViewModel? { get }
-    var bottomSheetHostingController: UIHostingController<DuckPlayerEntryPillView>? { get }
-
     /// Initializes a new instance of DuckPlayer with the provided settings and feature flagger.
     ///
     /// - Parameters:
@@ -319,10 +315,6 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
 
     /// Publisher to notify when DuckPlayer is dismissed
     var playerDismissedPublisher: PassthroughSubject<Void, Never>
-
-    /// The view and viewModel for the bottom sheet
-    var bottomSheetViewModel: DuckPlayerEntryPillViewModel?
-    var bottomSheetHostingController: UIHostingController<DuckPlayerEntryPillView>?
 
     private let nativeUIPresenter = DuckPlayerNativeUIPresenter()
     private var presentationCancellables = Set<AnyCancellable>()
@@ -777,7 +769,7 @@ final class DuckPlayer: NSObject, DuckPlayerControlling {
 
     @objc private func handleChromeVisibilityChange(_ notification: Notification) {
         if let url = hostView?.webView.url,
-            url.isYoutubeWatchMainPage,
+            url.isYoutubeWatch,
             let isHidden = notification.userInfo?["isHidden"] as? Bool {
 
             if isHidden {
