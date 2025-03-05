@@ -95,11 +95,6 @@ struct DuckPlayerView: View {
                                 }
                             }
                         }
-<<<<<<<< HEAD:iOS/DuckDuckGo/DuckPlayer/NativeUI/Views/DuckPlayerView.swift
-
-========
-                        
->>>>>>>> main:iOS/DuckDuckGo/DuckPlayer/NativeUI/DuckPlayerView.swift
                         Button {
                             viewModel.openSettings()
                             dismiss()
