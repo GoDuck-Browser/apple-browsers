@@ -528,7 +528,7 @@ class MainViewController: UIViewController {
     func presentNetworkProtectionStatusSettingsModal() {
         Task {
             let subscriptionManager = AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge
-            if await subscriptionManager.isEnabled(feature: .networkProtection) {
+            if let hasEntitlement = try? await subscriptionManager.isEnabled(feature: .networkProtection), hasEntitlement {
                 segueToVPN()
             } else {
                 segueToPrivacyPro()
@@ -1038,7 +1038,7 @@ class MainViewController: UIViewController {
             currentTab?.executeBookmarklet(url: url)
         }
     }
-    
+
     private func loadBackForwardItem(_ item: WKBackForwardListItem) {
         prepareTabForRequest {
             currentTab?.load(backForwardListItem: item)
@@ -1690,7 +1690,9 @@ class MainViewController: UIViewController {
     private func onEntitlementsChange(_ notification: Notification) {
         Task {
             let subscriptionManager = AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge
-            guard await subscriptionManager.isEnabled(feature: .networkProtection) else { return }
+            guard let hasEntitlement = try? await subscriptionManager.isEnabled(feature: .networkProtection),
+                      hasEntitlement == false
+            else { return }
 
             if await networkProtectionTunnelController.isInstalled {
                 tunnelDefaults.enableEntitlementMessaging()
@@ -3051,12 +3053,24 @@ extension MainViewController: UIDropInteractionDelegate {
 // MARK: - VoiceSearchViewControllerDelegate
 
 extension MainViewController: VoiceSearchViewControllerDelegate {
-    
-    func voiceSearchViewController(_ controller: VoiceSearchViewController, didFinishQuery query: String?) {
-        controller.dismiss(animated: true, completion: nil)
-        if let query = query {
-            Pixel.fire(pixel: .voiceSearchDone)
+
+    func voiceSearchViewController(_ controller: VoiceSearchViewController, didFinishQuery query: String?, target: VoiceSearchTarget) {
+        controller.dismiss(animated: true) { [weak self] in
+            guard let self = self, let query = query else { return }
+            self.handleVoiceSearchCompletion(with: query, for: target)
+        }
+    }
+
+    private func handleVoiceSearchCompletion(with query: String, for target: VoiceSearchTarget) {
+        switch target {
+        case .SERP:
+            Pixel.fire(pixel: .voiceSearchSERPDone)
             loadQuery(query)
+
+        case .AIChat:
+            Pixel.fire(pixel: .voiceSearchAIChatDone)
+            performCancel()
+            openAIChat(query, autoSend: true)
         }
     }
 }
