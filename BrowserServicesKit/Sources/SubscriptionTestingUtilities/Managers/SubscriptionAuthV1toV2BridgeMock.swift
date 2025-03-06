@@ -21,11 +21,10 @@ import Common
 @testable import Subscription
 
 public final class SubscriptionAuthV1toV2BridgeMock: SubscriptionAuthV1toV2Bridge {
-
     public init() {}
 
     public var enabledFeatures: [Subscription.Entitlement.ProductName] = []
-    public func isEnabled(feature: Subscription.Entitlement.ProductName) async -> Bool {
+    public func isEnabled(feature: Subscription.Entitlement.ProductName, cachePolicy: Subscription.APICachePolicy) async throws -> Bool {
         enabledFeatures.contains(feature)
     }
 

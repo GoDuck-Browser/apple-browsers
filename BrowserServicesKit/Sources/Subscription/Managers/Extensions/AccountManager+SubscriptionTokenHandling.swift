@@ -28,7 +28,7 @@ extension DefaultAccountManager: SubscriptionTokenHandling {
         guard let token = accessToken else {
             throw SubscriptionManagerError.tokenUnavailable(error: nil)
         }
-        Logger.subscription.log("[DefaultAccountManager+SubscriptionTokenHandling] Token fetched: \(token, privacy: .public)") // TODO: REMOVE
+        Logger.subscription.log("[DefaultAccountManager+SubscriptionTokenHandling] Token fetched")
         return token
     }
 

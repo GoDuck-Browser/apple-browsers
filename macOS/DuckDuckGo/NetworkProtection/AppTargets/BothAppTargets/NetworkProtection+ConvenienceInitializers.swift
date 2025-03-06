@@ -46,6 +46,7 @@ extension NetworkProtectionLocationListCompositeRepository {
         if !Application.appDelegate.isAuthV2Enabled {
             tokenHandler = NetworkProtectionKeychainTokenStore()
         } else {
+            // swiftlint:disable:next force_cast
             tokenHandler = Application.appDelegate.subscriptionManagerV2 as! DefaultSubscriptionManagerV2
         }
         self.init(
