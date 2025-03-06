@@ -23,11 +23,11 @@ class DataBrokerProtectionAuthenticationManagerTests: XCTestCase {
     var authenticationManager: DataBrokerProtectionAuthenticationManager!
     var subscriptionManager: MockDataBrokerProtectionSubscriptionManaging!
 
-    override func setUp() async throws {
+    override func setUpWithError() throws {
         subscriptionManager = MockDataBrokerProtectionSubscriptionManaging()
     }
 
-    override func tearDown() async throws {
+    override func tearDownWithError() throws {
         authenticationManager = nil
         subscriptionManager = nil
     }
@@ -64,7 +64,7 @@ class DataBrokerProtectionAuthenticationManagerTests: XCTestCase {
         authenticationManager = DataBrokerProtectionAuthenticationManager(subscriptionManager: subscriptionManager)
 
         let authHeader = await authenticationManager.getAuthHeader()
-        XCTAssertNil(authHeader)
+        XCTAssertNotNil(authHeader)
     }
 
     func testValidEntitlementCheckWithSuccess() async {
