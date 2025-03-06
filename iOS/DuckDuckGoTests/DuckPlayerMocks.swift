@@ -192,6 +192,7 @@ final class MockDuckPlayerSettings: DuckPlayerSettings {
 }
 
 final class MockDuckPlayer: DuckPlayerControlling {
+    
     // MARK: - Required Properties
     var settings: DuckPlayerSettings
     var hostView: TabViewController?
@@ -200,11 +201,13 @@ final class MockDuckPlayer: DuckPlayerControlling {
     
     // MARK: - Private Properties
     private var featureFlagger: FeatureFlagger
+    private var nativeUIPresenter: DuckPlayerNativeUIPresenting
     
     // MARK: - Initialization
-    init(settings: DuckPlayerSettings, featureFlagger: FeatureFlagger) {
+    init(settings: DuckPlayerSettings, featureFlagger: FeatureFlagger, nativeUIPresenter: DuckPlayerNativeUIPresenting = MockDuckPlayerNativeUIPresenting()) {
         self.settings = settings
         self.featureFlagger = featureFlagger
+        self.nativeUIPresenter = nativeUIPresenter
         self.youtubeNavigationRequest = PassthroughSubject<URL, Never>()
         self.playerDismissedPublisher = PassthroughSubject<Void, Never>()
     }
@@ -344,5 +347,32 @@ final class MockDuckPlayerInternalUserDecider: InternalUserDecider {
     @discardableResult
     func markUserAsInternalIfNeeded(forUrl url: URL?, response: HTTPURLResponse?) -> Bool {
         return mockIsInternalUser
+    }
+}
+
+final class MockDuckPlayerNativeUIPresenting: DuckPlayerNativeUIPresenting {
+
+    var videoPlaybackRequest: PassthroughSubject<String, Never>
+    
+    init() {
+        videoPlaybackRequest = PassthroughSubject<String, Never>()
+    }
+
+    @MainActor func presentPill(for videoID: String, in hostViewController: TabViewController, timestamp: String?) {
+        //NOOP
+    }
+    
+    @MainActor func dismissPill(reset: Bool) {}
+    
+    @MainActor func presentDuckPlayer(videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController, title: String?, timestamp: String?) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>) {
+        (navigation: PassthroughSubject<URL, Never>(), settings: PassthroughSubject<Void, Never>())        
+    }
+    
+    @MainActor func showBottomSheetForVisibleChrome() {
+        //NOOP
+    }
+    
+    @MainActor func hideBottomSheetForHiddenChrome() {
+        //NOOP
     }
 }
