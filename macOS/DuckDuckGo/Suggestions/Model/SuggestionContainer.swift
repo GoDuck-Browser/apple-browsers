@@ -52,11 +52,11 @@ final class SuggestionContainer {
     // Used for presenting the same suggestions after the removal of the local suggestion
     private(set) var suggestionDataCache: Data?
 
-    private var latestQuery: Query?
+    private var latestQuery: String?
 
     private let urlSession: URLSession
 
-    init(openTabsProvider: OpenTabsProvider? = nil, suggestionLoading: SuggestionLoading? = nil, urlSession: URLSession? = nil, historyProvider: HistoryProvider, bookmarkProvider: BookmarkProvider, startupPreferences: StartupPreferences = .shared, featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger, burnerMode: BurnerMode,
+    init(openTabsProvider: OpenTabsProvider? = nil, suggestionLoading: SuggestionLoading? = nil, urlSession: URLSession? = nil, historyProvider: HistoryProvider, bookmarkProvider: BookmarkProvider, startupPreferences: StartupPreferences = .shared, featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger, burnerMode: BurnerMode, isUrlIgnored: @escaping (URL) -> Bool,
          windowControllersManager: WindowControllersManagerProtocol? = nil) {
         let windowControllersManager = windowControllersManager ?? WindowControllersManager.shared
         self.openTabsProvider = openTabsProvider ?? Self.defaultOpenTabsProvider(burnerMode: burnerMode, windowControllersManager: windowControllersManager)
@@ -64,17 +64,18 @@ final class SuggestionContainer {
         self.historyProvider = historyProvider
         self.startupPreferences = startupPreferences
         self.featureFlagger = featureFlagger
-        self.loading = suggestionLoading ?? SuggestionLoader(urlFactory: URL.makeURL(fromSuggestionPhrase:))
+        self.loading = suggestionLoading ?? SuggestionLoader(urlFactory: URL.makeURL(fromSuggestionPhrase:), isUrlIgnored: isUrlIgnored)
         self.urlSession = urlSession ?? URLSession(configuration: .ephemeral)
         self.burnerMode = burnerMode
         self.windowControllersManager = windowControllersManager
     }
 
     @MainActor
-    convenience init(burnerMode: BurnerMode, windowControllersManager: WindowControllersManagerProtocol? = nil) {
+    convenience init(burnerMode: BurnerMode, isUrlIgnored: @escaping (URL) -> Bool, windowControllersManager: WindowControllersManagerProtocol? = nil) {
         self.init(historyProvider: HistoryCoordinator.shared,
                   bookmarkProvider: LocalBookmarkManager.shared,
                   burnerMode: burnerMode,
+                  isUrlIgnored: isUrlIgnored,
                   windowControllersManager: windowControllersManager)
     }
 
@@ -124,7 +125,7 @@ final class SuggestionContainer {
                       url != selectedTab?.content.userEditableUrl, // doesn‘t match currently selected
                       usedUrls.insert(url.nakedString ?? "").inserted == true /* if did not contain */ else { return nil }
 
-                return OpenTab(title: model.title, url: url)
+                return OpenTab(tabId: model.tab.id, title: model.title, url: url)
             }
         }
     }
@@ -133,6 +134,7 @@ final class SuggestionContainer {
 
 struct OpenTab: BrowserTab, Hashable, Codable {
 
+    let tabId: String?
     let title: String
     let url: URL
 

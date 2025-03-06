@@ -20,7 +20,7 @@ import Foundation
 
 public protocol SuggestionLoading: AnyObject {
 
-    func getSuggestions(query: Query,
+    func getSuggestions(query: String,
                         usingDataSource dataSource: SuggestionLoadingDataSource,
                         completion: @escaping (SuggestionResult?, Error?) -> Void)
 
@@ -30,6 +30,7 @@ public class SuggestionLoader: SuggestionLoading {
 
     static let remoteSuggestionsUrl = URL(string: "https://duckduckgo.com/ac/")!
     static let searchParameter = "q"
+    static let isNavParameter = "is_nav"
 
     public enum SuggestionLoaderError: Error {
         case noDataSource
@@ -38,12 +39,14 @@ public class SuggestionLoader: SuggestionLoading {
     }
 
     private let urlFactory: (String) -> URL?
+    private let isUrlIgnored: (URL) -> Bool
 
-    public init(urlFactory: @escaping (String) -> URL?) {
+    public init(urlFactory: @escaping (String) -> URL?, isUrlIgnored: @escaping (URL) -> Bool) {
         self.urlFactory = urlFactory
+        self.isUrlIgnored = isUrlIgnored
     }
 
-    public func getSuggestions(query: Query,
+    public func getSuggestions(query: String,
                                usingDataSource dataSource: SuggestionLoadingDataSource,
                                completion: @escaping (SuggestionResult?, Error?) -> Void) {
 
@@ -68,7 +71,7 @@ public class SuggestionLoader: SuggestionLoading {
             dataSource.suggestionLoading(self,
                                          suggestionDataFromUrl: Self.remoteSuggestionsUrl,
                                          withParameters: [ Self.searchParameter: query,
-                                                           "is_nav": "1", // Enables is_nav in the JSON response
+                                                           Self.isNavParameter: "1", // Enables is_nav in the JSON response
                                                          ]) { data, error in
                 defer { group.leave() }
                 guard let data = data else {
@@ -88,7 +91,7 @@ public class SuggestionLoader: SuggestionLoading {
         // 2) Processing it
         group.notify(queue: .global(qos: .userInitiated)) { [weak self] in
             guard let self = self else { return }
-            let processor = SuggestionProcessing(platform: dataSource.platform, urlFactory: self.urlFactory)
+            let processor = SuggestionProcessing(platform: dataSource.platform, isUrlIgnored: isUrlIgnored)
             let result = processor.result(for: query,
                                           from: history,
                                           bookmarks: bookmarks,

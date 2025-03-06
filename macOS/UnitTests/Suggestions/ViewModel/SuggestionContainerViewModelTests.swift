@@ -38,7 +38,8 @@ final class SuggestionContainerViewModelTests: XCTestCase {
                                                   suggestionLoading: suggestionLoadingMock,
                                                   historyProvider: historyProviderMock,
                                                   bookmarkProvider: LocalBookmarkManager.shared,
-                                                  burnerMode: .regular)
+                                                  burnerMode: .regular,
+                                                  isUrlIgnored: { _ in false })
         suggestionContainerViewModel = SuggestionContainerViewModel(suggestionContainer: suggestionContainer)
     }
 
@@ -62,7 +63,7 @@ final class SuggestionContainerViewModelTests: XCTestCase {
 
     @MainActor
     func testWhenSelectionIndexIsNilThenSelectedSuggestionViewModelIsNil() {
-        let suggestionContainer = SuggestionContainer(burnerMode: .regular)
+        let suggestionContainer = SuggestionContainer(burnerMode: .regular, isUrlIgnored: { _ in false })
         let suggestionContainerViewModel = SuggestionContainerViewModel(suggestionContainer: suggestionContainer)
 
         XCTAssertNil(suggestionContainerViewModel.selectionIndex)
@@ -91,7 +92,7 @@ final class SuggestionContainerViewModelTests: XCTestCase {
 
     @MainActor
     func testWhenSelectCalledWithIndexOutOfBoundsThenSelectedSuggestionViewModelIsNil() {
-        let suggestionContainer = SuggestionContainer(burnerMode: .regular)
+        let suggestionContainer = SuggestionContainer(burnerMode: .regular, isUrlIgnored: { _ in false })
         let suggestionListViewModel = SuggestionContainerViewModel(suggestionContainer: suggestionContainer)
 
         suggestionListViewModel.select(at: 0)
@@ -304,8 +305,8 @@ final class SuggestionContainerViewModelTests: XCTestCase {
     func testWhenSuggestionLoadingDataSourceOpenTabsRequested_ThenOpenTabsProviderIsCalled() {
         // Setup open tabs with matching URLs and titles
         let openTabs = [
-            OpenTab(title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!),
-            OpenTab(title: "Duck Tales", url: URL(string: "http://ducktales.com")!),
+            OpenTab(tabId: "1", title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!),
+            OpenTab(tabId: "2", title: "Duck Tales", url: URL(string: "http://ducktales.com")!),
         ]
 
         // Mock the open tabs provider to return the defined open tabs
@@ -313,7 +314,8 @@ final class SuggestionContainerViewModelTests: XCTestCase {
                                                   suggestionLoading: suggestionLoadingMock,
                                                   historyProvider: historyProviderMock,
                                                   bookmarkProvider: LocalBookmarkManager.shared,
-                                                  burnerMode: .regular)
+                                                  burnerMode: .regular,
+                                                  isUrlIgnored: { _ in false })
         suggestionContainerViewModel = SuggestionContainerViewModel(suggestionContainer: suggestionContainer)
 
         suggestionContainer.getSuggestions(for: "Duck")

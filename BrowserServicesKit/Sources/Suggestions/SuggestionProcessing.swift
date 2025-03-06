@@ -1,7 +1,7 @@
 //
 //  SuggestionProcessing.swift
 //
-//  Copyright © 2021 DuckDuckGo. All rights reserved.
+//  Copyright © 2025 DuckDuckGo. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -26,286 +26,265 @@ public enum Platform {
 }
 
 /// Class encapsulates the whole ordering and filtering algorithm
-/// It takes query, history, bookmarks, and apiResult as input parameters
+/// It takes query, history, bookmarks, open tabs, and apiResult as input parameters
 /// The output is instance of SuggestionResult
-final class SuggestionProcessing {
+struct SuggestionProcessing {
 
-    private let platform: Platform
-    private var urlFactory: (String) -> URL?
-
-    private typealias TopHitsEligibleSuggestion = (suggestion: Suggestion, allowedInTopHits: Bool)
-
-    init(platform: Platform, urlFactory: @escaping (String) -> URL?) {
-        self.platform = platform
-        self.urlFactory = urlFactory
-    }
-
-    func result(for query: Query,
-                from history: [HistorySuggestion],
-                bookmarks: [Bookmark],
-                internalPages: [InternalPage],
-                openTabs: [BrowserTab],
-                apiResult: APIResult?) -> SuggestionResult? {
-        let query = query.lowercased()
-
-        let duckDuckGoSuggestions = (try? self.duckDuckGoSuggestions(from: apiResult)) ?? []
-
-        // Get domain suggestions from the DuckDuckGo Suggestions section (for the Top Hits section)
-        let duckDuckGoDomainSuggestions = duckDuckGoSuggestions.compactMap { suggestion -> TopHitsEligibleSuggestion? in
-            // The JSON response tells us explicitly what is navigational now, so we only need to find website suggestions here
-            if case .website = suggestion {
-                return (suggestion: suggestion, allowedInTopHits: true)
-            }
-            return nil
-        }
-
-        // Get best matches from history and bookmarks
-        let allLocalSuggestions = Array(localSuggestions(from: history, bookmarks: bookmarks, internalPages: internalPages, openTabs: openTabs, query: query)
-            .prefix(100)) // temporary optimsiation
-
-        // Combine HaB and domains into navigational suggestions and remove duplicates
-        let navigationalSuggestions = allLocalSuggestions + duckDuckGoDomainSuggestions
-
-        let maximumOfNavigationalSuggestions = min(
-            Self.maximumNumberOfSuggestions - Self.minimumNumberInSuggestionGroup,
-            query.count + 1)
-        let expandedSuggestions = replaceHistoryWithBookmarksAndTabs(navigationalSuggestions)
-
-        let dedupedNavigationalSuggestions = Array(dedupLocalSuggestions(expandedSuggestions).prefix(maximumOfNavigationalSuggestions))
-
-        // Split the Top Hits and the History and Bookmarks section
-        let topHits = topHits(from: dedupedNavigationalSuggestions)
-        let localSuggestions = Array(dedupedNavigationalSuggestions.dropFirst(topHits.count).filter {
-            switch $0.suggestion {
-            case .bookmark, .openTab, .historyEntry, .internalPage:
-                return true
-            default:
-                return false
-            }
-        })
-
-        let dedupedDuckDuckGoSuggestions = removeDuplicateWebsiteSuggestions(in: topHits, from: duckDuckGoSuggestions)
-
-        return makeResult(topHits: topHits,
-                          duckduckgoSuggestions: dedupedDuckDuckGoSuggestions,
-                          localSuggestions: localSuggestions.map(\.suggestion))
-    }
-
-    private func dedupLocalSuggestions(_ suggestions: [TopHitsEligibleSuggestion]) -> [TopHitsEligibleSuggestion] {
-        return suggestions.reduce([TopHitsEligibleSuggestion]()) { partialResult, scoredSuggestion -> [TopHitsEligibleSuggestion] in
-            if partialResult.contains(where: { item in
-                switch item.suggestion {
-                case .bookmark(title: let title, url: let url, isFavorite: let isFavorite, _):
-                    if case .bookmark(title, url: let searchUrl, isFavorite, _) = scoredSuggestion.suggestion,
-                       searchUrl.naked == url.naked {
-                        return true
-                    }
-
-                case .historyEntry(title: let title, url: let url, _):
-                    if case .historyEntry(title, url: let searchUrl, _) = scoredSuggestion.suggestion,
-                       searchUrl.naked == url.naked {
-                        return true
-                    }
-
-                case .internalPage(title: let title, url: let url, _):
-                    if case .internalPage(title, url, _) = scoredSuggestion.suggestion {
-                        return true
-                    }
-
-                case .openTab(title: let title, url: let url, _):
-                    if case .openTab(title, url: let searchUrl, _) = scoredSuggestion.suggestion,
-                       searchUrl.naked == url.naked {
-                        return true
-                    }
-
-                default:
-                    assertionFailure("Unexpected suggestion in local suggestions")
-                    return true
-                }
-
-                return false
-            }) {
-                return partialResult
-            }
-            return partialResult + [scoredSuggestion]
-        }
-    }
-
-    private func replaceHistoryWithBookmarksAndTabs(_ sourceSuggestions: [TopHitsEligibleSuggestion]) -> [TopHitsEligibleSuggestion] {
-        var expanded = [TopHitsEligibleSuggestion]()
-        for i in 0 ..< sourceSuggestions.count {
-            let item = sourceSuggestions[i]
-            let suggestion = item.suggestion
-            guard case .historyEntry = suggestion else {
-                expanded.append(item)
-                continue
-            }
-
-            if let bookmark = sourceSuggestions[i ..< sourceSuggestions.endIndex].first(where: {
-                $0.suggestion.isBookmark && $0.suggestion.url?.naked == suggestion.url?.naked
-            }) {
-                expanded.append(bookmark)
-            } else {
-                expanded.append(item)
-            }
-        }
-        return expanded
-    }
-
-    private func removeDuplicateWebsiteSuggestions(in sourceSuggestions: [Suggestion], from targetSuggestions: [Suggestion]) -> [Suggestion] {
-        return targetSuggestions.compactMap { targetSuggestion in
-            if case .website = targetSuggestion, sourceSuggestions.contains(where: {
-                targetSuggestion == $0
-            }) {
-                return nil
-            }
-            return targetSuggestion
-        }
-    }
-
-    // MARK: - DuckDuckGo Suggestions
-
-    private func duckDuckGoSuggestions(from result: APIResult?) throws -> [Suggestion]? {
-        return result?.items
-            .compactMap {
-                guard let phrase = $0.phrase else {
-                    return nil
-                }
-                return Suggestion(phrase: phrase, isNav: $0.isNav ?? false)
-            }
-    }
-
-    // MARK: - History and Bookmarks
-
-    fileprivate enum LocalSuggestion {
-        case bookmark(Bookmark)
-        case history(HistorySuggestion)
-        case internalPage(InternalPage)
-        case openTab(BrowserTab)
-
-        func isAlowedInTopHits(platform: Platform) -> Bool {
-            switch self {
-            case .history(let historyEntry):
-                let areVisitsLow = historyEntry.numberOfVisits < 4
-                let allowedInTopHits = !(historyEntry.failedToLoad
-                                         || (areVisitsLow && !historyEntry.url.isRoot))
-                return allowedInTopHits
-            case .bookmark(let bookmark):
-                switch platform {
-                case .desktop: return bookmark.isFavorite
-                case .mobile: return true
-                }
-            case .internalPage, .openTab:
-                return false
-            }
-        }
-    }
-
-    private func localSuggestions(from history: [HistorySuggestion], bookmarks: [Bookmark], internalPages: [InternalPage], openTabs: [BrowserTab], query: Query) -> [(suggestion: Suggestion, allowedInTopHits: Bool)] {
-        let localSuggestions: [LocalSuggestion] = bookmarks.map(LocalSuggestion.bookmark) + openTabs.map(LocalSuggestion.openTab) + history.map(LocalSuggestion.history) + internalPages.map(LocalSuggestion.internalPage)
-        let queryTokens = Score.tokens(from: query)
-
-        let result: [(suggestion: Suggestion, allowedInTopHits: Bool)] = localSuggestions
-            // Score items
-            .map { suggestion -> (suggestion: LocalSuggestion, score: Score) in
-                let score = switch suggestion {
-                case .bookmark(let bookmark):
-                    Score(bookmark: bookmark, query: query, queryTokens: queryTokens)
-                case .history(let historyEntry):
-                    Score(historyEntry: historyEntry, query: query, queryTokens: queryTokens)
-                case .internalPage(let internalPage):
-                    Score(internalPage: internalPage, query: query, queryTokens: queryTokens)
-                case .openTab(let tab):
-                    Score(browserTab: tab, query: query)
-                }
-
-                return (suggestion, score)
-            }
-            // Filter not relevant
-            .filter { $0.score > 0 }
-            // Sort according to the score
-            .sorted {
-                switch ($0.suggestion, $1.suggestion) {
-                // place open tab suggestions on top
-                case (.openTab, .openTab): break
-                case (.openTab, _): return true
-                case (_, .openTab): return false
-                default: break
-                }
-                return $0.score > $1.score
-            }
-            // Create suggestion array
-            .compactMap { localSuggestion, score in
-                Suggestion(localSuggestion: localSuggestion, score: score).map { suggestion in
-                    (suggestion: suggestion, allowedInTopHits: localSuggestion.isAlowedInTopHits(platform: platform))
-                }
-            }
-
-        return result
-    }
-
-    // MARK: - Top Hits
-
-    /// Take the top two items from the suggestions, but only up to the first suggestion that is not allowed in top hits
-    private func topHits(from suggestions: [(suggestion: Suggestion, allowedInTopHits: Bool)]) -> [Suggestion] {
-        var topHits = [Suggestion]()
-
-        for item in suggestions {
-            guard topHits.count < Self.maximumNumberOfTopHits else { break }
-
-            if item.allowedInTopHits {
-                topHits.append(item.suggestion)
-            } else {
-                break
-            }
-        }
-
-        return topHits
-    }
-
-    // MARK: - Cutting off and making the result
+    // MARK: - Constants
 
     static let maximumNumberOfSuggestions = 12
     static let maximumNumberOfTopHits = 2
     static let minimumNumberInSuggestionGroup = 5
 
-    private func makeResult(topHits: [Suggestion],
-                            duckduckgoSuggestions: [Suggestion],
-                            localSuggestions: [Suggestion]) -> SuggestionResult {
+    private let platform: Platform
+    private var isUrlIgnored: (URL) -> Bool
 
-        assert(topHits.count <= Self.maximumNumberOfTopHits)
+    init(platform: Platform, isUrlIgnored: @escaping (URL) -> Bool) {
+        self.platform = platform
+        self.isUrlIgnored = isUrlIgnored
+    }
 
-        // Top Hits
-        var total = topHits.count
+    func result(for query: String,
+                from history: [HistorySuggestion],
+                bookmarks: [Bookmark],
+                internalPages: [InternalPage],
+                openTabs: [BrowserTab],
+                apiResult: APIResult?) -> SuggestionResult? {
 
-        // History and Bookmarks
-        let prefixForLocalSuggestions = Self.maximumNumberOfSuggestions - (total + Self.minimumNumberInSuggestionGroup)
-        let localSuggestions = Array(localSuggestions.prefix(prefixForLocalSuggestions))
-        total += localSuggestions.count
+        let lowerQuery = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let queryTokens = lowerQuery.tokenized()
+        guard !lowerQuery.isEmpty else { return .empty }
 
-        // DuckDuckGo Suggestions
-        let prefixForDuckDuckGoSuggestions = Self.maximumNumberOfSuggestions - total
-        let duckduckgoSuggestions = Array(duckduckgoSuggestions.prefix(prefixForDuckDuckGoSuggestions))
+        // STEP 1: Get DDG suggestions that point to a website
+        let duckDuckGoDomainSuggestions = apiResult?.items.compactMap { suggestion -> ScoredSuggestion? in
+            guard suggestion.isNav == true, let phrase = suggestion.phrase,
+                  let url = URL(string: URL.NavigationalScheme.http.separated() + phrase), !isUrlIgnored(url) else { return nil }
+            return ScoredSuggestion(kind: .website, url: url, title: phrase)
+        } ?? []
 
-        return SuggestionResult(topHits: topHits,
-                                duckduckgoSuggestions: duckduckgoSuggestions,
-                                localSuggestions: localSuggestions)
+        // STEP 2: Get best ordered matches from history, bookmarks, open tabs and internal pages (settings, bookmarks…)
+        let allHistoryAndBookmarkAndOpenTabSuggestions = [
+            bookmarks.compactMap(ScoringService.scored(lowerQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
+            openTabs.compactMap(ScoringService.scored(lowerQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
+            history.compactMap(ScoringService.scored(lowerQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
+            internalPages.compactMap(ScoringService.scored(lowerQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
+        ]
+            .joined()
+            .sorted { $0.score > $1.score }
+
+        // STEP 3: Combine all navigational suggestions
+        // All bookmark/favorite, history and duckDuckGoDomainSuggestions point directly to a URL browser can navigate to
+        let navigationalSuggestions = allHistoryAndBookmarkAndOpenTabSuggestions + duckDuckGoDomainSuggestions
+
+        // STEP 4: Deduplicate the results by grouping on URL and get the "best" suggestion for each. We also receive
+        // a list of SuggestionKind values for each URL to support better categorization below.
+        let dedupedSuggestionTuples = removeDuplicates(navigationalSuggestions)
+            .sorted { $0.suggestion.score > $1.suggestion.score }
+
+        // STEP 5: Find Top Hits: normally Website or History suggestions.
+        // Top Hits won't contain Bookmarks unless it is also a Website or History suggestion
+        // at which point the suggestion needs to display that it's a bookmark.
+        let topHitsDeduped = dedupedSuggestionTuples
+            .filter { isTopHit($0.suggestion, $0.kinds) }
+            .prefix(Self.maximumNumberOfTopHits)
+
+        // STEP 6: Handle special case for open tab suggestions
+        // If the top suggestion is open tab based and also a history entry, bookmark or favorite
+        // we split the open tab/other suggestion into separate suggestions and prioritize
+        // the non-open tab suggestion so it can be autocompleted.
+        let finalTopHits = handleTopHitsOpenTabCase(topHitsDeduped)
+
+        // STEP 7: Prepare final Top Hits suggestions
+        let topHits = finalTopHits.compactMap { Suggestion($0) }
+
+        // STEP 8: Calculate remaining count for history/bookmarks/open tabs section
+        let countForHistoryAndBookmarksAndOpenTabs = min(
+            Self.maximumNumberOfSuggestions - (topHits.count + Self.minimumNumberInSuggestionGroup),
+            lowerQuery.count + 1 - topHits.count
+        )
+
+        // STEP 9: Build history, bookmarks, and open tabs suggestions
+        let historyAndBookmarksAndOpenTabs = dedupedSuggestionTuples
+            .filter {
+                guard $0.kinds.intersects([.historyEntry, .bookmark, .favorite, .browserTab]),
+                      let suggestion = Suggestion($0.suggestion),
+                      !topHits.contains(suggestion) else { return false } // Don't include items already in top hits
+                return true
+            }
+            .prefix(countForHistoryAndBookmarksAndOpenTabs)
+            .compactMap { Suggestion($0.suggestion) }
+
+        // STEP 10: Build search phrase suggestions
+        let duckDuckGoPhrases = (apiResult?.items ?? [])
+            .compactMap { suggestion -> Suggestion? in
+                guard suggestion.isNav != true, let phrase = suggestion.phrase else { return nil }
+                return Suggestion.phrase(phrase: phrase)
+            }
+            .prefix(Self.maximumNumberOfSuggestions - (topHits.count + historyAndBookmarksAndOpenTabs.count))
+            .map(\.self)
+
+        // STEP 11: Return final ordered suggestions
+        return SuggestionResult(
+            topHits: topHits,
+            duckduckgoSuggestions: duckDuckGoPhrases,
+            localSuggestions: historyAndBookmarksAndOpenTabs
+        )
+    }
+
+    /// Removes duplicate entries (based on the URL) from a list of suggestions.
+    /// When duplicates are found, ones with more info (e.g. bookmarks) will take precedence.
+    private func removeDuplicates(_ suggestions: [ScoredSuggestion]) -> [(suggestion: ScoredSuggestion, kinds: Set<ScoredSuggestion.Kind>)] {
+        // Group suggestions by normalized URL preserving the keys order
+        var orderedKeys = [String]()
+        var seenKeys = Set<String>()
+        let groupedByURL = Dictionary(grouping: suggestions) {
+            let key = $0.url.nakedString ?? $0.url.absoluteString
+            if seenKeys.insert(key).inserted {
+                orderedKeys.append(key)
+            }
+            return key
+        }
+
+        var result = [(ScoredSuggestion, Set<ScoredSuggestion.Kind>)]()
+        for key in orderedKeys {
+            // We can have multiple kinds of suggestion for a given url, for example:
+            // 1. A search suggestion promoted to website due to being a valid URL
+            // 2. A history item
+            // 3. A bookmark
+            // 4. An open tab
+            guard let group = groupedByURL[key],
+                  // We want to display the suggestion of the highest "quality"
+                  var suggestion = group.max(by: { $0.quality < $1.quality }) else {
+                assertionFailure("Grouped suggestions should not be empty")
+                continue
+            }
+
+            // …but we also need to provide all the kinds of suggestion for this URL so
+            // downstream logic can do further filtering (i.e. TopHits shouldn't contain Bookmarks
+            // unless they're also part of a History or Website suggestion).
+            let suggestionKinds = Set(group.map(\.kind))
+
+            // Should only ever have a single history entry instance per
+            // group so can simply use Sum to get the VisitCount
+            let visitCount = group.reduce(0) { $0 + ($1.kind == .historyEntry ? $1.visitCount : 0) }
+
+            // set tabId even to non-browserTab suggestions so if it‘s duplicated in `handleTopHitsOpenTabCase`
+            // as a browserTab suggestion the tabId is still present there (as the Title/URL may not match)
+            let tabId = group.first(where: { $0.kind == .browserTab })?.tabId
+
+            // Get the highest score for this group
+            let maxScore = group.max(by: { $0.score < $1.score })?.score ?? 0
+
+            // If the chosen suggestion has a different visit count or score than the
+            // prioritized suggestion (for example open tab is prioritized over history,
+            // but it will have a lower score and visit count).
+            suggestion.score = maxScore
+            suggestion.visitCount = visitCount
+            suggestion.tabId = tabId
+
+            result.append((suggestion, suggestionKinds))
+        }
+
+        return result
+    }
+
+    /// Determines if a suggestion should be included in top hits
+    private func isTopHit(_ scoredSuggestion: ScoredSuggestion, _ suggestionKinds: Set<ScoredSuggestion.Kind>) -> Bool {
+        // Check if the suggestion is allowed in Top Hits: is it for website, favorite or history (+bookmarks for mobile)
+        var suggestionKindsAllowedInTopHits: [ScoredSuggestion.Kind] = [.website, .favorite, .historyEntry]
+        if platform == .mobile {
+            suggestionKindsAllowedInTopHits.append(.bookmark)
+        }
+        // Otherwise the suggestion should not be part of top hits
+        guard suggestionKinds.intersects(suggestionKindsAllowedInTopHits) else { return false }
+
+        // If the suggestion is based solely on history
+        if suggestionKinds == [.historyEntry] {
+            // Include in TopHits only if root domain or has more than 3 visits and didn‘t fail to load
+            return !scoredSuggestion.failedToLoad && (scoredSuggestion.visitCount > 3 || scoredSuggestion.url.isRoot)
+        }
+
+        // If the suggestion is based solely on an open tab
+        if suggestionKinds == [.browserTab] {
+            // Don't include open tabs in top hits by default
+            return false
+        }
+
+        // Other kinds of suggestion can be included in top hits
+        return true
+    }
+
+    /// Handles special case for open tab suggestions in top hits
+    private func handleTopHitsOpenTabCase(_ topHitsDeduped: some Collection<(suggestion: ScoredSuggestion, kinds: Set<ScoredSuggestion.Kind>)>) -> [ScoredSuggestion] {
+        var result = topHitsDeduped.map(\.suggestion)
+
+        // If the top suggestion is open tab based and also a history entry, bookmark or favorite…
+        guard let topHit = topHitsDeduped.first,
+              topHit.kinds.contains(.browserTab),
+              topHit.kinds.intersects([.historyEntry, .bookmark, .favorite]) else { return result }
+
+        // Choose new suggestion kind based on highest quality non-open tab suggestion type
+        let newSuggestionKind = if topHit.suggestion.kind == .browserTab {
+            topHit.kinds.filter { $0 != .browserTab }.max(by: { $0.quality < $1.quality }) ?? .browserTab
+        } else {
+            ScoredSuggestion.Kind.browserTab
+        }
+
+        // …we split the open tab/other suggestion into separate suggestions…
+        // Note: In real implementation, we would create a new suggestion here with the chosen kind
+        var newSuggestion = topHit.suggestion
+        newSuggestion.kind = newSuggestionKind
+        // …and prioritize the non-open tab suggestion so it can autocomplete.
+        // If new suggestion is open tab, put it second (original stays at top)
+        // If new suggestion is not open tab, put it first (prioritize for autocomplete)
+        let insertionIndex = (newSuggestionKind == .browserTab) ? 1 : 0
+        result.insert(newSuggestion, at: insertionIndex)
+
+        // Ensure we don't exceed MAX_TOP_HITS
+        if result.count > Self.maximumNumberOfTopHits {
+            result.removeSubrange(Self.maximumNumberOfTopHits...)
+        }
+
+        return result
     }
 
 }
 
+extension ScoredSuggestion.Kind {
+    // Suggestion quality ranking (higher numbers = higher quality)
+    var quality: Int {
+        switch self {
+        case .phrase: 1
+        case .website, .internalPage: 2
+        case .historyEntry: 3
+        case .browserTab: 4
+        case .bookmark: 5
+        case .favorite: 6
+        }
+    }
+}
+
+extension ScoredSuggestion {
+    var quality: Int { kind.quality }
+}
+
 private extension Suggestion {
-    init?(localSuggestion: SuggestionProcessing.LocalSuggestion, score: Int) {
-        switch localSuggestion {
-        case .bookmark(let bookmark):
-            guard let suggestion = Suggestion(bookmark: bookmark, score: score) else { return nil }
-            self = suggestion
-        case .history(let historyEntry):
-            self = Suggestion(historyEntry: historyEntry, score: score)
-        case .internalPage(let internalPage):
-            self = Suggestion(internalPage: internalPage, score: score)
-        case .openTab(let tab):
-            self = Suggestion(tab: tab, score: score)
+    init?(_ suggestion: ScoredSuggestion) {
+        switch suggestion.kind {
+        case .phrase:
+            self = .phrase(phrase: suggestion.title)
+        case .website:
+            self = .website(url: suggestion.url)
+        case .bookmark:
+            self = .bookmark(title: suggestion.title, url: suggestion.url, isFavorite: false, score: suggestion.score)
+        case .favorite:
+            self = .bookmark(title: suggestion.title, url: suggestion.url, isFavorite: true, score: suggestion.score)
+        case .historyEntry:
+            self = .historyEntry(title: suggestion.title, url: suggestion.url, score: suggestion.score)
+        case .internalPage:
+            self = .internalPage(title: suggestion.title, url: suggestion.url, score: suggestion.score)
+        case .browserTab:
+            self = .openTab(title: suggestion.title, url: suggestion.url, tabId: suggestion.tabId, score: suggestion.score)
         }
     }
 }

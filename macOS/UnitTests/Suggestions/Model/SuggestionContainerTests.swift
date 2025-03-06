@@ -17,8 +17,10 @@
 //
 
 import Combine
+import Common
 import History
 import NetworkingTestingUtils
+import os.log
 import SnapshotTesting
 import Suggestions
 import XCTest
@@ -38,7 +40,8 @@ final class SuggestionContainerTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: historyCoordinatingMock,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
-                                                      burnerMode: .regular)
+                                                      burnerMode: .regular,
+                                                      isUrlIgnored: { _ in false })
 
         let e = expectation(description: "Suggestions updated")
         let cancellable = suggestionContainer.$result.sink {
@@ -65,7 +68,8 @@ final class SuggestionContainerTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: historyCoordinatingMock,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
-                                                      burnerMode: .regular)
+                                                      burnerMode: .regular,
+                                                      isUrlIgnored: { _ in false })
 
         suggestionContainer.getSuggestions(for: "test")
         suggestionContainer.stopGettingSuggestions()
@@ -82,7 +86,8 @@ final class SuggestionContainerTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: historyCoordinatingMock,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
-                                                      burnerMode: .regular)
+                                                      burnerMode: .regular,
+                                                      isUrlIgnored: { _ in false })
 
         XCTAssertNil(suggestionContainer.suggestionDataCache)
         let e = expectation(description: "Suggestions updated")
@@ -110,6 +115,7 @@ final class SuggestionContainerTests: XCTestCase {
 
     @MainActor
     func testSuggestionsJsonScenarios() async throws {
+        let onlyRun = "" // "bookmarks-history-open-tabs-basic.json"
         guard let directoryURL = Bundle(for: SuggestionContainerTests.self).url(forResource: "privacy-reference-tests/suggestions", withExtension: nil) else {
             return XCTFail("Failed to locate the suggestions directory in the bundle")
         }
@@ -122,7 +128,7 @@ final class SuggestionContainerTests: XCTestCase {
             && !$0.deletingPathExtension().lastPathComponent.hasSuffix("schema")
         }
 
-        for fileURL in jsonFiles {
+        for fileURL in jsonFiles where onlyRun.isEmpty || onlyRun == fileURL.lastPathComponent {
             // Load and decode each JSON file
             let data = try Data(contentsOf: fileURL)
             let testScenario: TestScenario
@@ -133,6 +139,7 @@ final class SuggestionContainerTests: XCTestCase {
             }
 
             // Run the test for each scenario
+            Logger.tests.info("Running JSON test scenario: \(fileURL.lastPathComponent)")
             try await runJsonTestScenario(testScenario, named: fileURL.deletingPathExtension().lastPathComponent)
         }
     }
@@ -179,6 +186,7 @@ final class SuggestionContainerTests: XCTestCase {
                                                       historyProvider: HistoryProviderMock(history: input.history),
                                                       bookmarkProvider: BookmarkProviderMock(bookmarks: input.bookmarks),
                                                       burnerMode: tabCollectionViewModels[selectedWindow].burnerMode,
+                                                      isUrlIgnored: testScenario.input.isURLIgnored,
                                                       windowControllersManager: windowControllersManagerMock)
 
         // Mock API Suggestions response
@@ -205,9 +213,11 @@ final class SuggestionContainerTests: XCTestCase {
         // Get the compiled suggestions
         let resultPromise = suggestionContainer.$result.dropFirst().timeout(1).first().promise()
         suggestionContainer.getSuggestions(for: input.query)
-        let actualResult = try await resultPromise.get()
 
-        assert(TestExpectations(actualResult, query: testScenario.input.query, windows: testScenario.input.windows), named: name, matches: testScenario.expectations)
+        let actualResults = try await resultPromise.get()
+        let testResults = TestExpectations(from: actualResults, query: testScenario.input.query)
+
+        assert(testResults, named: name, match: testScenario.expectations)
     }
 
 }
@@ -228,6 +238,7 @@ extension SuggestionContainerTests {
         let pinnedTabs: [TabMock]
         let windows: [Window]
         let apiSuggestions: ApiSuggestions
+        let ignoredUris: Set<String>?
 
         enum ApiSuggestions: Decodable {
             case suggestions([Suggestions.APIResult.SuggestionResult])
@@ -242,24 +253,59 @@ extension SuggestionContainerTests {
                 }
             }
         }
+
         struct HTTPError: Swift.Error, Decodable {
             let statusCode: Int
+        }
+
+        func isURLIgnored(_ url: URL) -> Bool {
+            ignoredUris?.contains(url.nakedString ?? "") ?? false
         }
     }
 
     struct Bookmark: Decodable, Suggestions.Bookmark {
+        enum CodingKeys: String, CodingKey {
+            case title
+            case url="uri"
+            case isFavorite
+        }
         let title: String
-        let url: String
+        var url: String
         let isFavorite: Bool
     }
 
-    struct HistoryEntry: Decodable, Suggestions.HistorySuggestion {
-        var identifier: UUID
-        var title: String?
+    struct HistoryEntry: Decodable, Hashable, Suggestions.HistorySuggestion {
+        enum CodingKeys: String, CodingKey {
+            case title
+            case url = "uri"
+            case numberOfVisits = "visitCount"
+            case _lastVisit = "lastVisit"
+            case _failedToLoad = "failedToLoad"
+        }
+        let title: String?
         let url: URL
         let numberOfVisits: Int
-        var lastVisit: Date
-        var failedToLoad: Bool
+        let _lastVisit: Date?
+        var lastVisit: Date { _lastVisit ?? .distantPast }
+        let _failedToLoad: Bool?
+        var failedToLoad: Bool { _failedToLoad ?? false }
+
+        var identifier: UUID { Self.uuidFromHash(self.hashValue) }
+
+        private static func uuidFromHash(_ hash: Int) -> UUID {
+            // Convert the integer hash to a string
+            let hashString = String(hash)
+
+            // Create a UUID from the hash string by padding/truncating to fit UUID format
+            let paddedHashString = hashString.padding(toLength: 32, withPad: "0", startingAt: 0)
+
+            // Format the string to match UUID format (8-4-4-4-12)
+            let uuidString = "\(paddedHashString.prefix(8))-\(paddedHashString.dropFirst(8).prefix(4))-\(paddedHashString.dropFirst(12).prefix(4))-\(paddedHashString.dropFirst(16).prefix(4))-\(paddedHashString.dropFirst(20).prefix(12))"
+
+            // Create and return a UUID from the formatted string
+            return UUID(uuidString: uuidString)!
+        }
+
     }
 
     struct Window: Decodable {
@@ -315,7 +361,7 @@ extension SuggestionContainerTests {
         func unregister(_ windowController: DuckDuckGo_Privacy_Browser.MainWindowController) {
         }
 
-        func show(url: URL?, source: DuckDuckGo_Privacy_Browser.Tab.TabContent.URLSource, newTab: Bool) {
+        func show(url: URL?, tabId: String?, source: DuckDuckGo_Privacy_Browser.Tab.TabContent.URLSource, newTab: Bool) {
         }
 
         func showBookmarksTab() {
@@ -348,7 +394,7 @@ extension SuggestionContainerTests {
             return false
         }
         let tabs = openTabs.map {
-            Tab(content: TabContent.contentFromURL($0.url, source: .link), webViewConfiguration: WKWebViewConfiguration(), privacyFeatures: privacyFeaturesMock, title: $0.title, burnerMode: burnerMode)
+            Tab(id: $0.tabId, content: TabContent.contentFromURL($0.url, source: .link), webViewConfiguration: WKWebViewConfiguration(), privacyFeatures: privacyFeaturesMock, title: $0.title, burnerMode: burnerMode)
         }
         return TabCollection(tabs: tabs)
     }
@@ -361,7 +407,7 @@ extension SuggestionContainerTests {
     func assert<Value: Encodable>(
       _ value: @autoclosure () throws -> Value,
       named name: String,
-      matches anotherValue: Value,
+      match anotherValue: Value,
       file: StaticString = #file,
       testName: String = #function,
       line: UInt = #line
@@ -395,7 +441,7 @@ extension SuggestionContainerTests {
 }
 private extension OpenTab {
     init(_ tab: SuggestionContainerTests.TabMock) {
-        self.init(title: tab.title, url: tab.url)
+        self.init(tabId: tab.tabId.uuidString, title: tab.title, url: tab.url)
     }
 }
 class HistoryProviderMock: SuggestionContainer.HistoryProvider {
@@ -433,6 +479,14 @@ extension SuggestionContainerTests {
                 case openTab
                 case internalPage
             }
+            enum CodingKeys: String, CodingKey {
+                case type
+                case title
+                case subtitle
+                case uri
+                case tabId
+                case score
+            }
 
             let type: SuggestionType
             let title: String
@@ -440,17 +494,48 @@ extension SuggestionContainerTests {
             let uri: String?
             let tabId: UUID?
             let score: Int
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                self.type = try container.decode(SuggestionType.self, forKey: .type)
+                self.title = try container.decode(String.self, forKey: .title)
+                self.subtitle = try container.decodeIfPresent(String.self, forKey: .subtitle) ?? ""
+                self.uri = try container.decodeIfPresent(String.self, forKey: .uri).flatMap { urlString in
+                    // Convert percent-encoded sequences to upper case to match macOS `String.addingPercentEncoding` implementation
+                    guard let qStartIdx = urlString.firstIndex(of: "?") else { return urlString }
+                    let qEndIdx = urlString[qStartIdx...].firstIndex(of: "#") ?? urlString.endIndex
+                    var urlString = urlString
+                    let percentEncoursedSequencesRegex = regex(#"(%[0-9a-f]{2})"#)
+                    let matches = percentEncoursedSequencesRegex.matches(in: urlString, options: [], range: NSRange(qStartIdx..<qEndIdx, in: urlString))
+                    for match in matches {
+                        urlString.replaceSubrange(match.range(in: urlString)!, with: urlString[match.range(in: urlString)!].uppercased())
+                    }
+                    return urlString
+                }
+                let tabId = try container.decodeIfPresent(UUID.self, forKey: .tabId)
+                self.tabId = (tabId == UUID(uuidString: "00000000-0000-0000-0000-000000000000")) ? nil : (type == .openTab ? tabId : nil)
+                self.score = try container.decode(Int.self, forKey: .score)
+            }
+
+            init(type: SuggestionType, title: String, subtitle: String?, uri: String?, tabId: UUID?, score: Int = 1) {
+                self.type = type
+                self.title = title
+                self.subtitle = subtitle ?? ""
+                self.uri = uri
+                self.tabId = (tabId == UUID(uuidString: "00000000-0000-0000-0000-000000000000")) ? nil : (type == .openTab ? tabId : nil)
+                self.score = score
+            }
         }
 
         let topHits: [ExpectedSuggestion]
         let searchSuggestions: [ExpectedSuggestion]
         let localSuggestions: [ExpectedSuggestion]
 
-        init?(_ result: SuggestionResult?, query: String, windows: [SuggestionContainerTests.Window]) {
+        init?(from result: SuggestionResult?, query: String) {
             guard let result else { return nil }
-            self.topHits = result.topHits.compactMap { $0.expectedSuggestion(query: query, windows: windows) }
-            self.searchSuggestions = result.duckduckgoSuggestions.compactMap { $0.expectedSuggestion(query: query, windows: windows) }
-            self.localSuggestions = result.localSuggestions.compactMap { $0.expectedSuggestion(query: query, windows: windows) }
+            self.topHits = result.topHits.compactMap { $0.expectedSuggestion(query: query) }
+            self.searchSuggestions = result.duckduckgoSuggestions.compactMap { $0.expectedSuggestion(query: query) }
+            self.localSuggestions = result.localSuggestions.compactMap { $0.expectedSuggestion(query: query) }
         }
     }
 }
@@ -463,11 +548,11 @@ private extension URLSession {
 }
 private extension Suggestion {
 
-    func expectedSuggestion(query: String, windows: [SuggestionContainerTests.Window]) -> SuggestionContainerTests.TestExpectations.ExpectedSuggestion? {
+    func expectedSuggestion(query: String) -> SuggestionContainerTests.TestExpectations.ExpectedSuggestion? {
         let viewModel = SuggestionViewModel(isHomePage: false, suggestion: self, userStringValue: query)
         switch self {
         case .phrase(phrase: let phrase):
-            return .init(type: .phrase, title: phrase, subtitle: viewModel.suffix ?? "", uri: nil, tabId: nil, score: 0)
+            return .init(type: .phrase, title: phrase, subtitle: viewModel.suffix ?? "", uri: URL.makeSearchUrl(from: phrase)?.absoluteString, tabId: nil, score: 0)
 
         case .website(url: let url):
             return .init(type: .website, title: url.absoluteString, subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: nil, score: 0)
@@ -478,15 +563,8 @@ private extension Suggestion {
         case .historyEntry(title: let title, url: let url, score: let score):
             return .init(type: .historyEntry, title: title ?? "", subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: nil, score: score)
 
-        case .openTab(title: let title, url: let url, score: let score):
-            var tabId: UUID?
-            for window in windows {
-                if let tabs = window.tabs.firstIndex(where: { $0.url == url && $0.title == title }) {
-                    tabId = window.tabs[tabs].tabId
-                    break
-                }
-            }
-            return .init(type: .openTab, title: title, subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: tabId, score: score)
+        case .openTab(title: let title, url: let url, tabId: let tabId, score: let score):
+            return .init(type: .openTab, title: title, subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: tabId.flatMap(UUID.init(uuidString:)), score: score)
         case .internalPage(title: let title, url: let url, score: let score):
             return .init(type: .internalPage, title: title, subtitle: viewModel.suffix ?? "", uri: url.absoluteString, tabId: nil, score: score)
         case .unknown:

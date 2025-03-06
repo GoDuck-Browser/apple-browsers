@@ -51,13 +51,13 @@ extension SubscriptionManagerV2Tests {
         // GIVEN
         let redirectURLComponents = try XCTUnwrap(URLComponents(string: "https://www.duckduckgo.com/pro?origin=test"))
 
-        let stagingEnvironment = SubscriptionEnvironment(serviceEnvironment: .staging, purchasePlatform: .appStore)
+        _=SubscriptionEnvironment(serviceEnvironment: .staging, purchasePlatform: .appStore)
 
         let stagingSubscriptionManager = DefaultSubscriptionManagerV2(
             storePurchaseManager: mockStorePurchaseManager,
             oAuthClient: mockOAuthClient,
             subscriptionEndpointService: mockSubscriptionEndpointService,
-            subscriptionEnvironment: SubscriptionEnvironment(serviceEnvironment: .staging, purchasePlatform: .appStore),
+            subscriptionEnvironment: stagingEnvironment,
             pixelHandler: { _ in },
             autoRecoveryHandler: {
                 if let overrideTokenResponse = self.overrideTokenResponse {

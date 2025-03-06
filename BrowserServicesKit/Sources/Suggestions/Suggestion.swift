@@ -25,8 +25,37 @@ public enum Suggestion: Equatable {
     case bookmark(title: String, url: URL, isFavorite: Bool, score: Int)
     case historyEntry(title: String?, url: URL, score: Int)
     case internalPage(title: String, url: URL, score: Int)
-    case openTab(title: String, url: URL, score: Int)
+    case openTab(title: String, url: URL, tabId: String?, score: Int)
     case unknown(value: String)
+
+    /// The score of this suggestion, if available
+    var score: Int {
+        switch self {
+        case .bookmark(_, _, _, let score),
+             .historyEntry(_, _, let score),
+             .internalPage(_, _, let score),
+             .openTab(_, _, _, let score):
+            return score
+        case .phrase, .website, .unknown:
+            return 0
+        }
+    }
+
+    /// Returns a new suggestion with the updated score
+    func withScore(_ newScore: Int) -> Suggestion {
+        switch self {
+        case .bookmark(let title, let url, let isFavorite, _):
+            return .bookmark(title: title, url: url, isFavorite: isFavorite, score: newScore)
+        case .historyEntry(let title, let url, _):
+            return .historyEntry(title: title, url: url, score: newScore)
+        case .internalPage(let title, let url, _):
+            return .internalPage(title: title, url: url, score: newScore)
+        case .openTab(title: let title, url: let url, tabId: let tabId, _):
+            return .openTab(title: title, url: url, tabId: tabId, score: newScore)
+        case .phrase, .website, .unknown:
+            return self // No score field to update
+        }
+    }
 
     public var url: URL? {
         switch self {
@@ -34,7 +63,7 @@ public enum Suggestion: Equatable {
              .historyEntry(title: _, url: let url, _),
              .bookmark(title: _, url: let url, isFavorite: _, _),
              .internalPage(title: _, url: let url, _),
-             .openTab(title: _, url: let url, _):
+             .openTab(title: _, url: let url, _, _):
             return url
         case .phrase, .unknown:
             return nil
@@ -47,7 +76,7 @@ public enum Suggestion: Equatable {
             return title
         case .bookmark(title: let title, url: _, isFavorite: _, _),
              .internalPage(title: let title, url: _, _),
-             .openTab(title: let title, url: _, _):
+             .openTab(title: let title, url: _, _, _):
             return title
         case .phrase, .website, .unknown:
             return nil
@@ -92,19 +121,11 @@ extension Suggestion {
     }
 
     public init(tab: BrowserTab, score: Int) {
-        self = .openTab(title: tab.title, url: tab.url, score: score)
+        self = .openTab(title: tab.title, url: tab.url, tabId: tab.tabId, score: score)
     }
 
     public init(url: URL) {
         self = .website(url: url)
-    }
-
-    public init(phrase: String, isNav: Bool) {
-        if isNav, let url = URL(string: "http://\(phrase)") {
-            self = .website(url: url)
-        } else {
-            self = .phrase(phrase: phrase)
-        }
     }
 
 }
