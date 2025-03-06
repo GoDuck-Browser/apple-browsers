@@ -27901,7 +27901,7 @@
     },
     "history.delete.dialog.burn.checkbox.explanation" : {
       "comment" : "Explanation of what deleting site data means.",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -27954,6 +27954,18 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "This will log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted."
+          }
+        }
+      }
+    },
+    "history.delete.dialog.burn.checkbox.explanation.message" : {
+      "comment" : "Explanation of what deleting site data means.",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
             "value" : "This will log you out of these sites, reset site preferences, and remove saved sessions. Fireproof site cookies and data won’t be deleted."
           }
         }
@@ -28141,7 +28153,7 @@
     },
     "history.delete.dialog.title" : {
       "comment" : "Title of a dialog asking the user to confirm deleting history",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -28194,6 +28206,18 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
+            "value" : "Delete history?"
+          }
+        }
+      }
+    },
+    "history.delete.dialog.title1" : {
+      "comment" : "Title of a dialog asking the user to confirm deleting history",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
             "value" : "Delete history?"
           }
         }
@@ -43986,9 +44010,33 @@
         }
       }
     },
-    "open.all.in.new.fire.window" : {
+    "open.all.in.current.window" : {
+      "comment" : "Menu item that opens all the bookmarks in a folder in new tabs in the current window",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open All in Current Window"
+          }
+        }
+      }
+    },
+    "open.all.in.fire.window" : {
       "comment" : "Menu item that opens all URLs in a new Fire Window",
       "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Open All in New Fire Window"
+          }
+        }
+      }
+    },
+    "open.all.in.new.fire.window" : {
+      "comment" : "Menu item that opens all URLs in a new Fire Window",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -44048,7 +44096,7 @@
     },
     "open.all.in.new.tabs" : {
       "comment" : "Menu item that opens all the bookmarks in a folder in new tabs in the current window",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
