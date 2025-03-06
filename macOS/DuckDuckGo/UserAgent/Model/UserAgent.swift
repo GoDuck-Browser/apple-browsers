@@ -61,18 +61,19 @@ extension UserAgent {
 
     static func `for`(_ url: URL?,
                       privacyConfig: PrivacyConfiguration = ContentBlocking.shared.privacyConfigurationManager.privacyConfig) -> String {
-        guard let url, privacyConfig.isEnabled(featureKey: .customUserAgent) else {
-            return Self.default
-        }
-
-        if isURLPartOfWebviewDefaultList(url: url, privacyConfig: privacyConfig) {
-            return Self.webViewDefault
-        }
-        if isURLPartOfDefaultSitesList(url: url, privacyConfig: privacyConfig) {
-            return Self.safari
-        }
-
-        return Self.default
+        return Self.safari
+//        guard let url, privacyConfig.isEnabled(featureKey: .customUserAgent) else {
+//            return Self.default
+//        }
+//
+//        if isURLPartOfWebviewDefaultList(url: url, privacyConfig: privacyConfig) {
+//            return Self.webViewDefault
+//        }
+//        if isURLPartOfDefaultSitesList(url: url, privacyConfig: privacyConfig) {
+//            return Self.safari
+//        }
+//
+//        return Self.default
     }
 
     // MARK: - Remote user agent configuration
