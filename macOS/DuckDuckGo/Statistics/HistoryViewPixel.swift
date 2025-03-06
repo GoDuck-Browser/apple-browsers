@@ -32,7 +32,7 @@ enum HistoryViewPixel: PixelKitEventV2 {
      * > Note: This is a daily pixel.
      *
      * > Related links:
-     * [Privacy Triage TBD]()
+     * [Privacy Triage TBD](https://app.asana.com/0/69071770703008/1209581218702028)
      * [Detailed Pixels description](https://app.asana.com/0/0/1209364382402737/f)
      *
      * Anomaly Investigation:

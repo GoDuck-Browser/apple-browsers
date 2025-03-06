@@ -82,12 +82,21 @@ final class CapturingHistoryDataSource: HistoryDataSource {
     var deleteCalls: [[Visit]] = []
 }
 
+final class CapturingHistoryViewDataProviderPixelHandler: HistoryViewDataProviderPixelFiring {
+    func fireFilterUpdatedPixel(_ query: DataModel.HistoryQueryKind) {
+        fireFilterUpdatedPixelCalls.append(query)
+    }
+
+    var fireFilterUpdatedPixelCalls: [DataModel.HistoryQueryKind] = []
+}
+
 final class HistoryViewDataProviderTests: XCTestCase {
     var provider: HistoryViewDataProvider!
     var dataSource: CapturingHistoryDataSource!
     var burner: CapturingHistoryBurner!
     var dateFormatter: MockHistoryViewDateFormatter!
     var featureFlagger: MockFeatureFlagger!
+    var pixelHandler: CapturingHistoryViewDataProviderPixelHandler!
 
     @MainActor
     override func setUp() async throws {
@@ -95,11 +104,13 @@ final class HistoryViewDataProviderTests: XCTestCase {
         burner = CapturingHistoryBurner()
         dateFormatter = MockHistoryViewDateFormatter()
         featureFlagger = MockFeatureFlagger()
+        pixelHandler = CapturingHistoryViewDataProviderPixelHandler()
         provider = HistoryViewDataProvider(
             historyDataSource: dataSource,
             historyBurner: burner,
             dateFormatter: dateFormatter,
-            featureFlagger: featureFlagger
+            featureFlagger: featureFlagger,
+            pixelHandler: pixelHandler
         )
         await provider.refreshData()
     }
@@ -907,6 +918,47 @@ final class HistoryViewDataProviderTests: XCTestCase {
                 try XCTUnwrap("https://en.wikipedia.org".url): "English Wikipedia"
             ]
         )
+    }
+
+    // MARK: - pixels
+
+    func testWhenVisitsBatchIsCalledWithZeroOffsetAndUserSourceThenFilterUpdatedPixelIsFired() async throws {
+        _ = await provider.visitsBatch(for: .rangeFilter(.all), source: .user, limit: 10, offset: 0)
+        _ = await provider.visitsBatch(for: .rangeFilter(.today), source: .user, limit: 10, offset: 0)
+        _ = await provider.visitsBatch(for: .searchTerm("foo"), source: .user, limit: 10, offset: 0)
+        _ = await provider.visitsBatch(for: .domainFilter("example.com"), source: .user, limit: 10, offset: 0)
+
+        XCTAssertEqual(pixelHandler.fireFilterUpdatedPixelCalls, [
+            .rangeFilter(.all),
+            .rangeFilter(.today),
+            .searchTerm("foo"),
+            .domainFilter("example.com")
+        ])
+    }
+
+    func testWhenVisitsBatchIsCalledWithNonZeroOffsetAndUserSourceThenFilterUpdatedPixelIsNotFired() async throws {
+        _ = await provider.visitsBatch(for: .rangeFilter(.all), source: .user, limit: 10, offset: 10)
+        XCTAssertEqual(pixelHandler.fireFilterUpdatedPixelCalls, [])
+    }
+
+    func testWhenVisitsBatchIsCalledWithNonZeroOffsetAndAutoSourceThenFilterUpdatedPixelIsNotFired() async throws {
+        _ = await provider.visitsBatch(for: .rangeFilter(.all), source: .auto, limit: 10, offset: 10)
+        XCTAssertEqual(pixelHandler.fireFilterUpdatedPixelCalls, [])
+    }
+
+    func testWhenVisitsBatchIsCalledWithNonZeroOffsetAndInitialSourceThenFilterUpdatedPixelIsNotFired() async throws {
+        _ = await provider.visitsBatch(for: .rangeFilter(.all), source: .initial, limit: 10, offset: 10)
+        XCTAssertEqual(pixelHandler.fireFilterUpdatedPixelCalls, [])
+    }
+
+    func testWhenVisitsBatchIsCalledWithZeroOffsetAndAutoSourceThenFilterUpdatedPixelIsNotFired() async throws {
+        _ = await provider.visitsBatch(for: .rangeFilter(.all), source: .auto, limit: 10, offset: 0)
+        XCTAssertEqual(pixelHandler.fireFilterUpdatedPixelCalls, [])
+    }
+
+    func testWhenVisitsBatchIsCalledWithZeroOffsetAndInitialSourceThenFilterUpdatedPixelIsNotFired() async throws {
+        _ = await provider.visitsBatch(for: .rangeFilter(.all), source: .initial, limit: 10, offset: 0)
+        XCTAssertEqual(pixelHandler.fireFilterUpdatedPixelCalls, [])
     }
 
     // MARK: - helpers
