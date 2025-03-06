@@ -44,8 +44,8 @@ final class URLExtensionTests: XCTestCase {
 
     func test_makeURL_from_addressBarString() {
         let data: [(string: String, expected: String)] = [
-            ("https://duckduckgo.com/?q=search string with spaces", "https://duckduckgo.com/?q=search+string+with+spaces"),
-            ("define: foo", "https://duckduckgo.com/?q=define%3A+foo"),
+            ("https://duckduckgo.com/?q=search string with spaces", "https://duckduckgo.com/?q=search%20string%20with%20spaces"),
+            ("define: foo", "https://duckduckgo.com/?q=define%3A%20foo"),
             ("test://hello/", "test://hello/"),
             ("localdomain", "https://duckduckgo.com/?q=localdomain"),
             ("   http://example.com\n", "http://example.com"),
@@ -53,9 +53,9 @@ final class URLExtensionTests: XCTestCase {
             (" duckduckgo.c ", "https://duckduckgo.com/?q=duckduckgo.c"),
             ("localhost ", "http://localhost"),
             ("local ", "https://duckduckgo.com/?q=local"),
-            ("test string with spaces", "https://duckduckgo.com/?q=test+string+with+spaces"),
+            ("test string with spaces", "https://duckduckgo.com/?q=test%20string%20with%20spaces"),
             ("http://💩.la:8080 ", "http://xn--ls8h.la:8080"),
-            ("http:// 💩.la:8080 ", "https://duckduckgo.com/?q=http%3A%2F%2F+%F0%9F%92%A9.la%3A8080"),
+            ("http:// 💩.la:8080 ", "https://duckduckgo.com/?q=http%3A%2F%2F%20%F0%9F%92%A9.la%3A8080"),
             ("https://xn--ls8h.la/path/to/resource", "https://xn--ls8h.la/path/to/resource"),
             ("1.4/3.4", "https://duckduckgo.com/?q=1.4%2F3.4"),
             ("16385-12228.72", "https://duckduckgo.com/?q=16385-12228.72"),
@@ -63,9 +63,9 @@ final class URLExtensionTests: XCTestCase {
             ("user@domain.com", "https://duckduckgo.com/?q=user%40domain.com"),
             ("http://user@domain.com", "http://user@domain.com"),
             ("http://user:@domain.com", "http://user:@domain.com"),
-            ("http://user: @domain.com", "https://duckduckgo.com/?q=http%3A%2F%2Fuser%3A+%40domain.com"),
+            ("http://user: @domain.com", "https://duckduckgo.com/?q=http%3A%2F%2Fuser%3A%20%40domain.com"),
             ("http://user:,,@domain.com", "http://user:,,@domain.com"),
-            ("http://user:pass@domain.com", "http://user:pass@domain.com")
+            ("http://user:pass@domain.com", "http://user:pass@domain.com"),
         ]
 
         for (string, expected) in data {
