@@ -38,12 +38,6 @@ extension SubscriptionAuthV1toV2Bridge {
     }
 }
 
-extension SubscriptionAuthV1toV2Bridge {
-    public func isEnabled(feature: Entitlement.ProductName) async throws -> Bool {
-        try await isEnabled(feature: feature, cachePolicy: .returnCacheDataElseLoad)
-    }
-}
-
 extension DefaultSubscriptionManager: SubscriptionAuthV1toV2Bridge {
 
     public func isEnabled(feature: Entitlement.ProductName, cachePolicy: APICachePolicy) async throws -> Bool {

@@ -686,8 +686,8 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
     // MARK: - Overrideable Connection Events
 
     override func prepareToConnect(using provider: NETunnelProviderProtocol?) {
+        Logger.networkProtection.log("Preparing to connect...")
         super.prepareToConnect(using: provider)
-
         guard PixelKit.shared == nil, let options = provider?.providerConfiguration else { return }
         try? loadDefaultPixelHeaders(from: options)
     }
