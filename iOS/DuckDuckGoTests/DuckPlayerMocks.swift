@@ -192,10 +192,58 @@ final class MockDuckPlayerSettings: DuckPlayerSettings {
 }
 
 final class MockDuckPlayer: DuckPlayerControlling {
-    
+    // MARK: - Required Properties
+    var settings: DuckPlayerSettings
     var hostView: TabViewController?
+    var youtubeNavigationRequest: PassthroughSubject<URL, Never>
+    var playerDismissedPublisher: PassthroughSubject<Void, Never>
     
-    var youtubeNavigationRequest: PassthroughSubject<URL, Never>?
+    // MARK: - Private Properties
+    private var featureFlagger: FeatureFlagger
+    
+    // MARK: - Initialization
+    init(settings: DuckPlayerSettings, featureFlagger: FeatureFlagger) {
+        self.settings = settings
+        self.featureFlagger = featureFlagger
+        self.youtubeNavigationRequest = PassthroughSubject<URL, Never>()
+        self.playerDismissedPublisher = PassthroughSubject<Void, Never>()
+    }
+    
+    // MARK: - User Values Methods
+    func setUserValues(params: Any, message: WKScriptMessage) -> (any Encodable)? {
+        nil
+    }
+    
+    func getUserValues(params: Any, message: WKScriptMessage) -> (any Encodable)? {
+        nil
+    }
+    
+    // MARK: - Video Handling Methods
+    func openVideoInDuckPlayer(url: URL, webView: WKWebView) {
+        // Mock implementation
+    }
+    
+    func loadNativeDuckPlayerVideo(videoID: String, source: DuckPlayer.VideoNavigationSource) {
+        // Mock implementation
+    }
+    
+    // MARK: - Setup Methods
+    func initialSetupPlayer(params: Any, message: WKScriptMessage) async -> (any Encodable)? {
+        nil
+    }
+    
+    func initialSetupOverlay(params: Any, message: WKScriptMessage) async -> (any Encodable)? {
+        nil
+    }
+    
+    func setHostViewController(_ vc: TabViewController) {
+        self.hostView = vc
+    }
+    
+    // MARK: - Settings Methods
+    func openDuckPlayerSettings() {
+        // Mock implementation
+    }
     
     func openDuckPlayerSettings(params: Any, message: WKScriptMessage) async -> (any Encodable)? {
         nil
@@ -205,69 +253,32 @@ final class MockDuckPlayer: DuckPlayerControlling {
         nil
     }
     
-    func setHostViewController(_ vc: TabViewController) {}
-    func removeHostView() {}
-    
-    func initialSetupPlayer(params: Any, message: WKScriptMessage) async -> (any Encodable)? {
-        nil
-    }
-    
-    func initialSetupOverlay(params: Any, message: WKScriptMessage) async -> (any Encodable)? {
-        nil
-    }
-    
-    func loadNativeDuckPlayerVideo(videoID: String) {
-        return
-    }
-    
-    var settings: any DuckPlayerSettings
-    var playerDismissedPublisher: PassthroughSubject<Void, Never>?
-    var bottomSheetViewModel: DuckDuckGo.DuckPlayerEntryPillViewModel?
-    var bottomSheetHostingController: UIHostingController<DuckDuckGo.DuckPlayerEntryPillView>?
-    private var featureFlagger: FeatureFlagger
-    
-    init(settings: any DuckDuckGo.DuckPlayerSettings, featureFlagger: any BrowserServicesKit.FeatureFlagger) {
-        self.settings = settings
-        self.featureFlagger = featureFlagger
-        self.youtubeNavigationRequest = PassthroughSubject<URL, Never>()
-    }
-    
-    func setUserValues(params: Any, message: WKScriptMessage) -> (any Encodable)? {
-        nil
-    }
-    
-    func getUserValues(params: Any, message: WKScriptMessage) -> (any Encodable)? {
-        nil
-    }
-    
-    func openVideoInDuckPlayer(url: URL, webView: WKWebView) {
-        
-    }
-    
-    func initialSetup(params: Any, message: WKScriptMessage) async -> (any Encodable)? {
-        nil
-    }
-
+    // MARK: - Error Handling
     func handleYoutubeError(params: Any, message: WKScriptMessage) async -> (any Encodable)? {
         nil
     }
     
-    func openDuckPlayerSettings() {}
-    
-    func presentPill(for videoID: String) {}
-    
-    func dismissPill() {}
-    
-    func hideBottomSheetForHiddenChrome() {}
-    
-    func showBottomSheetForVisibleChrome() {}
-        
+    // MARK: - Telemetry
     func telemetryEvent(params: Any, message: WKScriptMessage) async -> (any Encodable)? {
         nil
     }
     
-    func loadNativeDuckPlayerVideo(videoID: String, source: DuckDuckGo.DuckPlayer.VideoNavigationSource) {}
-
+    // MARK: - Pill UI Methods
+    func presentPill(for videoID: String, timestamp: String? = nil) {
+        // Mock implementation
+    }
+    
+    func dismissPill() {
+        // Mock implementation
+    }
+    
+    func hidePillForHiddenChrome() {
+        // Mock implementation
+    }
+    
+    func showPillForVisibleChrome() {
+        // Mock implementation
+    }
 }
 
 enum MockFeatureFlag: Hashable {
