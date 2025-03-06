@@ -1042,6 +1042,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
     @available(iOS 17.0, *)
     private func updateConnectOnDemand(enabled: Bool) async throws {
+        Logger.networkProtectionIPC.log("Updating Connect on Demand to \(enabled)")
         let managers = try await NETunnelProviderManager.loadAllFromPreferences()
         if let manager = managers.first {
             manager.isOnDemandEnabled = enabled

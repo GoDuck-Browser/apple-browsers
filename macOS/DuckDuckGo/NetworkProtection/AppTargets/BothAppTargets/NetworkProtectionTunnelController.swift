@@ -190,6 +190,7 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
     }
 
     private func handleStatusChange(_ notification: Notification) {
+        Logger.networkProtection.log("🍕 VPN handle status change: \(notification.debugDescription, privacy: .public)")
         guard let session = (notification.object as? NETunnelProviderSession),
               session.status != previousStatus,
               let manager = session.manager as? NETunnelProviderManager else {
@@ -664,10 +665,10 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         }
 
         do {
-            Logger.networkProtection.log("Starting NetworkProtectionTunnelController, options: \(options, privacy: .public)")
+            Logger.networkProtection.log("🚀 Starting NetworkProtectionTunnelController, options: \(options, privacy: .public)")
             try tunnelManager.connection.startVPNTunnel(options: options)
         } catch {
-            Logger.networkProtection.fault("Failed to start VPN tunnel: \(error, privacy: .public)")
+            Logger.networkProtection.fault("🔴 Failed to start VPN tunnel: \(error, privacy: .public)")
             throw StartError.startTunnelFailure(error)
         }
 
@@ -697,7 +698,7 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
     ///
     @MainActor
     func stop() async {
-        Logger.networkProtection.log("Stop VPN")
+        Logger.networkProtection.log("🛑 Stop VPN")
         await stop(disableOnDemand: true)
     }
 
