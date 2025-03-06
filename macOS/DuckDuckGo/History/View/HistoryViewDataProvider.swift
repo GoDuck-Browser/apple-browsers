@@ -67,7 +67,6 @@ protocol HistoryViewDataProviding: HistoryView.DataProviding {
     func burnVisits(for identifiers: [VisitIdentifier]) async
 }
 
-
 final class HistoryViewDataProvider: HistoryViewDataProviding {
 
     init(

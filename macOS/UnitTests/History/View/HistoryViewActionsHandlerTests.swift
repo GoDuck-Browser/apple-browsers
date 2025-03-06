@@ -23,7 +23,7 @@ import PixelKit
 import XCTest
 @testable import DuckDuckGo_Privacy_Browser
 
-fileprivate struct FirePixelCall: Equatable {
+private struct FirePixelCall: Equatable {
     static func == (lhs: FirePixelCall, rhs: FirePixelCall) -> Bool {
         guard lhs.pixel.name == rhs.pixel.name, lhs.pixel.parameters == rhs.pixel.parameters else {
             return false
@@ -477,7 +477,6 @@ final class HistoryViewActionsHandlerTests: XCTestCase {
 
         XCTAssertEqual(firePixelCalls, [])
     }
-
 
     // MARK: - addBookmarks
 
