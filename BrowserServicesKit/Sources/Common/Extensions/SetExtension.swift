@@ -1,7 +1,7 @@
 //
-//  Query.swift
+//  SetExtension.swift
 //
-//  Copyright © 2021 DuckDuckGo. All rights reserved.
+//  Copyright © 2025 DuckDuckGo. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 //  limitations under the License.
 //
 
-import Foundation
+public extension Set {
 
-public typealias Query = String
+    @inlinable func intersects<S: Sequence>(_ other: S) -> Bool where Element == S.Element {
+        !isDisjoint(with: other)
+    }
+
+}

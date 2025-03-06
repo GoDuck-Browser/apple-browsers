@@ -1,7 +1,7 @@
 //
-//  Score.swift
+//  ScoringService.swift
 //
-//  Copyright © 2021 DuckDuckGo. All rights reserved.
+//  Copyright © 2025 DuckDuckGo. All rights reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
 //  you may not use this file except in compliance with the License.
@@ -19,33 +19,33 @@
 import Foundation
 import Common
 
-typealias Score = Int
+struct ScoringService  {
 
-extension Score {
-
-    // swiftlint:disable:next cyclomatic_complexity
-    init(title: String?, url: URL, visitCount: Int, query: Query, queryTokens: [Query]? = nil) {
+    /// Scores a suggestion based on the query and the suggestion's title and url.
+    static func score(title: String?, url: URL, visitCount: Int = 0, lowerQuery: String, queryTokens: [String]? = nil) -> Int { // swiftlint:disable:this cyclomatic_complexity
         // To optimize, query tokens can be precomputed
-        let query = query.lowercased()
-        let queryTokens = queryTokens ?? Self.tokens(from: query)
+        let queryTokens = queryTokens ?? lowerQuery.tokenized()
+        assert(lowerQuery.lowercased() == lowerQuery)
+        assert(queryTokens == lowerQuery.tokenized())
+        assert(!queryTokens.contains(where: { $0.isEmpty }))
 
         var score = 0
         let lowercasedTitle = title?.lowercased() ?? ""
-        let queryCount = query.count
+        let queryCount = lowerQuery.count
         let domain = url.host?.droppingWwwPrefix() ?? ""
         let nakedUrl = url.nakedString ?? ""
 
         // Full matches
-        if nakedUrl.starts(with: query) {
+        if nakedUrl.starts(with: lowerQuery) {
             score += 300
             // Prioritize root URLs most
             if url.isRoot { score += 2000 }
-        } else if lowercasedTitle.leadingBoundaryStartsWith(query) {
+        } else if lowercasedTitle.leadingBoundaryStartsWith(lowerQuery) {
             score += 200
             if url.isRoot { score += 2000 }
-        } else if queryCount > 2 && domain.contains(query) {
+        } else if queryCount > 2 && domain.contains(lowerQuery) {
             score += 150
-        } else if queryCount > 2 && lowercasedTitle.contains(" \(query)") { // Exact match from the begining of the word within string.
+        } else if queryCount > 2 && lowercasedTitle.contains(" \(lowerQuery)") { // Exact match from the begining of the word within string.
             score += 100
         } else {
             // Tokenized matches
@@ -81,38 +81,40 @@ extension Score {
             score += visitCount
         }
 
-        self = score
+        return score
     }
 
-    init(bookmark: Bookmark, query: Query, queryTokens: [Query]? = nil) {
+    static func score(bookmark: Bookmark, lowerQuery: String, queryTokens: [String]? = nil) -> Int {
         guard let urlObject = URL(string: bookmark.url) else {
-            self = 0
-            return
+            return 0
         }
-        self.init(title: bookmark.title, url: urlObject, visitCount: 0, query: query, queryTokens: queryTokens)
+        return score(title: bookmark.title, url: urlObject, visitCount: 0, lowerQuery: lowerQuery, queryTokens: queryTokens)
     }
 
-    init(historyEntry: HistorySuggestion, query: Query, queryTokens: [Query]? = nil) {
-        self.init(title: historyEntry.title ?? "",
-                  url: historyEntry.url,
-                  visitCount: historyEntry.numberOfVisits,
-                  query: query,
-                  queryTokens: queryTokens)
+    static func score(historyEntry: HistorySuggestion, lowerQuery: String, queryTokens: [String]? = nil) -> Int {
+        return score(title: historyEntry.title ?? "",
+                     url: historyEntry.url,
+                     visitCount: historyEntry.numberOfVisits,
+                     lowerQuery: lowerQuery,
+                     queryTokens: queryTokens)
     }
 
-    init(internalPage: InternalPage, query: Query, queryTokens: [Query]? = nil) {
-        self.init(title: internalPage.title, url: internalPage.url, visitCount: 0, query: query, queryTokens: queryTokens)
+    static func score(internalPage: InternalPage, lowerQuery: String, queryTokens: [String]? = nil) -> Int {
+        return score(title: internalPage.title, url: internalPage.url, visitCount: 0, lowerQuery: lowerQuery, queryTokens: queryTokens)
     }
 
-    static func tokens(from query: Query) -> [Query] {
-        return query.components(separatedBy: .whitespacesAndNewlines)
-            .filter { !$0.isEmpty }
-            .map { $0.lowercased() }
+    static func score(browserTab: BrowserTab, lowerQuery: String, queryTokens: [String]? = nil) -> Int {
+        return score(title: browserTab.title, url: browserTab.url, visitCount: 0, lowerQuery: lowerQuery, queryTokens: queryTokens)
     }
 
 }
 
 extension String {
+
+    /// Splits the search query into tokens (separate words).
+    func tokenized() -> [String] {
+        components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }
+    }
 
     /// e.g. "Cats and Dogs" would match `Cats` or `"Cats`
     func leadingBoundaryStartsWith(_ s: String) -> Bool {
