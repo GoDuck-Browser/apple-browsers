@@ -22,7 +22,7 @@ import DesignResourcesKit
 
 struct DuckPlayerEntryPillView: View {
     @ObservedObject var viewModel: DuckPlayerEntryPillViewModel
-    
+
     // Add state to track the height
     @State private var viewHeight: CGFloat = 100
     @State private var iconSize: CGFloat = 40
@@ -46,7 +46,6 @@ struct DuckPlayerEntryPillView: View {
         }
     }
 
-
     private var sheetContent: some View {
         Button(action: { viewModel.openInDuckPlayer() }) {
             VStack(spacing: Constants.Layout.stackSpacing) {
@@ -54,20 +53,20 @@ struct DuckPlayerEntryPillView: View {
                     Image(Constants.daxLogo)
                         .resizable()
                         .frame(width: Constants.Layout.iconSize, height: Constants.Layout.iconSize)
-                    
+
                     Text(UserText.duckPlayerNativeOpenInDuckPlayer)
                         .font(.system(size: Constants.Layout.fontSize, weight: .semibold))
                         .foregroundColor(Color(designSystemColor: .textPrimary))
-                    
+
                     Spacer()
-                    
+
                     Image(systemName: Constants.playImage)
                         .font(.system(size: Constants.Layout.playButtonFont))
                         .foregroundColor(.white)
                         .frame(width: iconSize, height: iconSize)
                         .background(Color.blue)
                         .clipShape(Circle())
-            
+
                 }
                 .padding(Constants.Layout.regularPadding)
             }
@@ -82,7 +81,7 @@ struct DuckPlayerEntryPillView: View {
             .padding(.bottom, Constants.Layout.bottomSpacer) // Add padding to cover border during animation                      
         }
     }
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Color(designSystemColor: .panel)

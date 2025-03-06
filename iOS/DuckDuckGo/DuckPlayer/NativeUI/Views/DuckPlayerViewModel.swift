@@ -81,9 +81,9 @@ final class DuckPlayerViewModel: ObservableObject {
     var cancellables = Set<AnyCancellable>()
 
     /// The generated URL for the embedded YouTube player
-    @Published private(set) var url: URL?     
+    @Published private(set) var url: URL?
     @Published private(set) var currentTimestamp: TimeInterval = 0
-    
+
     // MARK: - Private Properties
     private var timestampUpdateTimer: Timer?
     private var webView: WKWebView?
@@ -92,7 +92,7 @@ final class DuckPlayerViewModel: ObservableObject {
     /// Default parameters applied to all YouTube video URLs
     let defaultParameters: [String: String] = [
         Constants.relParameter: Constants.disabled,
-        Constants.playsInlineParameter: Constants.enabled,        
+        Constants.playsInlineParameter: Constants.enabled
     ]
 
     /// Starts observing the video timestamp
@@ -101,7 +101,7 @@ final class DuckPlayerViewModel: ObservableObject {
     func startObservingTimestamp(webView: WKWebView, coordinator: DuckPlayerWebView.Coordinator) {
         self.webView = webView
         self.coordinator = coordinator
-        
+
         // Update timestamp every second
         timestampUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
@@ -114,7 +114,7 @@ final class DuckPlayerViewModel: ObservableObject {
             }
         }
     }
-    
+
     /// Stops observing the video timestamp
     func stopObservingTimestamp() {
         timestampUpdateTimer?.invalidate()
@@ -122,22 +122,22 @@ final class DuckPlayerViewModel: ObservableObject {
         webView = nil
         coordinator = nil
     }
-    
+
     /// Gets the current video URL with the current timestamp
     /// - Returns: URL with the current timestamp parameter
     func getVideoURLWithCurrentTimestamp() -> URL? {
         guard let videoURL = getVideoURL() else { return nil }
         var components = URLComponents(url: videoURL, resolvingAgainstBaseURL: true)
-        
+
         // Convert timestamp to appropriate format (e.g., 1m30s)
         let minutes = Int(currentTimestamp) / 60
         let seconds = Int(currentTimestamp) % 60
         let timestampString = minutes > 0 ? "\(minutes)m\(seconds)s" : "\(seconds)s"
-        
+
         var queryItems = components?.queryItems ?? []
         queryItems.append(URLQueryItem(name: "t", value: timestampString))
         components?.queryItems = queryItems
-        
+
         return components?.url
     }
 
@@ -213,7 +213,5 @@ final class DuckPlayerViewModel: ObservableObject {
     func openSettings() {
         settingsRequestPublisher.send()
     }
-
-   
 
 }

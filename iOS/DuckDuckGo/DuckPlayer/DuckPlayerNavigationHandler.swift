@@ -1144,10 +1144,10 @@ extension DuckPlayerNavigationHandler: DuckPlayerNavigationHandling {
     /// Handles DuckPlayer Updates when WebView appears
     @MainActor
     func updateDuckPlayerForWebViewAppearance(_ hostViewController: TabViewController) {
-        
+
         // Ensure the pill is dismissed
         duckPlayer.dismissPill(animated: false)
-        
+
         // Ensure the tab is not muted
         toggleAudioForTab(hostViewController.webView, mute: false)
 
