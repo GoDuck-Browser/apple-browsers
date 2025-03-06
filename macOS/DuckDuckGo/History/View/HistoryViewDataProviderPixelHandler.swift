@@ -20,11 +20,19 @@ import Combine
 import HistoryView
 import PixelKit
 
+/**
+ * This protocol describes firing range updated pixels from HistoryViewDataProvider.
+ */
 protocol HistoryViewDataProviderPixelFiring {
     func fireFilterUpdatedPixel(_ query: DataModel.HistoryQueryKind)
 }
 
 struct HistoryViewDataProviderPixelHandler: HistoryViewDataProviderPixelFiring {
+
+    /**
+     * Due to the nature of filtering by search term (typing the phrase)
+     * search term filter pixel uses a debounce.
+     */
     func fireFilterUpdatedPixel(_ query: DataModel.HistoryQueryKind) {
         switch query {
         case .rangeFilter(.all), .searchTerm(""):
@@ -37,7 +45,7 @@ struct HistoryViewDataProviderPixelHandler: HistoryViewDataProviderPixelFiring {
     }
 
     init(
-        firePixel: @escaping (PixelKitEvent) -> Void = { PixelKit.fire($0, frequency: .dailyAndStandard) },
+        firePixel: @escaping (HistoryViewPixel) -> Void = { PixelKit.fire($0, frequency: .dailyAndStandard) },
         debounce: RunLoop.SchedulerTimeType.Stride = .seconds(1)
     ) {
         self.firePixel = firePixel
@@ -45,11 +53,11 @@ struct HistoryViewDataProviderPixelHandler: HistoryViewDataProviderPixelFiring {
         searchTermCancellable = searchTermPixelSubject
             .debounce(for: debounce, scheduler: RunLoop.main)
             .sink {
-                firePixel(HistoryViewPixel.filterSet(.searchTerm))
+                firePixel(.filterSet(.searchTerm))
             }
     }
 
-    private let firePixel: (PixelKitEvent) -> Void
+    private let firePixel: (HistoryViewPixel) -> Void
     private let searchTermPixelSubject = PassthroughSubject<Void, Never>()
     private let searchTermCancellable: AnyCancellable
 }
