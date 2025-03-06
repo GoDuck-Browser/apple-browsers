@@ -140,6 +140,7 @@ extension NetworkProtectionStatusView {
             tunnelControllerViewModel = TunnelControllerViewModel(controller: tunnelController,
                                                                   onboardingStatusPublisher: onboardingStatusPublisher,
                                                                   statusReporter: statusReporter,
+                                                                  vpnAppState: .init(defaults: userDefaults),
                                                                   vpnSettings: .init(defaults: userDefaults),
                                                                   proxySettings: .init(defaults: userDefaults),
                                                                   locationFormatter: locationFormatter,

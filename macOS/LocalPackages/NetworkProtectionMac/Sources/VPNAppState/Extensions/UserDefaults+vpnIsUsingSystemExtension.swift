@@ -1,5 +1,5 @@
 //
-//  UserDefaults+offerVPNSysexExtensionUpdate.swift
+//  UserDefaults+vpnIsUsingSystemExtension.swift
 //
 //  Copyright © 2023 DuckDuckGo. All rights reserved.
 //
@@ -32,17 +32,17 @@ extension UserDefaults {
     // Ref: https://app.asana.com/0/0/1209568433228372
     //
     @objc
-    public dynamic var isUsingSystemExtension: Bool {
+    dynamic var vpnIsUsingSystemExtension: Bool {
         get {
-            bool(forKey: #keyPath(isUsingSystemExtension))
+            bool(forKey: #keyPath(vpnIsUsingSystemExtension))
         }
 
         set {
-            set(newValue, forKey: #keyPath(isUsingSystemExtension))
+            set(newValue, forKey: #keyPath(vpnIsUsingSystemExtension))
         }
     }
 
-    public var isUsingSystemExtensionPublisher: AnyPublisher<Bool, Never> {
-        publisher(for: \.isUsingSystemExtension).eraseToAnyPublisher()
+    var vpnIsUsingSystemExtensionPublisher: AnyPublisher<Bool, Never> {
+        publisher(for: \.vpnIsUsingSystemExtension).eraseToAnyPublisher()
     }
 }

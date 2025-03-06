@@ -35,6 +35,7 @@ import ServiceManagement
 import Subscription
 import SwiftUICore
 import VPNAppLauncher
+import VPNAppState
 import VPNExtensionManagement
 
 @objc(Application)
@@ -163,19 +164,10 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
 
     private var cancellables = Set<AnyCancellable>()
     private lazy var networkExtensionController = NetworkExtensionController(sysexBundleID: Self.tunnelSysexBundleID, featureFlagger: featureFlagger)
+    private let vpnAppState = VPNAppState(defaults: .netP)
     private let tunnelSettings: VPNSettings
     private lazy var userDefaults = UserDefaults.netP
-    private lazy var proxySettings: TransparentProxySettings = {
-        let settings = TransparentProxySettings(defaults: .netP)
-
-#if APPSTORE
-        settings.proxyAvailable = false
-#else
-        settings.proxyAvailable = true
-#endif
-
-        return settings
-    }()
+    private let proxySettings: TransparentProxySettings = TransparentProxySettings(defaults: .netP)
 
     @MainActor
     private lazy var vpnProxyLauncher = VPNProxyLauncher(
@@ -188,6 +180,7 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
 
         let controller = TransparentProxyController(
             extensionResolver: proxyExtensionResolver,
+            vpnAppState: vpnAppState,
             settings: proxySettings,
             eventHandler: eventHandler) { [weak self] manager in
                 guard let self else { return }
@@ -250,9 +243,9 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
 
     @MainActor
     private lazy var proxyExtensionResolver = VPNExtensionResolver(
-            availableExtensions: proxyExtensions,
-            featureFlagger: featureFlagger,
-            isConfigurationInstalled: tunnelController.isConfigurationInstalled(extensionBundleID:))
+        availableExtensions: proxyExtensions,
+        featureFlagger: featureFlagger,
+        isConfigurationInstalled: tunnelController.isConfigurationInstalled(extensionBundleID:))
 
     @MainActor
     private lazy var tunnelController: NetworkProtectionTunnelController = {
@@ -425,11 +418,13 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
         }
 
 #if APPSTORE
+        let vpnAppState = VPNAppState(defaults: .netP)
+
         let isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never> = {
             let initialValue = featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex)
-                && !UserDefaults.netP.isUsingSystemExtension
+                && !vpnAppState.isUsingSystemExtension
 
-            let publisher = UserDefaults.netP.isUsingSystemExtensionPublisher
+            let publisher = vpnAppState.isUsingSystemExtensionPublisher
                 .map { [featureFlagger] value in
                     featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex) && !value
                 }.eraseToAnyPublisher()

@@ -23,7 +23,6 @@ public final class TransparentProxySettings {
     public enum Change: Codable {
         case appRoutingRules(_ routingRules: VPNAppRoutingRules)
         case excludedDomains(_ excludedDomains: [String])
-        case proxyAvailable(_ available: Bool)
     }
 
     let defaults: UserDefaults
@@ -35,12 +34,6 @@ public final class TransparentProxySettings {
                 .removeDuplicates()
                 .map { routingRules in
                     Change.appRoutingRules(routingRules)
-                }.eraseToAnyPublisher(),
-            defaults.vpnProxyFeatureAvailablePublisher
-                .dropFirst()
-                .removeDuplicates()
-                .map { available in
-                    Change.proxyAvailable(available)
                 }.eraseToAnyPublisher(),
             defaults.vpnProxyExcludedDomainsPublisher
                 .dropFirst()
@@ -93,16 +86,6 @@ public final class TransparentProxySettings {
 
     public var excludedDomainsPublisher: AnyPublisher<[String], Never> {
         defaults.vpnProxyExcludedDomainsPublisher
-    }
-
-    public var proxyAvailable: Bool {
-        get {
-            defaults.vpnProxyFeatureAvailable
-        }
-
-        set {
-            defaults.vpnProxyFeatureAvailable = newValue
-        }
     }
 
     // MARK: - Reset to factory defaults

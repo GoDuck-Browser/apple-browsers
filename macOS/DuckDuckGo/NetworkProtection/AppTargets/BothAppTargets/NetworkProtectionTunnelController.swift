@@ -568,16 +568,12 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
 
         do {
             if await extensionResolver.isUsingSystemExtension {
-                defaults.isUsingSystemExtension = true
-
                 try await activateSystemExtension { [weak self] in
                     // If we're waiting for user approval we wanna make sure the
                     // onboarding step is set correctly.  This can be useful to
                     // help prevent the value from being de-synchronized.
                     self?.onboardingStatusRawValue = OnboardingStatus.isOnboarding(step: .userNeedsToAllowExtension).rawValue
                 }
-            } else {
-                defaults.isUsingSystemExtension = false
             }
 
             let tunnelManager: NETunnelProviderManager

@@ -25,6 +25,7 @@ import NetworkProtectionIPC
 import NetworkProtectionProxy
 import NetworkProtectionUI
 import PixelKit
+import VPNAppState
 
 final class VPNPreferencesModel: ObservableObject {
 
@@ -77,7 +78,7 @@ final class VPNPreferencesModel: ObservableObject {
     }
 
     private var isExclusionsFeatureAvailableInBuild: Bool {
-        proxySettings.proxyAvailable
+        vpnAppState.isUsingSystemExtension
     }
 
     /// Whether legacy app exclusions should be shown
@@ -140,6 +141,8 @@ final class VPNPreferencesModel: ObservableObject {
     }
 
     private let vpnXPCClient: VPNControllerXPCClient
+    private let vpnAppState: VPNAppState
+    private let defaults: UserDefaults
     private let settings: VPNSettings
     private let proxySettings: TransparentProxySettings
     private let pinningManager: PinningManager
@@ -153,6 +156,8 @@ final class VPNPreferencesModel: ObservableObject {
          defaults: UserDefaults = .netP,
          featureFlagger: FeatureFlagger = NSApp.delegateTyped.featureFlagger) {
 
+        self.vpnAppState = .init(defaults: defaults)
+        self.defaults = defaults
         self.vpnXPCClient = vpnXPCClient
         self.settings = settings
         self.proxySettings = proxySettings

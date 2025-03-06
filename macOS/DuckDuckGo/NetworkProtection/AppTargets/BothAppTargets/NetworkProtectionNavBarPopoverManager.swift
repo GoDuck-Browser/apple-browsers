@@ -18,8 +18,10 @@
 
 import AppLauncher
 import AppKit
+import BrowserServicesKit
 import Combine
 import Common
+import FeatureFlags
 import Foundation
 import LoginItems
 import NetworkProtection
@@ -29,9 +31,8 @@ import NetworkProtectionUI
 import os.log
 import Subscription
 import SwiftUI
+import VPNAppState
 import VPNAppLauncher
-import BrowserServicesKit
-import FeatureFlags
 
 protocol NetworkProtectionIPCClient {
     var ipcStatusObserver: ConnectionStatusObserver { get }
@@ -178,6 +179,7 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
         activeSitePublisher.refreshActiveSiteInfo()
 
         let popover: NSPopover = {
+            let vpnAppState = VPNAppState(defaults: .netP)
             let vpnSettings = VPNSettings(defaults: .netP)
             let controller = NetworkProtectionIPCTunnelController(ipcClient: ipcClient)
 
@@ -221,9 +223,9 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
 #if APPSTORE
             let isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never> = {
                 let initialValue = featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex)
-                    && !UserDefaults.netP.isUsingSystemExtension
+                    && !vpnAppState.isUsingSystemExtension
 
-                let publisher = UserDefaults.netP.isUsingSystemExtensionPublisher
+                let publisher = vpnAppState.isUsingSystemExtensionPublisher
                     .map { [featureFlagger] value in
                         featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex) && !value
                     }.eraseToAnyPublisher()
@@ -252,6 +254,7 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
             let tipsModel = VPNTipsModel(statusObserver: statusReporter.statusObserver,
                                          activeSitePublisher: activeSitePublisher,
                                          forMenuApp: false,
+                                         vpnAppState: vpnAppState,
                                          vpnSettings: vpnSettings,
                                          proxySettings: proxySettings,
                                          logger: Logger(subsystem: "DuckDuckGo", category: "TipKit"))
