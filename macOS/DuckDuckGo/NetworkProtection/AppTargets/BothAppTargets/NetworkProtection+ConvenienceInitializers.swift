@@ -30,7 +30,7 @@ extension NetworkProtectionKeychainTokenStore {
     }
 
     convenience init(useAccessTokenProvider: Bool) {
-        let accessTokenProvider = { Application.appDelegate.subscriptionManagerV1.accountManager.accessToken }
+        let accessTokenProvider: AccessTokenProvider = { Application.appDelegate.subscriptionManagerV1.accountManager.accessToken }
         self.init(keychainType: .default,
                   errorEvents: .networkProtectionAppDebugEvents,
                   useAccessTokenProvider: useAccessTokenProvider,

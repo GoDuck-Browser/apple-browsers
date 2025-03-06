@@ -342,6 +342,7 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
     ///
     @MainActor
     private func setup(_ tunnelManager: NETunnelProviderManager) {
+        Logger.networkProtection.log("Setting up tunnel manager")
         if tunnelManager.localizedDescription == nil {
             tunnelManager.localizedDescription = UserText.networkProtectionTunnelName
         }

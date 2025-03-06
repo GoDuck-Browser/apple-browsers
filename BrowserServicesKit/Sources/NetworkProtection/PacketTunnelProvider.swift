@@ -692,7 +692,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
     @MainActor
     open override func startTunnel(options: [String: NSObject]? = nil) async throws {
-        Logger.networkProtection.log("Starting tunnel")
+        Logger.networkProtection.log("🚀 Starting tunnel")
 
         // It's important to have this as soon as possible since it helps setup PixelKit
         prepareToConnect(using: tunnelProviderProtocol)
@@ -705,7 +705,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
         do {
             try await load(options: startupOptions)
-            Logger.networkProtection.log("Startup options loaded correctly")
+            Logger.networkProtection.log("🟢 Startup options loaded correctly")
 
 #if os(iOS)
             if (try? await tokenHandler.getToken()) == nil {
@@ -847,7 +847,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
     open override func stopTunnel(with reason: NEProviderStopReason) async {
         providerEvents.fire(.tunnelStopAttempt(.begin))
 
-        Logger.networkProtection.log("Stopping tunnel with reason \(String(describing: reason), privacy: .public)")
+        Logger.networkProtection.log("🛑 Stopping tunnel with reason \(String(describing: reason), privacy: .public)")
 
         do {
             try await stopTunnel()
