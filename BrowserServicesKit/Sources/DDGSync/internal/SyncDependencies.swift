@@ -41,7 +41,9 @@ protocol SyncDependencies: SyncDependenciesDebuggingSupport {
     var errorEvents: EventMapping<SyncError> { get }
 
     func createRemoteConnector(_ connectInfo: ConnectInfo) throws -> RemoteConnecting
+    func createRemoteExchanger(_ exchangeInfo: ExchangeInfo) throws -> RemoteExchanging
     func createRecoveryKeyTransmitter() throws -> RecoveryKeyTransmitting
+    func createExchangeKeyTransmitter() throws -> ExchangeKeyTransmitting
 }
 
 protocol AccountManaging {
@@ -77,7 +79,8 @@ protocol CryptingInternal: Crypting {
     func extractSecretKey(protectedSecretKey: Data, stretchedPrimaryKey: Data) throws -> Data
 
     func prepareForConnect() throws -> ConnectInfo
-
+    
+    func prepareForExchange() throws -> ExchangeInfo
 }
 
 public struct HTTPResult {
@@ -102,4 +105,9 @@ protocol RecoveryKeyTransmitting {
 
     func send(_ code: SyncCode.ConnectCode) async throws
 
+}
+
+protocol ExchangeKeyTransmitting {
+    
+    func send(_ key: SyncCode.ExchangeKey) async throws
 }

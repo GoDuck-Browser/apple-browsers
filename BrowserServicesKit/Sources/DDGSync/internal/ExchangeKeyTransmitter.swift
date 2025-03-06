@@ -1,5 +1,5 @@
 //
-//  RecoveryKeyTransmitter.swift
+//  ExchangeKeyTransmitter.swift
 //
 //  Copyright © 2023 DuckDuckGo. All rights reserved.
 //
@@ -20,14 +20,14 @@ import Foundation
 
 // TODO: Create similar class for exchange flow
 
-struct RecoveryKeyTransmitter: RecoveryKeyTransmitting {
+struct ExchangeKeyTransmitter: ExchangeKeyTransmitting {
 
     let endpoints: Endpoints
     let api: RemoteAPIRequestCreating
     let storage: SecureStoring
     let crypter: CryptingInternal
 
-    func send(_ code: SyncCode.ConnectCode) async throws {
+    func send(_ code: SyncCode.ExchangeKey) async throws {
         guard let account = try storage.account() else {
             throw SyncError.accountNotFound
         }
@@ -40,13 +40,13 @@ struct RecoveryKeyTransmitter: RecoveryKeyTransmitting {
             SyncCode(recovery: SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey))
         )
 
-        let encryptedRecoveryKey = try crypter.seal(recoveryKey, secretKey: code.secretKey)
+        let encryptedRecoveryKey = try crypter.seal(recoveryKey, secretKey: code.publicKey)
 
         let body = try JSONEncoder.snakeCaseKeys.encode(
-            ConnectRequest(deviceId: code.deviceId, encryptedRecoveryKey: encryptedRecoveryKey)
+            ExchangeRequest(keyId: code.keyId, encryptedRecoveryKey: encryptedRecoveryKey)
         )
 
-        let request = api.createRequest(url: endpoints.connect,
+        let request = api.createRequest(url: endpoints.exchange,
                                         method: .post,
                                         headers: ["Authorization": "Bearer \(token)"],
                                         parameters: [:],
@@ -55,8 +55,8 @@ struct RecoveryKeyTransmitter: RecoveryKeyTransmitting {
         _ = try await request.execute()
     }
 
-    struct ConnectRequest: Encodable {
-        let deviceId: String
+    struct ExchangeRequest: Encodable {
+        let keyId: String
         let encryptedRecoveryKey: Data
     }
 

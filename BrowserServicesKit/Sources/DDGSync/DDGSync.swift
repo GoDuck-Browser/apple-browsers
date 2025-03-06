@@ -88,6 +88,19 @@ public class DDGSync: DDGSyncing {
         try updateAccount(account)
         scheduler.requestSyncImmediately()
     }
+    
+//    public func exchange(recoveryKey: SyncCode.RecoveryKey) async throws {
+//        guard let account = try dependencies.secureStore.account() else {
+//            throw SyncError.accountAlreadyExists
+//        }
+//        
+//        let privateKey = account.primaryKey
+//
+//        let result = try await dependencies.account.login(recoveryKey, deviceName: deviceName, deviceType: deviceType)
+//        try updateAccount(result.account)
+//        scheduler.requestSyncImmediately()
+//        return result.devices
+//    }
 
     public func login(_ recoveryKey: SyncCode.RecoveryKey, deviceName: String, deviceType: String) async throws -> [RegisteredDevice] {
         guard try dependencies.secureStore.account() == nil else {
@@ -107,7 +120,12 @@ public class DDGSync: DDGSyncing {
         let info = try dependencies.crypter.prepareForConnect()
         return try dependencies.createRemoteConnector(info)
     }
-
+    
+    public func remoteExchange() throws -> RemoteExchanging {
+        let info = try dependencies.crypter.prepareForExchange()
+        return try dependencies.createRemoteExchanger(info)
+    }
+    
     public func transmitRecoveryKey(_ connectCode: SyncCode.ConnectCode) async throws {
         guard try dependencies.secureStore.account() != nil else {
             throw SyncError.accountNotFound
@@ -115,6 +133,18 @@ public class DDGSync: DDGSyncing {
 
         do {
             try await dependencies.createRecoveryKeyTransmitter().send(connectCode)
+        } catch {
+            try handleUnauthenticated(error)
+        }
+    }
+    
+    public func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey) async throws {
+        guard try dependencies.secureStore.account() != nil else {
+            throw SyncError.accountNotFound
+        }
+
+        do {
+            try await dependencies.createExchangeKeyTransmitter().send(exchangeCode)
         } catch {
             try handleUnauthenticated(error)
         }

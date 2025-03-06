@@ -22,7 +22,6 @@ import Foundation
 import Persistence
 
 struct ProductionDependencies: SyncDependencies {
-
     let fileStorageUrl: URL
     let endpoints: Endpoints
     let account: AccountManaging
@@ -74,9 +73,22 @@ struct ProductionDependencies: SyncDependencies {
     func createRemoteConnector(_ info: ConnectInfo) throws -> RemoteConnecting {
         return try RemoteConnector(crypter: crypter, api: api, endpoints: endpoints, connectInfo: info)
     }
+    
+    func createRemoteExchanger(_ exchangeInfo: ExchangeInfo) throws -> any RemoteExchanging {
+        return try RemoteExchanger(
+            crypter: crypter,
+            api: api,
+            endpoints: endpoints,
+            exchangeInfo: exchangeInfo
+        )
+    }
 
     func createRecoveryKeyTransmitter() throws -> RecoveryKeyTransmitting {
         return RecoveryKeyTransmitter(endpoints: endpoints, api: api, storage: secureStore, crypter: crypter)
+    }
+    
+    func createExchangeKeyTransmitter() throws -> any ExchangeKeyTransmitting {
+        return ExchangeKeyTransmitter(endpoints: endpoints, api: api, storage: secureStore, crypter: crypter)
     }
 
     func updateServerEnvironment(_ serverEnvironment: ServerEnvironment) {

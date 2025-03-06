@@ -141,6 +141,7 @@ final class SyncPreferences: ObservableObject, SyncUI_macOS.ManagementViewModel 
     private var shouldRequestSyncOnFavoritesOptionChange: Bool = true
     private var isScreenLocked: Bool = false
     private var recoveryKey: SyncCode.RecoveryKey?
+    private var exchangeKey: SyncCode.ExchangeKey?
 
     @Published var syncFeatureFlags: SyncFeatureFlags {
         didSet {
@@ -446,6 +447,7 @@ final class SyncPreferences: ObservableObject, SyncUI_macOS.ManagementViewModel 
     private let appearancePreferences: AppearancePreferences
     private var cancellables = Set<AnyCancellable>()
     private var connector: RemoteConnecting?
+    private var exchanger: RemoteExchanging?
     private let userAuthenticator: UserAuthenticating
     private var syncPromoSource: String?
 }
@@ -541,7 +543,26 @@ extension SyncPreferences: ManagementDialogModelDelegate {
             }
         }
     }
+    
+    func startPollingForPublicKey() {
+        Task { @MainActor in
+            do {
+                self.exchanger = try syncService.remoteExchange()
+                self.codeToDisplay = exchanger?.code
+                self.presentDialog(for: .syncWithAnotherDevice(code: codeToDisplay ?? ""))
+                if let exchangeKey = try await exchanger?.pollForExchangeKey() {
+                    try await syncService.transmitExchangeKey(exchangeKey)
+                } else {
+                    // Polling was likeley cancelled elsewhere (e.g. dialog closed)
+                    return
+                }
+            } catch {
 
+            }
+        }
+    }
+
+    // TODO: Consider splitting in two to break control coupling
     func startPollingForRecoveryKey(isRecovery: Bool) {
         Task { @MainActor in
             do {
@@ -712,9 +733,9 @@ extension SyncPreferences: ManagementDialogModelDelegate {
             return
         }
         if isSyncEnabled {
-            presentDialog(for: .syncWithAnotherDevice(code: recoveryCode ?? ""))
+            self.startPollingForPublicKey()
         } else {
-            self.startPollingForRecoveryKey(isRecovery: false)
+            self.startPollingForRecoveryKey(isRecovery: false) // TODO: Replace with poll for exchange key
         }
     }
 
@@ -733,6 +754,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
 
     @MainActor
     func recoverDataPressed() async {
+        // TODO: Don't break this :)
         let authenticationResult = await userAuthenticator.authenticateUser(reason: .syncSettings)
         guard authenticationResult.authenticated else {
             if authenticationResult == .noAuthAvailable {

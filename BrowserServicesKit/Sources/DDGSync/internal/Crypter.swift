@@ -139,6 +139,7 @@ struct Crypter: CryptingInternal {
         return Data(secretKeyBytes)
     }
 
+    // TODO: Rename?
     func prepareForConnect() throws -> ConnectInfo {
         var publicKeyBytes = [UInt8](repeating: 0, count: Int(DDGSYNCCRYPTO_PUBLIC_KEY_SIZE.rawValue))
         var secretKeyBytes = [UInt8](repeating: 0, count: Int(DDGSYNCCRYPTO_PRIVATE_KEY_SIZE.rawValue))
@@ -149,6 +150,18 @@ struct Crypter: CryptingInternal {
         return ConnectInfo(deviceID: UUID().uuidString,
                            publicKey: Data(publicKeyBytes),
                            secretKey: Data(secretKeyBytes))
+    }
+    
+    func prepareForExchange() throws -> ExchangeInfo {
+        var publicKeyBytes = [UInt8](repeating: 0, count: Int(DDGSYNCCRYPTO_PUBLIC_KEY_SIZE.rawValue))
+        var secretKeyBytes = [UInt8](repeating: 0, count: Int(DDGSYNCCRYPTO_PRIVATE_KEY_SIZE.rawValue))
+        let result = ddgSyncPrepareForConnect(&publicKeyBytes, &secretKeyBytes)
+        guard DDGSYNCCRYPTO_OK == result else {
+            throw SyncError.failedToPrepareForExchange("ddgSyncPrepareForExchange failed: \(result)")
+        }
+        return ExchangeInfo(keyId: UUID().uuidString,
+                            publicKey: Data(publicKeyBytes),
+                            secretKey: Data(secretKeyBytes))
     }
 
     func seal(_ data: Data, secretKey: Data) throws -> Data {

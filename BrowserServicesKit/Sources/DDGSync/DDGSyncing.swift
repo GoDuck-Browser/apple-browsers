@@ -125,16 +125,26 @@ public protocol DDGSyncing: DDGSyncingDebuggingSupport {
      Logs in to an existing account using a recovery key.
      */
     func login(_ recoveryKey: SyncCode.RecoveryKey, deviceName: String, deviceType: String) async throws -> [RegisteredDevice]
-
+    
     /**
      Returns a device id and temporary secret key ready for display and allows callers attempt to fetch the transmitted recovery key.
      */
     func remoteConnect() throws -> RemoteConnecting
+    
+    /**
+     Returns a key id and temporary secret key ready for display and allows callers attempt to fetch the transmitted exchange key.
+     */
+    func remoteExchange() throws -> RemoteExchanging
 
     /**
      Sends this device's recovery key to the server encrypted using supplied key
      */
     func transmitRecoveryKey(_ connectCode: SyncCode.ConnectCode) async throws
+    
+    /**
+     Sends this device's recovery key to the server encrypted using supplied key
+     */
+    func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey) async throws
 
     /**
      Disconnect this client from the sync service. Removes all local info, but leaves in places bookmarks, etc.
@@ -263,6 +273,15 @@ public protocol RemoteConnecting {
 
     func stopPolling()
 
+}
+
+public protocol RemoteExchanging {
+    
+    var code: String { get }
+
+    func pollForExchangeKey() async throws -> SyncCode.ExchangeKey?
+
+    func stopPolling()
 }
 
 /**

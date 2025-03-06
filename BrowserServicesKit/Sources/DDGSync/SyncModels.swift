@@ -121,8 +121,17 @@ public struct ExtractedLoginInfo {
     public let stretchedPrimaryKey: Data
 }
 
+// TODO: Rename and reuse?
 public struct ConnectInfo {
+    // TODO: Rename?
     public let deviceID: String
+    public let publicKey: Data
+    public let secretKey: Data
+}
+
+// TODO: Rename and reuse?
+public struct ExchangeInfo {
+    public let keyId: String
     public let publicKey: Data
     public let secretKey: Data
 }
@@ -142,9 +151,21 @@ public struct SyncCode: Codable {
         let deviceId: String
         let secretKey: Data
     }
+    
+    public struct ExchangeKey: Codable, Sendable {
+        let keyId: String
+        let publicKey: Data
+    }
+    
+    public struct ExchangeMessage: Codable, Sendable {
+        let keyId: String
+        let encryptedMessage: Data
+    }
 
     public var recovery: RecoveryKey?
     public var connect: ConnectCode?
+    public var exchange: ExchangeKey?
+    public var exchangeMessage: ExchangeMessage?
 
     public static func decode(_ data: Data) throws -> Self {
         return try JSONDecoder.snakeCaseKeys.decode(self, from: data)
