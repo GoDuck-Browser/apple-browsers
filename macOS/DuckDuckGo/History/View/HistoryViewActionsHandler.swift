@@ -114,11 +114,13 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         switch await dialogPresenter.showDeleteDialog(for: visitsCount, deleteMode: adjustedQuery.deleteMode) {
         case .burn:
             await dataProvider.burnVisits(matching: adjustedQuery)
-            firePixel(.multipleItemsDeleted(.init(adjustedQuery), burn: false), .dailyAndStandard)
+            firePixel(.delete, .daily)
+            firePixel(.multipleItemsDeleted(.init(adjustedQuery), burn: true), .dailyAndStandard)
             return .delete
         case .delete:
             await dataProvider.deleteVisits(matching: adjustedQuery)
-            firePixel(.multipleItemsDeleted(.init(adjustedQuery), burn: true), .dailyAndStandard)
+            firePixel(.delete, .daily)
+            firePixel(.multipleItemsDeleted(.init(adjustedQuery), burn: false), .dailyAndStandard)
             return .delete
         default:
             return .noAction
@@ -312,12 +314,12 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
         case .burn:
             await dataProvider.burnVisits(for: identifiers)
             firePixel(.delete, .daily)
-            firePixel(.multipleItemsDeleted(.multiSelect, burn: false), .dailyAndStandard)
+            firePixel(.multipleItemsDeleted(.multiSelect, burn: true), .dailyAndStandard)
             return .delete
         case .delete:
             await dataProvider.deleteVisits(for: identifiers)
             firePixel(.delete, .daily)
-            firePixel(.multipleItemsDeleted(.multiSelect, burn: true), .dailyAndStandard)
+            firePixel(.multipleItemsDeleted(.multiSelect, burn: false), .dailyAndStandard)
             return .delete
         default:
             return .noAction
