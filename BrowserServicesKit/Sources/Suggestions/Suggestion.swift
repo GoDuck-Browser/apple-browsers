@@ -28,35 +28,6 @@ public enum Suggestion: Equatable {
     case openTab(title: String, url: URL, tabId: String?, score: Int)
     case unknown(value: String)
 
-    /// The score of this suggestion, if available
-    var score: Int {
-        switch self {
-        case .bookmark(_, _, _, let score),
-             .historyEntry(_, _, let score),
-             .internalPage(_, _, let score),
-             .openTab(_, _, _, let score):
-            return score
-        case .phrase, .website, .unknown:
-            return 0
-        }
-    }
-
-    /// Returns a new suggestion with the updated score
-    func withScore(_ newScore: Int) -> Suggestion {
-        switch self {
-        case .bookmark(let title, let url, let isFavorite, _):
-            return .bookmark(title: title, url: url, isFavorite: isFavorite, score: newScore)
-        case .historyEntry(let title, let url, _):
-            return .historyEntry(title: title, url: url, score: newScore)
-        case .internalPage(let title, let url, _):
-            return .internalPage(title: title, url: url, score: newScore)
-        case .openTab(title: let title, url: let url, tabId: let tabId, _):
-            return .openTab(title: title, url: url, tabId: tabId, score: newScore)
-        case .phrase, .website, .unknown:
-            return self // No score field to update
-        }
-    }
-
     public var url: URL? {
         switch self {
         case .website(url: let url),
@@ -83,49 +54,10 @@ public enum Suggestion: Equatable {
         }
     }
 
-    public var isOpenTab: Bool {
-        if case .openTab = self {
-            return true
-        }
-        return false
-    }
-
-    public var isBookmark: Bool {
-        if case .bookmark = self {
-            return true
-        }
-        return false
-    }
-
     public var isHistoryEntry: Bool {
         if case .historyEntry = self {
             return true
         }
         return false
     }
-}
-
-extension Suggestion {
-
-    public init?(bookmark: Bookmark, score: Int) {
-        guard let urlObject = URL(string: bookmark.url) else { return nil }
-        self = .bookmark(title: bookmark.title, url: urlObject, isFavorite: bookmark.isFavorite, score: score)
-    }
-
-    public init(historyEntry: HistorySuggestion, score: Int) {
-        self = .historyEntry(title: historyEntry.title, url: historyEntry.url, score: score)
-    }
-
-    public init(internalPage: InternalPage, score: Int) {
-        self = .internalPage(title: internalPage.title, url: internalPage.url, score: score)
-    }
-
-    public init(tab: BrowserTab, score: Int) {
-        self = .openTab(title: tab.title, url: tab.url, tabId: tab.tabId, score: score)
-    }
-
-    public init(url: URL) {
-        self = .website(url: url)
-    }
-
 }

@@ -26,6 +26,7 @@ import PixelKit
 import Suggestions
 
 final class SuggestionContainer {
+
     static let maximumNumberOfSuggestions = 9
 
     @PublishedAfter var result: SuggestionResult?
@@ -132,7 +133,7 @@ final class SuggestionContainer {
 
 }
 
-struct OpenTab: BrowserTab, Hashable, Codable {
+struct OpenTab: BrowserTab, Hashable {
 
     let tabId: String?
     let title: String
