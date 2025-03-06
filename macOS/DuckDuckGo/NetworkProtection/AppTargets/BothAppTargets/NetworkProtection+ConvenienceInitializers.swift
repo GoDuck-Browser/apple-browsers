@@ -41,9 +41,16 @@ extension NetworkProtectionKeychainTokenStore {
 extension NetworkProtectionLocationListCompositeRepository {
     convenience init() {
         let settings = Application.appDelegate.vpnSettings
+
+        var tokenHandler: any SubscriptionTokenHandling
+        if !Application.appDelegate.isAuthV2Enabled {
+            tokenHandler = NetworkProtectionKeychainTokenStore()
+        } else {
+            tokenHandler = Application.appDelegate.subscriptionManagerV2 as! DefaultSubscriptionManagerV2
+        }
         self.init(
             environment: settings.selectedEnvironment,
-            tokenHandler: NetworkProtectionKeychainTokenStore(),
+            tokenHandler: tokenHandler,
             errorEvents: .networkProtectionAppDebugEvents
         )
     }

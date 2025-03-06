@@ -437,8 +437,10 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                                                                                serviceName: Self.tokenServiceName,
                                                                                errorEvents: debugEvents,
                                                                                useAccessTokenProvider: false,
-                                                                               accessTokenProvider: { nil }
-            )
+                                                                 accessTokenProvider: {
+                assertionFailure("Should not be called")
+                return nil
+            })
             let entitlementsCache = UserDefaultsCache<[Entitlement]>(userDefaults: subscriptionUserDefaults,
                                                                      key: UserDefaultsCacheKey.subscriptionEntitlements,
                                                                      settings: UserDefaultsCacheSettings(defaultExpirationInterval: .minutes(20)))
@@ -553,6 +555,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         accountManager?.delegate = self
         observeServerChanges()
         observeStatusUpdateRequests()
+        Logger.networkProtection.log("[+] MacPacketTunnelProvider Initialised")
     }
 
     // MARK: - Observing Changes & Requests

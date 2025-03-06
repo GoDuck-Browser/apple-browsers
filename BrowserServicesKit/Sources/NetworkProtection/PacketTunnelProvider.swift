@@ -458,6 +458,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         super.init()
 
         observeSettingChanges()
+        Logger.networkProtectionMemory.debug("[+] PacketTunnelProvider initialized")
     }
 
     deinit {

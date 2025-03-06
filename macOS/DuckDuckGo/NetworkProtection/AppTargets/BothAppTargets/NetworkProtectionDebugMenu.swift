@@ -23,6 +23,7 @@ import NetworkProtection
 import NetworkProtectionProxy
 import SwiftUI
 import os.log
+import Subscription
 
 /// Controller for the VPN debug menu.
 ///
@@ -64,9 +65,14 @@ final class NetworkProtectionDebugMenu: NSMenu {
         let settings = Application.appDelegate.vpnSettings
         let keyStore = NetworkProtectionKeychainKeyStore(keychainType: .default,
                                                          errorEvents: .networkProtectionAppDebugEvents)
-        let tokenStore = NetworkProtectionKeychainTokenStore()
+        var tokenHandler: any SubscriptionTokenHandling
+        if !Application.appDelegate.isAuthV2Enabled {
+            tokenHandler = NetworkProtectionKeychainTokenStore()
+        } else {
+            tokenHandler = Application.appDelegate.subscriptionManagerV2 as! DefaultSubscriptionManagerV2
+        }
         networkProtectionDeviceManager = NetworkProtectionDeviceManager(environment: settings.selectedEnvironment,
-                                                                        tokenHandler: tokenStore,
+                                                                        tokenHandler: tokenHandler,
                                                                         keyStore: keyStore,
                                                                         errorEvents: .networkProtectionAppDebugEvents)
 
