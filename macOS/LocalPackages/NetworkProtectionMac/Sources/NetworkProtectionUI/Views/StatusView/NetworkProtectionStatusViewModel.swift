@@ -81,6 +81,10 @@ extension NetworkProtectionStatusView {
         private let statusReporter: NetworkProtectionStatusReporter
 
         public let agentLoginItem: LoginItem?
+
+        @Published
+        var isExtensionUpdateOffered: Bool
+
         private let isMenuBarStatusView: Bool
 
         // MARK: - Extra Menu Items
@@ -115,6 +119,7 @@ extension NetworkProtectionStatusView {
                     uiActionHandler: VPNUIActionHandling,
                     menuItems: @escaping () -> [MenuItem],
                     agentLoginItem: LoginItem?,
+                    isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never>,
                     isMenuBarStatusView: Bool,
                     runLoopMode: RunLoop.Mode? = nil,
                     userDefaults: UserDefaults,
@@ -126,6 +131,7 @@ extension NetworkProtectionStatusView {
             self.statusReporter = statusReporter
             self.menuItems = menuItems
             self.agentLoginItem = agentLoginItem
+            self.isExtensionUpdateOffered = isExtensionUpdateOfferedPublisher.value
             self.isMenuBarStatusView = isMenuBarStatusView
             self.runLoopMode = runLoopMode
             self.uiActionHandler = uiActionHandler
@@ -148,6 +154,8 @@ extension NetworkProtectionStatusView {
             // Particularly useful when unit testing with an initial status of our choosing.
             subscribeToStatusChanges()
             subscribeToConnectivityIssues()
+            subscribeToIsExtensionUpdateOfferedPublisher(
+                isExtensionUpdateOfferedPublisher.eraseToAnyPublisher())
             subscribeToTunnelErrorMessages()
             subscribeToControllerErrorMessages()
             subscribeToKnownFailures()
@@ -209,6 +217,14 @@ extension NetworkProtectionStatusView {
             statusReporter.connectivityIssuesObserver.publisher
                 .receive(on: DispatchQueue.main)
                 .assign(to: \.isHavingConnectivityIssues, onWeaklyHeld: self)
+                .store(in: &cancellables)
+        }
+
+        private func subscribeToIsExtensionUpdateOfferedPublisher(_ isExtensionUpdateOfferedPublisher: AnyPublisher<Bool, Never>) {
+
+            isExtensionUpdateOfferedPublisher
+                .receive(on: DispatchQueue.main)
+                .assign(to: \.isExtensionUpdateOffered, onWeaklyHeld: self)
                 .store(in: &cancellables)
         }
 
@@ -318,7 +334,7 @@ extension NetworkProtectionStatusView {
         var shouldShowSubscriptionExpired: Bool = false
 
         var promptActionViewModel: PromptActionView.Model? {
-#if !APPSTORE && !DEBUG
+#if !DEBUG
             guard Bundle.main.isInApplicationDirectory else {
                 return PromptActionView.Model(presentationData: MoveToApplicationsPromptPresentationData()) { [weak self] in
                     self?.tunnelControllerViewModel.moveToApplications()
@@ -333,17 +349,32 @@ extension NetworkProtectionStatusView {
             }
 
             switch onboardingStatus {
-            case .completed:
-                return nil
             case .isOnboarding(let step):
                 switch step {
-
                 case .userNeedsToAllowExtension, .userNeedsToAllowVPNConfiguration:
                     return PromptActionView.Model(onboardingStep: step, isMenuBar: self.isMenuBarStatusView) { [weak self] in
                         self?.tunnelControllerViewModel.startNetworkProtection()
                     }
                 }
+            case .completed:
+                if isExtensionUpdateOffered {
+                    return PromptActionView.Model(
+                        icon: .appleVPNIcon,
+                        title: UserText.vpnAppStoreSysexUpdatePromptTitle,
+                        description: [
+                            .init(text: UserText.vpnAppStoreSysexUpdatePromptMessage)
+                        ],
+                        actionTitle: UserText.vpnAppStoreSysexUpdatePromptActionButtonTitle,
+                        actionScreenshot: nil) { [weak self] in
+                            guard let strongSelf = self else { return }
 
+                            Task {
+                                await strongSelf.uninstallHandler()
+                            }
+                        }
+                }
+
+                return nil
             }
         }
 

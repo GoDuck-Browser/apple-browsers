@@ -208,12 +208,7 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
                 activeSitePublisher: activeSitePublisher,
                 uiActionHandler: uiActionHandler)
 
-            let statusViewModel = NetworkProtectionStatusView.Model(controller: controller,
-                                              onboardingStatusPublisher: onboardingStatusPublisher,
-                                              statusReporter: statusReporter,
-                                              uiActionHandler: uiActionHandler,
-                                              menuItems: { [weak self] in
-
+            let menuItems = { [weak self] () -> [NetworkProtectionStatusView.Model.MenuItem] in
                 guard let self else { return [] }
 
                 guard featureFlagger.isFeatureOn(.networkProtectionAppExclusions) else {
@@ -221,14 +216,38 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
                 }
 
                 return statusViewSubmenu()
-            },
-                                              agentLoginItem: LoginItem.vpnMenu,
-                                              isMenuBarStatusView: false,
-                                              userDefaults: .netP,
-                                              locationFormatter: DefaultVPNLocationFormatter(),
-                                              uninstallHandler: { [weak self] in
-                _ = try? await self?.vpnUninstaller.uninstall(removeSystemExtension: true)
-            })
+            }
+
+#if APPSTORE
+            let isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never> = {
+                let initialValue = featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex)
+                    && !UserDefaults.netP.isUsingSystemExtension
+
+                let publisher = UserDefaults.netP.isUsingSystemExtensionPublisher
+                    .map { [featureFlagger] value in
+                        featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex) && !value
+                    }.eraseToAnyPublisher()
+
+                return CurrentValuePublisher(initialValue: initialValue, publisher: publisher)
+            }()
+#else
+            let isExtensionUpdateOfferedPublisher = CurrentValuePublisher(initialValue: false, publisher: Just(false).eraseToAnyPublisher())
+#endif
+
+            let statusViewModel = NetworkProtectionStatusView.Model(
+                controller: controller,
+                onboardingStatusPublisher: onboardingStatusPublisher,
+                statusReporter: statusReporter,
+                uiActionHandler: uiActionHandler,
+                menuItems: menuItems,
+                agentLoginItem: LoginItem.vpnMenu,
+                isExtensionUpdateOfferedPublisher: isExtensionUpdateOfferedPublisher,
+                isMenuBarStatusView: false,
+                userDefaults: .netP,
+                locationFormatter: DefaultVPNLocationFormatter(),
+                uninstallHandler: { [weak self] in
+                    _ = try? await self?.vpnUninstaller.uninstall(removeSystemExtension: true)
+                })
 
             let tipsModel = VPNTipsModel(statusObserver: statusReporter.statusObserver,
                                          activeSitePublisher: activeSitePublisher,

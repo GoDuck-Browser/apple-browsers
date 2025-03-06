@@ -209,7 +209,7 @@ final class VPNUninstaller: VPNUninstalling {
         isDisabling = true
 
         defer {
-            resetUserDefaults(uninstallSystemExtension: removeSystemExtension)
+            isDisabling = false
         }
 
         do {
@@ -260,7 +260,6 @@ final class VPNUninstaller: VPNUninstalling {
         try await stopAgents()
 
         notifyVPNUninstalled()
-        isDisabling = false
     }
 
     // Stop the VPN agents.
@@ -297,16 +296,6 @@ final class VPNUninstaller: VPNUninstalling {
             try await ipcClient.uninstall(.configuration)
         } catch {
             throw UninstallError.vpnConfigurationError(error)
-        }
-    }
-
-    private func resetUserDefaults(uninstallSystemExtension: Bool) {
-        settings.resetToDefaults()
-
-        if uninstallSystemExtension {
-            userDefaults.networkProtectionOnboardingStatus = .default
-        } else {
-            userDefaults.networkProtectionOnboardingStatus = .isOnboarding(step: .userNeedsToAllowVPNConfiguration)
         }
     }
 

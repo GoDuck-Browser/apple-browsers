@@ -84,6 +84,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let internalUserDecider: InternalUserDecider
     private var isInternalUserSharingCancellable: AnyCancellable?
     let featureFlagger: FeatureFlagger
+    let featureFlagOverridesPublishingHandler = FeatureFlagOverridesPublishingHandler<FeatureFlag>()
     private var appIconChanger: AppIconChanger!
     private var autoClearHandler: AutoClearHandler!
     private(set) var autofillPixelReporter: AutofillPixelReporter?
@@ -129,6 +130,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     public let vpnSettings = VPNSettings(defaults: .netP)
 
+    private lazy var vpnAppEventsHandler = VPNAppEventsHandler(
+        featureGatekeeper: DefaultVPNFeatureGatekeeper(subscriptionManager: subscriptionManager),
+        featureFlagOverridesPublishingHandler: featureFlagOverridesPublishingHandler,
+        defaults: .netP)
     private var networkProtectionSubscriptionEventHandler: NetworkProtectionSubscriptionEventHandler?
 
     private var vpnXPCClient: VPNControllerXPCClient {
@@ -275,7 +280,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             privacyConfigManager: AppPrivacyFeatures.shared.contentBlocking.privacyConfigurationManager,
             localOverrides: FeatureFlagLocalOverrides(
                 keyValueStore: UserDefaults.appConfiguration,
-                actionHandler: FeatureFlagOverridesPublishingHandler<FeatureFlag>()
+                actionHandler: featureFlagOverridesPublishingHandler
             ),
             experimentManager: ExperimentCohortsManager(store: ExperimentsDataStore(), fireCohortAssigned: PixelKit.fireExperimentEnrollmentPixel(subfeatureID:experiment:)),
             for: FeatureFlag.self
@@ -476,7 +481,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         networkProtectionSubscriptionEventHandler?.registerForSubscriptionAccountManagerEvents()
 
-        NetworkProtectionAppEvents(featureGatekeeper: DefaultVPNFeatureGatekeeper(subscriptionManager: subscriptionManager)).applicationDidFinishLaunching()
+        vpnAppEventsHandler.applicationDidFinishLaunching()
         UNUserNotificationCenter.current().delegate = self
 
         dataBrokerProtectionSubscriptionEventHandler.registerForSubscriptionAccountManagerEvents()
@@ -541,7 +546,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         PixelExperiment.fireOnboardingTestPixels()
         initializeSync()
 
-        NetworkProtectionAppEvents(featureGatekeeper: DefaultVPNFeatureGatekeeper(subscriptionManager: subscriptionManager)).applicationDidBecomeActive()
+        vpnAppEventsHandler.applicationDidBecomeActive()
 
         let freemiumDBPUserStateManager = DefaultFreemiumDBPUserStateManager(userDefaults: .dbp)
         let pirGatekeeper = DefaultDataBrokerProtectionFeatureGatekeeper(accountManager:

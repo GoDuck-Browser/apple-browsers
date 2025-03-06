@@ -44,6 +44,7 @@ public final class StatusBarMenu: NSObject {
     private let menuItems: () -> [MenuItem]
     private let agentLoginItem: LoginItem?
     private let isMenuBarStatusView: Bool
+    private let isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never>
     private let userDefaults: UserDefaults
     private let locationFormatter: VPNLocationFormatting
     private let uninstallHandler: () async -> Void
@@ -71,6 +72,7 @@ public final class StatusBarMenu: NSObject {
                 menuItems: @escaping () -> [MenuItem],
                 agentLoginItem: LoginItem?,
                 isMenuBarStatusView: Bool,
+                isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never>,
                 userDefaults: UserDefaults,
                 locationFormatter: VPNLocationFormatting,
                 uninstallHandler: @escaping () async -> Void) {
@@ -87,6 +89,7 @@ public final class StatusBarMenu: NSObject {
         self.menuItems = menuItems
         self.agentLoginItem = agentLoginItem
         self.isMenuBarStatusView = isMenuBarStatusView
+        self.isExtensionUpdateOfferedPublisher = isExtensionUpdateOfferedPublisher
         self.userDefaults = userDefaults
         self.locationFormatter = locationFormatter
         self.uninstallHandler = uninstallHandler
@@ -166,6 +169,7 @@ public final class StatusBarMenu: NSObject {
                 uiActionHandler: uiActionHandler,
                 menuItems: menuItems,
                 agentLoginItem: agentLoginItem,
+                isExtensionUpdateOfferedPublisher: isExtensionUpdateOfferedPublisher,
                 isMenuBarStatusView: isMenuBarStatusView,
                 userDefaults: userDefaults,
                 locationFormatter: locationFormatter,

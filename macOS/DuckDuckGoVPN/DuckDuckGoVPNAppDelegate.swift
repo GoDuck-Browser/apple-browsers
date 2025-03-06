@@ -138,12 +138,13 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
     private let configurationManager: ConfigurationManager
     private var configurationSubscription: AnyCancellable?
     private let privacyConfigurationManager = VPNPrivacyConfigurationManager(internalUserDecider: DefaultInternalUserDecider(store: UserDefaults.appConfiguration))
+    private let featureFlagOverridesPublishingHandler = FeatureFlagOverridesPublishingHandler<FeatureFlag>()
     private lazy var featureFlagger = DefaultFeatureFlagger(
         internalUserDecider: privacyConfigurationManager.internalUserDecider,
         privacyConfigManager: privacyConfigurationManager,
         localOverrides: FeatureFlagLocalOverrides(
             keyValueStore: UserDefaults.appConfiguration,
-            actionHandler: FeatureFlagOverridesPublishingHandler<FeatureFlag>()
+            actionHandler: featureFlagOverridesPublishingHandler
         ),
         experimentManager: nil,
         for: FeatureFlag.self)
@@ -413,6 +414,32 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
             appLauncher: appLauncher,
             proxySettings: proxySettings)
 
+        let menuItems = { [weak self] () -> [NetworkProtectionStatusView.Model.MenuItem] in
+            guard let self else { return [] }
+
+            guard featureFlagger.isFeatureOn(.networkProtectionAppExclusions) else {
+                return legacyStatusViewSubmenu()
+            }
+
+            return statusViewSubmenu()
+        }
+
+#if APPSTORE
+        let isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never> = {
+            let initialValue = featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex)
+                && !UserDefaults.netP.isUsingSystemExtension
+
+            let publisher = UserDefaults.netP.isUsingSystemExtensionPublisher
+                .map { [featureFlagger] value in
+                    featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex) && !value
+                }.eraseToAnyPublisher()
+
+            return CurrentValuePublisher(initialValue: initialValue, publisher: publisher)
+        }()
+#else
+        let isExtensionUpdateOfferedPublisher = CurrentValuePublisher(initialValue: false, publisher: Just(false).eraseToAnyPublisher())
+#endif
+
         return StatusBarMenu(
             model: model,
             onboardingStatusPublisher: onboardingStatusPublisher,
@@ -420,24 +447,17 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
             controller: tunnelController,
             iconProvider: iconProvider,
             uiActionHandler: uiActionHandler,
-            menuItems: { [weak self] in
-                guard let self else { return [] }
-
-                guard featureFlagger.isFeatureOn(.networkProtectionAppExclusions) else {
-                    return legacyStatusViewSubmenu()
-                }
-
-                return statusViewSubmenu()
-            },
+            menuItems: menuItems,
             agentLoginItem: nil,
             isMenuBarStatusView: true,
+            isExtensionUpdateOfferedPublisher: isExtensionUpdateOfferedPublisher,
             userDefaults: .netP,
             locationFormatter: DefaultVPNLocationFormatter(),
             uninstallHandler: { [weak self] in
                 guard let self else { return }
 
                 do {
-                    try await self.vpnUninstaller.uninstall(includingSystemExtension: true)
+                    try await self.vpnUninstaller.uninstall()
                     exit(EXIT_SUCCESS)
                 } catch {
                     // Intentional no-op: we already anonymously track VPN uninstallation failures using
@@ -540,7 +560,6 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
-
 }
 
 extension DuckDuckGoVPNAppDelegate: AccountManagerKeychainAccessDelegate {

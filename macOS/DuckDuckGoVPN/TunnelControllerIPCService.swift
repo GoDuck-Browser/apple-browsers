@@ -259,7 +259,7 @@ extension TunnelControllerIPCService: XPCServerInterface {
     private func uninstall(_ component: VPNUninstallComponent) async throws {
         switch component {
         case .all:
-            try await uninstaller.uninstall(includingSystemExtension: true)
+            try await uninstaller.uninstall()
         case .configuration:
             try await uninstaller.removeVPNConfiguration()
         case .systemExtension:
