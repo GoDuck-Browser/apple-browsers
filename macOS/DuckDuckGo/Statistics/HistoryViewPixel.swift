@@ -22,33 +22,72 @@ import PixelKit
 
 /**
  * This enum keeps pixels related to HTML History View.
+ *
+ * > Unless otherwise specified, all pixels are daily + standard.
+ *
+ * > Related links:
+ * [Privacy Triage TBD](https://app.asana.com/0/69071770703008/1209581218702028)
+ * [Detailed Pixels description](https://app.asana.com/0/1201899738287924/1209364382402737)
+ *
+ * Anomaly Investigation:
+ * - Unless otherwise specified, anomaly in all the pixels will be related to an increase/drop in app use.
  */
 enum HistoryViewPixel: PixelKitEventV2 {
 
     // MARK: - Permanent Pixels
+
     /**
      * Event Trigger: History View is displayed to user.
      *
-     * > Note: This is a daily pixel.
-     *
-     * > Related links:
-     * [Privacy Triage TBD](https://app.asana.com/0/69071770703008/1209581218702028)
-     * [Detailed Pixels description](https://app.asana.com/0/0/1209364382402737/f)
-     *
-     * Anomaly Investigation:
-     * - Anomaly in this pixel may mean an increase/drop in app use.
      */
     case historyPageShown(HistoryPageSource)
+
+    /**
+     * Event Trigger: History View filter is set (range, search term or domain).
+     */
     case filterSet(FilterKind)
+
+    /**
+     * Event Trigger: History View filter is cleared (or range is set to `all`).
+     */
     case filterCleared
+
+    /**
+     * Event Trigger: History item is opened.
+     */
     case itemOpened
+
+    /**
+     * Event Trigger: History item was deleted. This pixel indicates any type of deletion.
+     *
+     * > This is a daily-only pixel.
+     */
     case delete
+
+    /**
+     * Event Trigger: A single history item was deleted by pressing delete key.
+     */
     case singleItemDeleted
+
+    /**
+     * Event Trigger: History items were deleted via the delete dialog.
+     */
     case multipleItemsDeleted(DeletedBatchKind, burn: Bool)
 
     // MARK: - Temporary Pixels
+    /**
+     * Event Trigger: History View onboarding dialog was shown.
+     */
     case onboardingDialogShown
+
+    /**
+     * Event Trigger: History View onboarding dialog was dismissed.
+     */
     case onboardingDialogDismissed
+
+    /**
+     * Event Trigger: History View onboarding dialog was accepted.
+     */
     case onboardingDialogAccepted
 
     // MARK: -
@@ -94,16 +133,10 @@ enum HistoryViewPixel: PixelKitEventV2 {
     /**
      * Event Trigger: History View reports a JavaScript exception.
      *
-     * > Note: This is a daily + standard pixel.
-     *
-     * > Related links:
-     * [Privacy Triage TBD]()
-     * [Detailed Pixels description](https://app.asana.com/0/0/1209364382402737/f)
-     *
      * Anomaly Investigation:
      * - Anomaly in this pixel may mean a critical breakage in the History View.
      */
-    case historyPageExceptionReported(message: String)
+    case historyPageExceptionReported
 
     var name: String {
         switch self {
@@ -125,8 +158,8 @@ enum HistoryViewPixel: PixelKitEventV2 {
         switch self {
         case .historyPageShown(let source):
             return [Parameters.source: source.rawValue]
-        case .historyPageExceptionReported(let message):
-            return [Parameters.message: message]
+        case .historyPageExceptionReported:
+            return nil
         case .filterSet(let filter):
             return [Parameters.filter: filter.rawValue]
         case .filterCleared:
