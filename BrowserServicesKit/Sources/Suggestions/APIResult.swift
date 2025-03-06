@@ -28,7 +28,7 @@ public struct APIResult: Decodable {
 
     }
 
-    var items = [SuggestionResult]()
+    public var items = [SuggestionResult]()
 
     init() {}
 

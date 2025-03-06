@@ -88,7 +88,7 @@ public class SuggestionLoader: SuggestionLoading {
 
         // 2) Processing it
         group.notify(queue: .global(qos: .userInitiated)) { [weak self] in
-            guard self != nil else { return }
+            guard let self else { return }
             let processor = SuggestionProcessing(platform: dataSource.platform)
             let result = processor.result(for: query,
                                           from: history,
