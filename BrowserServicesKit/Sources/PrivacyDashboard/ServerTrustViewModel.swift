@@ -118,10 +118,12 @@ public struct ServerTrustViewModel: Encodable {
     }
 
     let secCertificateViewModels: [SecCertificateViewModel]
+    let isInvalidCert: Bool
 
     public init?(serverTrust: SecTrust?) {
         guard let serverTrust = serverTrust else {
             self.secCertificateViewModels = []
+            self.isInvalidCert = true;
             return
         }
 
@@ -137,6 +139,7 @@ public struct ServerTrustViewModel: Encodable {
         }
 
         self.secCertificateViewModels = secCertificateViewModels
+        self.isInvalidCert = false
     }
 
 }
