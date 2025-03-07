@@ -31,6 +31,8 @@ extension XCUIApplication {
         static let bookmarksPanelShortcutButton = "NavigationBarViewController.bookmarkListButton"
         static let manageBookmarksMenuItem = "MainMenu.manageBookmarksMenuItem"
         static let resetBookmarksMenuItem = "MainMenu.resetBookmarks"
+        static let internalUserStateMenuItem = "MainMenu.internalUserState"
+        static let featureFlagOverridesMenuItem = "MainMenu.featureFlagOverrides"
     }
 
     /// Dismiss popover with the passed button identifier if exists. If it does not exist it continues the execution without failing.
@@ -55,6 +57,27 @@ extension XCUIApplication {
     func enforceSingleWindow() {
         typeKey("w", modifierFlags: [.command, .option, .shift])
         typeKey("n", modifierFlags: .command)
+    }
+
+    func enableFeatureFlagIfNeeded(_ featureFlag: String) {
+        let internalUserState = menuItems[AccessibilityIdentifiers.internalUserStateMenuItem]
+        typeKey("n", modifierFlags: [.command]) // Can't use debug menu without a window
+        if internalUserState.waitForExistence(timeout: UITests.Timeouts.elementExistence) {
+            print("XXXXX \(String(reflecting: internalUserState.value))")
+            internalUserState.click()
+        }
+        let featureFlagOverridesMenuItem = menuItems[AccessibilityIdentifiers.featureFlagOverridesMenuItem]
+        XCTAssertTrue(
+            featureFlagOverridesMenuItem.waitForExistence(timeout: UITests.Timeouts.elementExistence),
+            "Feature flag overrides menu item didn't become available in a reasonable timeframe."
+        )
+        featureFlagOverridesMenuItem.click()
+        let flagOverrideMenuItem = menuItems["FeatureFlagOverrides.\(featureFlag)"]
+        XCTAssertTrue(
+            flagOverrideMenuItem.waitForExistence(timeout: UITests.Timeouts.elementExistence),
+            "\(featureFlag) feature flag menu item didn't become available in a reasonable timeframe."
+        )
+        flagOverrideMenuItem.click()
     }
 
     /// Opens a new tab via keyboard shortcut

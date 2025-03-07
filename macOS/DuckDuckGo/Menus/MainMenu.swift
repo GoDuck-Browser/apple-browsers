@@ -321,6 +321,7 @@ final class MainMenu: NSMenu {
     @MainActor
     func buildHistoryMenu() -> NSMenuItem {
         NSMenuItem(title: UserText.mainMenuHistory)
+            .withAccessibilityIdentifier("MainMenu.history")
             .submenu(historyMenu)
     }
 
@@ -640,11 +641,13 @@ final class MainMenu: NSMenu {
     // MARK: - Debug
 
     let internalUserItem = NSMenuItem(title: "Set Internal User State", action: #selector(MainViewController.internalUserState))
+        .withAccessibilityIdentifier("MainMenu.internalUserState")
 
     @MainActor
     private func setupDebugMenu() -> NSMenu {
         let debugMenu = NSMenu(title: "Debug") {
             NSMenuItem(title: "Feature Flag Overrides")
+                .withAccessibilityValue("MainMenu.featureFlagOverrides")
                 .submenu(FeatureFlagOverridesMenu(featureFlagOverrides: NSApp.delegateTyped.featureFlagger))
             NSMenuItem.separator()
             NSMenuItem(title: "Open Vanilla Browser", action: #selector(MainViewController.openVanillaBrowser)).withAccessibilityIdentifier("MainMenu.openVanillaBrowser")

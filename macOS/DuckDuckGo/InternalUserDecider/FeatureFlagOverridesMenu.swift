@@ -65,6 +65,7 @@ final class FeatureFlagOverridesMenu: NSMenu {
                     target: self,
                     representedObject: flag
                 )
+                .withAccessibilityIdentifier("FeatureFlagOverrides.\(flag.rawValue)")
             }
     }
 
