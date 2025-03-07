@@ -216,9 +216,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return
         }
         Task {
-            if urls.count == 1 {
-                firePixel(.itemOpened, .dailyAndStandard)
-            }
+            fireItemOpenedPixel(urls)
             await tabOpener.openInNewTab(urls)
         }
     }
@@ -228,9 +226,7 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return
         }
         Task {
-            if urls.count == 1 {
-                firePixel(.itemOpened, .dailyAndStandard)
-            }
+            fireItemOpenedPixel(urls)
             await tabOpener.openInNewWindow(urls)
         }
     }
@@ -240,10 +236,14 @@ final class HistoryViewActionsHandler: HistoryView.ActionsHandling {
             return
         }
         Task {
-            if urls.count == 1 {
-                firePixel(.itemOpened, .dailyAndStandard)
-            }
+            fireItemOpenedPixel(urls)
             await tabOpener.openInNewFireWindow(urls)
+        }
+    }
+
+    private func fireItemOpenedPixel(_ urls: [URL]) {
+        if urls.count == 1 {
+            firePixel(.itemOpened, .dailyAndStandard)
         }
     }
 

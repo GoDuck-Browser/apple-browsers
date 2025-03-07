@@ -22,7 +22,6 @@ import ContentBlocking
 import Foundation
 import Navigation
 import History
-import PixelKit
 
 final class HistoryTabExtension: NSObject {
 
