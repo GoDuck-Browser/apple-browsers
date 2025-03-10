@@ -3726,7 +3726,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Re-install to update"
+            "value" : "Get the Update"
           }
         }
       }
@@ -3738,7 +3738,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "You can now customize the VPN to exclude websites and apps that aren’t compatible. Update to unlock VPN Exclusions."
+            "value" : "This update includes the option to exclude sites and apps that aren't compatible with VPNs so you can keep using them while connected."
           }
         }
       }
@@ -3750,7 +3750,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "New VPN version available"
+            "value" : "New VPN version available!"
           }
         }
       }
