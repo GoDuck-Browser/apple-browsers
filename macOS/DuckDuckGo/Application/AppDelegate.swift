@@ -110,6 +110,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let homePageSettingsModel = HomePage.Models.SettingsModel()
     let remoteMessagingClient: RemoteMessagingClient!
     let onboardingStateMachine: ContextualOnboardingStateMachine & ContextualOnboardingStateUpdater
+    let defaultBrowserAndDockPromptPresenter: DefaultBrowserAndDockPromptPresenter
 
     let isAuthV2Enabled: Bool = false
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
@@ -258,6 +259,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             experimentManager: ExperimentCohortsManager(store: ExperimentsDataStore(), fireCohortAssigned: PixelKit.fireExperimentEnrollmentPixel(subfeatureID:experiment:)),
             for: FeatureFlag.self
         )
+        
+        let coordinator =  DefaultBrowserAndDockPromptCoordinator(featureFlagger: featureFlagger)
+        defaultBrowserAndDockPromptPresenter = DefaultBrowserAndDockPromptPresenter(coordinator: coordinator, featureFlagger: featureFlagger)
+        
+        onboardingStateMachine = ContextualOnboardingStateMachine()
 
         // MARK: - Subscription configuration
 
