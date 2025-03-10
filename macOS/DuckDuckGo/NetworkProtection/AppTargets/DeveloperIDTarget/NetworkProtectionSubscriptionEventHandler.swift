@@ -57,6 +57,7 @@ final class NetworkProtectionSubscriptionEventHandler {
                 .publisher(for: .entitlementsDidChange)
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] notification in
+                    Logger.networkProtection.log("Entitlements did change notification received")
                     guard let self else {
                         return
                     }

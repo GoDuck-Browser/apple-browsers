@@ -139,23 +139,37 @@ final class UserScripts: UserScriptsProvider {
             userScripts.append(specialPages)
         }
 
-        guard let subscriptionManager = Application.appDelegate.subscriptionManagerV1 else {
-            assertionFailure("SubscriptionManager is not available")
-            return
+        var delegate: Subfeature
+        let freemiumDBPPixelExperimentManager = FreemiumDBPPixelExperimentManager(subscriptionManager: Application.appDelegate.subscriptionAuthV1toV2Bridge)
+        if !Application.appDelegate.isAuthV2Enabled {
+            guard let subscriptionManager = Application.appDelegate.subscriptionManagerV1 else {
+                assertionFailure("SubscriptionManager is not available")
+                return
+            }
+
+            let stripePurchaseFlow = DefaultStripePurchaseFlow(subscriptionEndpointService: subscriptionManager.subscriptionEndpointService,
+                                                               authEndpointService: subscriptionManager.authEndpointService,
+                                                               accountManager: subscriptionManager.accountManager)
+            delegate = SubscriptionPagesUseSubscriptionFeature(subscriptionManager: subscriptionManager,
+                                                               stripePurchaseFlow: stripePurchaseFlow,
+                                                               uiHandler: Application.appDelegate.subscriptionUIHandler,
+                                                               freemiumDBPPixelExperimentManager: freemiumDBPPixelExperimentManager)
+        } else {
+            guard let subscriptionManager = Application.appDelegate.subscriptionManagerV2 else {
+                assertionFailure("subscriptionManager is not available")
+                return
+            }
+            let stripePurchaseFlow = DefaultStripePurchaseFlowV2(subscriptionManager: subscriptionManager)
+            delegate = SubscriptionPagesUseSubscriptionFeatureV2(subscriptionManager: subscriptionManager,
+                                                                 stripePurchaseFlow: stripePurchaseFlow,
+                                                                 uiHandler: Application.appDelegate.subscriptionUIHandler,
+                                                                 freemiumDBPPixelExperimentManager: freemiumDBPPixelExperimentManager)
         }
-        let freemiumDBPPixelExperimentManager = FreemiumDBPPixelExperimentManager(subscriptionManager: subscriptionManager)
-        let stripePurchaseFlow = DefaultStripePurchaseFlow(subscriptionEndpointService: subscriptionManager.subscriptionEndpointService,
-                                                           authEndpointService: subscriptionManager.authEndpointService,
-                                                           accountManager: subscriptionManager.accountManager)
-        let delegate = SubscriptionPagesUseSubscriptionFeature(subscriptionManager: subscriptionManager,
-                                                           stripePurchaseFlow: stripePurchaseFlow,
-                                                           uiHandler: Application.appDelegate.subscriptionUIHandler,
-                                                           freemiumDBPPixelExperimentManager: freemiumDBPPixelExperimentManager)
 
         subscriptionPagesUserScript.registerSubfeature(delegate: delegate)
         userScripts.append(subscriptionPagesUserScript)
 
-        let identityTheftRestorationPagesFeature = IdentityTheftRestorationPagesFeature(subscriptionManager: subscriptionManager)
+        let identityTheftRestorationPagesFeature = IdentityTheftRestorationPagesFeature(subscriptionManager: Application.appDelegate.subscriptionAuthV1toV2Bridge)
         identityTheftRestorationPagesUserScript.registerSubfeature(delegate: identityTheftRestorationPagesFeature)
         userScripts.append(identityTheftRestorationPagesUserScript)
     }

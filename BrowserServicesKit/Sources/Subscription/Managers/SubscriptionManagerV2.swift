@@ -358,7 +358,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
             }
 
             // Send notification when entitlements change
-            if currentCachedEntitlements != newEntitlements {
+            if !SubscriptionEntitlement.areEntitlementsEqual(currentCachedEntitlements, newEntitlements) {
                 Logger.subscription.debug("Entitlements changed - New \(newEntitlements) Old \(String(describing: currentCachedEntitlements))")
 
                 // TMP: Convert to Entitlement (authV1)
