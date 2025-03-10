@@ -3326,6 +3326,8 @@
 		F1664A692D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1664A672D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift */; };
 		F1664A6B2D70B2530034CCB8 /* NetworkProtectionKeychainStore+TokenStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1664A6A2D70B2530034CCB8 /* NetworkProtectionKeychainStore+TokenStoring.swift */; };
 		F1664A6C2D70B2530034CCB8 /* NetworkProtectionKeychainStore+TokenStoring.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1664A6A2D70B2530034CCB8 /* NetworkProtectionKeychainStore+TokenStoring.swift */; };
+		F16A52422D7F4301003E6F9A /* UserScriptsV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = F16A52412D7F4301003E6F9A /* UserScriptsV2.swift */; };
+		F16A52432D7F4301003E6F9A /* UserScriptsV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = F16A52412D7F4301003E6F9A /* UserScriptsV2.swift */; };
 		F17114822C7C98FB009836C1 /* Logger+Favicons.swift in Sources */ = {isa = PBXBuildFile; fileRef = F17114812C7C98FB009836C1 /* Logger+Favicons.swift */; };
 		F17114832C7C98FB009836C1 /* Logger+Favicons.swift in Sources */ = {isa = PBXBuildFile; fileRef = F17114812C7C98FB009836C1 /* Logger+Favicons.swift */; };
 		F17114852C7C9D28009836C1 /* Logger+Fire.swift in Sources */ = {isa = PBXBuildFile; fileRef = F17114842C7C9D28009836C1 /* Logger+Fire.swift */; };
@@ -5271,6 +5273,7 @@
 		F1476FBF2C1359FB00EAE46A /* SubscriptionUIHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionUIHandler.swift; sourceTree = "<group>"; };
 		F1664A672D708EC60034CCB8 /* SubscriptionPagesUseSubscriptionFeatureV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionPagesUseSubscriptionFeatureV2.swift; sourceTree = "<group>"; };
 		F1664A6A2D70B2530034CCB8 /* NetworkProtectionKeychainStore+TokenStoring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NetworkProtectionKeychainStore+TokenStoring.swift"; sourceTree = "<group>"; };
+		F16A52412D7F4301003E6F9A /* UserScriptsV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserScriptsV2.swift; sourceTree = "<group>"; };
 		F17114812C7C98FB009836C1 /* Logger+Favicons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+Favicons.swift"; sourceTree = "<group>"; };
 		F17114842C7C9D28009836C1 /* Logger+Fire.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+Fire.swift"; sourceTree = "<group>"; };
 		F17E7DDB2C7C7F8100907A84 /* Logger+DBPBackgroundAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+DBPBackgroundAgent.swift"; sourceTree = "<group>"; };
@@ -9901,6 +9904,7 @@
 				56406D4A2C636A8900BF8FA2 /* SpecialPagesUserScriptExtension.swift */,
 				F1B33DF92BAD9C83001128B3 /* Subscription */,
 				85AC3AEE25D5CE9800C7D2AA /* UserScripts.swift */,
+				F16A52412D7F4301003E6F9A /* UserScriptsV2.swift */,
 			);
 			path = UserScripts;
 			sourceTree = "<group>";
@@ -12066,6 +12070,7 @@
 				3706FB07293F65D500E42796 /* Publisher.asVoid.swift in Sources */,
 				1DDC84F82B83558F00670238 /* PreferencesPrivateSearchView.swift in Sources */,
 				3706FB09293F65D500E42796 /* CrashReport.swift in Sources */,
+				F16A52422D7F4301003E6F9A /* UserScriptsV2.swift in Sources */,
 				1E0C72072ABC63BD00802009 /* SubscriptionPagesUserScript.swift in Sources */,
 				3706FB0A293F65D500E42796 /* NSPathControlView.swift in Sources */,
 				3706FB0B293F65D500E42796 /* DefaultBrowserPromptView.swift in Sources */,
@@ -14279,6 +14284,7 @@
 				3199AF6F2C80734A003AEBDC /* DuckPlayerOnboardingDecider.swift in Sources */,
 				AA3F895324C18AD500628DDE /* SuggestionViewModel.swift in Sources */,
 				4B9292A326670D2A00AD2C21 /* BookmarkManagedObject.swift in Sources */,
+				F16A52432D7F4301003E6F9A /* UserScriptsV2.swift in Sources */,
 				4B723E1326B0007A00E14D75 /* CSVLoginExporter.swift in Sources */,
 				B6BCC51E2AFCD9ED002C5499 /* DataImportSourcePicker.swift in Sources */,
 				85C48CCC278D808F00D3263E /* NSAttributedStringExtension.swift in Sources */,

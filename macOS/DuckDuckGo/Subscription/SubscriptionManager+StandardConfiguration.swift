@@ -119,7 +119,7 @@ extension DefaultSubscriptionManagerV2 {
         let authService = DefaultOAuthService(baseURL: environment.authEnvironment.url, apiService: apiService)
         let tokenStorage = SubscriptionTokenKeychainStorageV2(keychainType: keychainType) { keychainType, error in
             PixelKit.fire(PrivacyProErrorPixel.privacyProKeychainAccessError(accessType: keychainType, accessError: error),
-                                      frequency: .legacyDailyAndCount)
+                          frequency: .legacyDailyAndCount)
         }
         let legacyAccountStorage = canPerformAuthMigration == true ? SubscriptionTokenKeychainStorage(keychainType: keychainType) : nil
         let authClient = DefaultOAuthClient(tokensStorage: tokenStorage,
@@ -179,6 +179,8 @@ extension DefaultSubscriptionManagerV2 {
             pixelHandler = { _ in }
         }
 
+        let isInternalUserEnabled = { featureFlagger?.internalUserDecider.isInternalUser ?? false }
+
         if #available(macOS 12.0, *) {
             self.init(storePurchaseManager: DefaultStorePurchaseManagerV2(subscriptionFeatureMappingCache: subscriptionEndpointService,
                                                                           subscriptionFeatureFlagger: subscriptionFeatureFlagger),
@@ -188,7 +190,8 @@ extension DefaultSubscriptionManagerV2 {
                       pixelHandler: pixelHandler,
                       autoRecoveryHandler: {
                 // todo Implement
-            })
+            },
+                      isInternalUserEnabled: isInternalUserEnabled)
         } else {
             self.init(oAuthClient: authClient,
                       subscriptionEndpointService: subscriptionEndpointService,
@@ -196,7 +199,8 @@ extension DefaultSubscriptionManagerV2 {
                       pixelHandler: pixelHandler,
                       autoRecoveryHandler: {
                 // todo Implement
-            })
+            },
+                      isInternalUserEnabled: isInternalUserEnabled)
         }
     }
 }

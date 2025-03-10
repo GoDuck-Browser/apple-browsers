@@ -114,12 +114,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     let isAuthV2Enabled = false
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
-    let subscriptionManagerV1: any SubscriptionManager
-    let subscriptionManagerV2: any SubscriptionManagerV2
+    let subscriptionManagerV1: (any SubscriptionManager)?
+    let subscriptionManagerV2: (any SubscriptionManagerV2)?
 
     public let subscriptionUIHandler: SubscriptionUIHandling
     private let subscriptionCookieManager: any SubscriptionCookieManaging
-    private let subscriptionCookieManagerV2: any SubscriptionCookieManagingV2
     private var subscriptionCookieManagerFeatureFlagCancellable: AnyCancellable?
 
     // MARK: - Freemium DBP
@@ -271,33 +270,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return WindowControllersManager.shared
         })
 
-        // MARK: V1
-        subscriptionManagerV1 = DefaultSubscriptionManager(featureFlagger: featureFlagger)
-        subscriptionCookieManager = SubscriptionCookieManager(tokenProvider: subscriptionManagerV1, currentCookieStore: {
-            WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
-        }, eventMapping: SubscriptionCookieManageEventPixelMapping())
-
-        // MARK: V2
-        let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
-        let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
-        let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
-        subscriptionManagerV2 = DefaultSubscriptionManagerV2(keychainType: KeychainType.dataProtection(.named(subscriptionAppGroup)),
-                                                         environment: subscriptionEnvironment,
-                                                         userDefaults: subscriptionUserDefaults,
-                                                         canPerformAuthMigration: true,
-                                                         canHandlePixels: true)
-
-        subscriptionCookieManagerV2 = SubscriptionCookieManagerV2(subscriptionManager: subscriptionManagerV2, currentCookieStore: {
-            WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
-        }, eventMapping: SubscriptionCookieManageEventPixelMapping())
-
-        // --------
-
         if !isAuthV2Enabled {
-            subscriptionAuthV1toV2Bridge = subscriptionManagerV1
+            // MARK: V1
+            let subscriptionManager = DefaultSubscriptionManager(featureFlagger: featureFlagger)
+            subscriptionCookieManager = SubscriptionCookieManager(tokenProvider: subscriptionManager, currentCookieStore: {
+                WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
+            }, eventMapping: SubscriptionCookieManageEventPixelMapping())
+            subscriptionManagerV1 = subscriptionManager
+            subscriptionManagerV2 = nil
+            subscriptionAuthV1toV2Bridge = subscriptionManager
         } else {
-            subscriptionAuthV1toV2Bridge = subscriptionManagerV2
+            // MARK: V2
+            let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
+            let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
+            let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
+            let subscriptionManager = DefaultSubscriptionManagerV2(keychainType: KeychainType.dataProtection(.named(subscriptionAppGroup)),
+                                                                   environment: subscriptionEnvironment,
+                                                                   featureFlagger: featureFlagger,
+                                                                   userDefaults: subscriptionUserDefaults,
+                                                                   canPerformAuthMigration: true,
+                                                                   canHandlePixels: true)
+
+            subscriptionCookieManager = SubscriptionCookieManagerV2(subscriptionManager: subscriptionManager, currentCookieStore: {
+                WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
+            }, eventMapping: SubscriptionCookieManageEventPixelMapping())
+            subscriptionManagerV2 = subscriptionManager
+            subscriptionManagerV1 = nil
+            subscriptionAuthV1toV2Bridge = subscriptionManager
         }
+        // --------
 
         // MARK:
 
@@ -438,7 +439,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         startupSync()
 
-        subscriptionManagerV1.loadInitialData()
+        subscriptionManagerV1?.loadInitialData()
 
         let privacyConfigurationManager = ContentBlocking.shared.privacyConfigurationManager
 
@@ -580,7 +581,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         DataBrokerProtectionAppEvents(featureGatekeeper: pirGatekeeper).applicationDidBecomeActive()
 
-        subscriptionManagerV1.refreshCachedSubscriptionAndEntitlements { isSubscriptionActive in
+        subscriptionManagerV1?.refreshCachedSubscriptionAndEntitlements { isSubscriptionActive in
             if isSubscriptionActive {
                 PixelKit.fire(PrivacyProPixel.privacyProSubscriptionActive, frequency: .daily)
             }

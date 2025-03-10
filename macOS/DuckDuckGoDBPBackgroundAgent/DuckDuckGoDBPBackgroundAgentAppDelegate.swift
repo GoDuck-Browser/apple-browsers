@@ -32,8 +32,6 @@ final class DuckDuckGoDBPBackgroundAgentApplication: NSApplication {
     private let _delegate: DuckDuckGoDBPBackgroundAgentAppDelegate
 
     private let isAuthV2Enabled = false
-    private let subscriptionManagerV1: any SubscriptionManager
-    private let subscriptionManagerV2: any SubscriptionManagerV2
 
     override init() {
         Logger.dbpBackgroundAgent.log("🟢 Starting: \(NSRunningApplication.current.processIdentifier, privacy: .public)")
@@ -73,26 +71,23 @@ final class DuckDuckGoDBPBackgroundAgentApplication: NSApplication {
 
         // MARK: - Configure Subscription
 
-        // V1
-        subscriptionManagerV1 = DefaultSubscriptionManager()
-
-        // V2
-        let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
-        let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
-        let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
-        subscriptionManagerV2 = DefaultSubscriptionManagerV2(keychainType: .dataProtection(.named(subscriptionAppGroup)),
-                                                             environment: subscriptionEnvironment,
-                                                             userDefaults: subscriptionUserDefaults,
-                                                             canPerformAuthMigration: false,
-                                                             canHandlePixels: false)
-
-        // MARK: -
-
         if !isAuthV2Enabled {
-            _delegate = DuckDuckGoDBPBackgroundAgentAppDelegate(subscriptionManager: subscriptionManagerV1)
+            // V1
+            let subscriptionManager = DefaultSubscriptionManager()
+            _delegate = DuckDuckGoDBPBackgroundAgentAppDelegate(subscriptionManager: subscriptionManager)
         } else {
-            _delegate = DuckDuckGoDBPBackgroundAgentAppDelegate(subscriptionManager: subscriptionManagerV2)
+            // V2
+            let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
+            let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
+            let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
+            let subscriptionManager = DefaultSubscriptionManagerV2(keychainType: .dataProtection(.named(subscriptionAppGroup)),
+                                                                 environment: subscriptionEnvironment,
+                                                                 userDefaults: subscriptionUserDefaults,
+                                                                 canPerformAuthMigration: false,
+                                                                 canHandlePixels: false)
+            _delegate = DuckDuckGoDBPBackgroundAgentAppDelegate(subscriptionManager: subscriptionManager)
         }
+        // MARK: -
 
         super.init()
         self.delegate = _delegate

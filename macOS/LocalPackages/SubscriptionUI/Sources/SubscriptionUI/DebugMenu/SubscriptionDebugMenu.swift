@@ -34,10 +34,10 @@ public final class SubscriptionDebugMenu: NSMenuItem {
     var currentViewController: () -> NSViewController?
 
     let subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
-    let subscriptionManagerV1: any SubscriptionManager
-    let subscriptionManagerV2: any SubscriptionManagerV2
+    let subscriptionManagerV1: (any SubscriptionManager)!
+    let subscriptionManagerV2: (any SubscriptionManagerV2)!
     var accountManager: AccountManager {
-        subscriptionManagerV1.accountManager
+        return subscriptionManagerV1.accountManager
     }
 
     let subscriptionUserDefaults: UserDefaults
@@ -53,8 +53,8 @@ public final class SubscriptionDebugMenu: NSMenuItem {
                 currentViewController: @escaping () -> NSViewController?,
                 openSubscriptionTab: @escaping (URL) -> Void,
                 subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge,
-                subscriptionManagerV1: any SubscriptionManager,
-                subscriptionManagerV2: any SubscriptionManagerV2,
+                subscriptionManagerV1: (any SubscriptionManager)?,
+                subscriptionManagerV2: (any SubscriptionManagerV2)?,
                 subscriptionUserDefaults: UserDefaults,
                 isAuthV2Enabled: Bool) {
         self.currentEnvironment = currentEnvironment

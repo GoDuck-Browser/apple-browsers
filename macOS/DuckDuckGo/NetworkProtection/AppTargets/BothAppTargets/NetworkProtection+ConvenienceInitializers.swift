@@ -29,8 +29,8 @@ extension NetworkProtectionKeychainTokenStore {
         self.init(useAccessTokenProvider: true)
     }
 
-    convenience init(useAccessTokenProvider: Bool) {
-        let accessTokenProvider: AccessTokenProvider = { Application.appDelegate.subscriptionManagerV1.accountManager.accessToken }
+    convenience init(useAccessTokenProvider: Bool) { // only used in AuthV1
+        let accessTokenProvider: AccessTokenProvider = { Application.appDelegate.subscriptionManagerV1?.accountManager.accessToken }
         self.init(keychainType: .default,
                   errorEvents: .networkProtectionAppDebugEvents,
                   useAccessTokenProvider: useAccessTokenProvider,

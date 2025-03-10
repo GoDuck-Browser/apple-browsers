@@ -171,28 +171,6 @@ private extension DefaultFreemiumDBPFeature {
     }
 }
 
-// extension SubscriptionManager {
-//
-//    /// Returns true if a user is a "potential" Privacy Pro subscriber. This means:
-//    ///
-//    /// 1. Is eligible to purchase
-//    /// 2. Is not a current subscriber
-//    var isPotentialPrivacyProSubscriber: Bool {
-//        isPrivacyProPurchaseAvailable
-//        && !accountManager.isUserAuthenticated
-//    }
-//
-//    private var isPrivacyProPurchaseAvailable: Bool {
-//        let platform = currentEnvironment.purchasePlatform
-//        switch platform {
-//        case .appStore:
-//            return canPurchase
-//        case .stripe:
-//            return true
-//        }
-//    }
-// }
-
 extension SubscriptionAuthV1toV2Bridge {
 
     /// Returns true if a user is a "potential" Privacy Pro subscriber. This means:

@@ -25,7 +25,7 @@ import Subscription
 import SpecialErrorPages
 
 @MainActor
-final class UserScripts: UserScriptsProvider {
+final class UserScriptsV2: UserScriptsProvider {
 
     let pageObserverScript = PageObserverUserScript()
     let faviconScript = FaviconUserScript()
@@ -139,19 +139,16 @@ final class UserScripts: UserScriptsProvider {
             userScripts.append(specialPages)
         }
 
-        guard let subscriptionManager = Application.appDelegate.subscriptionManagerV1 else {
-            assertionFailure("SubscriptionManager is not available")
+        guard let subscriptionManager = Application.appDelegate.subscriptionManagerV2 else {
+            assertionFailure("subscriptionManager is not available")
             return
         }
         let freemiumDBPPixelExperimentManager = FreemiumDBPPixelExperimentManager(subscriptionManager: subscriptionManager)
-        let stripePurchaseFlow = DefaultStripePurchaseFlow(subscriptionEndpointService: subscriptionManager.subscriptionEndpointService,
-                                                           authEndpointService: subscriptionManager.authEndpointService,
-                                                           accountManager: subscriptionManager.accountManager)
-        let delegate = SubscriptionPagesUseSubscriptionFeature(subscriptionManager: subscriptionManager,
-                                                           stripePurchaseFlow: stripePurchaseFlow,
-                                                           uiHandler: Application.appDelegate.subscriptionUIHandler,
-                                                           freemiumDBPPixelExperimentManager: freemiumDBPPixelExperimentManager)
-
+        let stripePurchaseFlow = DefaultStripePurchaseFlowV2(subscriptionManager: subscriptionManager)
+        let delegate = SubscriptionPagesUseSubscriptionFeatureV2(subscriptionManager: subscriptionManager,
+                                                                 stripePurchaseFlow: stripePurchaseFlow,
+                                                                 uiHandler: Application.appDelegate.subscriptionUIHandler,
+                                                                 freemiumDBPPixelExperimentManager: freemiumDBPPixelExperimentManager)
         subscriptionPagesUserScript.registerSubfeature(delegate: delegate)
         userScripts.append(subscriptionPagesUserScript)
 

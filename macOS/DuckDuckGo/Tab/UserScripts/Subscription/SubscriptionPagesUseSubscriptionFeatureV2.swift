@@ -30,19 +30,29 @@ import Networking
 
 /// Use Subscription sub-feature
 final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
+
+    private enum OriginDomains {
+        static let duckduckgo = "duckduckgo.com"
+    }
+
     weak var broker: UserScriptMessageBroker?
-    var featureName = "useSubscription"
-    var messageOriginPolicy: MessageOriginPolicy = .only(rules: [
-        .exact(hostname: "duckduckgo.com"),
-        .exact(hostname: "abrown.duckduckgo.com")
+
+    let featureName = "useSubscription"
+    lazy var messageOriginPolicy: MessageOriginPolicy = .only(rules: [
+        HostnameMatchingRule.makeExactRule(for: subscriptionManager.url(for: .baseURL)) ?? .exact(hostname: OriginDomains.duckduckgo)
     ])
+
     let subscriptionManager: SubscriptionManagerV2
     var subscriptionPlatform: SubscriptionEnvironment.PurchasePlatform { subscriptionManager.currentEnvironment.purchasePlatform }
+
     let stripePurchaseFlow: any StripePurchaseFlowV2
     let subscriptionErrorReporter = DefaultSubscriptionErrorReporter()
     let subscriptionSuccessPixelHandler: SubscriptionAttributionPixelHandler
+
     let uiHandler: SubscriptionUIHandling
+
     let subscriptionFeatureAvailability: SubscriptionFeatureAvailability
+
     private var freemiumDBPUserStateManager: FreemiumDBPUserStateManager
     private let freemiumDBPPixelExperimentManager: FreemiumDBPPixelExperimentManaging
     private let notificationCenter: NotificationCenter
@@ -544,12 +554,12 @@ private extension SubscriptionPagesUseSubscriptionFeatureV2 {
 
     /**
      Sends a subscription upgrade notification if the freemium state is activated.
-     
+
      This function checks if the freemium state has been activated by verifying the
      `didActivate` property in `freemiumDBPUserStateManager`. If the freemium activation
      is detected, it posts a `subscriptionUpgradeFromFreemium` notification via
      `notificationCenter`.
-     
+
      - Important: The notification will only be posted if `didActivate` is `true`.
      */
     func sendSubscriptionUpgradeFromFreemiumNotificationIfFreemiumActivated() {
