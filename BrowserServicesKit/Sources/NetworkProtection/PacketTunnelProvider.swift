@@ -28,7 +28,7 @@ import os.log
 
 open class PacketTunnelProvider: NEPacketTunnelProvider {
 
-    public static let isAuthV2Enabled: Bool = false
+    public static let isAuthV2Enabled = false
 
     public enum Event {
         case userBecameActive

@@ -39,7 +39,7 @@ import VPNAppLauncher
 @objc(Application)
 final class DuckDuckGoVPNApplication: NSApplication {
 
-    static let isAuthV2Enabled: Bool = false
+    static let isAuthV2Enabled = false
     public var accountManager: AccountManager
     public var subscriptionManagerV2: any SubscriptionManagerV2
     private let _delegate: DuckDuckGoVPNAppDelegate

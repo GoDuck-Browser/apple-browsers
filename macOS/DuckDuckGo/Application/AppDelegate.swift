@@ -112,7 +112,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let onboardingStateMachine: ContextualOnboardingStateMachine & ContextualOnboardingStateUpdater
     let defaultBrowserAndDockPromptPresenter: DefaultBrowserAndDockPromptPresenter
 
-    let isAuthV2Enabled: Bool = false
+    let isAuthV2Enabled = false
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
     let subscriptionManagerV1: any SubscriptionManager
     let subscriptionManagerV2: any SubscriptionManagerV2
@@ -259,10 +259,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             experimentManager: ExperimentCohortsManager(store: ExperimentsDataStore(), fireCohortAssigned: PixelKit.fireExperimentEnrollmentPixel(subfeatureID:experiment:)),
             for: FeatureFlag.self
         )
-        
+
         let coordinator =  DefaultBrowserAndDockPromptCoordinator(featureFlagger: featureFlagger)
         defaultBrowserAndDockPromptPresenter = DefaultBrowserAndDockPromptPresenter(coordinator: coordinator, featureFlagger: featureFlagger)
-        
+
         onboardingStateMachine = ContextualOnboardingStateMachine()
 
         // MARK: - Subscription configuration

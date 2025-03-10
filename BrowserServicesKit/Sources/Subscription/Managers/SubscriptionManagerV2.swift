@@ -360,7 +360,10 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
             // Send notification when entitlements change
             if currentCachedEntitlements != newEntitlements {
                 Logger.subscription.debug("Entitlements changed - New \(newEntitlements) Old \(String(describing: currentCachedEntitlements))")
-                NotificationCenter.default.post(name: .entitlementsDidChange, object: self, userInfo: [UserDefaultsCacheKey.subscriptionEntitlements: newEntitlements])
+
+                // TMP: Convert to Entitlement (authV1)
+                let entitlements = newEntitlements.map { $0.entitlement }
+                NotificationCenter.default.post(name: .entitlementsDidChange, object: self, userInfo: [UserDefaultsCacheKey.subscriptionEntitlements: entitlements])
             }
 
             return resultTokenContainer
@@ -466,5 +469,23 @@ extension DefaultSubscriptionManagerV2: SubscriptionTokenProvider {
 
     public func removeAccessToken() {
         removeTokenContainer()
+    }
+}
+
+extension SubscriptionEntitlement {
+
+    var entitlement: Entitlement {
+        switch self {
+        case .networkProtection:
+            return Entitlement(product: .networkProtection)
+        case .dataBrokerProtection:
+            return Entitlement(product: .dataBrokerProtection)
+        case .identityTheftRestoration:
+            return Entitlement(product: .identityTheftRestoration)
+        case .identityTheftRestorationGlobal:
+            return Entitlement(product: .identityTheftRestorationGlobal)
+        case .unknown:
+            return Entitlement(product: .unknown)
+        }
     }
 }
