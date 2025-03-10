@@ -433,6 +433,8 @@ enum NetworkProtectionPixelEvent: PixelKitEventV2 {
                 .networkProtectionRekeyAttempt,
                 .networkProtectionRekeyCompleted,
                 .networkProtectionRekeyFailure,
+                .networkProtectionSystemExtensionActivationAttempt,
+                .networkProtectionSystemExtensionActivationSuccess,
                 .networkProtectionSystemExtensionActivationFailure,
                 .networkProtectionServerMigrationAttempt,
                 .networkProtectionServerMigrationSuccess,
