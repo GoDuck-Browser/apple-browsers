@@ -54,6 +54,7 @@ final class UserScripts: UserScriptsProvider {
     let aiChatUserScript: AIChatUserScript?
     let historyViewUserScript: HistoryViewUserScript?
 
+    // swiftlint:disable:next cyclomatic_complexity
     init(with sourceProvider: ScriptSourceProviding) {
         clickToLoadScript = ClickToLoadUserScript()
         contentBlockerRulesScript = ContentBlockerRulesUserScript(configuration: sourceProvider.contentBlockerRulesConfig!)
