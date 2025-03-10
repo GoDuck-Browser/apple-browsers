@@ -301,8 +301,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // MARK:
 
-        onboardingStateMachine = ContextualOnboardingStateMachine()
-
         if NSApplication.runType.requiresEnvironment {
             remoteMessagingClient = RemoteMessagingClient(
                 database: RemoteMessagingDatabase().db,
