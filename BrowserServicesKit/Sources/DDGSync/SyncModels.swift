@@ -152,14 +152,17 @@ public struct SyncCode: Codable {
         let secretKey: Data
     }
     
+    // TD: Step A https://app.asana.com/0/481882893211075/1209571867429615
     public struct ExchangeKey: Codable, Sendable {
         let keyId: String
         let publicKey: Data
     }
     
+    // TD: Step B https://app.asana.com/0/481882893211075/1209571867429615
     public struct ExchangeMessage: Codable, Sendable {
         let keyId: String
-        let encryptedMessage: Data
+        let publicKey: Data
+        let deviceName: String
     }
 
     public var recovery: RecoveryKey?

@@ -40,7 +40,7 @@ public struct EnterRecoveryCodeView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 Button {
                     recoveryCodeModel.paste()
-                    model.delegate?.recoveryCodePasted(recoveryCodeModel.recoveryCode, fromRecoveryScreen: true)
+                    model.delegate?.recoveryCodePasted(recoveryCodeModel.recoveryCode)
                 } label: {
                     HStack {
                         Image(.paste)

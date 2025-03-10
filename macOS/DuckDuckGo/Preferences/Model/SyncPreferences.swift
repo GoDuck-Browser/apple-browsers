@@ -551,7 +551,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                 self.codeToDisplay = exchanger?.code
                 self.presentDialog(for: .syncWithAnotherDevice(code: codeToDisplay ?? ""))
                 if let exchangeKey = try await exchanger?.pollForExchangeKey() {
-                    try await syncService.transmitExchangeKey(exchangeKey)
+                    try await syncService.transmitExchangeKey(exchangeKey, deviceName: deviceInfo().name)
                 } else {
                     // Polling was likeley cancelled elsewhere (e.g. dialog closed)
                     return
@@ -604,8 +604,26 @@ extension SyncPreferences: ManagementDialogModelDelegate {
         self.connector?.stopPolling()
         self.connector = nil
     }
+    
+    func sendPublicKey(exchangeCode: String) {
+        Task { @MainActor in
+            guard let syncCode = try? SyncCode.decodeBase64String(exchangeCode) else {
+                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .invalidCode, description: "")
+                return
+            }
+            presentDialog(for: .prepareToSync)
+            
+            if let exchangeKey = syncCode.exchange {
+                // TODO: POST public key
+            } else if let connectKey = syncCode.connect {
+                
+            } else if let recoveryKey = syncCode.recovery {
+                // TODO: What do we do here?
+            }
+        }
+    }
 
-    func recoverDevice(recoveryCode: String, fromRecoveryScreen: Bool) {
+    func recoverDevice(recoveryCode: String) {
         Task { @MainActor in
             guard let syncCode = try? SyncCode.decodeBase64String(recoveryCode) else {
                 managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .invalidCode, description: "")
@@ -614,7 +632,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
             presentDialog(for: .prepareToSync)
             if let recoveryKey = syncCode.recovery {
                 do {
-                    try await loginAndShowPresentedDialog(recoveryKey, isRecovery: fromRecoveryScreen)
+                    try await loginAndShowPresentedDialog(recoveryKey, isRecovery: true)
                 } catch {
                     if case SyncError.accountAlreadyExists = error,
                         featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
@@ -796,11 +814,11 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     }
 
     func recoveryCodePasted(_ code: String) {
-        recoverDevice(recoveryCode: code, fromRecoveryScreen: true)
+        recoverDevice(recoveryCode: code)
     }
-
-    func recoveryCodePasted(_ code: String, fromRecoveryScreen: Bool) {
-        recoverDevice(recoveryCode: code, fromRecoveryScreen: fromRecoveryScreen)
+    
+    func exchangeCodePasted(_ code: String) {
+        sendPublicKey(exchangeCode: code)
     }
 
     private func handleAccountAlreadyExists(_ recoveryKey: SyncCode.RecoveryKey) {

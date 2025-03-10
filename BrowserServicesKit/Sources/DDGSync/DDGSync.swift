@@ -138,13 +138,13 @@ public class DDGSync: DDGSyncing {
         }
     }
     
-    public func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey) async throws {
+    public func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws {
         guard try dependencies.secureStore.account() != nil else {
             throw SyncError.accountNotFound
         }
 
         do {
-            try await dependencies.createExchangeKeyTransmitter().send(exchangeCode)
+            try await dependencies.createExchangeKeyTransmitter().send(exchangeCode, deviceName: deviceName)
         } catch {
             try handleUnauthenticated(error)
         }

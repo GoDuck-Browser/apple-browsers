@@ -144,7 +144,7 @@ public protocol DDGSyncing: DDGSyncingDebuggingSupport {
     /**
      Sends this device's recovery key to the server encrypted using supplied key
      */
-    func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey) async throws
+    func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws
 
     /**
      Disconnect this client from the sync service. Removes all local info, but leaves in places bookmarks, etc.

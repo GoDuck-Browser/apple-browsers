@@ -109,5 +109,5 @@ protocol RecoveryKeyTransmitting {
 
 protocol ExchangeKeyTransmitting {
     
-    func send(_ key: SyncCode.ExchangeKey) async throws
+    func send(_ code: SyncCode.ExchangeKey, deviceName: String) async throws
 }

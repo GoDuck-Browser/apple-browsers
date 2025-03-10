@@ -20,12 +20,12 @@ import Foundation
 import Combine
 
 public protocol ManagementDialogModelDelegate: AnyObject {
-    func recoverDevice(recoveryCode: String, fromRecoveryScreen: Bool)
+    func recoverDevice(recoveryCode: String)
     func turnOffSync()
     func updateDeviceName(_ name: String)
     func removeDevice(_ device: SyncDevice)
     func deleteAccount()
-    func recoveryCodePasted(_ code: String, fromRecoveryScreen: Bool)
+    func exchangeCodePasted(_ code: String)
     func saveRecoveryPDF()
     func recoveryCodeNextPressed()
     func turnOnSync()

@@ -27,28 +27,25 @@ struct ExchangeKeyTransmitter: ExchangeKeyTransmitting {
     let storage: SecureStoring
     let crypter: CryptingInternal
 
-    func send(_ code: SyncCode.ExchangeKey) async throws {
-        guard let account = try storage.account() else {
-            throw SyncError.accountNotFound
-        }
-
-        guard let token = try storage.account()?.token else {
-            throw SyncError.noToken
-        }
-
-        let recoveryKey = try JSONEncoder.snakeCaseKeys.encode(
-            SyncCode(recovery: SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey))
+    func send(_ code: SyncCode.ExchangeKey, deviceName: String) async throws {
+        let exchangInfo = try crypter.prepareForExchange()
+        let exchangeKey = try JSONEncoder.snakeCaseKeys.encode(
+            SyncCode(exchangeMessage: .init(keyId: exchangInfo.keyId, publicKey: exchangInfo.publicKey, deviceName: deviceName))
         )
-
-        let encryptedRecoveryKey = try crypter.seal(recoveryKey, secretKey: code.publicKey)
+        
+        let base64ExchangeKey = exchangeKey.base64EncodedData()
+        
+        let encryptedRecoveryKey = try crypter.seal(base64ExchangeKey, secretKey: code.publicKey)
 
         let body = try JSONEncoder.snakeCaseKeys.encode(
             ExchangeRequest(keyId: code.keyId, encryptedRecoveryKey: encryptedRecoveryKey)
         )
+        
+        print("Exchange JSON request is: \(String(data: body, encoding: .utf8) ?? "nil")")
 
         let request = api.createRequest(url: endpoints.exchange,
                                         method: .post,
-                                        headers: ["Authorization": "Bearer \(token)"],
+                                        headers: [:], // TODO: Will we authenticate in certain scenarios?
                                         parameters: [:],
                                         body: body,
                                         contentType: "application/json")
