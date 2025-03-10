@@ -117,7 +117,7 @@ final class UserText {
 
     // MARK: Updating Appex to Sysex for App Store builds
 
-    static let vpnAppStoreSysexUpdatePromptTitle = NSLocalizedString("vpn.appstore.sysex.update.prompt.title", bundle: Bundle.module, value: "New VPN version available", comment: "Title shown to users to ask them to update the VPN to our System Extension, which requires reinstalling the VPN")
-    static let vpnAppStoreSysexUpdatePromptMessage = NSLocalizedString("vpn.appstore.sysex.update.prompt.message", bundle: Bundle.module, value: "You can now customize the VPN to exclude websites and apps that aren’t compatible. Update to unlock VPN Exclusions.", comment: "Message shown to users to ask them to update the VPN to our System Extension, which requires reinstalling the VPN")
-    static let vpnAppStoreSysexUpdatePromptActionButtonTitle = NSLocalizedString("vpn.appstore.sysex.update.prompt.action.button.title", bundle: Bundle.module, value: "Re-install to update", comment: "Action button title for the prompt that asks users to update the VPN to our System Extension.  Pressing this button reinstalls the VPN.")
+    static let vpnAppStoreSysexUpdatePromptTitle = NSLocalizedString("vpn.appstore.sysex.update.prompt.title", bundle: Bundle.module, value: "New VPN version available!", comment: "Title shown to users to ask them to update the VPN to our System Extension, which requires reinstalling the VPN")
+    static let vpnAppStoreSysexUpdatePromptMessage = NSLocalizedString("vpn.appstore.sysex.update.prompt.message", bundle: Bundle.module, value: "This update includes the option to exclude sites and apps that aren't compatible with VPNs so you can keep using them while connected.", comment: "Message shown to users to ask them to update the VPN to our System Extension, which requires reinstalling the VPN")
+    static let vpnAppStoreSysexUpdatePromptActionButtonTitle = NSLocalizedString("vpn.appstore.sysex.update.prompt.action.button.title", bundle: Bundle.module, value: "Get the Update", comment: "Action button title for the prompt that asks users to update the VPN to our System Extension.  Pressing this button reinstalls the VPN.")
 }
