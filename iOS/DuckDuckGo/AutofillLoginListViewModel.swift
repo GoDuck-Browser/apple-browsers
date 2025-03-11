@@ -442,8 +442,6 @@ final class AutofillLoginListViewModel: ObservableObject {
             } else {
                 newViewState = .searching
             }
-        } else if isEditing {
-            newViewState = sections.count >= 0 ? .showItems : .empty
         } else {
             newViewState = sections.count > 0 ? .showItems : .empty
         }
