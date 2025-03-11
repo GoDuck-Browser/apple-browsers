@@ -525,6 +525,7 @@ final class BrowserTabViewController: NSViewController {
             onGotItPressed: onGotItPressed,
             onFireButtonPressed: { [weak delegate] in
                 delegate?.dismissViewHighlight()
+                FireCoordinator.fireButtonAction()
             })
         let hostingController = NSHostingController(rootView: AnyView(daxView))
         insertChild(hostingController, in: containerStackView, at: 0)

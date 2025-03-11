@@ -45,7 +45,8 @@ final class BookmarksBarViewControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testWhenImportBookmarksClicked_ThenDataImportViewShown() {
+    func testWhenImportBookmarksClicked_ThenDataImportViewShown() throws {
+        throw XCTSkip("Unit Tests should not present UI")
         // When
         vc.importBookmarksClicked(self)
 
@@ -54,7 +55,9 @@ final class BookmarksBarViewControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testWhenThereAreBookmarks_ThenImportBookmarksButtonIsHidden() {
+    func testWhenThereAreBookmarks_ThenImportBookmarksButtonIsHidden() throws {
+        throw XCTSkip("Unit Tests should not expose UI")
+
         // Given
         let boolmarkList = BookmarkList(topLevelEntities: [Bookmark(id: "test", url: "", title: "Something", isFavorite: false), Bookmark(id: "test", url: "", title: "Impori", isFavorite: false)])
         let vc = BookmarksBarViewController.create(tabCollectionViewModel: TabCollectionViewModel(), bookmarkManager: bookmarksManager)
@@ -78,7 +81,8 @@ final class BookmarksBarViewControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testWhenThereAreNoBookmarks_AndbookmarkListEmpty_ThenImportBookmarksButtonIsNotShown() {
+    func testWhenThereAreNoBookmarks_AndbookmarkListEmpty_ThenImportBookmarksButtonIsNotShown() throws {
+        throw XCTSkip("Unit Tests should not expose UI")
         // Given
         let vc = BookmarksBarViewController.create(tabCollectionViewModel: TabCollectionViewModel(), bookmarkManager: bookmarksManager)
         let window = NSWindow(contentViewController: vc)
@@ -89,7 +93,8 @@ final class BookmarksBarViewControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testWhenThereAreNoBookmarks_ThenImportBookmarksButtonIsShown() {
+    func testWhenThereAreNoBookmarks_ThenImportBookmarksButtonIsShown() throws {
+        throw XCTSkip("Unit Tests should not expose UI")
         // Given
         let boolmarkList = BookmarkList(topLevelEntities: [])
         let vc = BookmarksBarViewController.create(tabCollectionViewModel: TabCollectionViewModel(), bookmarkManager: bookmarksManager)

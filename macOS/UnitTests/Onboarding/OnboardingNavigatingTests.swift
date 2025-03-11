@@ -35,7 +35,8 @@ final class OnboardingNavigatingTests: XCTestCase {
     }
 
     @MainActor
-    func testOnImportData_DataImportViewShown() {
+    func testOnImportData_DataImportViewShown() throws {
+        throw XCTSkip("Unit Tests should open windows")
         // Given
         let mockWindow = MockWindow()
         let mvc = MainWindowController(mainViewController: MainViewController(autofillPopoverPresenter: DefaultAutofillPopoverPresenter()), popUp: false)

@@ -37,7 +37,7 @@ class ContextualOnboardingStateMachineTests: XCTestCase {
         fireButtonInfoStateProvider = MockFireButtonInfoStateProvider()
         preferences = StartupPreferences(persistor: MockStartUpPreferencesPersistor())
         stateMachine = ContextualOnboardingStateMachine(trackerMessageProvider: mockTrackerMessageProvider, startupPreferences: preferences, fireButtonInfoStateProvider: fireButtonInfoStateProvider)
-        tab = Tab(url: URL.duckDuckGo)
+        tab = Tab(content: .none)
     }
 
     override func tearDown() {
@@ -720,4 +720,14 @@ class MockStartUpPreferencesPersistor: StartupPreferencesPersistor {
 
 class MockFireButtonInfoStateProvider: FireButtonInfoStateProviding {
     var infoPresentedOnce: Bool = false
+}
+private extension Tab {
+    var url: URL? {
+        get {
+            content.userEditableUrl
+        }
+        set {
+            setContent(newValue.map { TabContent.url($0, source: .link) } ?? .newtab)
+        }
+    }
 }

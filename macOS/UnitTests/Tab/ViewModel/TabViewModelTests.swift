@@ -533,3 +533,10 @@ extension TabViewModel {
     }
 
 }
+
+private extension Tab {
+    @MainActor
+    convenience init(url: URL? = nil) {
+        self.init(content: url.map { TabContent.url($0, source: .link) } ?? .none)
+    }
+}

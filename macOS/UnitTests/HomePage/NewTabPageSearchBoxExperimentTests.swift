@@ -103,7 +103,6 @@ final class NewTabPageSearchBoxExperimentTests: XCTestCase {
     func testWhenUserIsNotEnrolledAndOnboardingIsNotFinishedThenCohortIsNotSet() {
         onboardingExperimentCohortProvider.isOnboardingFinished = false
         cohortDecider.cohort = .experimentExistingUser
-        let date = Date()
         experiment.assignUserToCohort()
 
         XCTAssertFalse(dataStore.didRunEnrollment)

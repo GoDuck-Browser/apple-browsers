@@ -51,6 +51,5 @@ public class OnboardingFireButtonDialogViewModel: ObservableObject {
     func tryFireButton() {
         onFireButtonPressed()
         onboardingPixelReporter.trackFireButtonTryIt()
-        FireCoordinator.fireButtonAction()
     }
 }

@@ -108,3 +108,9 @@ final class WindowManagerStateRestorationTests: XCTestCase {
     }
 
 }
+private extension Tab {
+    @MainActor
+    @nonobjc convenience override init() {
+        self.init(content: .none)
+    }
+}

@@ -23,6 +23,7 @@ import XCTest
 @objc(TestRunHelper)
 final class TestRunHelper: NSObject {
     @objc(sharedInstance) static let shared = TestRunHelper()
+    private var windowObserver: Any?
 
     override init() {
         super.init()
@@ -47,7 +48,12 @@ final class TestRunHelper: NSObject {
 extension TestRunHelper: XCTestObservation {
 
     func testBundleWillStart(_ testBundle: Bundle) {
-
+        if NSApp.runType == .unitTests {
+            windowObserver = NotificationCenter.default.addObserver(forName: .init("NSWindowDidOrderOnScreenAndFinishAnimatingNotification"), object: nil, queue: .main) {_ in 
+//                fatalError("Unit Tests should not present UI")
+                print("fe")
+            }
+        }
     }
 
     func testBundleDidFinish(_ testBundle: Bundle) {

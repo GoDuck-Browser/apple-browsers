@@ -378,7 +378,12 @@ final class TabTests: XCTestCase {
 
 }
 
-extension Tab {
+private extension Tab {
+    @MainActor
+    @nonobjc convenience override init() {
+        self.init(content: .none)
+    }
+
     var url: URL? {
         get {
             content.userEditableUrl
