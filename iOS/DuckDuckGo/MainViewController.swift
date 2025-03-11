@@ -2305,7 +2305,7 @@ extension MainViewController: AutocompleteViewControllerDelegate {
             if newTabPageViewController != nil, let tab = tabManager.model.currentTab {
                 self.closeTab(tab)
             }
-            loadUrlInNewTab(url, reuseExisting: tabId.map(ReuseExisting.tabWithId) ?? .any, inheritedAttribution: .noAttribution)
+            loadUrlInNewTab(url, reuseExisting: tabId.map(ExistingTabReusePolicy.tabWithId) ?? .any, inheritedAttribution: .noAttribution)
 
         case .unknown(value: let value), .internalPage(title: let value, url: _):
             assertionFailure("Unknown suggestion: \(value)")
