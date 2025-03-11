@@ -1078,8 +1078,6 @@
 		373B2F862C387B840013A94B /* ActiveRemoteMessageModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373B2F802C384DEB0013A94B /* ActiveRemoteMessageModelTests.swift */; };
 		373D9B4829EEAC1B00381FDD /* SyncMetadataDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373D9B4729EEAC1B00381FDD /* SyncMetadataDatabase.swift */; };
 		373D9B4929EEAC1B00381FDD /* SyncMetadataDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373D9B4729EEAC1B00381FDD /* SyncMetadataDatabase.swift */; };
-		374286252CC5940100E66323 /* HomePageSettingsVisibilityModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374286242CC593F900E66323 /* HomePageSettingsVisibilityModelTests.swift */; };
-		374286262CC5940100E66323 /* HomePageSettingsVisibilityModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374286242CC593F900E66323 /* HomePageSettingsVisibilityModelTests.swift */; };
 		37445F992A1566420029F789 /* SyncDataProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37445F982A1566420029F789 /* SyncDataProviders.swift */; };
 		37445F9A2A1566420029F789 /* SyncDataProviders.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37445F982A1566420029F789 /* SyncDataProviders.swift */; };
 		37445F9C2A1569F00029F789 /* SyncBookmarksAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37445F9B2A1569F00029F789 /* SyncBookmarksAdapter.swift */; };
@@ -3882,7 +3880,6 @@
 		373B2F802C384DEB0013A94B /* ActiveRemoteMessageModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveRemoteMessageModelTests.swift; sourceTree = "<group>"; };
 		373D9B4729EEAC1B00381FDD /* SyncMetadataDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMetadataDatabase.swift; sourceTree = "<group>"; };
 		373DE97A2D3916FD000577EE /* UserScriptActionsManager */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = UserScriptActionsManager; sourceTree = "<group>"; };
-		374286242CC593F900E66323 /* HomePageSettingsVisibilityModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePageSettingsVisibilityModelTests.swift; sourceTree = "<group>"; };
 		37445F982A1566420029F789 /* SyncDataProviders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncDataProviders.swift; sourceTree = "<group>"; };
 		37445F9B2A1569F00029F789 /* SyncBookmarksAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncBookmarksAdapter.swift; sourceTree = "<group>"; };
 		3745DE042D536DCA00024FC8 /* HistoryGroupingProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryGroupingProvider.swift; sourceTree = "<group>"; };
@@ -7471,7 +7468,6 @@
 				569277C329DEE09D00B633EF /* ContinueSetUpModelTests.swift */,
 				56D145ED29E6DAD900E3488A /* DataImportProviderTests.swift */,
 				370270BF2C78EB13002E44E4 /* HomePageSettingsModelTests.swift */,
-				374286242CC593F900E66323 /* HomePageSettingsVisibilityModelTests.swift */,
 				37D046A02C7DA9A200AEAA50 /* UserBackgroundImagesManagerTests.swift */,
 				376731842C7EF97400EB097B /* ColorSchemeLosslessStringConvertibleExtensionTests.swift */,
 				376731962C7F36AA00EB097B /* UserBackgroundImageTests.swift */,
@@ -12994,7 +12990,6 @@
 				31031EB82CC94C6E00684340 /* AIChatRemoteSettingsTests.swift in Sources */,
 				3706FE2B293F661700E42796 /* AtbParserTests.swift in Sources */,
 				3706FE2C293F661700E42796 /* PermissionStoreMock.swift in Sources */,
-				374286262CC5940100E66323 /* HomePageSettingsVisibilityModelTests.swift in Sources */,
 				3706FE2D293F661700E42796 /* ChromiumFaviconsReaderTests.swift in Sources */,
 				3706FE2E293F661700E42796 /* LocalBookmarkManagerTests.swift in Sources */,
 				9F180D132B69C665000D695F /* DownloadsTabExtensionMock.swift in Sources */,
@@ -14839,7 +14834,6 @@
 				4BB99D1126FE1A84001E4761 /* SafariBookmarksReaderTests.swift in Sources */,
 				BBC063E82C5A9E4B007BDC18 /* BookmarkManagementDetailViewModelTests.swift in Sources */,
 				37A0BA332D74BB3300130447 /* DefaultHistoryViewTabOpenerTests.swift in Sources */,
-				374286252CC5940100E66323 /* HomePageSettingsVisibilityModelTests.swift in Sources */,
 				1DA860722BE3AE950027B813 /* DockPositionProviderTests.swift in Sources */,
 				4BBF0925283083EC00EE1418 /* FileSystemDSLTests.swift in Sources */,
 				4B11060A25903EAC0039B979 /* CoreDataEncryptionTests.swift in Sources */,
