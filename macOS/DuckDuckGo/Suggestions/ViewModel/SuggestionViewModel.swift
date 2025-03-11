@@ -158,12 +158,11 @@ struct SuggestionViewModel: Equatable {
         case .historyEntry(title: _, url: let url, _),
              .bookmark(title: _, url: let url, isFavorite: _, _),
              .openTab(title: _, url: let url, _, _):
-            // TODO: Should we show the Search suffix here?
-//            if url.isDuckDuckGoSearch {
-//                return UserText.searchDuckDuckGoSuffix
-//            } else {
-            return url.toString(decodePunycode: true, dropScheme: true, needsWWW: false, dropTrailingSlash: true)
-//            }
+            if url.isDuckDuckGoSearch {
+                return UserText.searchDuckDuckGoSuffix
+            } else {
+                return url.toString(decodePunycode: true, dropScheme: true, dropTrailingSlash: true)
+            }
         case .internalPage:
             return UserText.duckDuckGo
         }

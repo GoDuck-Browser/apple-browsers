@@ -129,5 +129,5 @@ private func Score(title: String, url: URL, visitCount: Int, query: String) -> I
     return ScoringService.score(title: title,
                                 url: url,
                                 visitCount: visitCount,
-                                lowerQuery: query.lowercased())
+                                lowercasedQuery: query.lowercased())
 }

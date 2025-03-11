@@ -90,7 +90,7 @@ public class SuggestionLoader: SuggestionLoading {
 
         // 2) Processing it
         group.notify(queue: .global(qos: .userInitiated)) { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             let processor = SuggestionProcessing(platform: dataSource.platform, isUrlIgnored: isUrlIgnored)
             let result = processor.result(for: query,
                                           from: history,

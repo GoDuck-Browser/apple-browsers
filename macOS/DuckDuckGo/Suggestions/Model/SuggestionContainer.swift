@@ -150,7 +150,7 @@ extension LocalBookmarkManager: SuggestionContainer.BookmarkProvider {
         list?.bookmarks() ?? []
     }
 }
-extension SuggestionContainer: @preconcurrency SuggestionLoadingDataSource {
+extension SuggestionContainer: SuggestionLoadingDataSource {
 
     var platform: Platform {
         return .desktop

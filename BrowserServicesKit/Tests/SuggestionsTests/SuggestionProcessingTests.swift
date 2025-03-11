@@ -170,8 +170,8 @@ final class SuggestionProcessingTests: XCTestCase {
                                        apiResult: APIResult.anAPIResult)
 
         XCTAssertEqual(result?.topHits, [
-            .openTab(title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!, score: 0),
-            .openTab(title: "Duck Tales", url: URL(string: "http://ducktales.com")!, score: 0),
+            .openTab(title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!, tabId: nil),
+            .openTab(title: "Duck Tales", url: URL(string: "http://ducktales.com")!, tabId: nil),
         ])
         // Filter out history entries that are already in top hits
         let topHitUrls = Set(result?.topHits.map { $0.url!.absoluteString } ?? [])
@@ -210,8 +210,8 @@ final class SuggestionProcessingTests: XCTestCase {
 
         // Assert that the top hits include the open tabs
         XCTAssertEqual(result?.topHits, [
-            .openTab(title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!, score: 0),
-            .openTab(title: "Duck Tales", url: URL(string: "http://ducktales.com")!, score: 0),
+            .openTab(title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!, tabId: nil),
+            .openTab(title: "Duck Tales", url: URL(string: "http://ducktales.com")!, tabId: nil),
         ])
 
         // Filter out bookmarks that are already in top hits
@@ -250,8 +250,8 @@ final class SuggestionProcessingTests: XCTestCase {
 
         // Assert that the top hits include the open tabs
         XCTAssertEqual(result?.topHits, [
-            .openTab(title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!, score: 0),
-            .openTab(title: "Duck Tales", url: URL(string: "http://ducktales.com")!, score: 0),
+            .openTab(title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!, tabId: nil),
+            .openTab(title: "Duck Tales", url: URL(string: "http://ducktales.com")!, tabId: nil),
         ])
 
         // Filter out bookmarks that are already in top hits
@@ -338,8 +338,8 @@ final class SuggestionProcessingTests: XCTestCase {
                                        apiResult: APIResult.anAPIResult)
 
         XCTAssertEqual(result?.topHits, [
-            .openTab(title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!, score: 0),
-            .openTab(title: "Duck Tales", url: URL(string: "http://ducktales.com")!, score: 0),
+            .openTab(title: "DuckDuckGo", url: URL(string: "http://duckduckgo.com")!, tabId: nil),
+            .openTab(title: "Duck Tales", url: URL(string: "http://ducktales.com")!, tabId: nil),
         ])
         // Filter out history entries that are already in top hits
         let topHitUrls = Set(result?.topHits.map { $0.url!.absoluteString } ?? [])

@@ -41,8 +41,18 @@ struct ScoredSuggestion {
 
 struct ScoringService {
 
-    /// Scores a suggestion based on the query and the suggestion's title and url.
-    static func score(title: String?, url: URL, visitCount: Int = 0, lowerQuery: String, queryTokens: [String]? = nil) -> Int { // swiftlint:disable:this cyclomatic_complexity
+    /// Scores a suggestion based on the query and the suggestion's title and URL.
+    ///
+    /// - Parameters:
+    ///   - title: The title of the suggestion, which can be `nil`.
+    ///   - url: The URL of the suggestion.
+    ///   - visitCount: The number of times the History Record suggestion has been visited. Defaults to 0 for other type of suggestions.
+    ///   - lowercasedQuery: The query string entered by user, which should be in lowercase.
+    ///   - queryTokens: An optional array of precomputed query tokens (`lowercasedQuery.tokenized()`). If `nil`, tokens will be computed.
+    ///
+    /// - Returns: An integer score representing how well the suggestion matches the query.
+    static func score(title: String?, url: URL, visitCount: Int = 0, lowercasedQuery lowerQuery: String, queryTokens: [String]? = nil) -> Int { // swiftlint:disable:this cyclomatic_complexity
+        // To optimize, query tokens can be precomputed
         let queryTokens = queryTokens ?? lowerQuery.tokenized()
         assert(lowerQuery.lowercased() == lowerQuery)
         assert(queryTokens == lowerQuery.tokenized())
@@ -101,37 +111,37 @@ struct ScoringService {
         return score
     }
 
-    static func scored(lowerQuery: String, queryTokens: [String]?, isUrlIgnored: @escaping (URL) -> Bool) -> (Bookmark) -> ScoredSuggestion? {
+    static func scored(lowercasedQuery: String, queryTokens: [String]?, isUrlIgnored: @escaping (URL) -> Bool) -> (Bookmark) -> ScoredSuggestion? {
         { bookmark in
             guard let url = URL(string: bookmark.url), !isUrlIgnored(url) else { return nil }
-            let score = score(title: bookmark.title, url: url, lowerQuery: lowerQuery, queryTokens: queryTokens)
+            let score = score(title: bookmark.title, url: url, lowercasedQuery: lowercasedQuery, queryTokens: queryTokens)
             guard score > 0 else { return nil }
             return ScoredSuggestion(kind: bookmark.isFavorite ? .favorite : .bookmark, url: url, title: bookmark.title, score: score)
         }
     }
 
-    static func scored(lowerQuery: String, queryTokens: [String]?, isUrlIgnored: @escaping (URL) -> Bool) -> (HistorySuggestion) -> ScoredSuggestion? {
+    static func scored(lowercasedQuery: String, queryTokens: [String]?, isUrlIgnored: @escaping (URL) -> Bool) -> (HistorySuggestion) -> ScoredSuggestion? {
         { historyEntry in
             guard !isUrlIgnored(historyEntry.url) else { return nil }
-            let score = score(title: historyEntry.title ?? "", url: historyEntry.url, visitCount: historyEntry.numberOfVisits, lowerQuery: lowerQuery, queryTokens: queryTokens)
+            let score = score(title: historyEntry.title ?? "", url: historyEntry.url, visitCount: historyEntry.numberOfVisits, lowercasedQuery: lowercasedQuery, queryTokens: queryTokens)
             guard score > 0 else { return nil }
             return ScoredSuggestion(kind: .historyEntry, url: historyEntry.url, title: historyEntry.title ?? "", visitCount: historyEntry.numberOfVisits, failedToLoad: historyEntry.failedToLoad, score: score)
         }
     }
 
-    static func scored(lowerQuery: String, queryTokens: [String]?, isUrlIgnored: @escaping (URL) -> Bool) -> (InternalPage) -> ScoredSuggestion? {
+    static func scored(lowercasedQuery: String, queryTokens: [String]?, isUrlIgnored: @escaping (URL) -> Bool) -> (InternalPage) -> ScoredSuggestion? {
         { internalPage in
             guard !isUrlIgnored(internalPage.url) else { return nil }
-            let score = score(title: internalPage.title, url: internalPage.url, lowerQuery: lowerQuery, queryTokens: queryTokens)
+            let score = score(title: internalPage.title, url: internalPage.url, lowercasedQuery: lowercasedQuery, queryTokens: queryTokens)
             guard score > 0 else { return nil }
             return ScoredSuggestion(kind: .internalPage, url: internalPage.url, title: internalPage.title, score: score)
         }
     }
 
-    static func scored(lowerQuery: String, queryTokens: [String]?, isUrlIgnored: @escaping (URL) -> Bool) -> (BrowserTab) -> ScoredSuggestion? {
+    static func scored(lowercasedQuery: String, queryTokens: [String]?, isUrlIgnored: @escaping (URL) -> Bool) -> (BrowserTab) -> ScoredSuggestion? {
         { browserTab in
             guard !isUrlIgnored(browserTab.url) else { return nil }
-            let score = score(title: browserTab.title, url: browserTab.url, lowerQuery: lowerQuery, queryTokens: queryTokens)
+            let score = score(title: browserTab.title, url: browserTab.url, lowercasedQuery: lowercasedQuery, queryTokens: queryTokens)
             guard score > 0 else { return nil }
             return ScoredSuggestion(kind: .browserTab, url: browserTab.url, title: browserTab.title, score: score, tabId: browserTab.tabId)
         }

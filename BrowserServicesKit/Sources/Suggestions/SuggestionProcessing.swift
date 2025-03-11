@@ -64,10 +64,10 @@ struct SuggestionProcessing {
 
         // STEP 2: Get best ordered matches from history, bookmarks, open tabs and internal pages (settings, bookmarks…)
         let allHistoryAndBookmarkAndOpenTabSuggestions = [
-            bookmarks.compactMap(ScoringService.scored(lowerQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
-            openTabs.compactMap(ScoringService.scored(lowerQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
-            history.compactMap(ScoringService.scored(lowerQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
-            internalPages.compactMap(ScoringService.scored(lowerQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
+            bookmarks.compactMap(ScoringService.scored(lowercasedQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
+            openTabs.compactMap(ScoringService.scored(lowercasedQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
+            history.compactMap(ScoringService.scored(lowercasedQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
+            internalPages.compactMap(ScoringService.scored(lowercasedQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
         ]
             .joined()
             .sorted { $0.score > $1.score }

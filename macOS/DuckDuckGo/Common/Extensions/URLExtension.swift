@@ -94,6 +94,7 @@ extension URL {
             return nil
         }
 
+        // encode spaces as "+"
         var queryItem = URLQueryItem(percentEncodingName: DuckDuckGoParameters.search.rawValue, value: trimmedQuery, withAllowedCharacters: .init(charactersIn: " "))
         queryItem.value = queryItem.value?.replacingOccurrences(of: " ", with: "+")
         var url = Self.duckDuckGo.appending(percentEncodedQueryItem: queryItem)
@@ -376,6 +377,10 @@ extension URL {
 
     static var updates: URL {
         return URL(string: "https://duckduckgo.com/updates")!
+    }
+
+    static var internalFeedbackForm: URL {
+        return URL(string: "https://go.duckduckgo.com/feedback")!
     }
 
     static var webTrackingProtection: URL {
