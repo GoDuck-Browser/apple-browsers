@@ -360,7 +360,7 @@ extension NetworkProtectionStatusView {
             case .completed:
                 if isExtensionUpdateOffered {
                     return PromptActionView.Model(
-                        icon: .appleVPNIcon,
+                        icon: .giftNew96,
                         title: UserText.vpnAppStoreSysexUpdatePromptTitle,
                         description: [
                             .init(text: UserText.vpnAppStoreSysexUpdatePromptMessage)
