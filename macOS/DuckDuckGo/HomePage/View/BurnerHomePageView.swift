@@ -23,26 +23,18 @@ extension HomePage.Views {
 
     struct BurnerHomePageView: View {
 
+        static let targetWidth: CGFloat = 508
         static let height: CGFloat = 273
+        static let totalHeight: CGFloat = height + 2 * Const.verticalPadding
 
         enum Const {
             static let verticalPadding = 40.0
             static let searchBoxVerticalSpacing = 24.0
         }
 
-        var totalHeight: CGFloat {
-
-            var totalHeight = Self.height + 2 * Const.verticalPadding
-
-            if addressBarModel.shouldShowAddressBar && model.isSearchBarVisible {
-                totalHeight += Const.searchBoxVerticalSpacing + BigSearchBox.Const.totalHeight
-            }
-            return totalHeight
-        }
 
         @Environment(\.colorScheme) var colorScheme
         @EnvironmentObject var model: AppearancePreferences
-        @EnvironmentObject var addressBarModel: HomePage.Models.AddressBarModel
 
         let backgroundColor = Color(.newTabPageBackground)
         private var infoBackgroundColor: Color {
@@ -69,11 +61,6 @@ extension HomePage.Views {
                             Spacer(minLength: Const.verticalPadding)
 
                             Group {
-                                if addressBarModel.shouldShowAddressBar {
-                                    BigSearchBox(isCompact: false, supportsFixedColorScheme: false)
-                                        .visibility(model.isSearchBarVisible ? .visible : .gone)
-                                }
-
                                 ZStack {
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color.homeFavoritesGhost, style: StrokeStyle(lineWidth: 1.0))
@@ -102,12 +89,12 @@ extension HomePage.Views {
                                 }
                                 .frame(height: Self.height)
                             }
-                            .frame(width: HomePage.Views.RootView.targetWidth)
+                            .frame(width: Self.targetWidth)
 
                             Spacer(minLength: Const.verticalPadding)
                         }
                         .frame(maxWidth: .infinity)
-                        .frame(height: max(geometry.size.height, totalHeight))
+                        .frame(height: max(geometry.size.height, Self.totalHeight))
                     }
                 }
                 .background(backgroundColor)
@@ -117,53 +104,53 @@ extension HomePage.Views {
 
     struct FeaturesBox: View {
 
-            var body: some View {
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Image(.burnerWindowIcon1)
-                            .resizable()
-                            .frame(width: 16, height: 16)
-                            .foregroundColor(Color.primary)
-                        Text(UserText.burnerHomepageDescription1)
-                            .font(.system(size: 13))
-                            .foregroundColor(Color.primary)
+        var body: some View {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Image(.burnerWindowIcon1)
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(Color.primary)
+                    Text(UserText.burnerHomepageDescription1)
+                        .font(.system(size: 13))
+                        .foregroundColor(Color.primary)
 
-                    }
+                }
 
-                    HStack {
-                        Image(.burnerWindowIcon2)
-                            .resizable()
-                            .frame(width: 16, height: 16)
-                            .foregroundColor(Color.primary)
-                        Text(UserText.burnerHomepageDescription2)
-                            .font(.system(size: 13))
-                            .foregroundColor(Color.primary)
-                    }
+                HStack {
+                    Image(.burnerWindowIcon2)
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(Color.primary)
+                    Text(UserText.burnerHomepageDescription2)
+                        .font(.system(size: 13))
+                        .foregroundColor(Color.primary)
+                }
 
-                    HStack {
-                        Image(.burnerWindowIcon3)
-                            .resizable()
-                            .frame(width: 16, height: 16)
-                            .foregroundColor(Color.primary)
-                        Text(UserText.burnerHomepageDescription3)
-                            .font(.system(size: 13))
-                            .foregroundColor(Color.primary)
-                    }
+                HStack {
+                    Image(.burnerWindowIcon3)
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(Color.primary)
+                    Text(UserText.burnerHomepageDescription3)
+                        .font(.system(size: 13))
+                        .foregroundColor(Color.primary)
+                }
 
-                    Divider()
+                Divider()
 
-                    HStack {
-                        Image(.burnerWindowIcon4)
-                            .resizable()
-                            .frame(width: 16, height: 16)
-                            .foregroundColor(Color.primary)
-                            .opacity(0.6)
-                            .padding(.top, -20)
-                        Text(UserText.burnerHomepageDescription4)
-                            .font(.system(size: 13))
-                            .foregroundColor(Color.primary)
-                    }
+                HStack {
+                    Image(.burnerWindowIcon4)
+                        .resizable()
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(Color.primary)
+                        .opacity(0.6)
+                        .padding(.top, -20)
+                    Text(UserText.burnerHomepageDescription4)
+                        .font(.system(size: 13))
+                        .foregroundColor(Color.primary)
                 }
             }
         }
+    }
 }

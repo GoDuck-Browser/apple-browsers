@@ -832,11 +832,11 @@ final class BrowserTabViewController: NSViewController {
 
         case .newtab:
             // We only use HTML New Tab Page in regular windows for now
-            if featureFlagger.isFeatureOn(.htmlNewTabPage) && !tabCollectionViewModel.isBurner {
-                updateTabIfNeeded(tabViewModel: tabViewModel)
-            } else {
+            if tabCollectionViewModel.isBurner {
                 removeAllTabContent()
                 addAndLayoutChild(homePageViewControllerCreatingIfNeeded())
+            } else {
+                updateTabIfNeeded(tabViewModel: tabViewModel)
             }
 
         case .history:
@@ -941,9 +941,7 @@ final class BrowserTabViewController: NSViewController {
     var homePageViewController: HomePageViewController?
     private func homePageViewControllerCreatingIfNeeded() -> HomePageViewController {
         return homePageViewController ?? {
-            let freemiumDBPPromotionViewCoordinator = Application.appDelegate.freemiumDBPPromotionViewCoordinator
-            let homePageViewController = HomePageViewController(tabCollectionViewModel: tabCollectionViewModel, bookmarkManager: bookmarkManager,
-                                                                freemiumDBPPromotionViewCoordinator: freemiumDBPPromotionViewCoordinator)
+            let homePageViewController = HomePageViewController()
             self.homePageViewController = homePageViewController
             return homePageViewController
         }()

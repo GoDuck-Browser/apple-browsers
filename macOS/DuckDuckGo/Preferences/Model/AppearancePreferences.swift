@@ -124,13 +124,8 @@ final class DefaultHomePageNavigator: HomePageNavigator {
             WindowControllersManager.shared.showTab(with: .newtab)
             try? await Task.sleep(interval: 0.2)
             if let window = WindowControllersManager.shared.lastKeyMainWindowController {
-                let homePageViewController = window.mainViewController.browserTabViewController.homePageViewController
-                homePageViewController?.settingsVisibilityModel.isSettingsVisible = true
-
-                if NSApp.delegateTyped.featureFlagger.isFeatureOn(.htmlNewTabPage) {
-                    let newTabPageViewModel = window.mainViewController.browserTabViewController.newTabPageWebViewModel
-                    NSApp.delegateTyped.homePageSettingsModel.customizerOpener.openSettings(for: newTabPageViewModel.webView)
-                }
+                let newTabPageViewModel = window.mainViewController.browserTabViewController.newTabPageWebViewModel
+                NSApp.delegateTyped.homePageSettingsModel.customizerOpener.openSettings(for: newTabPageViewModel.webView)
             }
         }
     }

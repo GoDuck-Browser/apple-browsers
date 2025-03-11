@@ -581,7 +581,6 @@
 		3706FBAA293F65D500E42796 /* HoverUserScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856CADEF271710F400E79BB0 /* HoverUserScript.swift */; };
 		3706FBAC293F65D500E42796 /* MainMenuActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6EF9B425081B4C004754E6 /* MainMenuActions.swift */; };
 		3706FBAF293F65D500E42796 /* FireproofDomains.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = B6085D072743993C00A9C456 /* FireproofDomains.xcdatamodeld */; };
-		3706FBB1293F65D500E42796 /* HomePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85589E7C27BBB8630038AD11 /* HomePageView.swift */; };
 		3706FBB2293F65D500E42796 /* WebKitDownloadTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A924D82664C72D001A28CA /* WebKitDownloadTask.swift */; };
 		3706FBB3293F65D500E42796 /* ChromiumLoginReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B59023926B35F3600489384 /* ChromiumLoginReader.swift */; };
 		3706FBB4293F65D500E42796 /* NSAlert+PasswordManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D885B226A5A9DE0077C374 /* NSAlert+PasswordManager.swift */; };
@@ -2192,7 +2191,6 @@
 		8546DE6225C03056000CA5E1 /* UserAgentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8546DE6125C03056000CA5E1 /* UserAgentTests.swift */; };
 		85480FCF25D1AA22009424E3 /* ConfigurationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85480FCE25D1AA22009424E3 /* ConfigurationStore.swift */; };
 		854DAAAE2A72B613001E2E24 /* BookmarksBarPromptAssets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 859F30662A72B38500C20372 /* BookmarksBarPromptAssets.xcassets */; };
-		85589E8227BBB8630038AD11 /* HomePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85589E7C27BBB8630038AD11 /* HomePageView.swift */; };
 		85589E8327BBB8630038AD11 /* HomePageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85589E7D27BBB8630038AD11 /* HomePageViewController.swift */; };
 		85589E8727BBB8F20038AD11 /* HomePageFavoritesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85589E8627BBB8F20038AD11 /* HomePageFavoritesModel.swift */; };
 		85589E9127BFB9810038AD11 /* HomePageRecentlyVisitedModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85589E9027BFB9810038AD11 /* HomePageRecentlyVisitedModel.swift */; };
@@ -4529,7 +4527,6 @@
 		8546DE6125C03056000CA5E1 /* UserAgentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAgentTests.swift; sourceTree = "<group>"; };
 		85480FCE25D1AA22009424E3 /* ConfigurationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigurationStore.swift; sourceTree = "<group>"; };
 		8553FF51257523760029327F /* URLSuggestedFilenameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSuggestedFilenameTests.swift; sourceTree = "<group>"; };
-		85589E7C27BBB8630038AD11 /* HomePageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePageView.swift; sourceTree = "<group>"; };
 		85589E7D27BBB8630038AD11 /* HomePageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePageViewController.swift; sourceTree = "<group>"; };
 		85589E8627BBB8F20038AD11 /* HomePageFavoritesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomePageFavoritesModel.swift; sourceTree = "<group>"; };
 		85589E9027BFB9810038AD11 /* HomePageRecentlyVisitedModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePageRecentlyVisitedModel.swift; sourceTree = "<group>"; };
@@ -9431,7 +9428,6 @@
 				85589E9D27BFE4500038AD11 /* DefaultBrowserPromptView.swift */,
 				85589E9327BFE1E70038AD11 /* FavoritesView.swift */,
 				56D6A3D529DB2BAB0055215A /* ContinueSetUpView.swift */,
-				85589E7C27BBB8630038AD11 /* HomePageView.swift */,
 				37AAA41B2C9CB9C0002A5377 /* AddressBarTextFieldView.swift */,
 				1DCFBC8929ADF32B00313531 /* BurnerHomePageView.swift */,
 				85589E7D27BBB8630038AD11 /* HomePageViewController.swift */,
@@ -12378,7 +12374,6 @@
 				B626A7552991413000053070 /* SerpHeadersNavigationResponder.swift in Sources */,
 				BB7696C62D6E333B00AD8DAB /* DefaultBrowserAndDockPromptPresenting.swift in Sources */,
 				B68D21C42ACBC917002DA3C2 /* ContentBlockingMock.swift in Sources */,
-				3706FBB1293F65D500E42796 /* HomePageView.swift in Sources */,
 				EEE11C5F2C7F54AD000ABD7E /* AutofillLoginImportState.swift in Sources */,
 				3706FBB2293F65D500E42796 /* WebKitDownloadTask.swift in Sources */,
 				3706FBB3293F65D500E42796 /* ChromiumLoginReader.swift in Sources */,
@@ -14112,7 +14107,6 @@
 				7BE146072A6A83C700C313B8 /* NetworkProtectionDebugMenu.swift in Sources */,
 				B6085D092743AAB600A9C456 /* FireproofDomains.xcdatamodeld in Sources */,
 				56BA1E752BAAF70F001CF69F /* SpecialErrorPageTabExtension.swift in Sources */,
-				85589E8227BBB8630038AD11 /* HomePageView.swift in Sources */,
 				B6BF5D932947199A006742B1 /* SerpHeadersNavigationResponder.swift in Sources */,
 				569277C129DDCBB500B633EF /* HomePageContinueSetUpModel.swift in Sources */,
 				B68D21CF2ACBC9FC002DA3C2 /* ContentBlockerRulesManagerMock.swift in Sources */,

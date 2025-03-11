@@ -388,12 +388,8 @@ final class MainViewController: NSViewController {
                 defer { lastTabContent = content }
 
                 if content == .newtab {
-                    if browserTabViewController.homePageViewController?.addressBarModel.shouldShowAddressBar == true {
-                        subscribeToNTPAddressBarVisibility(of: selectedTabViewModel)
-                    } else {
-                        ntpAddressBarVisibilityCancellable?.cancel()
-                        resizeNavigationBar(isHomePage: true, animated: lastTabContent != .newtab)
-                    }
+                    ntpAddressBarVisibilityCancellable?.cancel()
+                    resizeNavigationBar(isHomePage: true, animated: lastTabContent != .newtab)
                 } else {
                     ntpAddressBarVisibilityCancellable?.cancel()
                     resizeNavigationBar(isHomePage: false, animated: false)
@@ -641,9 +637,6 @@ extension MainViewController {
             }
             if let addressBarVC = navigationBarViewController.addressBarViewController {
                 isHandled = isHandled || addressBarVC.escapeKeyDown()
-            }
-            if let homePageAddressBarModel = browserTabViewController.homePageViewController?.addressBarModel {
-                isHandled = isHandled || homePageAddressBarModel.escapeKeyDown()
             }
             return isHandled
 
