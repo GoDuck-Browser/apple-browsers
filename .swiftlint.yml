@@ -19,6 +19,7 @@ disabled_rules:
   - static_over_final_class
   - non_optional_string_data_conversion
   - todo
+  - mark
 
 opt_in_rules:
   - file_header

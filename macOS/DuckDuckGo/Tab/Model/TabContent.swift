@@ -143,7 +143,7 @@ extension TabContent {
                 return .webExtensionUrl(url)
             }
 
-            let subscriptionManager = Application.appDelegate.subscriptionManager
+            let subscriptionManager = Application.appDelegate.subscriptionAuthV1toV2Bridge
             let environment = subscriptionManager.currentEnvironment.serviceEnvironment
             let subscriptionBaseURL = subscriptionManager.url(for: .baseURL)
             let identityTheftRestorationURL = subscriptionManager.url(for: .identityTheftRestoration)
@@ -350,14 +350,4 @@ extension TabContent {
             return true
         }
     }
-
-    var canBeMuted: Bool {
-        switch self {
-        case .newtab, .settings, .bookmarks, .history, .onboarding, .onboardingDeprecated, .dataBrokerProtection, .none, .releaseNotes, .identityTheftRestoration, .subscription:
-            return false
-        default:
-            return true
-        }
-    }
-
 }
