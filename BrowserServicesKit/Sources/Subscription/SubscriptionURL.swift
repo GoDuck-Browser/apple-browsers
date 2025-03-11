@@ -30,7 +30,6 @@ public enum SubscriptionURL {
     case manageEmail
     case activateSuccess
     case addEmailToSubscriptionSuccess
-    case addEmailToSubscriptionOTP
     case manageSubscriptionsInAppStore
     case identityTheftRestoration
 
@@ -59,8 +58,6 @@ public enum SubscriptionURL {
                 baseURL.appendingPathComponent("activate/success")
             case .addEmailToSubscriptionSuccess:
                 baseURL.appendingPathComponent("add-email/success")
-            case .addEmailToSubscriptionOTP:
-                baseURL.appendingPathComponent("add-email/otp")
             case .manageSubscriptionsInAppStore:
                 StaticURLs.manageSubscriptionsInMacAppStoreURL
             case .identityTheftRestoration:

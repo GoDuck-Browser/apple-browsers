@@ -52,7 +52,6 @@ final class SubscriptionURLTests: XCTestCase {
                                               .manageEmail,
                                               .activateSuccess,
                                               .addEmailToSubscriptionSuccess,
-                                              .addEmailToSubscriptionOTP,
                                               .identityTheftRestoration]
 
         for urlType in allURLTypes {
@@ -73,7 +72,6 @@ final class SubscriptionURLTests: XCTestCase {
                                               .manageEmail,
                                               .activateSuccess,
                                               .addEmailToSubscriptionSuccess,
-                                              .addEmailToSubscriptionOTP,
                                               .identityTheftRestoration]
 
         for urlType in allURLTypes {
