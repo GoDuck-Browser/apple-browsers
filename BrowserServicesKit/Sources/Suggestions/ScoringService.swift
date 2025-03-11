@@ -21,8 +21,17 @@ import Common
 
 struct ScoringService  {
 
-    /// Scores a suggestion based on the query and the suggestion's title and url.
-    static func score(title: String?, url: URL, visitCount: Int = 0, lowerQuery: String, queryTokens: [String]? = nil) -> Int { // swiftlint:disable:this cyclomatic_complexity
+    /// Scores a suggestion based on the query and the suggestion's title and URL.
+    ///
+    /// - Parameters:
+    ///   - title: The title of the suggestion, which can be `nil`.
+    ///   - url: The URL of the suggestion.
+    ///   - visitCount: The number of times the History Record suggestion has been visited. Defaults to 0 for other type of suggestions.
+    ///   - lowercasedQuery: The query string entered by user, which should be in lowercase.
+    ///   - queryTokens: An optional array of precomputed query tokens (`lowercasedQuery.tokenized()`). If `nil`, tokens will be computed.
+    ///
+    /// - Returns: An integer score representing how well the suggestion matches the query.
+    static func score(title: String?, url: URL, visitCount: Int = 0, lowercasedQuery lowerQuery: String, queryTokens: [String]? = nil) -> Int { // swiftlint:disable:this cyclomatic_complexity
         // To optimize, query tokens can be precomputed
         let queryTokens = queryTokens ?? lowerQuery.tokenized()
         assert(lowerQuery.lowercased() == lowerQuery)
@@ -84,27 +93,27 @@ struct ScoringService  {
         return score
     }
 
-    static func score(bookmark: Bookmark, lowerQuery: String, queryTokens: [String]? = nil) -> Int {
+    static func score(bookmark: Bookmark, lowercasedQuery: String, queryTokens: [String]? = nil) -> Int {
         guard let urlObject = URL(string: bookmark.url) else {
             return 0
         }
-        return score(title: bookmark.title, url: urlObject, visitCount: 0, lowerQuery: lowerQuery, queryTokens: queryTokens)
+        return score(title: bookmark.title, url: urlObject, visitCount: 0, lowercasedQuery: lowercasedQuery, queryTokens: queryTokens)
     }
 
-    static func score(historyEntry: HistorySuggestion, lowerQuery: String, queryTokens: [String]? = nil) -> Int {
+    static func score(historyEntry: HistorySuggestion, lowercasedQuery: String, queryTokens: [String]? = nil) -> Int {
         return score(title: historyEntry.title ?? "",
                      url: historyEntry.url,
                      visitCount: historyEntry.numberOfVisits,
-                     lowerQuery: lowerQuery,
+                     lowercasedQuery: lowercasedQuery,
                      queryTokens: queryTokens)
     }
 
-    static func score(internalPage: InternalPage, lowerQuery: String, queryTokens: [String]? = nil) -> Int {
-        return score(title: internalPage.title, url: internalPage.url, visitCount: 0, lowerQuery: lowerQuery, queryTokens: queryTokens)
+    static func score(internalPage: InternalPage, lowercasedQuery: String, queryTokens: [String]? = nil) -> Int {
+        return score(title: internalPage.title, url: internalPage.url, visitCount: 0, lowercasedQuery: lowercasedQuery, queryTokens: queryTokens)
     }
 
-    static func score(browserTab: BrowserTab, lowerQuery: String, queryTokens: [String]? = nil) -> Int {
-        return score(title: browserTab.title, url: browserTab.url, visitCount: 0, lowerQuery: lowerQuery, queryTokens: queryTokens)
+    static func score(browserTab: BrowserTab, lowercasedQuery: String, queryTokens: [String]? = nil) -> Int {
+        return score(title: browserTab.title, url: browserTab.url, visitCount: 0, lowercasedQuery: lowercasedQuery, queryTokens: queryTokens)
     }
 
 }

@@ -208,13 +208,13 @@ final class SuggestionProcessing {
             .map { item -> (item: LocalSuggestion, score: Int) in
                 let score = switch item {
                 case .bookmark(let bookmark):
-                    ScoringService.score(bookmark: bookmark, lowerQuery: lowerQuery, queryTokens: queryTokens)
+                    ScoringService.score(bookmark: bookmark, lowercasedQuery: lowerQuery, queryTokens: queryTokens)
                 case .history(let historyEntry):
-                    ScoringService.score(historyEntry: historyEntry, lowerQuery: lowerQuery, queryTokens: queryTokens)
+                    ScoringService.score(historyEntry: historyEntry, lowercasedQuery: lowerQuery, queryTokens: queryTokens)
                 case .internalPage(let internalPage):
-                    ScoringService.score(internalPage: internalPage, lowerQuery: lowerQuery, queryTokens: queryTokens)
+                    ScoringService.score(internalPage: internalPage, lowercasedQuery: lowerQuery, queryTokens: queryTokens)
                 case .openTab(let tab):
-                    ScoringService.score(browserTab: tab, lowerQuery: lowerQuery)
+                    ScoringService.score(browserTab: tab, lowercasedQuery: lowerQuery)
                 }
 
                 return (item, score)
