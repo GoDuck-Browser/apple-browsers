@@ -388,27 +388,13 @@ final class MainViewController: NSViewController {
                 defer { lastTabContent = content }
 
                 if content == .newtab {
-                    ntpAddressBarVisibilityCancellable?.cancel()
                     resizeNavigationBar(isHomePage: true, animated: lastTabContent != .newtab)
                 } else {
-                    ntpAddressBarVisibilityCancellable?.cancel()
                     resizeNavigationBar(isHomePage: false, animated: false)
                 }
                 adjustFirstResponder(selectedTabViewModel: selectedTabViewModel, tabContent: content)
             }
             .store(in: &self.tabViewModelCancellables)
-    }
-
-    private var ntpAddressBarVisibilityCancellable: AnyCancellable?
-
-    private func subscribeToNTPAddressBarVisibility(of selectedTabViewModel: TabViewModel) {
-        ntpAddressBarVisibilityCancellable = browserTabViewController.homePageViewController?.appearancePreferences.$isSearchBarVisible
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isAddressBarVisible in
-                guard let self else { return }
-                resizeNavigationBar(isHomePage: !isAddressBarVisible, animated: true)
-                adjustFirstResponder(selectedTabViewModel: selectedTabViewModel, tabContent: .newtab)
-            }
     }
 
     private func subscribeToFirstResponder() {

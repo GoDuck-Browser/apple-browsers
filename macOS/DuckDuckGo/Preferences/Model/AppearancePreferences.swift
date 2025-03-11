@@ -37,7 +37,6 @@ protocol AppearancePreferencesPersistor {
     var continueSetUpCardsClosed: Bool { get set }
     var isRecentActivityVisible: Bool { get set }
     var isPrivacyStatsVisible: Bool { get set }
-    var isSearchBarVisible: Bool { get set }
     var showBookmarksBar: Bool { get set }
     var bookmarksBarAppearance: BookmarksBarAppearance { get set }
     var homeButtonPosition: HomeButtonPosition { get set }
@@ -76,9 +75,6 @@ struct AppearancePreferencesUserDefaultsPersistor: AppearancePreferencesPersisto
 
     @UserDefaultsWrapper(key: .homePageIsPrivacyStatsVisible, defaultValue: true)
     var isPrivacyStatsVisible: Bool
-
-    @UserDefaultsWrapper(key: .homePageIsSearchBarVisible, defaultValue: true)
-    var isSearchBarVisible: Bool
 
     @UserDefaultsWrapper(key: .showBookmarksBar, defaultValue: false)
     var showBookmarksBar: Bool
@@ -301,12 +297,6 @@ final class AppearancePreferences: ObservableObject {
         }
     }
 
-    @Published var isSearchBarVisible: Bool {
-        didSet {
-            persistor.isSearchBarVisible = isSearchBarVisible
-        }
-    }
-
     @Published var showBookmarksBar: Bool {
         didSet {
             persistor.showBookmarksBar = showBookmarksBar
@@ -396,7 +386,6 @@ final class AppearancePreferences: ObservableObject {
         isFavoriteVisible = persistor.isFavoriteVisible
         isRecentActivityVisible = persistor.isRecentActivityVisible
         isPrivacyStatsVisible = persistor.isPrivacyStatsVisible
-        isSearchBarVisible = persistor.isSearchBarVisible
         showBookmarksBar = persistor.showBookmarksBar
         bookmarksBarAppearance = persistor.bookmarksBarAppearance
         homeButtonPosition = persistor.homeButtonPosition
