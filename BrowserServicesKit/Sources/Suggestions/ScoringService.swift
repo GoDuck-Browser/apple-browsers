@@ -36,7 +36,7 @@ struct ScoredSuggestion {
     var visitCount: Int = 0
     var failedToLoad: Bool = false
     var score: Int = 0
-    var tabId: String? = nil
+    var tabId: String?
 }
 
 struct ScoringService {

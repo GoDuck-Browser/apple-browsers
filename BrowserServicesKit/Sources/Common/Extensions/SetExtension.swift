@@ -16,6 +16,8 @@
 //  limitations under the License.
 //
 
+import Foundation
+
 public extension Set {
 
     @inlinable func intersects<S: Sequence>(_ other: S) -> Bool where Element == S.Element {
