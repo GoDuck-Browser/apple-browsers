@@ -47,13 +47,11 @@ class AutofillSettingsViewController: UIViewController {
 
     weak var delegate: AutofillSettingsViewControllerDelegate?
 
-    private var viewModel: AutofillSettingsViewModel
-
-    var selectedAccount: SecureVaultModels.WebsiteAccount?
-    let source: AutofillSettingsSource
-    private let syncService: DDGSyncing
     private let appSettings: AppSettings
+    private let syncService: DDGSyncing
     private let syncDataProviders: SyncDataProviders
+    private let selectedAccount: SecureVaultModels.WebsiteAccount?
+    private let source: AutofillSettingsSource
     private let bookmarksDatabase: CoreDataDatabase
     private let favoritesDisplayMode: FavoritesDisplayMode
 
@@ -65,14 +63,11 @@ class AutofillSettingsViewController: UIViewController {
          bookmarksDatabase: CoreDataDatabase,
          favoritesDisplayMode: FavoritesDisplayMode
     ) {
-
-        self.viewModel = AutofillSettingsViewModel()
-
+        self.appSettings = appSettings
         self.syncService = syncService
+        self.syncDataProviders = syncDataProviders
         self.selectedAccount = selectedAccount
         self.source = source
-        self.appSettings = appSettings
-        self.syncDataProviders = syncDataProviders
         self.bookmarksDatabase = bookmarksDatabase
         self.favoritesDisplayMode = favoritesDisplayMode
 
@@ -88,15 +83,15 @@ class AutofillSettingsViewController: UIViewController {
 
         setupView()
 
-        title = "Passwords & Autofill"
+        title = UserText.settingsLogins
 
         if selectedAccount != nil {
             segueToPasswords()
         }
-
     }
 
     private func setupView() {
+        let viewModel = AutofillSettingsViewModel(appSettings: appSettings)
         viewModel.delegate = self
 
         let controller = UIHostingController(rootView: AutofillSettingsView(viewModel: viewModel))
@@ -182,7 +177,6 @@ extension AutofillSettingsViewController: DataImportViewControllerDelegate {
     }
 
 }
-
 
 // MARK: ImportPasswordsViaSyncViewController
 

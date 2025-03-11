@@ -24,13 +24,9 @@ struct AutofillSettingsView: View {
 
     @ObservedObject var viewModel = AutofillSettingsViewModel()
 
-    @State private var savePasswordsEnabled = true
-    @State private var savePaymentMethodsEnabled = true
-    @State private var autofillInOtherAppsEnabled = false
-
     var body: some View {
         List {
-            Section(header: Text("View").foregroundColor(.gray)) {
+            Section(header: Text(UserText.autofillSettingsViewSectionHeader).foregroundColor(.secondary)) {
                 Button {
                     viewModel.navigateToPasswords()
                 } label: {
@@ -50,7 +46,7 @@ struct AutofillSettingsView: View {
                 }
                 .foregroundColor(.primary)
             }
-            Section(header: Text(UserText.autofillEmptyViewImportButtonTitle).foregroundColor(.gray)) {
+            Section(header: Text(UserText.autofillSettingsImportPasswordsSectionHeader).foregroundColor(.secondary)) {
                 if #available(iOS 18.2, *) {
                     Button {
                         viewModel.navigateToFileImport()
@@ -78,8 +74,8 @@ struct AutofillSettingsView: View {
                 }
             }
 
-            Section(header: Text("Ask to save and autofill").foregroundColor(.secondary).daxFootnoteRegular(),
-                    footer: PasswordFooterView(viewModel: viewModel).foregroundColor(.gray)) {
+            Section(header: Text(UserText.autofillSettingsAskToSaveAndAutofill).foregroundColor(.secondary).daxFootnoteRegular(),
+                    footer: PasswordFooterView(viewModel: viewModel)) {
                 Toggle(UserText.autofillLoginListTitle, isOn: $viewModel.savePasswordsEnabled)
                     .toggleStyle(.switch)
                     .tint(Color(designSystemColor: .accent))
@@ -88,7 +84,7 @@ struct AutofillSettingsView: View {
             }
 
             if viewModel.shouldShowNeverPromptReset() {
-                Section(header: Text("Options").foregroundColor(.gray)) {
+                Section(header: Text(UserText.autofillSettingsOptionsSectionHeader).foregroundColor(.secondary)) {
                     Button {
                         viewModel.resetExcludedSites()
                     } label: {
@@ -120,9 +116,9 @@ struct AutofillSettingsView: View {
         let viewModel: AutofillSettingsViewModel
 
         var body: some View {
-            return (Text(Image(.lockSolid16)).baselineOffset(-1.0).foregroundColor(Color(.secondaryText).opacity(0.6))
+            return (Text(Image(.lockSolid16)).baselineOffset(-1.0).foregroundColor(.secondary)
                     + Text(verbatim: " ")
-                    + Text(UserText.autofillLoginListSettingsFooterFallback).foregroundColor(Color(.secondaryText).opacity(0.6))
+                    + Text(UserText.autofillLoginListSettingsFooterFallback).foregroundColor(.secondary)
                     + Text(verbatim: " ")
                     + Text(viewModel.footerAttributedString())
             )

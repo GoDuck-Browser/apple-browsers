@@ -37,6 +37,7 @@ final class AutofillSettingsViewModel: ObservableObject {
     private let keyValueStore: KeyValueStoringDictionaryRepresentable
 
     @Published var showingResetConfirmation = false
+    
     @Published var savePasswordsEnabled: Bool {
         didSet {
             appSettings.autofillCredentialsEnabled = savePasswordsEnabled
