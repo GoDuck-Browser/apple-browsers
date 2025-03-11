@@ -3119,8 +3119,8 @@ extension MainViewController {
 }
 
 // MARK: - AutofillLoginSettingsListViewControllerDelegate
-extension MainViewController: AutofillLoginSettingsListViewControllerDelegate {
-    func autofillLoginSettingsListViewControllerDidFinish(_ controller: AutofillLoginSettingsListViewController) {
+extension MainViewController: AutofillLoginListViewControllerDelegate {
+    func autofillLoginListViewControllerDidFinish(_ controller: AutofillLoginListViewController) {
         controller.dismiss(animated: true)
     }
 }

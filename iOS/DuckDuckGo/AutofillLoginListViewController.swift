@@ -1,5 +1,5 @@
 //
-//  AutofillLoginSettingsListViewController.swift
+//  AutofillLoginListViewController.swift
 //  DuckDuckGo
 //
 //  Copyright © 2022 DuckDuckGo. All rights reserved.
@@ -29,29 +29,17 @@ import os.log
 import Persistence
 import Bookmarks
 
-enum AutofillSettingsSource: String {
-    case settings
-    case overflow = "overflow_menu"
-    case sync
-    case appIconShortcut = "app_icon_shortcut"
-    case homeScreenWidget = "home_screen_widget"
-    case lockScreenWidget = "lock_screen_widget"
-    case newTabPageShortcut = "new_tab_page_shortcut"
-    case saveLoginDisablePrompt = "save_login_disable_prompt"
-    case newTabPageToolbar = "new_tab_page_toolbar"
+protocol AutofillLoginListViewControllerDelegate: AnyObject {
+    func autofillLoginListViewControllerDidFinish(_ controller: AutofillLoginListViewController)
 }
 
-protocol AutofillLoginSettingsListViewControllerDelegate: AnyObject {
-    func autofillLoginSettingsListViewControllerDidFinish(_ controller: AutofillLoginSettingsListViewController)
-}
-
-final class AutofillLoginSettingsListViewController: UIViewController {
+final class AutofillLoginListViewController: UIViewController {
 
     private enum Constants {
         static let padding: CGFloat = 16
     }
 
-    weak var delegate: AutofillLoginSettingsListViewControllerDelegate?
+    weak var delegate: AutofillLoginListViewControllerDelegate?
     weak var detailsViewController: AutofillLoginDetailsViewController?
     private let viewModel: AutofillLoginListViewModel
     private lazy var emptyView: UIView = {
@@ -383,7 +371,7 @@ final class AutofillLoginSettingsListViewController: UIViewController {
 
             if error != nil {
                 if error != .noAuthAvailable {
-                    self.delegate?.autofillLoginSettingsListViewControllerDidFinish(self)
+                    self.delegate?.autofillLoginListViewControllerDidFinish(self)
                 }
             } else {
                 showSelectedAccountIfRequired()
@@ -829,7 +817,7 @@ final class AutofillLoginSettingsListViewController: UIViewController {
 
 // MARK: UITableViewDelegate
 
-extension AutofillLoginSettingsListViewController: UITableViewDelegate {
+extension AutofillLoginListViewController: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
         switch viewModel.sections[indexPath.section] {
@@ -860,18 +848,11 @@ extension AutofillLoginSettingsListViewController: UITableViewDelegate {
         }
     }
 
-    func tableView(_ tableView: UITableView, willDisplayFooterView view: UIView, forSection: Int) {
-        if let view = view as? UITableViewHeaderFooterView {
-            let theme = ThemeManager.shared.currentTheme
-            view.textLabel?.textColor = theme.tableHeaderTextColor
-        }
-    }
-
 }
 
 // MARK: UITableViewDataSource
 
-extension AutofillLoginSettingsListViewController: UITableViewDataSource {
+extension AutofillLoginListViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         viewModel.rowsInSection(section)
@@ -971,7 +952,7 @@ extension AutofillLoginSettingsListViewController: UITableViewDataSource {
 
 // MARK: AutofillLoginDetailsViewControllerDelegate
 
-extension AutofillLoginSettingsListViewController: AutofillLoginDetailsViewControllerDelegate {
+extension AutofillLoginListViewController: AutofillLoginDetailsViewControllerDelegate {
     func autofillLoginDetailsViewControllerDidSave(_ controller: AutofillLoginDetailsViewController, account: SecureVaultModels.WebsiteAccount?) {
         viewModel.updateData()
         tableView.reloadData()
@@ -982,6 +963,9 @@ extension AutofillLoginSettingsListViewController: AutofillLoginDetailsViewContr
             Pixel.fire(pixel: .autofillManagementSaveLogin)
         } else {
             Pixel.fire(pixel: .autofillManagementUpdateLogin)
+            if viewModel.isSearching, let query = searchController.searchBar.text {
+                viewModel.filterData(with: query)
+            }
         }
     }
 
@@ -999,7 +983,7 @@ extension AutofillLoginSettingsListViewController: AutofillLoginDetailsViewContr
 
 // MARK: ImportPasswordsViaSyncViewControllerDelegate
 
-extension AutofillLoginSettingsListViewController: ImportPasswordsViaSyncViewControllerDelegate {
+extension AutofillLoginListViewController: ImportPasswordsViaSyncViewControllerDelegate {
 
     func importPasswordsViaSyncViewControllerDidRequestOpenSync(_ viewController: ImportPasswordsViaSyncViewController) {
         segueToSync()
@@ -1009,7 +993,7 @@ extension AutofillLoginSettingsListViewController: ImportPasswordsViaSyncViewCon
 
 // MARK: Themable
 
-extension AutofillLoginSettingsListViewController {
+extension AutofillLoginListViewController {
 
     private func decorate() {
         let theme = ThemeManager.shared.currentTheme
@@ -1035,7 +1019,7 @@ extension AutofillLoginSettingsListViewController {
 
 // MARK: UISearchControllerDelegate
 
-extension AutofillLoginSettingsListViewController: UISearchResultsUpdating {
+extension AutofillLoginListViewController: UISearchResultsUpdating {
 
     func updateSearchResults(for searchController: UISearchController) {
         viewModel.isSearching = searchController.isActive
@@ -1056,7 +1040,7 @@ extension AutofillLoginSettingsListViewController: UISearchResultsUpdating {
     }
 }
 
-extension AutofillLoginSettingsListViewController: UISearchBarDelegate {
+extension AutofillLoginListViewController: UISearchBarDelegate {
 
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         viewModel.isCancelingSearch = true
@@ -1069,7 +1053,7 @@ extension AutofillLoginSettingsListViewController: UISearchBarDelegate {
 
 // MARK: UIAdaptivePresentationControllerDelegate
 
-extension AutofillLoginSettingsListViewController: UIAdaptivePresentationControllerDelegate {
+extension AutofillLoginListViewController: UIAdaptivePresentationControllerDelegate {
 
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
         dismissSearchIfRequired()
@@ -1079,7 +1063,7 @@ extension AutofillLoginSettingsListViewController: UIAdaptivePresentationControl
 
 // MARK: Keyboard
 
-extension AutofillLoginSettingsListViewController {
+extension AutofillLoginListViewController {
 
     private func registerForKeyboardNotifications() {
         NotificationCenter.default.addObserver(self,
@@ -1105,7 +1089,7 @@ extension AutofillLoginSettingsListViewController {
 
 // MARK: AutofillHeaderViewDelegate
 
-extension AutofillLoginSettingsListViewController: AutofillHeaderViewDelegate {
+extension AutofillLoginListViewController: AutofillHeaderViewDelegate {
 
     func handlePrimaryAction(for headerType: AutofillHeaderViewFactory.ViewType) {
         switch headerType {
@@ -1137,7 +1121,7 @@ extension AutofillLoginSettingsListViewController: AutofillHeaderViewDelegate {
 
 // MARK: ImportPasswordsViewControllerDelegate
 
-extension AutofillLoginSettingsListViewController: DataImportViewControllerDelegate {
+extension AutofillLoginListViewController: DataImportViewControllerDelegate {
 
     func dataImportViewControllerDidFinish(_ viewController: DataImportViewController) {
         viewModel.updateData()

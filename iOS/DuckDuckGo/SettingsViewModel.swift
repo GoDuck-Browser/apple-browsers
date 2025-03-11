@@ -723,10 +723,10 @@ extension SettingsViewModel {
 }
 
 // MARK: AutofillLoginSettingsListViewControllerDelegate
-extension SettingsViewModel: AutofillLoginSettingsListViewControllerDelegate {
+extension SettingsViewModel: AutofillSettingsViewControllerDelegate {
     
     @MainActor
-    func autofillLoginSettingsListViewControllerDidFinish(_ controller: AutofillLoginSettingsListViewController) {
+    func autofillSettingsViewControllerDidFinish(_ controller: AutofillSettingsViewController) {
         onRequestPopLegacyView?()
     }
 }
