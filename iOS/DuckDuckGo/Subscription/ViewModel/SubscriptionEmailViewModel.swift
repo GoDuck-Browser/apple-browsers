@@ -95,7 +95,7 @@ final class SubscriptionEmailViewModel: ObservableObject {
                                                           settings: AsyncHeadlessWebViewSettings(bounces: false,
                                                                                                  allowedDomains: allowedDomains,
                                                                                                  contentBlocking: false))
-        self.emailURL = subscriptionManager.url(for: .activateViaEmail)
+        self.emailURL = subscriptionManager.url(for: .activationFlow)
     }
     
     @MainActor
