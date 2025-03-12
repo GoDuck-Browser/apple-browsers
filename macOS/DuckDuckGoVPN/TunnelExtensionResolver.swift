@@ -20,7 +20,7 @@ import BrowserServicesKit
 import FeatureFlags
 import VPNExtensionManagement
 
-class VPNExtensionResolver {
+final class VPNExtensionResolver {
 
     public enum AvailableExtensions {
         case both(appexBundleID: String, sysexBundleID: String)
