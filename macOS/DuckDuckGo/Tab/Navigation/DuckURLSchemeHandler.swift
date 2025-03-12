@@ -59,7 +59,7 @@ final class DuckURLSchemeHandler: NSObject, WKURLSchemeHandler {
             handleDuckPlayer(requestURL: webViewURL, urlSchemeTask: urlSchemeTask, webView: webView)
         case .error:
             handleErrorPage(urlSchemeTask: urlSchemeTask)
-        case .newTab where isNTPSpecialPageSupported && featureFlagger.isFeatureOn(.htmlNewTabPage):
+        case .newTab where isNTPSpecialPageSupported:
             switch requestURL.type {
             case .favicon:
                 handleFavicon(urlSchemeTask: urlSchemeTask)

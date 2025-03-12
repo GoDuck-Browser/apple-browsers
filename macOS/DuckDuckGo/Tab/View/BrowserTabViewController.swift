@@ -150,7 +150,6 @@ final class BrowserTabViewController: NSViewController {
         hoverLabelContainer.alphaValue = 0
         subscribeToTabs()
         subscribeToSelectedTabViewModel()
-        subscribeToHTMLNewTabPageFeatureFlagChanges()
 
         if let webViewContainer {
             removeChild(in: self.containerStackView, webViewContainer: webViewContainer)
@@ -290,25 +289,6 @@ final class BrowserTabViewController: NSViewController {
         Task { @MainActor in
             tabCollectionViewModel.removeAll(with: .dataBrokerProtection)
         }
-    }
-
-    private func subscribeToHTMLNewTabPageFeatureFlagChanges() {
-        guard let overridesHandler = featureFlagger.localOverrides?.actionHandler as? FeatureFlagOverridesPublishingHandler<FeatureFlag> else {
-            return
-        }
-
-        overridesHandler.flagDidChangePublisher
-            .filter { $0.0 == .htmlNewTabPage }
-            .asVoid()
-            .sink { [weak self] in
-                guard let self, let tabViewModel else {
-                    return
-                }
-                if tabViewModel.tab.content == .newtab {
-                    showTabContent(of: tabViewModel)
-                }
-            }
-            .store(in: &cancellables)
     }
 
     private func subscribeToSelectedTabViewModel() {
@@ -916,7 +896,7 @@ final class BrowserTabViewController: NSViewController {
         case .onboarding:
             return
         case .newtab:
-            guard !featureFlagger.isFeatureOn(.htmlNewTabPage) else {
+            guard tabCollectionViewModel.isBurner else {
                 return
             }
             containsHostingView = false
