@@ -50,8 +50,7 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
     private var internalRepresentation: [String: Any]?
     private let lock = NSLock()
 
-    public init(location: URL, name: String,
-         protectionType: FileProtectionType = .completeUntilFirstUserAuthentication) {
+    public init(location: URL, name: String) {
         self.location = location
         self.name = name
     }
@@ -65,9 +64,9 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
 
         do {
             let data = try PropertyListSerialization.data(fromPropertyList: dictionary, format: .binary, options: 0)
-            try data.write(to: location)
+            try data.write(to: location, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
         } catch {
-            throw Error.readFailure(error)
+            throw Error.writeFailure(error)
         }
     }
 
@@ -83,7 +82,16 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
             self.internalRepresentation = dictionary
             return dictionary
         } catch {
-            throw Error.readFailure(error)
+            let error = error as NSError
+            let ue = error.userInfo[NSUnderlyingErrorKey] as? NSError
+
+            if ue?.domain == NSPOSIXErrorDomain && ue?.code == 2 {
+                // File not created yet
+                self.internalRepresentation = [:]
+                return [:]
+            } else {
+                throw Error.readFailure(error)
+            }
         }
     }
 
@@ -106,8 +114,8 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
 
         var dictionary = try internalRepresentation ?? load()
         dictionary[key] = value
-        self.internalRepresentation = dictionary
         try persist(dictionary: dictionary)
+        self.internalRepresentation = dictionary
     }
 
     public func removeObject(forKey key: String) throws {
@@ -121,8 +129,8 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
         guard dictionary.removeValue(forKey: key) != nil else {
             return
         }
-        self.internalRepresentation = dictionary
         try persist(dictionary: dictionary)
+        self.internalRepresentation = dictionary
     }
 
 
