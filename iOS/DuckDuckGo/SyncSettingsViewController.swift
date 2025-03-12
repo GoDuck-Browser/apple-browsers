@@ -35,6 +35,7 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
     let syncBookmarksAdapter: SyncBookmarksAdapter
     let syncCredentialsAdapter: SyncCredentialsAdapter
     var connector: RemoteConnecting?
+    var exchanger: RemoteExchanging?
 
     let userAuthenticator = UserAuthenticator(reason: UserText.syncUserUserAuthenticationReason,
                                               cancelTitle: UserText.autofillLoginListAuthenticationCancelButton)
@@ -314,12 +315,23 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
         connector = nil
     }
 
-    func startConnectMode() async -> String? {
+    func startConnectMode() -> String? {
         // Handle local authentication later
         do {
             self.connector = try syncService.remoteConnect()
             self.startPolling()
             return self.connector?.code
+        } catch {
+            self.handleError(SyncErrorMessage.unableToSyncToServer, error: error, event: .syncLoginError)
+            return nil
+        }
+    }
+    
+    func startExchangeMode() -> String? {
+        do {
+            self.exchanger = try syncService.remoteExchange()
+            self.startExchangePolling()
+            return self.exchanger?.code
         } catch {
             self.handleError(SyncErrorMessage.unableToSyncToServer, error: error, event: .syncLoginError)
             return nil
@@ -348,6 +360,40 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
                 }
             } catch {
                 handleError(SyncErrorMessage.unableToSyncWithDevice, error: error, event: .syncLoginError)
+            }
+        }
+    }
+    
+    // TODO: Figure out when to stop polling
+    func startExchangePolling() {
+        print("EXCHANGE DEBUG: 1. Entered startExchangePolling")
+        Task { @MainActor in
+            print("EXCHANGE DEBUG: 2. Entered Task")
+            do {
+                // Step C
+                guard let account = syncService.account else {
+                    // TODO: Handle me
+                    return
+                }
+                print("EXCHANGE DEBUG: 3. Found account")
+                if let exchangeMessage = try await exchanger?.pollForPublicKey() {
+                    print("EXCHANGE DEBUG: 4. Finished polling")
+                    dismissPresentedViewController()
+                    print("EXCHANGE DEBUG: 5. Dismissed ViewController")
+                    showPreparingSync()
+                    print("EXCHANGE DEBUG: 6. Showed preparing sync")
+                    let recoveryKey = SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey)
+                    print("EXCHANGE DEBUG: 7. Transmitting recoveryKey...")
+                    try await syncService.transmitExchangeRecoveryKey(from: recoveryKey, keyID: exchangeMessage.keyId, publicKey: exchangeMessage.publicKey)
+                    print("EXCHANGE DEBUG: 8. Transmitted recoveryKey...")
+                    // TODO: Still has the preparingSync view showing
+                    dismissPresentedViewController()
+                } else {
+                    print("EXCHANGE DEBUG: 4. No exchange message")
+                    return
+                }
+            } catch {
+                print("EXCHANGE DEBUG: X. Threw error: \(error)")
             }
         }
     }

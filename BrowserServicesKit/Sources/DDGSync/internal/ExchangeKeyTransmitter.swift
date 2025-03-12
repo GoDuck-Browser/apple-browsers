@@ -27,20 +27,45 @@ struct ExchangeKeyTransmitter: ExchangeKeyTransmitting {
     let storage: SecureStoring
     let crypter: CryptingInternal
 
-    func send(_ code: SyncCode.ExchangeKey, deviceName: String) async throws {
-        let exchangInfo = try crypter.prepareForExchange()
+    // Step B
+    func send(_ code: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo {
+        let exchangeInfo = try crypter.prepareForExchange()
         let exchangeKey = try JSONEncoder.snakeCaseKeys.encode(
-            SyncCode(exchangeMessage: .init(keyId: exchangInfo.keyId, publicKey: exchangInfo.publicKey, deviceName: deviceName))
+            SyncCode(exchangeMessage: .init(keyId: exchangeInfo.keyId, publicKey: exchangeInfo.publicKey, deviceName: deviceName))
         )
-        
-        let base64ExchangeKey = exchangeKey.base64EncodedData()
-        
-        let encryptedRecoveryKey = try crypter.seal(base64ExchangeKey, secretKey: code.publicKey)
+                
+        let encryptedRecoveryKey = try crypter.seal(exchangeKey, secretKey: code.publicKey)
+        let encodedRecoveryKey = encryptedRecoveryKey.base64EncodedString()
 
         let body = try JSONEncoder.snakeCaseKeys.encode(
-            ExchangeRequest(keyId: code.keyId, encryptedRecoveryKey: encryptedRecoveryKey)
+            ExchangeRequest(keyId: code.keyId, encryptedMessage: encodedRecoveryKey)
         )
         
+        print("🦄 B: Send public key with keyID: \(code.keyId), publicKey: \(code.publicKey)")
+        Swift.print("Exchange JSON request is: \(String(data: body, encoding: .utf8) ?? "nil")")
+
+        let request = api.createRequest(url: endpoints.exchange,
+                                        method: .post,
+                                        headers: [:], // TODO: Will we authenticate in certain scenarios?
+                                        parameters: [:],
+                                        body: body,
+                                        contentType: "application/json")
+        _ = try await request.execute()
+        return exchangeInfo
+    }
+    
+    // Step D
+    func sendRecovery(_ code: SyncCode.RecoveryKey, keyID: String, publicKey: Data) async throws {
+        let recoveryJSON = try SyncCode(recovery: code).toJSON()
+        
+        let encryptedRecoveryKey = try crypter.seal(recoveryJSON, secretKey: publicKey)
+        let encodedRecoveryKey = encryptedRecoveryKey.base64EncodedString()
+
+        let body = try JSONEncoder.snakeCaseKeys.encode(
+            ExchangeRequest(keyId: keyID, encryptedMessage: encodedRecoveryKey)
+        )
+        
+        print("🦄 D: Send recovery key with keyID: \(keyID), recoveryKey: \(recoveryJSON)")
         print("Exchange JSON request is: \(String(data: body, encoding: .utf8) ?? "nil")")
 
         let request = api.createRequest(url: endpoints.exchange,
@@ -54,7 +79,7 @@ struct ExchangeKeyTransmitter: ExchangeKeyTransmitting {
 
     struct ExchangeRequest: Encodable {
         let keyId: String
-        let encryptedRecoveryKey: Data
+        let encryptedMessage: String
     }
 
 }

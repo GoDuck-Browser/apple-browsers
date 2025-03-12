@@ -82,6 +82,15 @@ struct ProductionDependencies: SyncDependencies {
             exchangeInfo: exchangeInfo
         )
     }
+    
+    func createRemoteExchangeRecoverer(_ exchangeInfo: ExchangeInfo) throws -> any RemoteExchangeRecovering {
+        return try RemoteExchangeRecoverer(
+            crypter: crypter,
+            api: api,
+            endpoints: endpoints,
+            exchangeInfo: exchangeInfo
+        )
+    }
 
     func createRecoveryKeyTransmitter() throws -> RecoveryKeyTransmitting {
         return RecoveryKeyTransmitter(endpoints: endpoints, api: api, storage: secureStore, crypter: crypter)

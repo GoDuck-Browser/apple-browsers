@@ -22,6 +22,8 @@ import SwiftUIExtensions
 struct SyncWithAnotherDeviceView: View {
 
     @EnvironmentObject var model: ManagementDialogModel
+    
+    // TODO: Consider renaming this as it could be an exchange code
     @EnvironmentObject var recoveryCodeModel: RecoveryCodeViewModel
     let code: String
 
@@ -133,7 +135,7 @@ struct SyncWithAnotherDeviceView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             Button {
                 recoveryCodeModel.paste()
-                model.delegate?.recoveryCodePasted(recoveryCodeModel.recoveryCode, fromRecoveryScreen: false)
+                model.delegate?.exchangeCodePasted(recoveryCodeModel.recoveryCode)
             } label: {
                 HStack {
                     Image(.paste)

@@ -547,11 +547,21 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     func startPollingForPublicKey() {
         Task { @MainActor in
             do {
+                guard let account = syncService.account else {
+                    // TODO: Handle me
+                    return
+                }
                 self.exchanger = try syncService.remoteExchange()
+                // Step A
                 self.codeToDisplay = exchanger?.code
+                print("🦄 Displaying code: \(self.codeToDisplay ?? "")")
                 self.presentDialog(for: .syncWithAnotherDevice(code: codeToDisplay ?? ""))
-                if let exchangeKey = try await exchanger?.pollForExchangeKey() {
-                    try await syncService.transmitExchangeKey(exchangeKey, deviceName: deviceInfo().name)
+                
+                // Step C
+                if let exchangeMessage = try await exchanger?.pollForPublicKey() {
+                    let recoveryKey = SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey)
+                    // Step D
+                    try await syncService.transmitExchangeRecoveryKey(from: recoveryKey, keyID: exchangeMessage.keyId, publicKey: exchangeMessage.publicKey)
                 } else {
                     // Polling was likeley cancelled elsewhere (e.g. dialog closed)
                     return
@@ -614,7 +624,17 @@ extension SyncPreferences: ManagementDialogModelDelegate {
             presentDialog(for: .prepareToSync)
             
             if let exchangeKey = syncCode.exchange {
-                // TODO: POST public key
+                // Step B
+                guard let exchangeInfo = try? await self.syncService.transmitExchangeKey(exchangeKey, deviceName: deviceInfo().name) else {
+                    print("⚠️⚠️ NIL KEYID")
+                    return
+                }
+                // Step E
+                guard let recoveryKey = try? await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
+                    print("⚠️⚠️ NIL KEY")
+                    return
+                }
+                try await loginAndShowPresentedDialog(recoveryKey, isRecovery: false)
             } else if let connectKey = syncCode.connect {
                 
             } else if let recoveryKey = syncCode.recovery {
@@ -753,7 +773,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
         if isSyncEnabled {
             self.startPollingForPublicKey()
         } else {
-            self.startPollingForRecoveryKey(isRecovery: false) // TODO: Replace with poll for exchange key
+            self.startPollingForRecoveryKey(isRecovery: false) // TODO: NO change here
         }
     }
 
@@ -818,6 +838,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     }
     
     func exchangeCodePasted(_ code: String) {
+        print("🦄 B: Exchange code pasted: \(code)")
         sendPublicKey(exchangeCode: code)
     }
 

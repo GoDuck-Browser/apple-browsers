@@ -75,7 +75,7 @@ public protocol DDGSyncing: DDGSyncingDebuggingSupport {
      The currently logged in sync account. Returns nil if client is not authenticated
      */
     var account: SyncAccount? { get }
-
+    
     /**
      Used to trigger Sync by the client app.
 
@@ -133,8 +133,12 @@ public protocol DDGSyncing: DDGSyncingDebuggingSupport {
     
     /**
      Returns a key id and temporary secret key ready for display and allows callers attempt to fetch the transmitted exchange key.
+     // Step A + C
      */
     func remoteExchange() throws -> RemoteExchanging
+    
+    // Step E
+    func remoteExchangeAgain(exchangeInfo: ExchangeInfo) throws -> RemoteExchangeRecovering
 
     /**
      Sends this device's recovery key to the server encrypted using supplied key
@@ -142,10 +146,17 @@ public protocol DDGSyncing: DDGSyncingDebuggingSupport {
     func transmitRecoveryKey(_ connectCode: SyncCode.ConnectCode) async throws
     
     /**
-     Sends this device's recovery key to the server encrypted using supplied key
+     Sends this device's public key to the server encrypted using supplied key
+     // Step B
      */
-    func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws
+    func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo?
 
+    /**
+     Sends this device's recovery key to the server encrypted using supplied key
+     // Step D
+     */
+    func transmitExchangeRecoveryKey(from recoveryKey: SyncCode.RecoveryKey, keyID: String, publicKey: Data) async throws
+    
     /**
      Disconnect this client from the sync service. Removes all local info, but leaves in places bookmarks, etc.
      */
@@ -277,9 +288,19 @@ public protocol RemoteConnecting {
 
 public protocol RemoteExchanging {
     
+    // Step A
     var code: String { get }
 
-    func pollForExchangeKey() async throws -> SyncCode.ExchangeKey?
+    // Step C
+    func pollForPublicKey() async throws -> SyncCode.ExchangeMessage?
+    
+    func stopPolling()
+}
+
+public protocol RemoteExchangeRecovering {
+    
+    // Step E
+    func pollForRecoveryKey() async throws -> SyncCode.RecoveryKey?
 
     func stopPolling()
 }

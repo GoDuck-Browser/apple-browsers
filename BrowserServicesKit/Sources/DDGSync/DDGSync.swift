@@ -24,7 +24,6 @@ import Foundation
 import os.log
 
 public class DDGSync: DDGSyncing {
-
     public static let bundle = Bundle.module
 
     @Published public private(set) var featureFlags: SyncFeatureFlags = .all
@@ -114,16 +113,12 @@ public class DDGSync: DDGSyncing {
     }
 
     public func remoteConnect() throws -> RemoteConnecting {
-        guard try dependencies.secureStore.account() == nil else {
-            throw SyncError.accountAlreadyExists
-        }
+// TODO: Not sure if I should remove this...
+//        guard try dependencies.secureStore.account() == nil else {
+//            throw SyncError.accountAlreadyExists
+//        }
         let info = try dependencies.crypter.prepareForConnect()
         return try dependencies.createRemoteConnector(info)
-    }
-    
-    public func remoteExchange() throws -> RemoteExchanging {
-        let info = try dependencies.crypter.prepareForExchange()
-        return try dependencies.createRemoteExchanger(info)
     }
     
     public func transmitRecoveryKey(_ connectCode: SyncCode.ConnectCode) async throws {
@@ -138,13 +133,61 @@ public class DDGSync: DDGSyncing {
         }
     }
     
-    public func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws {
-        guard try dependencies.secureStore.account() != nil else {
-            throw SyncError.accountNotFound
-        }
-
+//    // Steps B + E
+//    public func sendPublicKeyGetRecoveryKeyAndLogIn() async throws {
+//        Task {
+//            
+//        }
+//    }
+//    
+//    var exchanger: RemoteExchanging?
+//    
+//    // Steps A + C + D
+//    public func createQRCodeAndGetPublicKeyAndPostRecoveryKey() async throws -> String {
+//        let info = try dependencies.crypter.prepareForExchange()
+//        let localExchanger = try dependencies.createRemoteExchanger(info)
+//        exchanger = localExchanger
+//        
+//        Task {
+//            // Step C
+//            if let exchangeMessage = try await exchanger?.pollForPublicKey() {
+//                let recoveryKey = SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey)
+//                // Step D
+//                try await syncService.transmitExchangeRecoveryKey(from: recoveryKey, keyID: exchangeMessage.keyId, publicKey: exchangeMessage.publicKey)
+//            } else {
+//                // Polling was likeley cancelled elsewhere (e.g. dialog closed)
+//                return
+//            }
+//        }
+//
+//        return localExchanger.code
+//    }
+    
+    // Step A + C
+    public func remoteExchange() throws -> RemoteExchanging {
+        let info = try dependencies.crypter.prepareForExchange()
+        return try dependencies.createRemoteExchanger(info)
+    }
+    
+    // Step E Needs ExchangeInfo
+    public func remoteExchangeAgain(exchangeInfo: ExchangeInfo) throws -> RemoteExchangeRecovering {
+        return try dependencies.createRemoteExchangeRecoverer(exchangeInfo)
+    }
+    
+    // Step B
+    public func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo? {
         do {
-            try await dependencies.createExchangeKeyTransmitter().send(exchangeCode, deviceName: deviceName)
+            return try await dependencies.createExchangeKeyTransmitter().send(exchangeCode, deviceName: deviceName)
+        } catch {
+            try handleUnauthenticated(error)
+        }
+        return nil // TODO: Perhaps not. Result?
+    }
+    
+    // Step D
+    public func transmitExchangeRecoveryKey(from recoveryKey: SyncCode.RecoveryKey, keyID: String, publicKey: Data) async throws {
+        do {
+            try await dependencies.createExchangeKeyTransmitter().sendRecovery(recoveryKey, keyID: keyID, publicKey: publicKey)
         } catch {
             try handleUnauthenticated(error)
         }

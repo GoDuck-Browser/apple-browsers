@@ -143,8 +143,13 @@ public struct SyncCode: Codable {
     }
 
     public struct RecoveryKey: Codable, Sendable {
-        let userId: String
-        let primaryKey: Data
+        public init(userId: String, primaryKey: Data) {
+            self.userId = userId
+            self.primaryKey = primaryKey
+        }
+        
+        public let userId: String
+        public let primaryKey: Data
     }
 
     public struct ConnectCode: Codable, Sendable {
@@ -153,22 +158,31 @@ public struct SyncCode: Codable {
     }
     
     // TD: Step A https://app.asana.com/0/481882893211075/1209571867429615
+    // TODO: Check access levels
     public struct ExchangeKey: Codable, Sendable {
-        let keyId: String
-        let publicKey: Data
+        public let keyId: String
+        public let publicKey: Data
     }
     
     // TD: Step B https://app.asana.com/0/481882893211075/1209571867429615
+    // TODO: Check access levels
     public struct ExchangeMessage: Codable, Sendable {
-        let keyId: String
-        let publicKey: Data
-        let deviceName: String
+        public let keyId: String
+        public let publicKey: Data
+        public let deviceName: String
     }
 
     public var recovery: RecoveryKey?
     public var connect: ConnectCode?
     public var exchange: ExchangeKey?
     public var exchangeMessage: ExchangeMessage?
+    
+    public init(recovery: RecoveryKey? = nil, connect: ConnectCode? = nil, exchange: ExchangeKey? = nil, exchangeMessage: ExchangeMessage? = nil) {
+        self.recovery = recovery
+        self.connect = connect
+        self.exchange = exchange
+        self.exchangeMessage = exchangeMessage
+    }
 
     public static func decode(_ data: Data) throws -> Self {
         return try JSONDecoder.snakeCaseKeys.decode(self, from: data)

@@ -42,6 +42,7 @@ protocol SyncDependencies: SyncDependenciesDebuggingSupport {
 
     func createRemoteConnector(_ connectInfo: ConnectInfo) throws -> RemoteConnecting
     func createRemoteExchanger(_ exchangeInfo: ExchangeInfo) throws -> RemoteExchanging
+    func createRemoteExchangeRecoverer(_ exchangeInfo: ExchangeInfo) throws -> any RemoteExchangeRecovering
     func createRecoveryKeyTransmitter() throws -> RecoveryKeyTransmitting
     func createExchangeKeyTransmitter() throws -> ExchangeKeyTransmitting
 }
@@ -109,5 +110,7 @@ protocol RecoveryKeyTransmitting {
 
 protocol ExchangeKeyTransmitting {
     
-    func send(_ code: SyncCode.ExchangeKey, deviceName: String) async throws
+    func send(_ code: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo
+
+    func sendRecovery(_ code: SyncCode.RecoveryKey, keyID: String, publicKey: Data) async throws
 }

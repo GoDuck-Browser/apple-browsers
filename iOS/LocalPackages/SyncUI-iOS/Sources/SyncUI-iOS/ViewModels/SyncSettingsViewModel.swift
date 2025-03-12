@@ -191,6 +191,7 @@ public class SyncSettingsViewModel: ObservableObject {
         }
     }
 
+    // TODO: Rename "tappedSyncWithAnotherDevice" or similar
     func scanQRCode() {
         Task { @MainActor in
             if await commonAuthenticate() {

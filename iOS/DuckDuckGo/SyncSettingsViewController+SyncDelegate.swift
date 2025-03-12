@@ -308,7 +308,8 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
     }
 
     private func collectCode(showConnectMode: Bool) {
-        let model = ScanOrPasteCodeViewModel(showConnectMode: showConnectMode, recoveryCode: recoveryCode.isEmpty ? nil : recoveryCode)
+        let exchangeCode = self.startExchangeMode()
+        let model = ScanOrPasteCodeViewModel(showConnectMode: showConnectMode, recoveryCode: (exchangeCode?.isEmpty ?? true) ? nil : exchangeCode)
         model.delegate = self
 
         var controller: UIHostingController<AnyView>
