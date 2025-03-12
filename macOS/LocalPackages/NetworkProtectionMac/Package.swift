@@ -31,6 +31,7 @@ let package = Package(
         .library(name: "NetworkProtectionProxy", targets: ["NetworkProtectionProxy"]),
         .library(name: "NetworkProtectionUI", targets: ["NetworkProtectionUI"]),
         .library(name: "VPNAppLauncher", targets: ["VPNAppLauncher"]),
+        .library(name: "VPNExtensionManagement", targets: ["VPNExtensionManagement"]),
     ],
     dependencies: [
         .package(url: "https://github.com/airbnb/lottie-spm", exact: "4.4.3"),
@@ -43,6 +44,13 @@ let package = Package(
         .package(path: "../LoginItems"),
     ],
     targets: [
+
+        .target(
+            name: "VPNExtensionManagement",
+            swiftSettings: [
+                .define("DEBUG", .when(configuration: .debug))
+            ]),
+
         // MARK: - NetworkProtectionIPC
 
         .target(
@@ -64,6 +72,7 @@ let package = Package(
             name: "NetworkProtectionProxy",
             dependencies: [
                 "AppInfoRetriever",
+                "VPNExtensionManagement",
                 .product(name: "NetworkProtection", package: "BrowserServicesKit"),
                 .product(name: "PixelKit", package: "BrowserServicesKit"),
             ],

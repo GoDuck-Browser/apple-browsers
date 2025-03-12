@@ -23,6 +23,7 @@ import NetworkProtection
 import os.log
 import PixelKit
 import SystemExtensions
+import VPNExtensionManagement
 
 /// Controller for ``TransparentProxyProvider``
 ///
@@ -46,9 +47,9 @@ public final class TransparentProxyController {
     ///
     private let dryMode: Bool
 
-    /// The bundleID of the extension that contains the ``TransparentProxyProvider``.
+    /// The proxy extension resolver.
     ///
-    private let extensionID: String
+    private let extensionResolver: VPNExtensionResolving
 
     /// The event handler
     ///
@@ -59,14 +60,6 @@ public final class TransparentProxyController {
     public let setup: ManagerSetupCallback
 
     private var internalManager: NETransparentProxyManager?
-
-    /// Whether the proxy settings should be stored in the provider configuration.
-    ///
-    /// We recommend setting this to true if the provider is running in a System Extension and can't access
-    /// shared `TransparentProxySettings`.  If the provider is in an App Extension you should instead
-    /// use a shared `TransparentProxySettings` and set this to false.
-    ///
-    private let storeSettingsInProviderConfiguration: Bool
     public let settings: TransparentProxySettings
     private let notificationCenter: NotificationCenter
     private var cancellables = Set<AnyCancellable>()
@@ -76,19 +69,13 @@ public final class TransparentProxyController {
     /// Default initializer.
     ///
     /// - Parameters:
-    ///     - extensionID: the bundleID for the extension that contains the ``TransparentProxyProvider``.
-    ///         This class DOES NOT take any responsibility in installing the system extension.  It only uses
-    ///         the extensionID to identify the appropriate manager configuration to load / save.
-    ///     - storeSettingsInProviderConfiguration: whether the provider configuration will be used for storing
-    ///         the proxy settings.  Should be `true` when using a System Extension and `false` when using
-    ///         an App Extension.
+    ///     - extensionResolver: the proxy extension resolver.
     ///     - settings: the settings to use for this proxy.
     ///     - dryMode: whether this class is initialized in dry mode.
     ///     - setup: a callback that will be called whenever a ``NETransparentProxyManager`` needs
     ///         to be setup.
     ///
-    public init(extensionID: String,
-                storeSettingsInProviderConfiguration: Bool,
+    public init(extensionResolver: VPNExtensionResolving,
                 settings: TransparentProxySettings,
                 notificationCenter: NotificationCenter = .default,
                 dryMode: Bool = false,
@@ -96,12 +83,11 @@ public final class TransparentProxyController {
                 setup: @escaping ManagerSetupCallback) {
 
         self.dryMode = dryMode
-        self.extensionID = extensionID
+        self.extensionResolver = extensionResolver
         self.notificationCenter = notificationCenter
         self.settings = settings
         self.setup = setup
         self.eventHandler = eventHandler
-        self.storeSettingsInProviderConfiguration = storeSettingsInProviderConfiguration
 
         subscribeToProviderConfigurationChanges()
         subscribeToSettingsChanges()
@@ -152,13 +138,15 @@ public final class TransparentProxyController {
 
     // MARK: - Setting up NETransparentProxyManager
 
-    /// Loads the configuration matching our ``extensionID``.
+    /// Loads the proxy configuration.
     ///
     public var manager: NETransparentProxyManager? {
         get async {
             if let internalManager {
                 return internalManager
             }
+
+            let extensionID = await extensionResolver.activeExtensionBundleID
 
             let manager = try? await NETransparentProxyManager.loadAllFromPreferences().first { manager in
                 (manager.protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier == extensionID
@@ -193,10 +181,6 @@ public final class TransparentProxyController {
     }
 
     private func setupAdditionalProviderConfiguration(_ manager: NETransparentProxyManager) throws {
-        guard storeSettingsInProviderConfiguration else {
-            return
-        }
-
         guard let providerProtocol = manager.protocolConfiguration as? NETunnelProviderProtocol else {
             throw StartError.couldNotRetrieveProtocolConfiguration
         }
