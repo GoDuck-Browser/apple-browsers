@@ -554,20 +554,37 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                 self.exchanger = try syncService.remoteExchange()
                 // Step A
                 self.codeToDisplay = exchanger?.code
+                print("EXCHANGE DEBUG: Step A complete")
                 print("🦄 Displaying code: \(self.codeToDisplay ?? "")")
                 self.presentDialog(for: .syncWithAnotherDevice(code: codeToDisplay ?? ""))
                 
                 // Step C
                 if let exchangeMessage = try await exchanger?.pollForPublicKey() {
+                    print("EXCHANGE DEBUG: Step C complete")
                     let recoveryKey = SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey)
                     // Step D
-                    try await syncService.transmitExchangeRecoveryKey(from: recoveryKey, keyID: exchangeMessage.keyId, publicKey: exchangeMessage.publicKey)
+                    do {
+                        try await syncService.transmitExchangeRecoveryKey(from: recoveryKey, keyID: exchangeMessage.keyId, publicKey: exchangeMessage.publicKey)
+                    } catch {
+                        if case SyncError.accountAlreadyExists = error,
+                            featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
+                            handleAccountAlreadyExists(recoveryKey)
+                        } else if case SyncError.accountAlreadyExists = error {
+                            managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToMergeTwoAccounts, description: "")
+                            PixelKit.fire(DebugEvent(GeneralPixel.syncLoginExistingAccountError(error: error)))
+                        } else {
+                            managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToSyncToOtherDevice)
+                        }
+                    }
+                    print("EXCHANGE DEBUG: Step D complete")
+                    // TODO: Figure out how/when to dismiss Sync view
                 } else {
                     // Polling was likeley cancelled elsewhere (e.g. dialog closed)
+                    print("EXCHANGE DEBUG: Polling cancelled")
                     return
                 }
             } catch {
-
+                print("EXCHANGE DEBUG: Polling errored: \(error)")
             }
         }
     }
@@ -617,28 +634,45 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     
     func sendPublicKey(exchangeCode: String) {
         Task { @MainActor in
-            guard let syncCode = try? SyncCode.decodeBase64String(exchangeCode) else {
-                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .invalidCode, description: "")
-                return
-            }
-            presentDialog(for: .prepareToSync)
-            
-            if let exchangeKey = syncCode.exchange {
-                // Step B
-                guard let exchangeInfo = try? await self.syncService.transmitExchangeKey(exchangeKey, deviceName: deviceInfo().name) else {
-                    print("⚠️⚠️ NIL KEYID")
-                    return
-                }
-                // Step E
-                guard let recoveryKey = try? await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
-                    print("⚠️⚠️ NIL KEY")
-                    return
-                }
-                try await loginAndShowPresentedDialog(recoveryKey, isRecovery: false)
-            } else if let connectKey = syncCode.connect {
+            do {
+                print("EXCHANGE DEBUG: Started sending public key")
+                let syncCode = try SyncCode.decodeBase64String(exchangeCode)
+                print("EXCHANGE DEBUG: Sync code is \(syncCode)")
+                presentDialog(for: .prepareToSync)
                 
-            } else if let recoveryKey = syncCode.recovery {
-                // TODO: What do we do here?
+                if let exchangeKey = syncCode.exchangeKey {
+                    // Step B
+                    guard let exchangeInfo = try await self.syncService.transmitExchangeKey(exchangeKey, deviceName: deviceInfo().name) else {
+                        print("⚠️⚠️ NIL KEYID")
+                        return
+                    }
+                    // Step E
+                    guard let recoveryKey = try await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
+                        print("⚠️⚠️ NIL KEY")
+                        return
+                    }
+                    do {
+                        try await loginAndShowPresentedDialog(recoveryKey, isRecovery: false)
+                    } catch {
+                        if case SyncError.accountAlreadyExists = error,
+                            featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
+                            handleAccountAlreadyExists(recoveryKey)
+                        } else if case SyncError.accountAlreadyExists = error {
+                            managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToMergeTwoAccounts, description: "")
+                            PixelKit.fire(DebugEvent(GeneralPixel.syncLoginExistingAccountError(error: error)))
+                        } else {
+                            managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToSyncToOtherDevice)
+                        }
+                    }
+                } else if let connectKey = syncCode.connect {
+                    print("EXCHANGE DEBUG: Found connectKey \(connectKey)")
+                } else if let recoveryKey = syncCode.recovery {
+                    print("EXCHANGE DEBUG: Found recoveryKey \(recoveryKey)")
+                    // TODO: What do we do here?
+                    // ANSWER: REVERT TO NORMAL RECOVERY
+                }
+            } catch {
+                print("EXCHANGE DEBUG: Error \(error)")
             }
         }
     }

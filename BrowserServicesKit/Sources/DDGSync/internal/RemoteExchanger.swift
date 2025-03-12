@@ -43,7 +43,7 @@ final class RemoteExchanger: RemoteExchanging {
     }
     
     // Step C
-    func pollForPublicKey() async throws -> SyncCode.ExchangeMessage? {
+    func pollForPublicKey() async throws -> ExchangeMessage? {
         assert(!isPolling, "exchanger is already polling")
         
         isPolling = true
@@ -65,7 +65,7 @@ final class RemoteExchanger: RemoteExchanging {
     
     // MARK: Public Key
     
-    private func fetchPublicKey() async throws -> SyncCode.ExchangeMessage? {
+    private func fetchPublicKey() async throws -> ExchangeMessage? {
         print("🦄 C: Fetch public key with keyID: \(exchangeInfo.keyId), publicKey: \(exchangeInfo.publicKey)")
         if let base64EncodedEncryptedRecoveryKeyString = try await fetchEncryptedExchangeMessage() {
             let exchangeKey = try decryptEncryptedExchangeKey(base64EncodedEncryptedRecoveryKeyString)
@@ -75,17 +75,15 @@ final class RemoteExchanger: RemoteExchanging {
         return nil
     }
     
-    private func decryptEncryptedExchangeKey(_ base64EncodedEncryptedExchangeString: String) throws -> SyncCode.ExchangeMessage {
+    private func decryptEncryptedExchangeKey(_ base64EncodedEncryptedExchangeString: String) throws -> ExchangeMessage {
         guard let base64DecodedEncryptedExchangeMessage = Data(base64Encoded: base64EncodedEncryptedExchangeString) else {
-            throw SyncError.failedToDecryptValue("Invalid recovery key in exchange response") // TODO: Add new error for this?
+            throw SyncError.failedToDecryptValue("Failed to convert base64 string to Data") // TODO: Add new error for this?
         }
         let data = try crypter.unseal(encryptedData: base64DecodedEncryptedExchangeMessage,
                                       publicKey: exchangeInfo.publicKey,
                                       secretKey: exchangeInfo.secretKey)
         
-        guard let exchangeMessage = try JSONDecoder.snakeCaseKeys.decode(SyncCode.self, from: data).exchangeMessage else {
-            throw SyncError.failedToDecryptValue("Invalid recovery key in exchange response")
-        }
+        let exchangeMessage = try JSONDecoder.snakeCaseKeys.decode(ExchangeMessage.self, from: data)
         
         return exchangeMessage
     }

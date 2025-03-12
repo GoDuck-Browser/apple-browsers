@@ -136,6 +136,12 @@ public struct ExchangeInfo {
     public let secretKey: Data
 }
 
+public struct ExchangeMessage: Codable, Sendable {
+    public let keyId: String
+    public let publicKey: Data
+    public let deviceName: String
+}
+
 public struct SyncCode: Codable {
 
     public enum Base64Error: Error {
@@ -166,22 +172,15 @@ public struct SyncCode: Codable {
     
     // TD: Step B https://app.asana.com/0/481882893211075/1209571867429615
     // TODO: Check access levels
-    public struct ExchangeMessage: Codable, Sendable {
-        public let keyId: String
-        public let publicKey: Data
-        public let deviceName: String
-    }
 
     public var recovery: RecoveryKey?
     public var connect: ConnectCode?
-    public var exchange: ExchangeKey?
-    public var exchangeMessage: ExchangeMessage?
+    public var exchangeKey: ExchangeKey?
     
-    public init(recovery: RecoveryKey? = nil, connect: ConnectCode? = nil, exchange: ExchangeKey? = nil, exchangeMessage: ExchangeMessage? = nil) {
+    public init(recovery: RecoveryKey? = nil, connect: ConnectCode? = nil, exchange: ExchangeKey? = nil) {
         self.recovery = recovery
         self.connect = connect
-        self.exchange = exchange
-        self.exchangeMessage = exchangeMessage
+        self.exchangeKey = exchange
     }
 
     public static func decode(_ data: Data) throws -> Self {

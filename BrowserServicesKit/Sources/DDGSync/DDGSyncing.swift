@@ -292,7 +292,7 @@ public protocol RemoteExchanging {
     var code: String { get }
 
     // Step C
-    func pollForPublicKey() async throws -> SyncCode.ExchangeMessage?
+    func pollForPublicKey() async throws -> ExchangeMessage?
     
     func stopPolling()
 }

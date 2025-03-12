@@ -31,7 +31,7 @@ struct ExchangeKeyTransmitter: ExchangeKeyTransmitting {
     func send(_ code: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo {
         let exchangeInfo = try crypter.prepareForExchange()
         let exchangeKey = try JSONEncoder.snakeCaseKeys.encode(
-            SyncCode(exchangeMessage: .init(keyId: exchangeInfo.keyId, publicKey: exchangeInfo.publicKey, deviceName: deviceName))
+            ExchangeMessage(keyId: exchangeInfo.keyId, publicKey: exchangeInfo.publicKey, deviceName: deviceName)
         )
                 
         let encryptedRecoveryKey = try crypter.seal(exchangeKey, secretKey: code.publicKey)
