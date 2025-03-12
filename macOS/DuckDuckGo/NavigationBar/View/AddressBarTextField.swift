@@ -372,7 +372,11 @@ final class AddressBarTextField: NSTextField {
            url == .bookmarks || url.isSettingsURL {
             // when choosing an internal page suggestion prefer already open tab
             switchTo(OpenTab(tabId: nil, title: title, url: url))
+<<<<<<< HEAD
         } else if case .openTab(let title, url: let url, tabId: let tabId, _) = suggestion {
+=======
+        } else if case .openTab(let title, url: let url, tabId: let tabId) = suggestion {
+>>>>>>> origin/main
             switchTo(OpenTab(tabId: tabId, title: title, url: url))
         } else if NSApp.isCommandPressed {
             openNew(NSApp.isOptionPressed ? .window : .tab, selected: NSApp.isShiftPressed, suggestion: suggestion)
@@ -502,8 +506,13 @@ final class AddressBarTextField: NSTextField {
         case .bookmark(title: _, url: let url, isFavorite: _, _),
              .historyEntry(title: _, url: let url, _),
              .website(url: let url),
+<<<<<<< HEAD
              .internalPage(title: _, url: let url, _),
              .openTab(title: _, url: let url, _, _):
+=======
+             .internalPage(title: _, url: let url),
+             .openTab(title: _, url: let url, _):
+>>>>>>> origin/main
             finalUrl = url
             userEnteredValue = url.absoluteString
         case .phrase(phrase: let phrase),
@@ -909,7 +918,11 @@ extension AddressBarTextField {
                 } else {
                     self = .url(url)
                 }
+<<<<<<< HEAD
             case .openTab(title: _, url: let url, _, _):
+=======
+            case .openTab(title: _, url: let url, _):
+>>>>>>> origin/main
                 self = .openTab(url)
             case .unknown:
                 self = Suffix.search

@@ -40,8 +40,12 @@ final class SuggestionContainerTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: historyCoordinatingMock,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
+<<<<<<< HEAD
                                                       burnerMode: .regular,
                                                       isUrlIgnored: { _ in false })
+=======
+                                                      burnerMode: .regular)
+>>>>>>> origin/main
 
         let e = expectation(description: "Suggestions updated")
         let cancellable = suggestionContainer.$result.sink {
@@ -68,8 +72,12 @@ final class SuggestionContainerTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: historyCoordinatingMock,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
+<<<<<<< HEAD
                                                       burnerMode: .regular,
                                                       isUrlIgnored: { _ in false })
+=======
+                                                      burnerMode: .regular)
+>>>>>>> origin/main
 
         suggestionContainer.getSuggestions(for: "test")
         suggestionContainer.stopGettingSuggestions()
@@ -86,8 +94,12 @@ final class SuggestionContainerTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: historyCoordinatingMock,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
+<<<<<<< HEAD
                                                       burnerMode: .regular,
                                                       isUrlIgnored: { _ in false })
+=======
+                                                      burnerMode: .regular)
+>>>>>>> origin/main
 
         XCTAssertNil(suggestionContainer.suggestionDataCache)
         let e = expectation(description: "Suggestions updated")
@@ -113,6 +125,7 @@ final class SuggestionContainerTests: XCTestCase {
         waitForExpectations(timeout: 1)
     }
 
+<<<<<<< HEAD
     @MainActor
     func testSuggestionsJsonScenarios() async throws {
         let onlyRun = "" // "bookmarks-history-open-tabs-basic.json"
@@ -355,6 +368,11 @@ extension SuggestionContainerTests {
         let phrase: String
         let isNav: Bool?
     }
+=======
+}
+
+extension SuggestionContainerTests {
+>>>>>>> origin/main
 
     class WindowControllersManagerMock: WindowControllersManagerProtocol {
         var mainWindowControllers: [DuckDuckGo_Privacy_Browser.MainWindowController] = []
@@ -418,6 +436,7 @@ extension SuggestionContainerTests {
         PinnedTabsManager(tabCollection: tabCollection(tabs))
     }
 
+<<<<<<< HEAD
     func assert<Value: Encodable>(
       _ value: @autoclosure () throws -> Value,
       named name: String,
@@ -458,6 +477,55 @@ private extension OpenTab {
         self.init(tabId: tab.tabId.uuidString, title: tab.title, url: tab.url)
     }
 }
+=======
+    struct Bookmark: Decodable, Suggestions.Bookmark {
+        enum CodingKeys: String, CodingKey {
+            case title
+            case url="uri"
+            case isFavorite
+        }
+        let title: String
+        var url: String
+        let isFavorite: Bool
+    }
+
+    struct HistoryEntry: Decodable, Hashable, Suggestions.HistorySuggestion {
+        enum CodingKeys: String, CodingKey {
+            case title
+            case url = "uri"
+            case numberOfVisits = "visitCount"
+            case _lastVisit = "lastVisit"
+            case _failedToLoad = "failedToLoad"
+        }
+        let title: String?
+        let url: URL
+        let numberOfVisits: Int
+        let _lastVisit: Date?
+        var lastVisit: Date { _lastVisit ?? .distantPast }
+        let _failedToLoad: Bool?
+        var failedToLoad: Bool { _failedToLoad ?? false }
+
+        var identifier: UUID { Self.uuidFromHash(self.hashValue) }
+
+        private static func uuidFromHash(_ hash: Int) -> UUID {
+            // Convert the integer hash to a string
+            let hashString = String(hash)
+
+            // Create a UUID from the hash string by padding/truncating to fit UUID format
+            let paddedHashString = hashString.padding(toLength: 32, withPad: "0", startingAt: 0)
+
+            // Format the string to match UUID format (8-4-4-4-12)
+            let uuidString = "\(paddedHashString.prefix(8))-\(paddedHashString.dropFirst(8).prefix(4))-\(paddedHashString.dropFirst(12).prefix(4))-\(paddedHashString.dropFirst(16).prefix(4))-\(paddedHashString.dropFirst(20).prefix(12))"
+
+            // Create and return a UUID from the formatted string
+            return UUID(uuidString: uuidString)!
+        }
+
+    }
+
+}
+
+>>>>>>> origin/main
 class HistoryProviderMock: SuggestionContainer.HistoryProvider {
     let history: [SuggestionContainerTests.HistoryEntry]
 
@@ -469,6 +537,10 @@ class HistoryProviderMock: SuggestionContainer.HistoryProvider {
         self.history = history
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
 private class BookmarkProviderMock: SuggestionContainer.BookmarkProvider {
     let bookmarks: [SuggestionContainerTests.Bookmark]
 
@@ -479,6 +551,7 @@ private class BookmarkProviderMock: SuggestionContainer.BookmarkProvider {
     init(bookmarks: [SuggestionContainerTests.Bookmark]) {
         self.bookmarks = bookmarks
     }
+<<<<<<< HEAD
 }
 
 extension SuggestionContainerTests {
@@ -585,4 +658,6 @@ private extension Suggestion {
             return nil
         }
     }
+=======
+>>>>>>> origin/main
 }
