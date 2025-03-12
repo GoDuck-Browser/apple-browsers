@@ -38,12 +38,8 @@ final class SuggestionContainerViewModelTests: XCTestCase {
                                                   suggestionLoading: suggestionLoadingMock,
                                                   historyProvider: historyProviderMock,
                                                   bookmarkProvider: LocalBookmarkManager.shared,
-<<<<<<< HEAD
                                                   burnerMode: .regular,
                                                   isUrlIgnored: { _ in false })
-=======
-                                                  burnerMode: .regular)
->>>>>>> origin/main
         suggestionContainerViewModel = SuggestionContainerViewModel(suggestionContainer: suggestionContainer)
     }
 
@@ -318,12 +314,8 @@ final class SuggestionContainerViewModelTests: XCTestCase {
                                                   suggestionLoading: suggestionLoadingMock,
                                                   historyProvider: historyProviderMock,
                                                   bookmarkProvider: LocalBookmarkManager.shared,
-<<<<<<< HEAD
                                                   burnerMode: .regular,
                                                   isUrlIgnored: { _ in false })
-=======
-                                                  burnerMode: .regular)
->>>>>>> origin/main
         suggestionContainerViewModel = SuggestionContainerViewModel(suggestionContainer: suggestionContainer)
 
         suggestionContainer.getSuggestions(for: "Duck")

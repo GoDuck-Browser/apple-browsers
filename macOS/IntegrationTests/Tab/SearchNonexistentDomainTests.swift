@@ -242,12 +242,8 @@ final class SearchNonexistentDomainTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: HistoryCoordinator.shared,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
-<<<<<<< HEAD
                                                       burnerMode: .regular,
                                                       isUrlIgnored: { _ in false })
-=======
-                                                      burnerMode: .regular)
->>>>>>> origin/main
         addressBar.suggestionContainerViewModel = SuggestionContainerViewModel(isHomePage: true, isBurner: false, suggestionContainer: suggestionContainer)
 
         suggestionContainer.getSuggestions(for: enteredString)

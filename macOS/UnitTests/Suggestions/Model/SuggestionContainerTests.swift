@@ -21,7 +21,7 @@ import Common
 import History
 import NetworkingTestingUtils
 import os.log
-import SnapshotTesting
+import InlineSnapshotTesting
 import Suggestions
 import XCTest
 
@@ -40,12 +40,8 @@ final class SuggestionContainerTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: historyCoordinatingMock,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
-<<<<<<< HEAD
                                                       burnerMode: .regular,
                                                       isUrlIgnored: { _ in false })
-=======
-                                                      burnerMode: .regular)
->>>>>>> origin/main
 
         let e = expectation(description: "Suggestions updated")
         let cancellable = suggestionContainer.$result.sink {
@@ -72,12 +68,8 @@ final class SuggestionContainerTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: historyCoordinatingMock,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
-<<<<<<< HEAD
                                                       burnerMode: .regular,
                                                       isUrlIgnored: { _ in false })
-=======
-                                                      burnerMode: .regular)
->>>>>>> origin/main
 
         suggestionContainer.getSuggestions(for: "test")
         suggestionContainer.stopGettingSuggestions()
@@ -94,12 +86,8 @@ final class SuggestionContainerTests: XCTestCase {
                                                       suggestionLoading: suggestionLoadingMock,
                                                       historyProvider: historyCoordinatingMock,
                                                       bookmarkProvider: LocalBookmarkManager.shared,
-<<<<<<< HEAD
                                                       burnerMode: .regular,
                                                       isUrlIgnored: { _ in false })
-=======
-                                                      burnerMode: .regular)
->>>>>>> origin/main
 
         XCTAssertNil(suggestionContainer.suggestionDataCache)
         let e = expectation(description: "Suggestions updated")
@@ -125,7 +113,6 @@ final class SuggestionContainerTests: XCTestCase {
         waitForExpectations(timeout: 1)
     }
 
-<<<<<<< HEAD
     @MainActor
     func testSuggestionsJsonScenarios() async throws {
         let onlyRun = "" // "bookmarks-history-open-tabs-basic.json"
@@ -151,7 +138,7 @@ final class SuggestionContainerTests: XCTestCase {
                 throw NSError(domain: error.domain, code: error.code, userInfo: error.userInfo.merging([NSFilePathErrorKey: fileURL.lastPathComponent]) { $1 })
             }
             
-            // Skip non-desktop scenarios - only run desktop or unspecified platform tests
+            // Skip non-desktop scenarios - only run desktop platform tests
             guard testScenario.platform == .desktop else {
                 Logger.tests.info("Skipping non-desktop test scenario: \(fileURL.lastPathComponent)")
                 continue
@@ -236,7 +223,7 @@ final class SuggestionContainerTests: XCTestCase {
         let actualResults = try await resultPromise.get()
         let testResults = TestExpectations(from: actualResults, query: testScenario.input.query)
 
-        assert(testResults, named: name, match: testScenario.expectations)
+        assertInlineSnapshot(of: testResults?.encoded(), as: .lines, message: name, matches: testScenario.expectations.encoded)
     }
 
 }
@@ -319,7 +306,7 @@ extension SuggestionContainerTests {
 
         private static func uuidFromHash(_ hash: Int) -> UUID {
             // Convert the integer hash to a string
-            let hashString = String(hash)
+            let hashString = String(abs(hash))
 
             // Create a UUID from the hash string by padding/truncating to fit UUID format
             let paddedHashString = hashString.padding(toLength: 32, withPad: "0", startingAt: 0)
@@ -368,11 +355,6 @@ extension SuggestionContainerTests {
         let phrase: String
         let isNav: Bool?
     }
-=======
-}
-
-extension SuggestionContainerTests {
->>>>>>> origin/main
 
     class WindowControllersManagerMock: WindowControllersManagerProtocol {
         var mainWindowControllers: [DuckDuckGo_Privacy_Browser.MainWindowController] = []
@@ -436,96 +418,12 @@ extension SuggestionContainerTests {
         PinnedTabsManager(tabCollection: tabCollection(tabs))
     }
 
-<<<<<<< HEAD
-    func assert<Value: Encodable>(
-      _ value: @autoclosure () throws -> Value,
-      named name: String,
-      match anotherValue: Value,
-      file: StaticString = #file,
-      testName: String = #function,
-      line: UInt = #line
-    ) {
-        let snapshotDirectory = FileManager.default.temporaryDirectory.appendingPathComponent("temp_snapshots")
-        let identifier = sanitizePathComponent(name)
-        let testName = sanitizePathComponent(testName)
-        let fileName = "\(testName).\(identifier).json"
-        let snapshotUrl = snapshotDirectory.appendingPathComponent(fileName)
-        let failure = verifySnapshot(of: try {
-            try FileManager.default.createDirectory(at: snapshotDirectory, withIntermediateDirectories: true)
-            // write anotherValue to the snapshot dir
-            let encoder = JSONEncoder()
-            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-            try encoder.encode(anotherValue).write(to: snapshotUrl)
-            return try value()
-        }(), as: .json, named: name, record: false, snapshotDirectory: snapshotDirectory.path, timeout: 0, file: file, testName: testName)
-        defer {
-            try? FileManager.default.removeItem(at: snapshotUrl)
-        }
-        guard let message = failure else { return }
-        XCTFail(message, file: file, line: line)
-    }
-    func sanitizePathComponent(_ string: String) -> String {
-      return
-        string
-        .replacingOccurrences(of: "\\W+", with: "-", options: .regularExpression)
-        .replacingOccurrences(of: "^-|-$", with: "", options: .regularExpression)
-    }
-
 }
 private extension OpenTab {
     init(_ tab: SuggestionContainerTests.TabMock) {
         self.init(tabId: tab.tabId.uuidString, title: tab.title, url: tab.url)
     }
 }
-=======
-    struct Bookmark: Decodable, Suggestions.Bookmark {
-        enum CodingKeys: String, CodingKey {
-            case title
-            case url="uri"
-            case isFavorite
-        }
-        let title: String
-        var url: String
-        let isFavorite: Bool
-    }
-
-    struct HistoryEntry: Decodable, Hashable, Suggestions.HistorySuggestion {
-        enum CodingKeys: String, CodingKey {
-            case title
-            case url = "uri"
-            case numberOfVisits = "visitCount"
-            case _lastVisit = "lastVisit"
-            case _failedToLoad = "failedToLoad"
-        }
-        let title: String?
-        let url: URL
-        let numberOfVisits: Int
-        let _lastVisit: Date?
-        var lastVisit: Date { _lastVisit ?? .distantPast }
-        let _failedToLoad: Bool?
-        var failedToLoad: Bool { _failedToLoad ?? false }
-
-        var identifier: UUID { Self.uuidFromHash(self.hashValue) }
-
-        private static func uuidFromHash(_ hash: Int) -> UUID {
-            // Convert the integer hash to a string
-            let hashString = String(hash)
-
-            // Create a UUID from the hash string by padding/truncating to fit UUID format
-            let paddedHashString = hashString.padding(toLength: 32, withPad: "0", startingAt: 0)
-
-            // Format the string to match UUID format (8-4-4-4-12)
-            let uuidString = "\(paddedHashString.prefix(8))-\(paddedHashString.dropFirst(8).prefix(4))-\(paddedHashString.dropFirst(12).prefix(4))-\(paddedHashString.dropFirst(16).prefix(4))-\(paddedHashString.dropFirst(20).prefix(12))"
-
-            // Create and return a UUID from the formatted string
-            return UUID(uuidString: uuidString)!
-        }
-
-    }
-
-}
-
->>>>>>> origin/main
 class HistoryProviderMock: SuggestionContainer.HistoryProvider {
     let history: [SuggestionContainerTests.HistoryEntry]
 
@@ -537,10 +435,7 @@ class HistoryProviderMock: SuggestionContainer.HistoryProvider {
         self.history = history
     }
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/main
 private class BookmarkProviderMock: SuggestionContainer.BookmarkProvider {
     let bookmarks: [SuggestionContainerTests.Bookmark]
 
@@ -551,7 +446,6 @@ private class BookmarkProviderMock: SuggestionContainer.BookmarkProvider {
     init(bookmarks: [SuggestionContainerTests.Bookmark]) {
         self.bookmarks = bookmarks
     }
-<<<<<<< HEAD
 }
 
 extension SuggestionContainerTests {
@@ -624,6 +518,16 @@ extension SuggestionContainerTests {
             self.searchSuggestions = result.duckduckgoSuggestions.compactMap { $0.expectedSuggestion(query: query) }
             self.localSuggestions = result.localSuggestions.compactMap { $0.expectedSuggestion(query: query) }
         }
+
+        func encoded() -> String {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+            do {
+                return try encoder.encode(self).utf8String() ?? "<nil>"
+            } catch {
+                return error.localizedDescription
+            }
+        }
     }
 }
 private extension URLSession {
@@ -658,6 +562,4 @@ private extension Suggestion {
             return nil
         }
     }
-=======
->>>>>>> origin/main
 }
