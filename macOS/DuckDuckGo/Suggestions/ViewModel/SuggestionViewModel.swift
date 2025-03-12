@@ -161,7 +161,7 @@ struct SuggestionViewModel: Equatable {
             if url.isDuckDuckGoSearch {
                 return UserText.searchDuckDuckGoSuffix
             } else {
-                return url.toString(decodePunycode: true, dropScheme: true, dropTrailingSlash: true)
+                return url.toString(decodePunycode: true, dropScheme: true, needsWWW: false, dropTrailingSlash: true)
             }
         case .internalPage:
             return UserText.duckDuckGo

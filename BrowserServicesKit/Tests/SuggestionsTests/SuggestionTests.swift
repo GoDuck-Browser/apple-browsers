@@ -178,4 +178,3 @@ fileprivate extension URL {
     static let aNonRootUrl = URL(string: "https://www.duckduckgo.com/traffic")!
 
 }
-

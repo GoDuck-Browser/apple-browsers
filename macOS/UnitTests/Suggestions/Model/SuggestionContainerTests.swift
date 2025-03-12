@@ -137,6 +137,12 @@ final class SuggestionContainerTests: XCTestCase {
             } catch let error as NSError {
                 throw NSError(domain: error.domain, code: error.code, userInfo: error.userInfo.merging([NSFilePathErrorKey: fileURL.lastPathComponent]) { $1 })
             }
+            
+            // Skip non-desktop scenarios - only run desktop or unspecified platform tests
+            guard testScenario.platform == .desktop else {
+                Logger.tests.info("Skipping non-desktop test scenario: \(fileURL.lastPathComponent)")
+                continue
+            }
 
             // Run the test for each scenario
             Logger.tests.info("Running JSON test scenario: \(fileURL.lastPathComponent)")
@@ -225,6 +231,12 @@ final class SuggestionContainerTests: XCTestCase {
 extension SuggestionContainerTests {
 
     fileprivate struct TestScenario: Decodable {
+        enum Platform: String, Decodable {
+            case mobile
+            case desktop
+        }
+        
+        let platform: Platform
         let description: String
         let input: TestInput
         let expectations: TestExpectations
@@ -372,7 +384,9 @@ extension SuggestionContainerTests {
 
         var allTabCollectionViewModels: [TabCollectionViewModel] = []
         var selectedWindowIndex: Int
-        var selectedTab: Tab?
+        var selectedTab: Tab? {
+            allTabCollectionViewModels[selectedWindowIndex].selectedTab
+        }
 
         func openNewWindow(with tabCollectionViewModel: DuckDuckGo_Privacy_Browser.TabCollectionViewModel?, burnerMode: DuckDuckGo_Privacy_Browser.BurnerMode, droppingPoint: NSPoint?, contentSize: NSSize?, showWindow: Bool, popUp: Bool, lazyLoadTabs: Bool, isMiniaturized: Bool, isMaximized: Bool, isFullscreen: Bool) -> DuckDuckGo_Privacy_Browser.MainWindow? {
             nil
