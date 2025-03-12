@@ -64,7 +64,7 @@ extension HomePage.Views {
                                 ZStack {
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color.homeFavoritesGhost, style: StrokeStyle(lineWidth: 1.0))
-                                        .homePageViewBackground(nil)
+                                        .background(Color.homeFavoritesBackground)
                                         .cornerRadius(12)
 
                                     VStack(alignment: .leading, spacing: 16) {
