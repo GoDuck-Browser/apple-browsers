@@ -1223,7 +1223,6 @@ struct UserText {
     static let newTabFavoriteSectionTitle = NSLocalizedString("newTab.favorites.section.title", value: "Favorites", comment: "Title of the Favorites section in the home page")
 
     // Set Up
-    static let newTabSetUpSectionTitle = NSLocalizedString("newTab.setup.section.title", value: "Next Steps", comment: "Title of the setup section in the home page")
     static let newTabSetUpDefaultBrowserCardTitle = NSLocalizedString("newTab.setup.default.browser.title", value: "Default to Privacy", comment: "Title of the Default Browser card of the Set Up section in the home page")
     static let newTabSetUpDockCardTitle = NSLocalizedString("newTab.setup.dock.title", value: "Keep in Your Dock", comment: "Title of the new tab page card for adding application to the Dock")
     static let newTabSetUpImportCardTitle = NSLocalizedString("newTab.setup.import.title", value: "Bring Your Stuff", comment: "Title of the Import card of the Set Up section in the home page")

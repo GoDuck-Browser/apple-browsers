@@ -104,9 +104,6 @@ extension Preferences {
                 PreferencePaneSection(UserText.newTabBottomPopoverTitle) {
 
                     PreferencePaneSubSection {
-                        if model.isContinueSetUpCardsVisibilityControlAvailable && model.isContinueSetUpAvailable && !model.isContinueSetUpCardsViewOutdated && !model.continueSetUpCardsClosed {
-                            ToggleMenuItem(UserText.newTabSetUpSectionTitle, isOn: $model.isContinueSetUpVisible)
-                        }
                         ToggleMenuItem(UserText.newTabFavoriteSectionTitle, isOn: $model.isFavoriteVisible).accessibilityIdentifier("Preferences.AppearanceView.showFavoritesToggle")
                         if model.isRecentActivityAvailable {
                             ToggleMenuItem(UserText.newTabRecentActivitySectionTitle, isOn: $model.isRecentActivityVisible)

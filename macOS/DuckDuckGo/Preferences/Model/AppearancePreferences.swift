@@ -240,11 +240,6 @@ final class AppearancePreferences: ObservableObject {
         }
     }
 
-    var isContinueSetUpCardsVisibilityControlAvailable: Bool {
-        // HTML NTP doesn't allow for hiding Next Steps Cards section
-        !featureFlagger().isFeatureOn(.htmlNewTabPage)
-    }
-
     var isContinueSetUpVisible: Bool {
         get {
             return persistor.isContinueSetUpVisible && !persistor.continueSetUpCardsClosed && !isContinueSetUpCardsViewOutdated
