@@ -92,8 +92,8 @@ final class AutofillSettingsViewModel: ObservableObject {
     }
     
     func footerAttributedString() -> AttributedString {
-        let markdownString = UserText.autofillLoginListSettingsFooterMarkdown
-
+        let markdownString = UserText.autofillLearnMoreLinkTitle
+        
         do {
             var attributedString = try AttributedString(markdown: markdownString)
             attributedString.foregroundColor = Color(designSystemColor: .accent)

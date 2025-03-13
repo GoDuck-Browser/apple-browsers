@@ -359,7 +359,7 @@
 "autofill.keep-enabled.alert.disable" = "Disable";
 
 /* A link that takes the user to the DuckDuckGo help pages explaining password managers */
-"autofill.learn.more.link.title" = "Learn More";
+"autofill.learn.more.link.title" = "[Learn More](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "View";
@@ -503,10 +503,7 @@
 "autofill.logins.list.search-placeholder" = "Search passwords";
 
 /* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
-"autofill.logins.list.settings.footer.fallback" = "Passwords are encrypted. Nobody but you can see them, not even us.";
-
-/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
-"autofill.logins.list.settings.footer.markdown" = "[Learn More](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+"autofill.logins.list.settings.footer" = "Passwords are encrypted. Nobody but you can see them, not even us.";
 
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Suggested";
