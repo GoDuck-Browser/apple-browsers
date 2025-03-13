@@ -30,7 +30,7 @@ import Combine
 class AutofillLoginListViewModelTests: XCTestCase {
 
     private let tld = TLD()
-    private let appSettings = AppUserDefaults()
+    private let appSettings = AppSettingsMock()
     private let vault = (try? MockSecureVaultFactory.makeVault(reporter: nil))!
     private var cancellables: Set<AnyCancellable> = []
     var syncService: MockDDGSyncing!

@@ -1003,6 +1003,7 @@
 		C13F3F682B7F88100083BE40 /* AuthConfirmationPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13F3F672B7F88100083BE40 /* AuthConfirmationPromptView.swift */; };
 		C13F3F6A2B7F883A0083BE40 /* AuthConfirmationPromptViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13F3F692B7F883A0083BE40 /* AuthConfirmationPromptViewController.swift */; };
 		C13F3F6C2B7F88470083BE40 /* AuthConfirmationPromptViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C13F3F6B2B7F88470083BE40 /* AuthConfirmationPromptViewModel.swift */; };
+		C14073882D8374520087E836 /* AutofillSettingsViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14073872D8374520087E836 /* AutofillSettingsViewModelTests.swift */; };
 		C14882DA27F2011C00D59F0C /* BookmarksExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14882D727F2011C00D59F0C /* BookmarksExporter.swift */; };
 		C14882DC27F2011C00D59F0C /* BookmarksImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14882D927F2011C00D59F0C /* BookmarksImporter.swift */; };
 		C14882E327F20D9A00D59F0C /* BookmarksExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C14882E127F20D9A00D59F0C /* BookmarksExporterTests.swift */; };
@@ -3007,6 +3008,7 @@
 		C13F3F6B2B7F88470083BE40 /* AuthConfirmationPromptViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthConfirmationPromptViewModel.swift; sourceTree = "<group>"; };
 		C1406D862D0862F30082CB50 /* hr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hr; path = hr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1406D872D0862F30082CB50 /* hr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hr; path = hr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		C14073872D8374520087E836 /* AutofillSettingsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutofillSettingsViewModelTests.swift; sourceTree = "<group>"; };
 		C1453E322D0863C80024449B /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1453E332D0863C80024449B /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C14882D727F2011C00D59F0C /* BookmarksExporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarksExporter.swift; sourceTree = "<group>"; };
@@ -5921,6 +5923,14 @@
 				C13EEA1D2D64CFCA001D5DC3 /* DataImportViewModelTests.swift */,
 			);
 			name = DataImport;
+			sourceTree = "<group>";
+		};
+		C14073812D8373EB0087E836 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				C14073872D8374520087E836 /* AutofillSettingsViewModelTests.swift */,
+			);
+			name = Settings;
 			sourceTree = "<group>";
 		};
 		C14882D627F2010700D59F0C /* ImportExport */ = {
@@ -9258,6 +9268,7 @@
 				9F16230B2CA0F0190093C4FC /* DebouncerTests.swift in Sources */,
 				9F254ADC2CF6120E0063B308 /* MockSpecialErrorPageNavigationDelegate.swift in Sources */,
 				1CB7B82323CEA28300AA24EA /* DateExtensionTests.swift in Sources */,
+				C14073882D8374520087E836 /* AutofillSettingsViewModelTests.swift in Sources */,
 				31C138A427A3352600FFD4B2 /* DownloadTests.swift in Sources */,
 				C162A1B72D79F71500C34BAB /* SubscriptionPagesUseSubscriptionFeatureOnboardingPromotionTests.swift in Sources */,
 				853A717820F645FB00FE60BC /* PixelTests.swift in Sources */,
