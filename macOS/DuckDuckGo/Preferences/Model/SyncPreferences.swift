@@ -841,11 +841,11 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     @MainActor
     func copyCode() {
         var code: String?
-        if isSyncEnabled {
-            code = recoveryCode
-        } else {
+//        if isSyncEnabled {
+//            code = recoveryCode // TODO: Figure out why and what to do here...
+//        } else {
             code = codeToDisplay
-        }
+//        }
         guard let code else { return }
         let pasteboard = NSPasteboard.general
         pasteboard.declareTypes([.string], owner: nil)
