@@ -274,6 +274,7 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
         }
         presentedViewController.dismiss(animated: true, completion: completion)
         endConnectMode()
+        endExchangeMode()
     }
 
     func refreshDevices(clearDevices: Bool = true) {
@@ -313,6 +314,11 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
     func endConnectMode() {
         connector?.stopPolling()
         connector = nil
+    }
+    
+    func endExchangeMode() {
+        exchanger?.stopPolling()
+        exchanger = nil
     }
 
     func startConnectMode() -> String? {
@@ -380,7 +386,7 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
                     print("EXCHANGE DEBUG: 4. Finished polling")
                     dismissPresentedViewController()
                     print("EXCHANGE DEBUG: 5. Dismissed ViewController")
-                    showPreparingSync()
+                    await showPreparingSyncAsync()
                     print("EXCHANGE DEBUG: 6. Showed preparing sync")
                     let recoveryKey = SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey)
                     print("EXCHANGE DEBUG: 7. Transmitting recoveryKey...")
@@ -399,53 +405,83 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
     }
 
     func syncCodeEntered(code: String) async -> Bool {
-        var shouldShowSyncEnabled = true
         guard let syncCode = try? SyncCode.decodeBase64String(code) else {
             return false
         }
-        if let recoveryKey = syncCode.recovery {
-            dismissPresentedViewController()
-            await showPreparingSyncAsync()
-            do {
-                try await loginAndShowDeviceConnected(recoveryKey: recoveryKey)
-                return true
-            } catch {
-                await handleRecoveryCodeLoginError(recoveryKey: recoveryKey, error: error)
-            }
+        dismissPresentedViewController()
+        await showPreparingSyncAsync()
+        if let exchangeKey = syncCode.exchangeKey {
+            return await handleExchangeKey(exchangeKey)
+        } else if let recoveryKey = syncCode.recovery {
+            return await handleRecoveryKey(recoveryKey)
         } else if let connectKey = syncCode.connect {
-            dismissPresentedViewController()
-            showPreparingSync()
-            if syncService.account == nil {
-                do {
-                    try await syncService.createAccount(deviceName: deviceName, deviceType: deviceType)
-                    let additionalParameters = source.map { ["source": $0] } ?? [:]
-                    try await Pixel.fire(pixel: .syncSignupConnect, withAdditionalParameters: additionalParameters, includedParameters: [.appVersion])
-                    self.dismissVCAndShowRecoveryPDF()
-                    shouldShowSyncEnabled = false
-                    rootView.model.syncEnabled(recoveryCode: recoveryCode)
-                } catch {
-                    handleError(.unableToSyncToServer, error: error, event: .syncSignupError)
-                }
-            }
-            do {
-                try await syncService.transmitRecoveryKey(connectKey)
-                self.rootView.model.$devices
-                    .removeDuplicates()
-                    .dropFirst()
-                    .prefix(1)
-                    .sink { [weak self] _ in
-                        guard let self else { return }
-                        if shouldShowSyncEnabled {
-                            self.dismissVCAndShowRecoveryPDF()
-                        }
-                    }.store(in: &cancellables)
-            } catch {
-                handleError(.unableToSyncWithDevice, error: error, event: .syncLoginError)
-            }
-
-            return true
+            return await handleConnectKey(connectKey)
         }
         return false
+    }
+    
+    private func handleRecoveryKey(_ recoveryKey: SyncCode.RecoveryKey) async -> Bool {
+        do {
+            try await loginAndShowDeviceConnected(recoveryKey: recoveryKey)
+            return true
+        } catch {
+            await handleRecoveryCodeLoginError(recoveryKey: recoveryKey, error: error)
+            return false
+        }
+    }
+    
+    private func handleExchangeKey(_ exchangeKey: SyncCode.ExchangeKey) async -> Bool {
+        do {
+            print("EXCHANGE DEBUG: Started sending public key")
+            // Step B
+            guard let exchangeInfo = try await self.syncService.transmitExchangeKey(exchangeKey, deviceName: deviceName) else {
+                print("⚠️⚠️ NIL KEYID")
+                return false
+            }
+            // Step E
+            guard let recoveryKey = try await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
+                print("⚠️⚠️ NIL KEY")
+                return false
+            }
+            return await handleRecoveryKey(recoveryKey)
+        } catch {
+            return false
+        }
+    }
+    
+    private func handleConnectKey(_ connectKey: SyncCode.ConnectCode) async -> Bool {
+        var shouldShowSyncEnabled = true
+        
+        if syncService.account == nil {
+            do {
+                try await syncService.createAccount(deviceName: deviceName, deviceType: deviceType)
+                let additionalParameters = source.map { ["source": $0] } ?? [:]
+                try await Pixel.fire(pixel: .syncSignupConnect, withAdditionalParameters: additionalParameters, includedParameters: [.appVersion])
+                self.dismissVCAndShowRecoveryPDF()
+                shouldShowSyncEnabled = false
+                rootView.model.syncEnabled(recoveryCode: recoveryCode)
+            } catch {
+                handleError(.unableToSyncToServer, error: error, event: .syncSignupError)
+            }
+        }
+        do {
+            try await syncService.transmitRecoveryKey(connectKey)
+            self.rootView.model.$devices
+                .removeDuplicates()
+                .dropFirst()
+                .prefix(1)
+                .sink { [weak self] _ in
+                    guard let self else { return }
+                    if shouldShowSyncEnabled {
+                        self.dismissVCAndShowRecoveryPDF()
+                    }
+                }.store(in: &cancellables)
+        } catch {
+            handleError(.unableToSyncWithDevice, error: error, event: .syncLoginError)
+            return false
+        }
+
+        return true
     }
 
     private func handleRecoveryCodeLoginError(recoveryKey: SyncCode.RecoveryKey, error: Error) async {
