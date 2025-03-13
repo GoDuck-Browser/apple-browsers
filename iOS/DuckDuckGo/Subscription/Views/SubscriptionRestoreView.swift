@@ -36,10 +36,10 @@ struct SubscriptionRestoreView: View {
     @Binding var currentView: SubscriptionContainerView.CurrentViewType
     
     private enum Constants {
-        static let heroImage = "ManageSubscriptionHero"
-        static let appleIDIcon = "Platform-Apple-16-subscriptions"
-        static let emailIcon = "Email-16"
-        
+        static let heroImage = "Privacy-Pro-Add-Device-128"
+        static let appleIcon = "ActivateViaApple-16"
+        static let emailIcon = "ActivateViaEmail-16"
+
         static let viewPadding = EdgeInsets(top: 10, leading: 30, bottom: 0, trailing: 30)
         static let sectionSpacing: CGFloat = 16
         static let maxWidth: CGFloat = 768
@@ -151,7 +151,7 @@ struct SubscriptionRestoreView: View {
     private var addViaAppleIDView: some View {
         RoundedCardView(title: UserText.subscriptionActivateViaAppleAccountTitle,
                         description: UserText.subscriptionActivateViaAppleAccountDescription,
-                        imageName: Constants.appleIDIcon,
+                        imageName: Constants.appleIcon,
                         buttonTitle: UserText.subscriptionActivateViaAppleAccountButton,
                         buttonAction: {
             viewModel.restoreAppstoreTransaction()
