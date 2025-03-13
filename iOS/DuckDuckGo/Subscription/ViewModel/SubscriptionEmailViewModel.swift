@@ -54,7 +54,7 @@ final class SubscriptionEmailViewModel: ObservableObject {
         var selectedFeature: SelectedFeature = .none
         var shouldPopToSubscriptionSettings: Bool = false
         var shouldPopToAppSettings: Bool = false
-        var viewTitle = UserText.subscriptionActivateEmailTitle
+        var viewTitle = UserText.subscriptionActivateViewTitle
     }
     
     // Read only View State - Should only be modified from the VM

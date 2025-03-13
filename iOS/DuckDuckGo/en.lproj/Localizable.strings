@@ -2645,23 +2645,8 @@ Take back control of your personal information with the browser designed for dat
 /* No comment provided by engineer. */
 "siteFeedback.urlPlaceholder" = "Which website is broken?";
 
-/* Subscription Activation Info */
-"subscription.activate..header.description" = "Access your Privacy Pro subscription on this device via Apple Account or an email address.";
-
 /* Button for adding email address to subscription */
 "subscription.activate.add.email.button" = "Add Email";
-
-/* Apple Account option for activation */
-"subscription.activate.appleid" = "Apple Account";
-
-/* Button text for restoring purchase via Apple Account */
-"subscription.activate.appleid.button" = "Restore Purchase";
-
-/* Description for Apple Account activation */
-"subscription.activate.appleid.description" = "Restore your purchase to activate your subscription on this device.";
-
-/* Subscription Activation Info */
-"subscription.activate.description" = "Your subscription is automatically available in DuckDuckGo on any device signed in to your Apple Account.";
 
 /* Button for editing email address added to subscription */
 "subscription.activate.edit.email.button" = "Edit Email";
@@ -2669,17 +2654,8 @@ Take back control of your personal information with the browser designed for dat
 /* View Title for editing your email account */
 "subscription.activate.edit.email.title" = "Edit Email";
 
-/* Email option for activation */
-"subscription.activate.email" = "Email";
-
-/* Restore button title for Email */
-"subscription.activate.email.button" = "Enter Email";
-
-/* Description for Email activation */
-"subscription.activate.email.description" = "Use your email to activate your subscription on this device.";
-
-/* Activate subscription title */
-"subscription.activate.email.title" = "Activate Subscription";
+/* Header title for the subscription activation view */
+"subscription.activate.header.title" = "Add your Privacy Pro subscription to this device";
 
 /* Button title for cancelling email deletion */
 "subscription.activate.manage.email.cancel" = "Cancel";
@@ -2687,11 +2663,26 @@ Take back control of your personal information with the browser designed for dat
 /* Button title for confirming email deletion */
 "subscription.activate.manage.email.OK" = "OK";
 
-/* Restore button title for AppleID */
-"subscription.activate.restore.apple" = "Restore Purchase";
+/* Button title for starting the process of adding subscription via Apple Account */
+"subscription.activate.via.apple.account.button" = "Restore Purchase";
 
-/* Subscription Activation Title */
-"subscription.activate.title" = "Activate your subscription on this device";
+/* Description for adding subscription via Apple Account */
+"subscription.activate.via.apple.account.description" = "Restore your subscription on Apple devices using your Apple Account.";
+
+/* Title for adding subscription via Apple Account */
+"subscription.activate.via.apple.account.title" = "Add via Apple Account";
+
+/* Button title for starting the process of adding subscription via email address */
+"subscription.activate.via.email.button" = "Get Started";
+
+/* Description for adding subscription via email address */
+"subscription.activate.via.email.description" = "Use an email address to add Privacy Pro to this device.";
+
+/* Title for adding subscription via email address */
+"subscription.activate.via.email.title" = "Add via email address";
+
+/* View title for activating subscription */
+"subscription.activate.view.title" = "I Have a Subscription";
 
 /* Resend activation instructions button */
 "subscription.add.device.resend.instructions" = "Resend Instructions";

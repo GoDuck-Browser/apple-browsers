@@ -196,7 +196,7 @@ struct SubscriptionSettingsView: View {
 
     @ViewBuilder
     var restorePurchaseView: some View {
-         let text = !settingsViewModel.state.subscription.isRestoring ? UserText.subscriptionActivateAppleIDButton : UserText.subscriptionRestoringTitle
+        let text = !settingsViewModel.state.subscription.isRestoring ? UserText.subscriptionActivateViaAppleAccountButton : UserText.subscriptionRestoringTitle
         SettingsCustomCell(content: {
             Text(text)
                 .daxBodyRegular()
@@ -567,7 +567,7 @@ struct SubscriptionSettingsViewV2: View {
 
     @ViewBuilder
     var restorePurchaseView: some View {
-         let text = !settingsViewModel.state.subscription.isRestoring ? UserText.subscriptionActivateAppleIDButton : UserText.subscriptionRestoringTitle
+        let text = !settingsViewModel.state.subscription.isRestoring ? UserText.subscriptionActivateViaAppleAccountButton : UserText.subscriptionRestoringTitle
         SettingsCustomCell(content: {
             Text(text)
                 .daxBodyRegular()
