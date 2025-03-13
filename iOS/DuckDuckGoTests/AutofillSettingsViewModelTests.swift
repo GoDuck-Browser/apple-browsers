@@ -38,7 +38,8 @@ final class AutofillSettingsViewModelTests: XCTestCase {
         viewModel = AutofillSettingsViewModel(
             appSettings: appSettings,
             autofillNeverPromptWebsitesManager: manager,
-            secureVault: vault
+            secureVault: vault,
+            source: .settings
         )
         viewModel.delegate = mockDelegate
     }
@@ -59,7 +60,8 @@ final class AutofillSettingsViewModelTests: XCTestCase {
         let viewModel = AutofillSettingsViewModel(
             appSettings: appSettings,
             autofillNeverPromptWebsitesManager: manager,
-            secureVault: vault
+            secureVault: vault,
+            source: .settings
         )
         
         // Then
@@ -80,7 +82,8 @@ final class AutofillSettingsViewModelTests: XCTestCase {
         let viewModel = AutofillSettingsViewModel(
             appSettings: appSettings,
             autofillNeverPromptWebsitesManager: manager,
-            secureVault: vault
+            secureVault: vault,
+            source: .settings
         )
         
         // Then
@@ -107,10 +110,11 @@ final class AutofillSettingsViewModelTests: XCTestCase {
         let viewModel = AutofillSettingsViewModel(
             appSettings: appSettings,
             autofillNeverPromptWebsitesManager: manager,
-            secureVault: nil
+            secureVault: nil,
+            source: .settings
         )
         
-        // When/Then - This verifies that no crash occurs when vault is nil
+        // When/Then (handles nil vault)
         viewModel.updatePasswordsCount()
     }
     
@@ -195,7 +199,6 @@ final class AutofillSettingsViewModelTests: XCTestCase {
         // Given
         XCTAssertTrue(manager.deleteAllNeverPromptWebsites())
         XCTAssertNoThrow(try manager.saveNeverPromptWebsite("example.com"))
-        
         viewModel.showingResetConfirmation = true
         
         // When
