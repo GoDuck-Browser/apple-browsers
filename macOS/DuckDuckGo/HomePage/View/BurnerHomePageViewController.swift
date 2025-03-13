@@ -1,5 +1,5 @@
 //
-//  HomePageViewController.swift
+//  BurnerHomePageViewController.swift
 //
 //  Copyright © 2021 DuckDuckGo. All rights reserved.
 //
@@ -20,12 +20,12 @@ import AppKit
 import SwiftUI
 
 @MainActor
-final class HomePageViewController: NSViewController {
+final class BurnerHomePageViewController: NSViewController {
 
     let appearancePreferences: AppearancePreferences
 
     required init?(coder: NSCoder) {
-        fatalError("HomePageViewController: Bad initializer")
+        fatalError("BurnerHomePageViewController: Bad initializer")
     }
 
     init(appearancePreferences: AppearancePreferences = AppearancePreferences.shared) {
@@ -35,7 +35,7 @@ final class HomePageViewController: NSViewController {
     }
 
     override func loadView() {
-        let rootView = HomePage.Views.BurnerHomePageView()
+        let rootView = BurnerHomePageView()
             .environmentObject(appearancePreferences)
 
         self.view = NSHostingView(rootView: rootView)

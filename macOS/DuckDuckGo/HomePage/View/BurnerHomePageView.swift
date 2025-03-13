@@ -19,137 +19,133 @@
 import Foundation
 import SwiftUI
 
-extension HomePage.Views {
+struct BurnerHomePageView: View {
 
-    struct BurnerHomePageView: View {
+    static let targetWidth: CGFloat = 508
+    static let height: CGFloat = 273
+    static let totalHeight: CGFloat = height + 2 * Const.verticalPadding
 
-        static let targetWidth: CGFloat = 508
-        static let height: CGFloat = 273
-        static let totalHeight: CGFloat = height + 2 * Const.verticalPadding
-
-        enum Const {
-            static let verticalPadding = 40.0
-            static let searchBoxVerticalSpacing = 24.0
-        }
-
-
-        @Environment(\.colorScheme) var colorScheme
-        @EnvironmentObject var model: AppearancePreferences
-
-        let backgroundColor = Color(.newTabPageBackground)
-        private var infoBackgroundColor: Color {
-            return colorScheme == .dark ? Color.white.opacity(0.03) : backgroundColor
-        }
-
-        private var infoStrokeColor1: Color {
-            return colorScheme == .dark ? Color.white.opacity(0.03) : Color.clear
-        }
-
-        private var infoStrokeColor2: Color {
-            return colorScheme == .dark ? Color.black.opacity(0.12) : Color.gray.opacity(0.09)
-        }
-
-        private var infoShadowColor: Color {
-            return colorScheme == .dark ? Color.black.opacity(0.12) : Color.black.opacity(0.05)
-        }
-
-        var body: some View {
-            GeometryReader { geometry in
-                ZStack {
-                    ScrollView {
-                        VStack(spacing: Const.searchBoxVerticalSpacing) {
-                            Spacer(minLength: Const.verticalPadding)
-
-                            Group {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.homeFavoritesGhost, style: StrokeStyle(lineWidth: 1.0))
-                                        .background(Color.homeFavoritesBackground)
-                                        .cornerRadius(12)
-
-                                    VStack(alignment: .leading, spacing: 16) {
-                                        HStack {
-                                            Image(.burnerWindowHomepage)
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fit)
-                                                .frame(width: 64, height: 48)
-                                                .padding(.leading, -15)
-                                                .padding(.top, -5)
-
-                                            Text(UserText.burnerWindowHeader)
-                                                .font(.system(size: 22, weight: .bold))
-                                                .foregroundColor(Color.primary)
-                                                .padding(.leading, -10)
-                                        }
-
-                                        FeaturesBox()
-                                            .padding(.top, 10)
-                                    }
-                                    .padding(.horizontal, 40)
-                                }
-                                .frame(height: Self.height)
-                            }
-                            .frame(width: Self.targetWidth)
-
-                            Spacer(minLength: Const.verticalPadding)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: max(geometry.size.height, Self.totalHeight))
-                    }
-                }
-                .background(backgroundColor)
-            }
-        }
+    enum Const {
+        static let verticalPadding = 40.0
+        static let searchBoxVerticalSpacing = 24.0
     }
 
-    struct FeaturesBox: View {
+    @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var model: AppearancePreferences
 
-        var body: some View {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Image(.burnerWindowIcon1)
-                        .resizable()
-                        .frame(width: 16, height: 16)
-                        .foregroundColor(Color.primary)
-                    Text(UserText.burnerHomepageDescription1)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color.primary)
+    let backgroundColor = Color(.newTabPageBackground)
+    private var infoBackgroundColor: Color {
+        return colorScheme == .dark ? Color.white.opacity(0.03) : backgroundColor
+    }
 
+    private var infoStrokeColor1: Color {
+        return colorScheme == .dark ? Color.white.opacity(0.03) : Color.clear
+    }
+
+    private var infoStrokeColor2: Color {
+        return colorScheme == .dark ? Color.black.opacity(0.12) : Color.gray.opacity(0.09)
+    }
+
+    private var infoShadowColor: Color {
+        return colorScheme == .dark ? Color.black.opacity(0.12) : Color.black.opacity(0.05)
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                ScrollView {
+                    VStack(spacing: Const.searchBoxVerticalSpacing) {
+                        Spacer(minLength: Const.verticalPadding)
+
+                        Group {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.homeFavoritesGhost, style: StrokeStyle(lineWidth: 1.0))
+                                    .background(Color.homeFavoritesBackground)
+                                    .cornerRadius(12)
+
+                                VStack(alignment: .leading, spacing: 16) {
+                                    HStack {
+                                        Image(.burnerWindowHomepage)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 64, height: 48)
+                                            .padding(.leading, -15)
+                                            .padding(.top, -5)
+
+                                        Text(UserText.burnerWindowHeader)
+                                            .font(.system(size: 22, weight: .bold))
+                                            .foregroundColor(Color.primary)
+                                            .padding(.leading, -10)
+                                    }
+
+                                    FeaturesBox()
+                                        .padding(.top, 10)
+                                }
+                                .padding(.horizontal, 40)
+                            }
+                            .frame(height: Self.height)
+                        }
+                        .frame(width: Self.targetWidth)
+
+                        Spacer(minLength: Const.verticalPadding)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: max(geometry.size.height, Self.totalHeight))
                 }
+            }
+            .background(backgroundColor)
+        }
+    }
+}
 
-                HStack {
-                    Image(.burnerWindowIcon2)
-                        .resizable()
-                        .frame(width: 16, height: 16)
-                        .foregroundColor(Color.primary)
-                    Text(UserText.burnerHomepageDescription2)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color.primary)
-                }
+struct FeaturesBox: View {
 
-                HStack {
-                    Image(.burnerWindowIcon3)
-                        .resizable()
-                        .frame(width: 16, height: 16)
-                        .foregroundColor(Color.primary)
-                    Text(UserText.burnerHomepageDescription3)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color.primary)
-                }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(.burnerWindowIcon1)
+                    .resizable()
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(Color.primary)
+                Text(UserText.burnerHomepageDescription1)
+                    .font(.system(size: 13))
+                    .foregroundColor(Color.primary)
 
-                Divider()
+            }
 
-                HStack {
-                    Image(.burnerWindowIcon4)
-                        .resizable()
-                        .frame(width: 16, height: 16)
-                        .foregroundColor(Color.primary)
-                        .opacity(0.6)
-                        .padding(.top, -20)
-                    Text(UserText.burnerHomepageDescription4)
-                        .font(.system(size: 13))
-                        .foregroundColor(Color.primary)
-                }
+            HStack {
+                Image(.burnerWindowIcon2)
+                    .resizable()
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(Color.primary)
+                Text(UserText.burnerHomepageDescription2)
+                    .font(.system(size: 13))
+                    .foregroundColor(Color.primary)
+            }
+
+            HStack {
+                Image(.burnerWindowIcon3)
+                    .resizable()
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(Color.primary)
+                Text(UserText.burnerHomepageDescription3)
+                    .font(.system(size: 13))
+                    .foregroundColor(Color.primary)
+            }
+
+            Divider()
+
+            HStack {
+                Image(.burnerWindowIcon4)
+                    .resizable()
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(Color.primary)
+                    .opacity(0.6)
+                    .padding(.top, -20)
+                Text(UserText.burnerHomepageDescription4)
+                    .font(.system(size: 13))
+                    .foregroundColor(Color.primary)
             }
         }
     }

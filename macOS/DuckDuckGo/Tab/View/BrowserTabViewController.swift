@@ -759,7 +759,7 @@ final class BrowserTabViewController: NSViewController {
         transientTabContentViewController?.removeCompletely()
         preferencesViewController?.removeCompletely()
         bookmarksViewController?.removeCompletely()
-        homePageViewController?.removeCompletely()
+        burnerHomePageViewController?.removeCompletely()
         webExtensionWebView?.superview?.removeFromSuperview()
         webExtensionWebView = nil
         dataBrokerProtectionHomeViewController?.removeCompletely()
@@ -814,7 +814,7 @@ final class BrowserTabViewController: NSViewController {
             // We only use HTML New Tab Page in regular windows for now
             if tabCollectionViewModel.isBurner {
                 removeAllTabContent()
-                addAndLayoutChild(homePageViewControllerCreatingIfNeeded())
+                addAndLayoutChild(burnerHomePageViewControllerCreatingIfNeeded())
             } else {
                 updateTabIfNeeded(tabViewModel: tabViewModel)
             }
@@ -918,12 +918,12 @@ final class BrowserTabViewController: NSViewController {
 
     // MARK: - New Tab page
 
-    var homePageViewController: HomePageViewController?
-    private func homePageViewControllerCreatingIfNeeded() -> HomePageViewController {
-        return homePageViewController ?? {
-            let homePageViewController = HomePageViewController()
-            self.homePageViewController = homePageViewController
-            return homePageViewController
+    var burnerHomePageViewController: BurnerHomePageViewController?
+    private func burnerHomePageViewControllerCreatingIfNeeded() -> BurnerHomePageViewController {
+        return burnerHomePageViewController ?? {
+            let burnerHomePageViewController = BurnerHomePageViewController()
+            self.burnerHomePageViewController = burnerHomePageViewController
+            return burnerHomePageViewController
         }()
     }
 

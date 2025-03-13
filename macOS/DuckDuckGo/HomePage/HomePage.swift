@@ -21,9 +21,6 @@ import Foundation
 /// Namespace declaration
 struct HomePage {
 
-    struct Views {
-    }
-
     struct Models {
     }
 
