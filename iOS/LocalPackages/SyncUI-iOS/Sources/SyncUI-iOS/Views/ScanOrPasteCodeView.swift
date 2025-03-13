@@ -129,11 +129,7 @@ public struct ScanOrSeeCode: View {
         }
         .padding(.bottom, 40)
         .onAppear {
-            if let recoveryCode = model.recoveryCode {
-                self.qrCodeModel.code = recoveryCode
-            } else {
-                self.qrCodeModel = model.startConnectMode()
-            }
+            self.qrCodeModel.code = model.code
         }
         .frame(width: width)
     }

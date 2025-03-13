@@ -41,6 +41,10 @@ class SyncSettingsViewController: UIHostingController<SyncSettingsView> {
                                               cancelTitle: UserText.autofillLoginListAuthenticationCancelButton)
     let userSession = UserSession()
     let featureFlagger: FeatureFlagger
+    
+    var isSyncEnabled: Bool {
+        syncService.account != nil
+    }
 
     var recoveryCode: String {
         guard let code = syncService.account?.recoveryCode else {
@@ -324,9 +328,10 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
     func startConnectMode() -> String? {
         // Handle local authentication later
         do {
-            self.connector = try syncService.remoteConnect()
+            let connector = try syncService.remoteConnect()
+            self.connector = connector
             self.startPolling()
-            return self.connector?.code
+            return connector.code
         } catch {
             self.handleError(SyncErrorMessage.unableToSyncToServer, error: error, event: .syncLoginError)
             return nil
@@ -335,9 +340,10 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
     
     func startExchangeMode() -> String? {
         do {
-            self.exchanger = try syncService.remoteExchange()
+            let exchanger = try syncService.remoteExchange()
+            self.exchanger = exchanger
             self.startExchangePolling()
-            return self.exchanger?.code
+            return exchanger.code
         } catch {
             self.handleError(SyncErrorMessage.unableToSyncToServer, error: error, event: .syncLoginError)
             return nil
