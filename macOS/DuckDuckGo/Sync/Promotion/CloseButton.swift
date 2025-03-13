@@ -25,9 +25,9 @@ struct CloseButton: View {
     let backgroundColor: Color
     let backgroundColorOnHover: Color
     let action: () -> Void
-    
+
     @State var isHovering = false
-    
+
     init(icon: NSImage, size: CGFloat, backgroundColor: Color = .clear, backgroundColorOnHover: Color = .homeFavoritesHover, action: @escaping () -> Void) {
         self.icon = icon
         self.size = size
@@ -36,7 +36,7 @@ struct CloseButton: View {
         self.action = action
         self.isHovering = isHovering
     }
-    
+
     var body: some View {
         Button(action: action) {
             ZStack {
