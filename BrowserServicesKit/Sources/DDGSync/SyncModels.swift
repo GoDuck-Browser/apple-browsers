@@ -177,10 +177,10 @@ public struct SyncCode: Codable {
     public var connect: ConnectCode?
     public var exchangeKey: ExchangeKey?
     
-    public init(recovery: RecoveryKey? = nil, connect: ConnectCode? = nil, exchange: ExchangeKey? = nil) {
+    public init(recovery: RecoveryKey? = nil, connect: ConnectCode? = nil, exchangeKey: ExchangeKey? = nil) {
         self.recovery = recovery
         self.connect = connect
-        self.exchangeKey = exchange
+        self.exchangeKey = exchangeKey
     }
 
     public static func decode(_ data: Data) throws -> Self {

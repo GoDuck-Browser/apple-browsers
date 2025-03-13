@@ -165,8 +165,7 @@ public class DDGSync: DDGSyncing {
     
     // Step A + C
     public func remoteExchange() throws -> RemoteExchanging {
-        let info = try dependencies.crypter.prepareForExchange()
-        return try dependencies.createRemoteExchanger(info)
+        return try dependencies.createRemoteExchanger()
     }
     
     // Step E Needs ExchangeInfo

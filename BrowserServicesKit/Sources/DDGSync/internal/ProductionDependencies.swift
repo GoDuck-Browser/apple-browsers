@@ -74,12 +74,11 @@ struct ProductionDependencies: SyncDependencies {
         return try RemoteConnector(crypter: crypter, api: api, endpoints: endpoints, connectInfo: info)
     }
     
-    func createRemoteExchanger(_ exchangeInfo: ExchangeInfo) throws -> any RemoteExchanging {
+    func createRemoteExchanger() throws -> any RemoteExchanging {
         return try RemoteExchanger(
             crypter: crypter,
             api: api,
-            endpoints: endpoints,
-            exchangeInfo: exchangeInfo
+            endpoints: endpoints
         )
     }
     

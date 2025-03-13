@@ -33,12 +33,11 @@ final class RemoteExchanger: RemoteExchanging {
     // TODO: Just use the Crypter internally
     init(crypter: CryptingInternal,
          api: RemoteAPIRequestCreating,
-         endpoints: Endpoints,
-         exchangeInfo: ExchangeInfo) throws {
+         endpoints: Endpoints) throws {
         self.crypter = crypter
         self.api = api
         self.endpoints = endpoints
-        self.exchangeInfo = exchangeInfo
+        self.exchangeInfo = try crypter.prepareForExchange()
         self.code = try exchangeInfo.toCode()
     }
     
@@ -228,7 +227,7 @@ final class RemoteExchangeRecoverer: RemoteExchangeRecovering {
 extension ExchangeInfo {
 
     func toCode() throws -> String {
-        return try SyncCode(exchange: .init(keyId: keyId, publicKey: publicKey))
+        return try SyncCode(exchangeKey: .init(keyId: keyId, publicKey: publicKey))
             .toJSON()
             .base64EncodedString()
     }
