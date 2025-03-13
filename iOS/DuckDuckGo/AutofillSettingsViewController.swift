@@ -43,10 +43,10 @@ protocol AutofillSettingsViewControllerDelegate: AnyObject {
     func autofillSettingsViewControllerDidFinish(_ controller: AutofillSettingsViewController)
 }
 
-class AutofillSettingsViewController: UIViewController {
-
+final class AutofillSettingsViewController: UIViewController {
+    
     weak var delegate: AutofillSettingsViewControllerDelegate?
-
+    
     private let appSettings: AppSettings
     private let syncService: DDGSyncing
     private let syncDataProviders: SyncDataProviders
@@ -54,7 +54,7 @@ class AutofillSettingsViewController: UIViewController {
     private let source: AutofillSettingsSource
     private let bookmarksDatabase: CoreDataDatabase
     private let favoritesDisplayMode: FavoritesDisplayMode
-
+    
     init(appSettings: AppSettings,
          syncService: DDGSyncing,
          syncDataProviders: SyncDataProviders,
@@ -70,36 +70,36 @@ class AutofillSettingsViewController: UIViewController {
         self.source = source
         self.bookmarksDatabase = bookmarksDatabase
         self.favoritesDisplayMode = favoritesDisplayMode
-
+        
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         setupView()
-
+        
         title = UserText.settingsLogins
-
+        
         if selectedAccount != nil {
             segueToPasswords()
         }
     }
-
+    
     private func setupView() {
-        let viewModel = AutofillSettingsViewModel(appSettings: appSettings)
+        let viewModel = AutofillSettingsViewModel(appSettings: appSettings, source: source)
         viewModel.delegate = self
-
+        
         let controller = UIHostingController(rootView: AutofillSettingsView(viewModel: viewModel))
         controller.view.backgroundColor = .clear
         installChildViewController(controller)
     }
-
-    func segueToPasswords() {
+    
+    private func segueToPasswords() {
         let autofillLoginListViewController = AutofillLoginListViewController(
             appSettings: appSettings,
             currentTabUrl: nil,
@@ -114,7 +114,7 @@ class AutofillSettingsViewController: UIViewController {
         )
         navigationController?.pushViewController(autofillLoginListViewController, animated: true)
     }
-
+    
     private func segueToFileImport() {
         let dataImportManager = DataImportManager(reporter: SecureVaultReporter(),
                                                   bookmarksDatabase: bookmarksDatabase,
@@ -126,13 +126,13 @@ class AutofillSettingsViewController: UIViewController {
         dataImportViewController.delegate = self
         navigationController?.pushViewController(dataImportViewController, animated: true)
     }
-
+    
     private func segueToImportViaSync() {
         let importController = ImportPasswordsViaSyncViewController(syncService: syncService)
         importController.delegate = self
         navigationController?.pushViewController(importController, animated: true)
     }
-
+    
     private func segueToSync(source: String? = nil) {
         if let settingsVC = self.navigationController?.children.first as? SettingsHostingController {
             navigationController?.popToRootViewController(animated: true)
@@ -152,38 +152,38 @@ class AutofillSettingsViewController: UIViewController {
 // MARK: AutofillSettingsViewModelDelegate
 
 extension AutofillSettingsViewController: AutofillSettingsViewModelDelegate {
-
+    
     func navigateToFileImport(viewModel: AutofillSettingsViewModel) {
         segueToFileImport()
     }
-
+    
     func navigateToImportViaSync(viewModel: AutofillSettingsViewModel) {
         segueToImportViaSync()
     }
-
+    
     func navigateToPasswords(viewModel: AutofillSettingsViewModel) {
         segueToPasswords()
     }
-
+    
 }
 
 // MARK: DataImportViewControllerDelegate
 
 extension AutofillSettingsViewController: DataImportViewControllerDelegate {
-
+    
     func dataImportViewControllerDidFinish(_ controller: DataImportViewController) {
         AppDependencyProvider.shared.autofillLoginSession.startSession()
         segueToPasswords()
     }
-
+    
 }
 
 // MARK: ImportPasswordsViaSyncViewController
 
 extension AutofillSettingsViewController: ImportPasswordsViaSyncViewControllerDelegate {
-
+    
     func importPasswordsViaSyncViewControllerDidRequestOpenSync(_ viewController: ImportPasswordsViaSyncViewController) {
         segueToSync()
     }
-
+    
 }

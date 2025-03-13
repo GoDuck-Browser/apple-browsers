@@ -30,9 +30,9 @@ protocol AutofillSettingsViewModelDelegate: AnyObject {
 }
 
 final class AutofillSettingsViewModel: ObservableObject {
-
+    
     weak var delegate: AutofillSettingsViewModelDelegate?
-
+    
     private let autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager
     private let appSettings: AppSettings
     private let keyValueStore: KeyValueStoringDictionaryRepresentable
@@ -41,15 +41,21 @@ final class AutofillSettingsViewModel: ObservableObject {
     @Published var showingResetConfirmation = false
     
     @Published var passwordsCount: Int?
-    
     @Published var savePasswordsEnabled: Bool {
         didSet {
             appSettings.autofillCredentialsEnabled = savePasswordsEnabled
             keyValueStore.set(false, forKey: UserDefaultsWrapper<Bool>.Key.autofillFirstTimeUser.rawValue)
             NotificationCenter.default.post(name: AppUserDefaults.Notifications.autofillEnabledChange, object: self)
+            
+            if savePasswordsEnabled {
+                Pixel.fire(pixel: .autofillLoginsSettingsEnabled)
+            } else {
+                Pixel.fire(pixel: .autofillLoginsSettingsDisabled, withAdditionalParameters: ["source": source.rawValue])
+            }
         }
     }
-
+    @Published var showingResetConfirmation = false
+    
     init(appSettings: AppSettings = AppDependencyProvider.shared.appSettings,
          keyValueStore: KeyValueStoringDictionaryRepresentable = UserDefaults.standard,
          autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager = AppDependencyProvider.shared.autofillNeverPromptWebsitesManager,
@@ -62,7 +68,7 @@ final class AutofillSettingsViewModel: ObservableObject {
         savePasswordsEnabled = appSettings.autofillCredentialsEnabled
         updatePasswordsCount()
     }
-
+    
     func updatePasswordsCount() {
         if secureVault == nil {
             do {
@@ -72,61 +78,65 @@ final class AutofillSettingsViewModel: ObservableObject {
                 return
             }
         }
-
+        
         guard let vault = secureVault else {
             passwordsCount = nil
             return
         }
-
+        
         do {
             passwordsCount = try vault.accountsCount()
         } catch {
             passwordsCount = nil
         }
     }
-
+    
     func footerAttributedString() -> AttributedString {
         let markdownString = UserText.autofillLoginListSettingsFooterMarkdown
 
         do {
             var attributedString = try AttributedString(markdown: markdownString)
             attributedString.foregroundColor = Color(designSystemColor: .accent)
-
+            
             return attributedString
         } catch {
             return ""
         }
     }
-
+    
+    // MARK: - Navigation
+    
     func navigateToPasswords() {
         delegate?.navigateToPasswords(viewModel: self)
     }
-
+    
     func navigateToFileImport() {
         delegate?.navigateToFileImport(viewModel: self)
     }
-
+    
     func navigateToImportViaSync() {
         delegate?.navigateToImportViaSync(viewModel: self)
     }
-
+    
+    func shouldShowNeverPromptReset() -> Bool {
+        !autofillNeverPromptWebsitesManager.neverPromptWebsites.isEmpty
+    }
+    
+    // MARK: - Reset Excluded Sites
+    
     func resetExcludedSites() {
         showingResetConfirmation = true
         Pixel.fire(pixel: .autofillLoginsSettingsResetExcludedDisplayed)
     }
-
+    
     func confirmResetExcludedSites() {
         _ = autofillNeverPromptWebsitesManager.deleteAllNeverPromptWebsites()
+        showingResetConfirmation = false
         Pixel.fire(pixel: .autofillLoginsSettingsResetExcludedConfirmed)
-        showingResetConfirmation = false
     }
-
+    
     func cancelResetExcludedSites() {
-        Pixel.fire(pixel: .autofillLoginsSettingsResetExcludedDismissed)
         showingResetConfirmation = false
-    }
-
-    func shouldShowNeverPromptReset() -> Bool {
-        !autofillNeverPromptWebsitesManager.neverPromptWebsites.isEmpty
+        Pixel.fire(pixel: .autofillLoginsSettingsResetExcludedDismissed)
     }
 }

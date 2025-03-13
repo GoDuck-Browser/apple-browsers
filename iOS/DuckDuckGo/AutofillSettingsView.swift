@@ -21,9 +21,9 @@ import SwiftUI
 import DesignResourcesKit
 
 struct AutofillSettingsView: View {
-
-    @ObservedObject var viewModel = AutofillSettingsViewModel()
-
+    
+    @ObservedObject var viewModel: AutofillSettingsViewModel
+    
     var body: some View {
         List {
             Section(header: Text(UserText.autofillSettingsViewSectionHeader).foregroundColor(.secondary)) {
@@ -36,21 +36,20 @@ struct AutofillSettingsView: View {
                         Text(UserText.autofillLoginListTitle)
                             .daxBodyRegular()
                             .foregroundColor(Color(designSystemColor: .textPrimary))
-
+                        
                         Spacer()
-
+                        
                         if let passwordsCount = viewModel.passwordsCount {
                             Text("\(passwordsCount)")
                                 .daxBodyRegular()
                                 .foregroundColor(Color(designSystemColor: .textSecondary))
                         }
-
+                        
                         Image(systemName: "chevron.forward")
                             .font(Font.system(.footnote).weight(.bold))
                             .foregroundColor(Color(UIColor.tertiaryLabel))
                     }
                 }
-                .foregroundColor(.primary)
             }
             
             Section(header: Text(UserText.autofillSettingsAskToSaveAndAutofill).foregroundColor(.secondary).daxFootnoteRegular(),
@@ -86,10 +85,9 @@ struct AutofillSettingsView: View {
                             .daxBodyRegular()
                             .foregroundColor(Color(designSystemColor: .accent))
                     }
-
                 }
             }
-
+            
             if viewModel.shouldShowNeverPromptReset() {
                 Section(header: Text(UserText.autofillSettingsOptionsSectionHeader).foregroundColor(.secondary)) {
                     Button {
@@ -121,23 +119,23 @@ struct AutofillSettingsView: View {
             viewModel.updatePasswordsCount()
         }
     }
-
-    struct PasswordFooterView: View {
+    
+    private struct PasswordFooterView: View {
         let viewModel: AutofillSettingsViewModel
-
+        
         var body: some View {
             return (Text(Image(.lockSolid16)).baselineOffset(-1.0).foregroundColor(.secondary)
                     + Text(verbatim: " ")
-                    + Text(UserText.autofillLoginListSettingsFooterFallback).foregroundColor(.secondary)
+                    + Text(UserText.autofillLoginListSettingsFooter).foregroundColor(.secondary)
                     + Text(verbatim: " ")
                     + Text(viewModel.footerAttributedString())
             )
-                .daxFootnoteRegular()
-                .lineSpacing(2)
+            .daxFootnoteRegular()
+            .lineSpacing(2)
         }
     }
 }
 
 #Preview {
-    AutofillSettingsView()
+    AutofillSettingsView(viewModel: AutofillSettingsViewModel(source: .settings))
 }
