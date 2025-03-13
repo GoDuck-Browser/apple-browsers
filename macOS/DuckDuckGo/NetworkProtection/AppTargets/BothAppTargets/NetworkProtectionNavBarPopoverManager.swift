@@ -247,8 +247,13 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
                 isMenuBarStatusView: false,
                 userDefaults: .netP,
                 locationFormatter: DefaultVPNLocationFormatter(),
-                uninstallHandler: { [weak self] in
-                    _ = try? await self?.vpnUninstaller.uninstall(removeSystemExtension: true)
+                uninstallHandler: { [weak self] reason in
+
+                    let showNotification = reason == .expiration
+
+                    try? await self?.vpnUninstaller.uninstall(
+                        removeSystemExtension: true,
+                        showNotification: showNotification)
                 })
 
             let tipsModel = VPNTipsModel(statusObserver: statusReporter.statusObserver,

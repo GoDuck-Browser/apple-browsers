@@ -448,11 +448,11 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
             isExtensionUpdateOfferedPublisher: isExtensionUpdateOfferedPublisher,
             userDefaults: .netP,
             locationFormatter: DefaultVPNLocationFormatter(),
-            uninstallHandler: { [weak self] in
+            uninstallHandler: { [weak self] _ in
                 guard let self else { return }
 
                 do {
-                    try await self.vpnUninstaller.uninstall()
+                    try await self.vpnUninstaller.uninstall(showNotification: true)
                     exit(EXIT_SUCCESS)
                 } catch {
                     // Intentional no-op: we already anonymously track VPN uninstallation failures using

@@ -23,7 +23,7 @@ import PixelKit
 import SystemExtensions
 
 protocol VPNUninstalling {
-    func uninstall() async throws
+    func uninstall(showNotification: Bool) async throws
     func removeSystemExtension() async throws
     func removeVPNConfiguration() async throws
 }
@@ -47,7 +47,7 @@ final class VPNUninstaller: VPNUninstalling {
         self.pixelKit = pixelKit
     }
 
-    func uninstall() async throws {
+    func uninstall(showNotification: Bool) async throws {
         pixelKit?.fire(VPNUninstallAttempt.begin, frequency: .legacyDailyAndCount)
 
         do {
@@ -58,7 +58,10 @@ final class VPNUninstaller: VPNUninstalling {
 
             await resetOnboardingStatus()
 
-            defaults.networkProtectionShouldShowVPNUninstalledMessage = true
+            if showNotification {
+                defaults.networkProtectionShouldShowVPNUninstalledMessage = true
+            }
+
             pixelKit?.fire(VPNUninstallAttempt.success, frequency: .legacyDailyAndCount)
         } catch {
             switch error {

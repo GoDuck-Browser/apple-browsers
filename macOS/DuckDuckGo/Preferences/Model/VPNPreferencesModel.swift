@@ -299,7 +299,9 @@ final class VPNPreferencesModel: ObservableObject {
 
         switch response {
         case .OK:
-            try? await VPNUninstaller().uninstall(removeSystemExtension: true)
+            try? await VPNUninstaller().uninstall(
+                removeSystemExtension: true,
+                showNotification: true)
         default:
             // intentional no-op
             break

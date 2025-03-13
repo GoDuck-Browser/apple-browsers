@@ -51,6 +51,25 @@ extension NetworkProtectionStatusView {
             }
         }
 
+        /// Reason why the VPN is being uninstalled
+        ///
+        /// This is useful for the VPN update for App Store users, but it might make sense
+        /// to remove this enum once that's no longer necessary.
+        ///
+        public enum UninstallReason {
+            /// The subscription expired and the user is given an option to uninstall the VPN.
+            ///
+            case expiration
+
+            /// The user chose to update their VPN.
+            ///
+            /// Currently used for the App Store VPN update that restores exclusions.
+            ///
+            case update
+        }
+
+        public typealias UninstallHandler = (UninstallReason) async -> Void
+
         /// The NetP service.
         ///
         private let tunnelController: TunnelController
@@ -99,7 +118,7 @@ extension NetworkProtectionStatusView {
 
         private let uiActionHandler: VPNUIActionHandling
 
-        private let uninstallHandler: () async -> Void
+        private let uninstallHandler: UninstallHandler
 
         private var cancellables = Set<AnyCancellable>()
 
@@ -124,7 +143,7 @@ extension NetworkProtectionStatusView {
                     runLoopMode: RunLoop.Mode? = nil,
                     userDefaults: UserDefaults,
                     locationFormatter: VPNLocationFormatting,
-                    uninstallHandler: @escaping () async -> Void) {
+                    uninstallHandler: @escaping UninstallHandler) {
 
             self.tunnelController = controller
             self.onboardingStatusPublisher = onboardingStatusPublisher
@@ -203,7 +222,7 @@ extension NetworkProtectionStatusView {
 
         func uninstallVPN() {
             Task {
-                await uninstallHandler()
+                await uninstallHandler(.expiration)
             }
         }
 
@@ -370,7 +389,7 @@ extension NetworkProtectionStatusView {
                             guard let strongSelf = self else { return }
 
                             Task {
-                                await strongSelf.uninstallHandler()
+                                await strongSelf.uninstallHandler(.update)
                             }
                         }
                 }

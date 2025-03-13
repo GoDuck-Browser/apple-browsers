@@ -32,6 +32,7 @@ import VPNAppState
 @objc
 public final class StatusBarMenu: NSObject {
     public typealias MenuItem = NetworkProtectionStatusView.Model.MenuItem
+    public typealias UninstallHandler = NetworkProtectionStatusView.Model.UninstallHandler
 
     private let model: StatusBarMenuModel
 
@@ -48,7 +49,7 @@ public final class StatusBarMenu: NSObject {
     private let isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never>
     private let userDefaults: UserDefaults
     private let locationFormatter: VPNLocationFormatting
-    private let uninstallHandler: () async -> Void
+    private let uninstallHandler: UninstallHandler
 
     // MARK: - NetP Icon publisher
 
@@ -76,7 +77,7 @@ public final class StatusBarMenu: NSObject {
                 isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never>,
                 userDefaults: UserDefaults,
                 locationFormatter: VPNLocationFormatting,
-                uninstallHandler: @escaping () async -> Void) {
+                uninstallHandler: @escaping UninstallHandler) {
 
         self.model = model
         let statusItem = statusItem ?? NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
