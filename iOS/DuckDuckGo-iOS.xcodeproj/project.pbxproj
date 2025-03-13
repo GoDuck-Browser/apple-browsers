@@ -704,6 +704,7 @@
 		982995A22CE64DC1004126D2 /* WebViewWarmupHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9853D6F72CE6434D0044326C /* WebViewWarmupHelper.swift */; };
 		982C87C42255559A00919035 /* UITableViewCellExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 982C87C32255559A00919035 /* UITableViewCellExtension.swift */; };
 		982E5630222C3D5B008D861B /* FeedbackPickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 982E562F222C3D5B008D861B /* FeedbackPickerViewController.swift */; };
+		982F28DE2D82C090003E05A2 /* KeyValueFileStorePerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 982F28DD2D82C080003E05A2 /* KeyValueFileStorePerformanceTests.swift */; };
 		9830A06325ED0DB900DB64DE /* BrowsingMenu.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9830A06225ED0DB900DB64DE /* BrowsingMenu.xcassets */; };
 		9833913727AC400800DAF119 /* AppTrackerDataSetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9833913627AC400800DAF119 /* AppTrackerDataSetProvider.swift */; };
 		9838059F2228208E00385F1A /* PositiveFeedbackViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9838059E2228208E00385F1A /* PositiveFeedbackViewController.swift */; };
@@ -2232,6 +2233,7 @@
 		982C87C32255559A00919035 /* UITableViewCellExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableViewCellExtension.swift; sourceTree = "<group>"; };
 		982E562D222C39F8008D861B /* Feedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Feedback.swift; sourceTree = "<group>"; };
 		982E562F222C3D5B008D861B /* FeedbackPickerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackPickerViewController.swift; sourceTree = "<group>"; };
+		982F28DD2D82C080003E05A2 /* KeyValueFileStorePerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyValueFileStorePerformanceTests.swift; sourceTree = "<group>"; };
 		982F402C251EAC4A009D48CD /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		982F402D251EAC4A009D48CD /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		982F402F251EAC4A009D48CD /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -5259,6 +5261,7 @@
 		9825F9D9293F2E5F00F220F2 /* PerformanceTests */ = {
 			isa = PBXGroup;
 			children = (
+				982F28DD2D82C080003E05A2 /* KeyValueFileStorePerformanceTests.swift */,
 				98BFA910294A2086004EA636 /* bookmarks_3k.html */,
 				98D4B7E22949C4270068814D /* bookmarks_30k.html */,
 				9825F9DA293F2E8700F220F2 /* BookmarksTestData.swift */,
@@ -9307,6 +9310,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				98D4B7E52949EFCE0068814D /* BookmarksExportPerformanceTests.swift in Sources */,
+				982F28DE2D82C090003E05A2 /* KeyValueFileStorePerformanceTests.swift in Sources */,
 				98D4B7DA294407AC0068814D /* BookmarksSearchPerformanceTests.swift in Sources */,
 				986B45CB299D5EF50089D2D7 /* BookmarksLookupPerformanceTests.swift in Sources */,
 				98D4B7E12949C3E80068814D /* BookmarksImportPerformanceTests.swift in Sources */,
@@ -11029,7 +11033,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = "IntegrationTests copy-Info.plist";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -11059,7 +11064,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = "IntegrationTests copy-Info.plist";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -11728,7 +11734,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = "IntegrationTests copy-Info.plist";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -12125,7 +12132,8 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = "IntegrationTests copy-Info.plist";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
