@@ -641,35 +641,11 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                 presentDialog(for: .prepareToSync)
                 
                 if let exchangeKey = syncCode.exchangeKey {
-                    // Step B
-                    guard let exchangeInfo = try await self.syncService.transmitExchangeKey(exchangeKey, deviceName: deviceInfo().name) else {
-                        print("⚠️⚠️ NIL KEYID")
-                        return
-                    }
-                    // Step E
-                    guard let recoveryKey = try await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
-                        print("⚠️⚠️ NIL KEY")
-                        return
-                    }
-                    do {
-                        try await loginAndShowPresentedDialog(recoveryKey, isRecovery: false)
-                    } catch {
-                        if case SyncError.accountAlreadyExists = error,
-                            featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
-                            handleAccountAlreadyExists(recoveryKey)
-                        } else if case SyncError.accountAlreadyExists = error {
-                            managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToMergeTwoAccounts, description: "")
-                            PixelKit.fire(DebugEvent(GeneralPixel.syncLoginExistingAccountError(error: error)))
-                        } else {
-                            managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToSyncToOtherDevice)
-                        }
-                    }
+                    try await handleExchangeKey(exchangeKey)
                 } else if let connectKey = syncCode.connect {
-                    print("EXCHANGE DEBUG: Found connectKey \(connectKey)")
+                    await handleConnectKey(connectKey, code: exchangeCode)
                 } else if let recoveryKey = syncCode.recovery {
-                    print("EXCHANGE DEBUG: Found recoveryKey \(recoveryKey)")
-                    // TODO: What do we do here?
-                    // ANSWER: REVERT TO NORMAL RECOVERY
+                    await handleRecoveryKey(recoveryKey)
                 }
             } catch {
                 print("EXCHANGE DEBUG: Error \(error)")
@@ -685,49 +661,85 @@ extension SyncPreferences: ManagementDialogModelDelegate {
             }
             presentDialog(for: .prepareToSync)
             if let recoveryKey = syncCode.recovery {
-                do {
-                    try await loginAndShowPresentedDialog(recoveryKey, isRecovery: true)
-                } catch {
-                    if case SyncError.accountAlreadyExists = error,
-                        featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
-                        handleAccountAlreadyExists(recoveryKey)
-                    } else if case SyncError.accountAlreadyExists = error {
-                        managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToMergeTwoAccounts, description: "")
-                        PixelKit.fire(DebugEvent(GeneralPixel.syncLoginExistingAccountError(error: error)))
-                    } else {
-                        managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToSyncToOtherDevice)
-                    }
-                }
+                await handleRecoveryKey(recoveryKey)
             } else if let connectKey = syncCode.connect {
-                do {
-                    if syncService.account == nil {
-                        let device = deviceInfo()
-                        try await syncService.createAccount(deviceName: device.name, deviceType: device.type)
-                        let additionalParameters = syncPromoSource.map { ["source": $0] } ?? [:]
-                        PixelKit.fire(GeneralPixel.syncSignupConnect, withAdditionalParameters: additionalParameters)
-                        presentDialog(for: .saveRecoveryCode(recoveryCode))
-                    }
-
-                    try await syncService.transmitRecoveryKey(connectKey)
-                    self.$devices
-                        .removeDuplicates()
-                        .dropFirst()
-                        .prefix(1)
-                        .sink { [weak self] _ in
-                            guard let self else { return }
-                            self.presentDialog(for: .saveRecoveryCode(recoveryCode))
-                        }.store(in: &cancellables)
-                    // The UI will update when the devices list changes.
-                } catch {
-                    managementDialogModel.syncErrorMessage = SyncErrorMessage(
-                        type: .unableToSyncToOtherDevice,
-                        description: error.localizedDescription
-                    )
-                    PixelKit.fire(DebugEvent(GeneralPixel.syncLoginError(error: error)))
-                }
+                await handleConnectKey(connectKey, code: recoveryCode)
             } else {
                 managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .invalidCode, description: "")
                 return
+            }
+        }
+    }
+    
+    private func handleRecoveryKey(_ recoveryKey: SyncCode.RecoveryKey) async {
+        do {
+            try await loginAndShowPresentedDialog(recoveryKey, isRecovery: true)
+        } catch {
+            if case SyncError.accountAlreadyExists = error,
+                featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
+                handleAccountAlreadyExists(recoveryKey)
+            } else if case SyncError.accountAlreadyExists = error {
+                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToMergeTwoAccounts, description: "")
+                PixelKit.fire(DebugEvent(GeneralPixel.syncLoginExistingAccountError(error: error)))
+            } else {
+                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToSyncToOtherDevice)
+            }
+        }
+    }
+    
+    private func handleConnectKey(_ connectKey: SyncCode.ConnectCode, code: String) async {
+        do {
+            if syncService.account == nil {
+                let device = deviceInfo()
+                try await syncService.createAccount(deviceName: device.name, deviceType: device.type)
+                let additionalParameters = syncPromoSource.map { ["source": $0] } ?? [:]
+                PixelKit.fire(GeneralPixel.syncSignupConnect, withAdditionalParameters: additionalParameters)
+                await presentDialog(for: .saveRecoveryCode(code))
+            }
+
+            try await syncService.transmitRecoveryKey(connectKey)
+            self.$devices
+                .removeDuplicates()
+                .dropFirst()
+                .prefix(1)
+                .sink { [weak self] _ in
+                    guard let self else { return }
+                    Task {
+                        await self.presentDialog(for: .saveRecoveryCode(code))
+                    }
+                }.store(in: &cancellables)
+            // The UI will update when the devices list changes.
+        } catch {
+            managementDialogModel.syncErrorMessage = SyncErrorMessage(
+                type: .unableToSyncToOtherDevice,
+                description: error.localizedDescription
+            )
+            PixelKit.fire(DebugEvent(GeneralPixel.syncLoginError(error: error)))
+        }
+    }
+    
+    private func handleExchangeKey(_ exchangeKey: SyncCode.ExchangeKey) async throws {
+        // Step B
+        guard let exchangeInfo = try await self.syncService.transmitExchangeKey(exchangeKey, deviceName: deviceInfo().name) else {
+            print("⚠️⚠️ NIL KEYID")
+            return
+        }
+        // Step E
+        guard let recoveryKey = try await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
+            print("⚠️⚠️ NIL KEY")
+            return
+        }
+        do {
+            try await loginAndShowPresentedDialog(recoveryKey, isRecovery: false)
+        } catch {
+            if case SyncError.accountAlreadyExists = error,
+                featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
+                handleAccountAlreadyExists(recoveryKey)
+            } else if case SyncError.accountAlreadyExists = error {
+                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToMergeTwoAccounts, description: "")
+                PixelKit.fire(DebugEvent(GeneralPixel.syncLoginExistingAccountError(error: error)))
+            } else {
+                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToSyncToOtherDevice)
             }
         }
     }
