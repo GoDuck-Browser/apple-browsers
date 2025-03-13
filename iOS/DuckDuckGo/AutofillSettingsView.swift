@@ -39,6 +39,12 @@ struct AutofillSettingsView: View {
 
                         Spacer()
 
+                        if let passwordsCount = viewModel.passwordsCount {
+                            Text("\(passwordsCount)")
+                                .daxBodyRegular()
+                                .foregroundColor(Color(designSystemColor: .textSecondary))
+                        }
+
                         Image(systemName: "chevron.forward")
                             .font(Font.system(.footnote).weight(.bold))
                             .foregroundColor(Color(UIColor.tertiaryLabel))
@@ -46,6 +52,16 @@ struct AutofillSettingsView: View {
                 }
                 .foregroundColor(.primary)
             }
+            
+            Section(header: Text(UserText.autofillSettingsAskToSaveAndAutofill).foregroundColor(.secondary).daxFootnoteRegular(),
+                    footer: PasswordFooterView(viewModel: viewModel)) {
+                Toggle(UserText.autofillLoginListTitle, isOn: $viewModel.savePasswordsEnabled)
+                    .toggleStyle(.switch)
+                    .tint(Color(designSystemColor: .accent))
+                    .foregroundColor(Color(designSystemColor: .textPrimary))
+                    .daxBodyRegular()
+            }
+            
             Section(header: Text(UserText.autofillSettingsImportPasswordsSectionHeader).foregroundColor(.secondary)) {
                 if #available(iOS 18.2, *) {
                     Button {
@@ -74,15 +90,6 @@ struct AutofillSettingsView: View {
                 }
             }
 
-            Section(header: Text(UserText.autofillSettingsAskToSaveAndAutofill).foregroundColor(.secondary).daxFootnoteRegular(),
-                    footer: PasswordFooterView(viewModel: viewModel)) {
-                Toggle(UserText.autofillLoginListTitle, isOn: $viewModel.savePasswordsEnabled)
-                    .toggleStyle(.switch)
-                    .tint(Color(designSystemColor: .accent))
-                    .foregroundColor(Color(designSystemColor: .textPrimary))
-                    .daxBodyRegular()
-            }
-
             if viewModel.shouldShowNeverPromptReset() {
                 Section(header: Text(UserText.autofillSettingsOptionsSectionHeader).foregroundColor(.secondary)) {
                     Button {
@@ -109,6 +116,9 @@ struct AutofillSettingsView: View {
             }
         } message: {
             Text(UserText.autofillResetNeverSavedActionTitle)
+        }
+        .onAppear {
+            viewModel.updatePasswordsCount()
         }
     }
 

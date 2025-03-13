@@ -21,6 +21,7 @@ import Foundation
 import Core
 import PrivacyDashboard
 import SwiftUI
+import BrowserServicesKit
 
 protocol AutofillSettingsViewModelDelegate: AnyObject {
     func navigateToPasswords(viewModel: AutofillSettingsViewModel)
@@ -35,8 +36,11 @@ final class AutofillSettingsViewModel: ObservableObject {
     private let autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager
     private let appSettings: AppSettings
     private let keyValueStore: KeyValueStoringDictionaryRepresentable
+    private var secureVault: (any AutofillSecureVault)?
 
     @Published var showingResetConfirmation = false
+    
+    @Published var passwordsCount: Int?
     
     @Published var savePasswordsEnabled: Bool {
         didSet {
@@ -48,18 +52,36 @@ final class AutofillSettingsViewModel: ObservableObject {
 
     init(appSettings: AppSettings = AppDependencyProvider.shared.appSettings,
          keyValueStore: KeyValueStoringDictionaryRepresentable = UserDefaults.standard,
-         autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager = AppDependencyProvider.shared.autofillNeverPromptWebsitesManager) {
+         autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager = AppDependencyProvider.shared.autofillNeverPromptWebsitesManager,
+         secureVault: (any AutofillSecureVault)? = nil) {
         self.autofillNeverPromptWebsitesManager = autofillNeverPromptWebsitesManager
         self.appSettings = appSettings
         self.keyValueStore = keyValueStore
+        self.secureVault = secureVault
 
         savePasswordsEnabled = appSettings.autofillCredentialsEnabled
+        updatePasswordsCount()
+    }
 
-        if savePasswordsEnabled {
-            Pixel.fire(pixel: .autofillLoginsSettingsEnabled)
-        } else {
-            // TODO
-//            Pixel.fire(pixel: .autofillLoginsSettingsDisabled, withAdditionalParameters: ["source": source.rawValue])
+    func updatePasswordsCount() {
+        if secureVault == nil {
+            do {
+                secureVault = try AutofillSecureVaultFactory.makeVault(reporter: SecureVaultReporter())
+            } catch {
+                passwordsCount = nil
+                return
+            }
+        }
+
+        guard let vault = secureVault else {
+            passwordsCount = nil
+            return
+        }
+
+        do {
+            passwordsCount = try vault.accountsCount()
+        } catch {
+            passwordsCount = nil
         }
     }
 
