@@ -33,6 +33,7 @@ protocol WebViewHandler: NSObject {
     func execute(action: Action, data: CCFRequestData) async
     func evaluateJavaScript(_ javaScript: String) async throws
     func setCookies(_ cookies: [HTTPCookie]) async
+    func addUserScript(_ script: WKUserScript) async
 }
 
 @MainActor
@@ -60,6 +61,10 @@ final class DataBrokerProtectionWebViewHandler: NSObject, WebViewHandler {
         let userContentController = configuration.userContentController as? DataBrokerUserContentController
         assert(userContentController != nil)
         self.userContentController = userContentController
+    }
+
+    func addUserScript(_ script: WKUserScript) async {
+       userContentController?.addUserScript(script)
     }
 
     func initializeWebView(showWebView: Bool) async {
