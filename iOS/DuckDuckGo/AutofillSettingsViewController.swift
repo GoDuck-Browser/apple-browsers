@@ -88,6 +88,8 @@ final class AutofillSettingsViewController: UIViewController {
         if selectedAccount != nil {
             segueToPasswords()
         }
+        
+        Pixel.fire(pixel: .autofillSettingsOpened)
     }
     
     private func setupView() {
@@ -125,12 +127,14 @@ final class AutofillSettingsViewController: UIViewController {
                                                                 syncService: syncService)
         dataImportViewController.delegate = self
         navigationController?.pushViewController(dataImportViewController, animated: true)
+        Pixel.fire(pixel: .autofillImportPasswordsImportButtonTapped, withAdditionalParameters: [PixelParameters.source: "settings"])
     }
     
     private func segueToImportViaSync() {
         let importController = ImportPasswordsViaSyncViewController(syncService: syncService)
         importController.delegate = self
         navigationController?.pushViewController(importController, animated: true)
+        Pixel.fire(pixel: .autofillLoginsImportNoPasswords, withAdditionalParameters: [PixelParameters.source: "settings"])
     }
     
     private func segueToSync(source: String? = nil) {

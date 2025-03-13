@@ -37,8 +37,7 @@ final class AutofillSettingsViewModel: ObservableObject {
     private let appSettings: AppSettings
     private let keyValueStore: KeyValueStoringDictionaryRepresentable
     private var secureVault: (any AutofillSecureVault)?
-
-    @Published var showingResetConfirmation = false
+    private let source: AutofillSettingsSource
     
     @Published var passwordsCount: Int?
     @Published var savePasswordsEnabled: Bool {
@@ -59,12 +58,14 @@ final class AutofillSettingsViewModel: ObservableObject {
     init(appSettings: AppSettings = AppDependencyProvider.shared.appSettings,
          keyValueStore: KeyValueStoringDictionaryRepresentable = UserDefaults.standard,
          autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager = AppDependencyProvider.shared.autofillNeverPromptWebsitesManager,
-         secureVault: (any AutofillSecureVault)? = nil) {
+         secureVault: (any AutofillSecureVault)? = nil,
+         source: AutofillSettingsSource) {
         self.autofillNeverPromptWebsitesManager = autofillNeverPromptWebsitesManager
         self.appSettings = appSettings
         self.keyValueStore = keyValueStore
         self.secureVault = secureVault
-
+        self.source = source
+        
         savePasswordsEnabled = appSettings.autofillCredentialsEnabled
         updatePasswordsCount()
     }
