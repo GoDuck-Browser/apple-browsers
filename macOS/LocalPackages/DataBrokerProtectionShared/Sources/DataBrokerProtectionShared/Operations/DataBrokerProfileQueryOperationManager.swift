@@ -34,7 +34,8 @@ protocol OperationsManager {
                       database: DataBrokerProtectionRepository,
                       notificationCenter: NotificationCenter,
                       runner: WebJobRunner,
-                      pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+                      pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                      sleepObserver: SleepObserver?,
                       showWebView: Bool,
                       isImmediateOperation: Bool,
                       userNotificationService: DataBrokerProtectionUserNotificationService,
@@ -47,7 +48,8 @@ extension OperationsManager {
                       database: DataBrokerProtectionRepository,
                       notificationCenter: NotificationCenter,
                       runner: WebJobRunner,
-                      pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+                      pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                      sleepObserver: SleepObserver?,
                       userNotificationService: DataBrokerProtectionUserNotificationService,
                       isManual: Bool,
                       shouldRunNextStep: @escaping () -> Bool) async throws {
@@ -58,6 +60,7 @@ extension OperationsManager {
                                notificationCenter: notificationCenter,
                                runner: runner,
                                pixelHandler: pixelHandler,
+                               sleepObserver: sleepObserver,
                                showWebView: false,
                                isImmediateOperation: isManual,
                                userNotificationService: userNotificationService,
@@ -72,7 +75,8 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
                                database: DataBrokerProtectionRepository,
                                notificationCenter: NotificationCenter = NotificationCenter.default,
                                runner: WebJobRunner,
-                               pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+                               pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                               sleepObserver: SleepObserver?,
                                showWebView: Bool = false,
                                isImmediateOperation: Bool = false,
                                userNotificationService: DataBrokerProtectionUserNotificationService,
@@ -84,6 +88,7 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
                                        database: database,
                                        notificationCenter: notificationCenter,
                                        pixelHandler: pixelHandler,
+                                       sleepObserver: sleepObserver,
                                        showWebView: showWebView,
                                        isManual: isImmediateOperation,
                                        userNotificationService: userNotificationService,
@@ -95,6 +100,7 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
                                          database: database,
                                          notificationCenter: notificationCenter,
                                          pixelHandler: pixelHandler,
+                                         sleepObserver: sleepObserver,
                                          showWebView: showWebView,
                                          userNotificationService: userNotificationService,
                                          shouldRunNextStep: shouldRunNextStep)
@@ -106,7 +112,8 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
                                    brokerProfileQueryData: BrokerProfileQueryData,
                                    database: DataBrokerProtectionRepository,
                                    notificationCenter: NotificationCenter,
-                                   pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+                                   pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                                   sleepObserver: SleepObserver?,
                                    showWebView: Bool = false,
                                    isManual: Bool = false,
                                    userNotificationService: DataBrokerProtectionUserNotificationService,
@@ -134,7 +141,7 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
             let event = HistoryEvent(brokerId: brokerId, profileQueryId: profileQueryId, type: .scanStarted)
             try database.add(event)
 
-            let extractedProfiles = try await runner.scan(brokerProfileQueryData, stageCalculator: stageCalculator, pixelHandler: pixelHandler, showWebView: showWebView, shouldRunNextStep: shouldRunNextStep)
+            let extractedProfiles = try await runner.scan(brokerProfileQueryData, stageCalculator: stageCalculator, pixelHandler: pixelHandler, sleepObserver: sleepObserver, showWebView: showWebView, shouldRunNextStep: shouldRunNextStep)
             Logger.dataBrokerProtection.log("Extracted profiles: \(extractedProfiles)")
 
             if !extractedProfiles.isEmpty {
@@ -281,7 +288,8 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
                                      brokerProfileQueryData: BrokerProfileQueryData,
                                      database: DataBrokerProtectionRepository,
                                      notificationCenter: NotificationCenter,
-                                     pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+                                     pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                                     sleepObserver: SleepObserver?,
                                      showWebView: Bool = false,
                                      userNotificationService: DataBrokerProtectionUserNotificationService,
                                      shouldRunNextStep: @escaping () -> Bool) async throws {
@@ -341,6 +349,7 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
                                     extractedProfile: extractedProfile,
                                     stageCalculator: stageDurationCalculator,
                                     pixelHandler: pixelHandler,
+                                    sleepObserver: sleepObserver,
                                     showWebView: showWebView,
                                     shouldRunNextStep: shouldRunNextStep)
 

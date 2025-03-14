@@ -23,11 +23,11 @@ import Cocoa
 import SecureStorage
 import os.log
 
-protocol ResourcesRepository {
+public protocol ResourcesRepository {
     func fetchBrokerFromResourceFiles() throws -> [DataBroker]?
 }
 
-final class FileResources: ResourcesRepository {
+public final class FileResources: ResourcesRepository {
 
     enum FileResourcesError: Error {
         case bundleResourceURLNil
@@ -35,11 +35,11 @@ final class FileResources: ResourcesRepository {
 
     private let fileManager: FileManager
 
-    init(fileManager: FileManager = .default) {
+    public init(fileManager: FileManager = .default) {
         self.fileManager = fileManager
     }
 
-    func fetchBrokerFromResourceFiles() throws -> [DataBroker]? {
+    public func fetchBrokerFromResourceFiles() throws -> [DataBroker]? {
         guard NSApplication.runType != .unitTests && NSApplication.runType != .uiTests else {
             /*
              There's a bug with the bundle resources in tests:
@@ -77,13 +77,13 @@ final class FileResources: ResourcesRepository {
     }
 }
 
-protocol BrokerUpdaterRepository {
+public protocol BrokerUpdaterRepository {
 
     func saveLatestAppVersionCheck(version: String)
     func getLastCheckedVersion() -> String?
 }
 
-final class BrokerUpdaterUserDefaults: BrokerUpdaterRepository {
+public final class BrokerUpdaterUserDefaults: BrokerUpdaterRepository {
 
     struct Consts {
         static let shouldCheckForUpdatesKey = "macos.browser.data-broker-protection.LastLocalVersionChecked"
@@ -91,30 +91,32 @@ final class BrokerUpdaterUserDefaults: BrokerUpdaterRepository {
 
     private let userDefaults: UserDefaults
 
-    init(userDefaults: UserDefaults = .standard) {
+    public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
     }
 
-    func saveLatestAppVersionCheck(version: String) {
+    public func saveLatestAppVersionCheck(version: String) {
         UserDefaults.standard.set(version, forKey: Consts.shouldCheckForUpdatesKey)
     }
 
-    func getLastCheckedVersion() -> String? {
+    public func getLastCheckedVersion() -> String? {
         UserDefaults.standard.string(forKey: Consts.shouldCheckForUpdatesKey)
     }
 }
 
-protocol AppVersionNumberProvider {
+public protocol AppVersionNumberProvider {
     var versionNumber: String { get }
 }
 
-final class AppVersionNumber: AppVersionNumberProvider {
+public final class AppVersionNumber: AppVersionNumberProvider {
 
-    var versionNumber: String = AppVersion.shared.versionNumber
+    public var versionNumber: String = AppVersion.shared.versionNumber
+
+    public init() {
+    }
 }
 
-protocol DataBrokerProtectionBrokerUpdater {
-    static func provideForDebug() -> DefaultDataBrokerProtectionBrokerUpdater?
+public protocol DataBrokerProtectionBrokerUpdater {
     func updateBrokers()
     func checkForUpdatesInBrokerJSONFiles()
 }
@@ -125,27 +127,18 @@ public struct DefaultDataBrokerProtectionBrokerUpdater: DataBrokerProtectionBrok
     private let resources: ResourcesRepository
     private let vault: any DataBrokerProtectionSecureVault
     private let appVersion: AppVersionNumberProvider
-    private let pixelHandler: EventMapping<DataBrokerProtectionPixels>
+    private let pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>
 
-    init(repository: BrokerUpdaterRepository = BrokerUpdaterUserDefaults(),
-         resources: ResourcesRepository = FileResources(),
-         vault: any DataBrokerProtectionSecureVault,
-         appVersion: AppVersionNumberProvider = AppVersionNumber(),
-         pixelHandler: EventMapping<DataBrokerProtectionPixels> = DataBrokerProtectionPixelsHandler()) {
+    public init(repository: BrokerUpdaterRepository = BrokerUpdaterUserDefaults(),
+                resources: ResourcesRepository = FileResources(),
+                vault: any DataBrokerProtectionSecureVault,
+                appVersion: AppVersionNumberProvider = AppVersionNumber(),
+                pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>) {
         self.repository = repository
         self.resources = resources
         self.vault = vault
         self.appVersion = appVersion
         self.pixelHandler = pixelHandler
-    }
-
-    public static func provideForDebug() -> DefaultDataBrokerProtectionBrokerUpdater? {
-        if let vault = try? DataBrokerProtectionSecureVaultFactory.makeVault(reporter: DataBrokerProtectionSecureVaultErrorReporter.shared) {
-            return DefaultDataBrokerProtectionBrokerUpdater(vault: vault)
-        }
-
-        Logger.dataBrokerProtection.log("Error when trying to create vault for data broker protection updater debug menu item")
-        return nil
     }
 
     public func updateBrokers() {
@@ -169,7 +162,7 @@ public struct DefaultDataBrokerProtectionBrokerUpdater: DataBrokerProtectionBrok
         }
     }
 
-    func checkForUpdatesInBrokerJSONFiles() {
+    public func checkForUpdatesInBrokerJSONFiles() {
         if let lastCheckedVersion = repository.getLastCheckedVersion() {
             if shouldUpdate(incoming: appVersion.versionNumber, storedVersion: lastCheckedVersion) {
                 updateBrokersAndSaveLatestVersion()

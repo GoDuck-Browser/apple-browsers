@@ -42,9 +42,9 @@ final class ScanJob: DataBrokerJob {
     let shouldRunNextStep: () -> Bool
     var retriesCountOnError: Int = 0
     let clickAwaitTime: TimeInterval
-    let pixelHandler: EventMapping<DataBrokerProtectionPixels>
+    let pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>
     var postLoadingSiteStartTime: Date?
-    let sleepObserver: SleepObserver
+    let sleepObserver: SleepObserver?
 
     init(privacyConfig: PrivacyConfigurationManaging,
          prefs: ContentScopeProperties,
@@ -55,8 +55,8 @@ final class ScanJob: DataBrokerJob {
          operationAwaitTime: TimeInterval = 3,
          clickAwaitTime: TimeInterval = 0,
          stageDurationCalculator: StageDurationCalculator,
-         pixelHandler: EventMapping<DataBrokerProtectionPixels>,
-         sleepObserver: SleepObserver,
+         pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+         sleepObserver: SleepObserver?,
          shouldRunNextStep: @escaping () -> Bool
     ) {
         self.privacyConfig = privacyConfig

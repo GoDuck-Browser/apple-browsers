@@ -20,37 +20,51 @@ import Foundation
 import Common
 import os.log
 
-protocol DataBrokerOperationDependencies {
+public protocol DataBrokerOperationDependencies {
     var database: DataBrokerProtectionRepository { get }
     var config: DataBrokerExecutionConfig { get }
     var runnerProvider: JobRunnerProvider { get }
     var notificationCenter: NotificationCenter { get }
-    var pixelHandler: EventMapping<DataBrokerProtectionPixels> { get }
+    var pixelHandler: EventMapping<DataBrokerProtectionSharedPixels> { get }
     var userNotificationService: DataBrokerProtectionUserNotificationService { get }
 }
 
-struct DefaultDataBrokerOperationDependencies: DataBrokerOperationDependencies {
-    let database: DataBrokerProtectionRepository
-    var config: DataBrokerExecutionConfig
-    let runnerProvider: JobRunnerProvider
-    let notificationCenter: NotificationCenter
-    let pixelHandler: EventMapping<DataBrokerProtectionPixels>
-    let userNotificationService: DataBrokerProtectionUserNotificationService
+public struct DefaultDataBrokerOperationDependencies: DataBrokerOperationDependencies {
+    public let database: DataBrokerProtectionRepository
+    public var config: DataBrokerExecutionConfig
+    public let runnerProvider: JobRunnerProvider
+    public let notificationCenter: NotificationCenter
+    public let pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>
+    public let userNotificationService: DataBrokerProtectionUserNotificationService
+
+    public init(database: any DataBrokerProtectionRepository,
+                config: DataBrokerExecutionConfig,
+                runnerProvider: any JobRunnerProvider,
+                notificationCenter: NotificationCenter,
+                pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                userNotificationService: any DataBrokerProtectionUserNotificationService) {
+        self.database = database
+        self.config = config
+        self.runnerProvider = runnerProvider
+        self.notificationCenter = notificationCenter
+        self.pixelHandler = pixelHandler
+        self.userNotificationService = userNotificationService
+    }
 }
 
-enum OperationType {
+public enum OperationType {
     case manualScan
     case scheduledScan
     case optOut
     case all
 }
 
-protocol DataBrokerOperationErrorDelegate: AnyObject {
+public protocol DataBrokerOperationErrorDelegate: AnyObject {
     func dataBrokerOperationDidError(_ error: Error, withBrokerName brokerName: String?)
 }
 
 // swiftlint:disable explicit_non_final_class
-class DataBrokerOperation: Operation, @unchecked Sendable {
+public class DataBrokerOperation: Operation, @unchecked Sendable {
 
     private let dataBrokerID: Int64
     private let operationType: OperationType
@@ -83,7 +97,7 @@ class DataBrokerOperation: Operation, @unchecked Sendable {
         super.init()
     }
 
-    override func start() {
+    public override func start() {
         if isCancelled {
             finish()
             return
@@ -96,19 +110,19 @@ class DataBrokerOperation: Operation, @unchecked Sendable {
         main()
     }
 
-    override var isAsynchronous: Bool {
+    public override var isAsynchronous: Bool {
         return true
     }
 
-    override var isExecuting: Bool {
+    public override var isExecuting: Bool {
         return _isExecuting
     }
 
-    override var isFinished: Bool {
+    public override var isFinished: Bool {
         return _isFinished
     }
 
-    override func main() {
+    public override func main() {
         Task {
             await runOperation()
             finish()
@@ -180,6 +194,7 @@ class DataBrokerOperation: Operation, @unchecked Sendable {
                                                                                 notificationCenter: operationDependencies.notificationCenter,
                                                                                 runner: operationDependencies.runnerProvider.getJobRunner(),
                                                                                 pixelHandler: operationDependencies.pixelHandler,
+                                                                                sleepObserver: nil,
                                                                                 showWebView: showWebView,
                                                                                 isImmediateOperation: operationType == .manualScan,
                                                                                 userNotificationService: operationDependencies.userNotificationService,

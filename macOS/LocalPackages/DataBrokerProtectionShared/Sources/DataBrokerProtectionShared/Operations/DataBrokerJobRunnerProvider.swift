@@ -19,18 +19,26 @@
 import Foundation
 import BrowserServicesKit
 
-protocol JobRunnerProvider {
+public protocol JobRunnerProvider {
     @MainActor func getJobRunner() -> WebJobRunner
 }
 
-struct DataBrokerJobRunnerProvider: JobRunnerProvider {
+public struct DataBrokerJobRunnerProvider: JobRunnerProvider {
+
     var privacyConfigManager: PrivacyConfigurationManaging
     var contentScopeProperties: ContentScopeProperties
     var emailService: EmailServiceProtocol
     var captchaService: CaptchaServiceProtocol
 
+    public init(privacyConfigManager: any PrivacyConfigurationManaging, contentScopeProperties: ContentScopeProperties, emailService: any EmailServiceProtocol, captchaService: any CaptchaServiceProtocol) {
+        self.privacyConfigManager = privacyConfigManager
+        self.contentScopeProperties = contentScopeProperties
+        self.emailService = emailService
+        self.captchaService = captchaService
+    }
+
     @MainActor
-    func getJobRunner() -> WebJobRunner {
+    public func getJobRunner() -> WebJobRunner {
         DataBrokerJobRunner(privacyConfigManager: privacyConfigManager,
                                   contentScopeProperties: contentScopeProperties,
                                   emailService: emailService,

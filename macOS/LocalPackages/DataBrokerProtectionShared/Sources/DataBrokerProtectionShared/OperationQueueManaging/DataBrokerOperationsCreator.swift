@@ -19,7 +19,7 @@
 import Common
 import Foundation
 
-protocol DataBrokerOperationsCreator {
+public protocol DataBrokerOperationsCreator {
     func operations(forOperationType operationType: OperationType,
                     withPriorityDate priorityDate: Date?,
                     showWebView: Bool,
@@ -27,9 +27,12 @@ protocol DataBrokerOperationsCreator {
                     operationDependencies: DataBrokerOperationDependencies) throws -> [DataBrokerOperation]
 }
 
-final class DefaultDataBrokerOperationsCreator: DataBrokerOperationsCreator {
+public final class DefaultDataBrokerOperationsCreator: DataBrokerOperationsCreator {
 
-    func operations(forOperationType operationType: OperationType,
+    public init() {
+    }
+
+    public func operations(forOperationType operationType: OperationType,
                     withPriorityDate priorityDate: Date?,
                     showWebView: Bool,
                     errorDelegate: DataBrokerOperationErrorDelegate,

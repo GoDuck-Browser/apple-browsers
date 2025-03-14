@@ -21,18 +21,20 @@ import BrowserServicesKit
 import Common
 import os.log
 
-protocol WebJobRunner {
+public protocol WebJobRunner {
 
     func scan(_ profileQuery: BrokerProfileQueryData,
               stageCalculator: StageDurationCalculator,
-              pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+              pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+              sleepObserver: SleepObserver?,
               showWebView: Bool,
               shouldRunNextStep: @escaping () -> Bool) async throws -> [ExtractedProfile]
 
     func optOut(profileQuery: BrokerProfileQueryData,
                 extractedProfile: ExtractedProfile,
                 stageCalculator: StageDurationCalculator,
-                pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+                pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                sleepObserver: SleepObserver?,
                 showWebView: Bool,
                 shouldRunNextStep: @escaping () -> Bool) async throws
 }
@@ -41,12 +43,14 @@ extension WebJobRunner {
 
     func scan(_ profileQuery: BrokerProfileQueryData,
               stageCalculator: StageDurationCalculator,
-              pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+              pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+              sleepObserver: SleepObserver?,
               shouldRunNextStep: @escaping () -> Bool) async throws -> [ExtractedProfile] {
 
         try await scan(profileQuery,
                        stageCalculator: stageCalculator,
                        pixelHandler: pixelHandler,
+                       sleepObserver: sleepObserver,
                        showWebView: false,
                        shouldRunNextStep: shouldRunNextStep)
     }
@@ -54,13 +58,15 @@ extension WebJobRunner {
     func optOut(profileQuery: BrokerProfileQueryData,
                 extractedProfile: ExtractedProfile,
                 stageCalculator: StageDurationCalculator,
-                pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+                sleepObserver: SleepObserver?,
+                pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
                 shouldRunNextStep: @escaping () -> Bool) async throws {
 
         try await optOut(profileQuery: profileQuery,
                          extractedProfile: extractedProfile,
                          stageCalculator: stageCalculator,
                          pixelHandler: pixelHandler,
+                         sleepObserver: sleepObserver,
                          showWebView: false,
                          shouldRunNextStep: shouldRunNextStep)
     }
@@ -85,10 +91,10 @@ final class DataBrokerJobRunner: WebJobRunner {
 
     func scan(_ profileQuery: BrokerProfileQueryData,
               stageCalculator: StageDurationCalculator,
-              pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+              pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+              sleepObserver: SleepObserver?,
               showWebView: Bool,
               shouldRunNextStep: @escaping () -> Bool) async throws -> [ExtractedProfile] {
-        let sleepObserver = DataBrokerProtectionSleepObserver(brokerProfileQueryData: profileQuery)
         let scan = ScanJob(
             privacyConfig: privacyConfigManager,
             prefs: contentScopeProperties,
@@ -106,10 +112,10 @@ final class DataBrokerJobRunner: WebJobRunner {
     func optOut(profileQuery: BrokerProfileQueryData,
                 extractedProfile: ExtractedProfile,
                 stageCalculator: StageDurationCalculator,
-                pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+                pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                sleepObserver: SleepObserver?,
                 showWebView: Bool,
                 shouldRunNextStep: @escaping () -> Bool) async throws {
-        let sleepObserver = DataBrokerProtectionSleepObserver(brokerProfileQueryData: profileQuery)
         let optOut = OptOutJob(
             privacyConfig: privacyConfigManager,
             prefs: contentScopeProperties,

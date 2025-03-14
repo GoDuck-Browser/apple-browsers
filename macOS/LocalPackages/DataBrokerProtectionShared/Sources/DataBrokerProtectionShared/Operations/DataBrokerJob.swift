@@ -22,7 +22,7 @@ import BrowserServicesKit
 import UserScript
 import Common
 
-protocol DataBrokerJob: CCFCommunicationDelegate {
+public protocol DataBrokerJob: CCFCommunicationDelegate {
     associatedtype ReturnValue
     associatedtype InputValue
 
@@ -33,8 +33,8 @@ protocol DataBrokerJob: CCFCommunicationDelegate {
     var captchaService: CaptchaServiceProtocol { get }
     var cookieHandler: CookieHandler { get }
     var stageCalculator: StageDurationCalculator { get }
-    var pixelHandler: EventMapping<DataBrokerProtectionPixels> { get }
-    var sleepObserver: SleepObserver { get }
+    var pixelHandler: EventMapping<DataBrokerProtectionSharedPixels> { get }
+    var sleepObserver: SleepObserver? { get }
 
     var webViewHandler: WebViewHandler? { get set }
     var actionsHandler: ActionsHandler? { get }
@@ -54,7 +54,7 @@ protocol DataBrokerJob: CCFCommunicationDelegate {
     func executeCurrentAction() async
 }
 
-extension DataBrokerJob {
+public extension DataBrokerJob {
     func run(inputValue: InputValue,
              webViewHandler: WebViewHandler?,
              actionsHandler: ActionsHandler?,
@@ -67,7 +67,7 @@ extension DataBrokerJob {
     }
 }
 
-extension DataBrokerJob {
+public extension DataBrokerJob {
 
     // MARK: - Shared functions
 
@@ -221,7 +221,8 @@ extension DataBrokerJob {
         if stageCalculator.isImmediateOperation {
             let dataBrokerURL = self.query.dataBroker.url
             let durationInMs = (Date().timeIntervalSince(startTime) * 1000).rounded(.towardZero)
-            pixelHandler.fire(.initialScanSiteLoadDuration(duration: durationInMs, hasError: hasError, brokerURL: dataBrokerURL, sleepDuration: sleepObserver.totalSleepTime()))
+            let sleepTime = sleepObserver?.totalSleepTime() ?? 0
+            pixelHandler.fire(.initialScanSiteLoadDuration(duration: durationInMs, hasError: hasError, brokerURL: dataBrokerURL, sleepDuration: sleepTime))
         }
     }
 
@@ -229,7 +230,8 @@ extension DataBrokerJob {
         if stageCalculator.isImmediateOperation, let postLoadingSiteStartTime = self.postLoadingSiteStartTime {
             let dataBrokerURL = self.query.dataBroker.url
             let durationInMs = (Date().timeIntervalSince(postLoadingSiteStartTime) * 1000).rounded(.towardZero)
-            pixelHandler.fire(.initialScanPostLoadingDuration(duration: durationInMs, hasError: hasError, brokerURL: dataBrokerURL, sleepDuration: sleepObserver.totalSleepTime()))
+            let sleepTime = sleepObserver?.totalSleepTime() ?? 0
+            pixelHandler.fire(.initialScanPostLoadingDuration(duration: durationInMs, hasError: hasError, brokerURL: dataBrokerURL, sleepDuration: sleepTime))
         }
     }
 
@@ -299,7 +301,7 @@ extension DataBrokerJob {
     }
 }
 
-protocol CookieHandler {
+public protocol CookieHandler {
     func getAllCookiesFromDomain(_ url: URL) async -> [HTTPCookie]?
 }
 

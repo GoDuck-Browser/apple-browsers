@@ -41,7 +41,7 @@ public struct DataBrokerExecutionConfig {
         }
     }
 
-    var activitySchedulerTriggerInterval: TimeInterval {
+    public var activitySchedulerTriggerInterval: TimeInterval {
         switch mode {
         case .normal:
             return 20 * 60 // 20 minutes
@@ -50,7 +50,7 @@ public struct DataBrokerExecutionConfig {
         }
     }
 
-    var activitySchedulerIntervalTolerance: TimeInterval {
+    public var activitySchedulerIntervalTolerance: TimeInterval {
         switch mode {
         case .normal:
             return 10 * 60 // 10 minutes
@@ -59,9 +59,9 @@ public struct DataBrokerExecutionConfig {
         }
     }
 
-    let activitySchedulerQOS: QualityOfService = .userInitiated
+    public let activitySchedulerQOS: QualityOfService = .userInitiated
 
-    init(mode: DataBrokerExecutionConfigMode) {
+    public init(mode: DataBrokerExecutionConfigMode) {
         self.mode = mode
     }
 }
