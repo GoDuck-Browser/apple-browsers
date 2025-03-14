@@ -2173,6 +2173,7 @@
 		84C96E492CF9BB6400A80A01 /* malwareHashPrefixes.json in Resources */ = {isa = PBXBuildFile; fileRef = 84C96E452CF9BB6400A80A01 /* malwareHashPrefixes.json */; };
 		84CD91BA2D4288060089A2E7 /* match.api.response.json in Resources */ = {isa = PBXBuildFile; fileRef = 84CD91B92D4288060089A2E7 /* match.api.response.json */; };
 		84CD91BB2D4288060089A2E7 /* match.api.response.json in Resources */ = {isa = PBXBuildFile; fileRef = 84CD91B92D4288060089A2E7 /* match.api.response.json */; };
+		84D6780C2D842DBE0030BC82 /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 84D6780B2D842DBE0030BC82 /* InlineSnapshotTesting */; };
 		84DC715A2C1C1E9000033B8C /* UserDefaultsWrapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC71582C1C1E8A00033B8C /* UserDefaultsWrapperTests.swift */; };
 		84DC715B2C1C1E9000033B8C /* UserDefaultsWrapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC71582C1C1E8A00033B8C /* UserDefaultsWrapperTests.swift */; };
 		84DDB90A2C92B66E008C997B /* WKVisitedLinkStoreWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DDB9092C92B667008C997B /* WKVisitedLinkStoreWrapper.swift */; };
@@ -5376,6 +5377,7 @@
 				B65CD8CF2B316E0200A595BB /* SnapshotTesting in Frameworks */,
 				9DC5FACD2C6B8E620011F068 /* AppKitExtensions in Frameworks */,
 				4B9EE3722D76CB5F00DDC75C /* SubscriptionTestingUtilities in Frameworks */,
+				84D6780C2D842DBE0030BC82 /* InlineSnapshotTesting in Frameworks */,
 				374EFDF12D01C70A00B30939 /* Utilities in Frameworks */,
 				4B9EE3702D76CB5600DDC75C /* PixelKitTestingUtilities in Frameworks */,
 				F124E0E72D6E122F0035C7BA /* NetworkingTestingUtils in Frameworks */,
@@ -10549,6 +10551,7 @@
 				F124E0E82D6E122F0035C7BA /* PersistenceTestingUtils */,
 				4B9EE36F2D76CB5600DDC75C /* PixelKitTestingUtilities */,
 				4B9EE3712D76CB5F00DDC75C /* SubscriptionTestingUtilities */,
+				84D6780B2D842DBE0030BC82 /* InlineSnapshotTesting */,
 			);
 			productName = DuckDuckGoTests;
 			productReference = 3706FE99293F661700E42796 /* Unit Tests App Store.xctest */;
@@ -16769,6 +16772,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = B6DA44152616C13800DD1EC2 /* XCRemoteSwiftPackageReference "OHHTTPStubs" */;
 			productName = OHHTTPStubsSwift;
+		};
+		84D6780B2D842DBE0030BC82 /* InlineSnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B65CD8C92B316DF100A595BB /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = InlineSnapshotTesting;
 		};
 		84EFBCCF2D817CC400706739 /* InlineSnapshotTesting */ = {
 			isa = XCSwiftPackageProductDependency;
