@@ -71,7 +71,7 @@ public class DataBrokerProtectionAgentManagerProvider {
                                                             featureToggles: features)
 
         let fakeBroker = DataBrokerDebugFlagFakeBroker()
-        let databaseURL = DefaultDataBrokerProtectionDatabaseProvider.databaseFilePath(directoryName: "DBP", fileName: "Vault.db", appGroupIdentifier: Bundle.main.appGroupName)
+        let databaseURL = DefaultDataBrokerProtectionDatabaseProvider.databaseFilePath(directoryName: DatabaseConstants.directoryName, fileName: DatabaseConstants.fileName, appGroupIdentifier: Bundle.main.appGroupName)
         let vaultFactory = createDataBrokerProtectionSecureVaultFactory(appGroupName: Bundle.main.appGroupName, databaseFileURL: databaseURL)
 
         let reporter = DataBrokerProtectionSecureVaultErrorReporter(pixelHandler: sharedPixelsHandler)
@@ -139,6 +139,8 @@ public class DataBrokerProtectionAgentManagerProvider {
 }
 
 public final class DataBrokerProtectionAgentManager {
+
+    let databaseURL = DefaultDataBrokerProtectionDatabaseProvider.databaseFilePath(directoryName: DatabaseConstants.directoryName, fileName: DatabaseConstants.fileName, appGroupIdentifier: Bundle.main.appGroupName)
 
     private let userNotificationService: DataBrokerProtectionUserNotificationService
     private var activityScheduler: DataBrokerProtectionBackgroundActivityScheduler
