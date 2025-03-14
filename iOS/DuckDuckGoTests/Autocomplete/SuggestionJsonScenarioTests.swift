@@ -31,7 +31,13 @@ import XCTest
 
 @testable import DuckDuckGo
 
+// swiftlint:disable force_try identifier_name
+
 final class SuggestionJsonScenarioTests: XCTestCase {
+
+    override class func setUp() {
+        StatisticsUserDefaults().atb = nil
+    }
 
     // MARK: - Test Scenarios
 
@@ -365,7 +371,7 @@ extension SuggestionJsonScenarioTests {
         var allHistoryVisits: [History.Visit]?
 
         @Published var historyDictionary: [URL: History.HistoryEntry]?
-        var historyDictionaryPublisher: Published<[URL : History.HistoryEntry]?>.Publisher {
+        var historyDictionaryPublisher: Published<[URL: History.HistoryEntry]?>.Publisher {
             $historyDictionary
         }
 
@@ -611,3 +617,5 @@ class SortingDataSourceWrapper: SuggestionLoadingDataSource {
                                             completion: completion)
     }
 }
+
+// swiftlint:enable force_try identifier_name
