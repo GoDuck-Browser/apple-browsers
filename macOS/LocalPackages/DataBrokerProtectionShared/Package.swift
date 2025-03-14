@@ -30,9 +30,6 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../BrowserServicesKit"),
-        .package(path: "../SwiftUIExtensions"),
-        .package(path: "../AppKitExtensions"),
-        .package(path: "../XPCHelper"),
         .package(path: "../Freemium"),
     ],
     targets: [
@@ -40,9 +37,6 @@ let package = Package(
             name: "DataBrokerProtectionShared",
             dependencies: [
                 .product(name: "BrowserServicesKit", package: "BrowserServicesKit"),
-                .product(name: "SwiftUIExtensions", package: "SwiftUIExtensions"),
-                .product(name: "AppKitExtensions", package: "AppKitExtensions"),
-                .byName(name: "XPCHelper"),
                 .product(name: "PixelKit", package: "BrowserServicesKit"),
                 .product(name: "Configuration", package: "BrowserServicesKit"),
                 .product(name: "Persistence", package: "BrowserServicesKit"),
