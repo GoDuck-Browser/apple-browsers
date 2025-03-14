@@ -38,17 +38,19 @@ public final class DBPUIViewModel {
     private var communicationLayer: DBPUICommunicationLayer?
     private var webView: WKWebView?
     private let webUISettings: DataBrokerProtectionWebUIURLSettingsRepresentable
-    private let pixelHandler: EventMapping<DataBrokerProtectionPixels> = DataBrokerProtectionPixelsHandler()
+    private let pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>
 
     public init(dataManager: DataBrokerProtectionDataManaging,
                 agentInterface: DataBrokerProtectionAppToAgentInterface,
                 webUISettings: DataBrokerProtectionWebUIURLSettingsRepresentable,
+                pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
                 privacyConfig: PrivacyConfigurationManaging? = nil,
                 prefs: ContentScopeProperties? = nil,
                 webView: WKWebView? = nil) {
         self.dataManager = dataManager
         self.agentInterface = agentInterface
         self.webUISettings = webUISettings
+        self.pixelHandler = pixelHandler
         self.privacyConfig = privacyConfig
         self.prefs = prefs
         self.webView = webView

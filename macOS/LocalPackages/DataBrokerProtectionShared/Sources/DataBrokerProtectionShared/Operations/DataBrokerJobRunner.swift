@@ -37,7 +37,7 @@ public protocol WebJobRunner {
                 shouldRunNextStep: @escaping () -> Bool) async throws
 }
 
-extension WebJobRunner {
+public extension WebJobRunner {
 
     func scan(_ profileQuery: BrokerProfileQueryData,
               stageCalculator: StageDurationCalculator,
@@ -67,7 +67,7 @@ extension WebJobRunner {
 }
 
 @MainActor
-final class DataBrokerJobRunner: WebJobRunner {
+public final class DataBrokerJobRunner: WebJobRunner {
     let privacyConfigManager: PrivacyConfigurationManaging
     let contentScopeProperties: ContentScopeProperties
     let emailService: EmailServiceProtocol
@@ -83,11 +83,11 @@ final class DataBrokerJobRunner: WebJobRunner {
         self.captchaService = captchaService
     }
 
-    func scan(_ profileQuery: BrokerProfileQueryData,
-              stageCalculator: StageDurationCalculator,
-              pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
-              showWebView: Bool,
-              shouldRunNextStep: @escaping () -> Bool) async throws -> [ExtractedProfile] {
+    public func scan(_ profileQuery: BrokerProfileQueryData,
+                     stageCalculator: StageDurationCalculator,
+                     pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                     showWebView: Bool,
+                     shouldRunNextStep: @escaping () -> Bool) async throws -> [ExtractedProfile] {
         let scan = ScanJob(
             privacyConfig: privacyConfigManager,
             prefs: contentScopeProperties,
@@ -101,12 +101,12 @@ final class DataBrokerJobRunner: WebJobRunner {
         return try await scan.run(inputValue: (), showWebView: showWebView)
     }
 
-    func optOut(profileQuery: BrokerProfileQueryData,
-                extractedProfile: ExtractedProfile,
-                stageCalculator: StageDurationCalculator,
-                pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
-                showWebView: Bool,
-                shouldRunNextStep: @escaping () -> Bool) async throws {
+    public func optOut(profileQuery: BrokerProfileQueryData,
+                       extractedProfile: ExtractedProfile,
+                       stageCalculator: StageDurationCalculator,
+                       pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
+                       showWebView: Bool,
+                       shouldRunNextStep: @escaping () -> Bool) async throws {
         let optOut = OptOutJob(
             privacyConfig: privacyConfigManager,
             prefs: contentScopeProperties,

@@ -24,6 +24,7 @@ import Configuration
 import Common
 import Networking
 import PixelKit
+import DataBrokerProtectionShared
 
 public extension Logger {
     static var config: Logger = { Logger(subsystem: Bundle.main.bundleIdentifier ?? "DuckDuckGo", category: "Configuration") }()
@@ -42,7 +43,7 @@ final class ConfigurationManager: DefaultConfigurationManager {
     }
 
     static let configurationDebugEvents = EventMapping<ConfigurationDebugEvents> { event, error, _, _ in
-        let domainEvent: DataBrokerProtectionPixels
+        let domainEvent: DataBrokerProtectionSharedPixels
         switch event {
         case .invalidPayload(let configuration):
             domainEvent = .invalidPayload(configuration)

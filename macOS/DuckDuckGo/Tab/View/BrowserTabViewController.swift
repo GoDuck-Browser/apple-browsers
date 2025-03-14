@@ -652,7 +652,7 @@ final class BrowserTabViewController: NSViewController {
             self?.scheduleHoverLabelUpdatesForUrl($0)
         }.store(in: &tabViewModelCancellables)
 #if DEBUG
-        if case .xcPreviews = NSApp.runType {
+        if case .xcPreviews = AppVersion.runType {
             self.scheduleHoverLabelUpdatesForUrl(.duckDuckGo)
         }
 #endif

@@ -357,7 +357,7 @@ extension DataBrokerProtectionAgentManager: DataBrokerProtectionAgentAppEvents {
         do {
             let profileQueries = try dataManager.profileQueriesCount()
             let durationSinceStart = Date().timeIntervalSince(startTime) * 1000
-            self.pixelHandler.fire(.initialScanTotalDuration(duration: durationSinceStart.rounded(.towardZero),
+            self.sharedPixelsHandler.fire(.initialScanTotalDuration(duration: durationSinceStart.rounded(.towardZero),
                                                              profileQueries: profileQueries))
         } catch {
             Logger.dataBrokerProtection.log("Initial Scans Error when trying to fetch the profile to get the profile queries")

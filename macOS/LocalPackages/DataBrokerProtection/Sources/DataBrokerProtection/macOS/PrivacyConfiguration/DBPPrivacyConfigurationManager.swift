@@ -21,6 +21,7 @@ import BrowserServicesKit
 import Combine
 import Common
 import PixelKit
+import DataBrokerProtectionShared
 
 public final class DBPPrivacyConfigurationManager: PrivacyConfigurationManaging {
 
@@ -95,7 +96,7 @@ public final class DBPPrivacyConfigurationManager: PrivacyConfigurationManaging 
                 fetchedConfigData = (data, configData, etag)
                 updatesSubject.send(())
             } catch {
-                PixelKit.fire(DebugEvent(DataBrokerProtectionPixels.failedToParsePrivacyConfig(error), error: error))
+                PixelKit.fire(DebugEvent(DataBrokerProtectionSharedPixels.failedToParsePrivacyConfig(error), error: error))
                 fetchedConfigData = nil
                 return .embeddedFallback
             }

@@ -377,7 +377,7 @@ final class MoreOptionsMenu: NSMenu, NSMenuDelegate {
 
     private func addUpdateItem() {
 #if SPARKLE
-        guard NSApp.runType != .uiTests,
+        guard AppVersion.runType != .uiTests,
               let updateController = Application.appDelegate.updateController,
               let update = updateController.latestUpdate else {
             return
