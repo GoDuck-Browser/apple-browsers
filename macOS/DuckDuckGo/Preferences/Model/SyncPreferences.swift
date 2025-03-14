@@ -418,9 +418,11 @@ final class SyncPreferences: ObservableObject, SyncUI_macOS.ManagementViewModel 
             return
         }
 
-        onEndFlow = {
-            self.connector?.stopPolling()
-            self.connector = nil
+        onEndFlow = { [weak self] in
+            self?.connector?.stopPolling()
+            self?.connector = nil
+            self?.exchanger?.stopPolling()
+            self?.exchanger = nil
 
             Task { @MainActor in
                 guard let window = syncWindowController.window, let sheetParent = window.sheetParent else {
@@ -562,7 +564,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                 if let exchangeMessage = try await exchanger?.pollForPublicKey() {
                     print("EXCHANGE DEBUG: Step C complete")
                     let recoveryKey = SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey)
-                    // Step D
+                    presentDialog(for: .prepareToSync)
                     do {
                         try await syncService.transmitExchangeRecoveryKey(from: recoveryKey, keyID: exchangeMessage.keyId, publicKey: exchangeMessage.publicKey)
                     } catch {
@@ -577,7 +579,6 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                         }
                     }
                     print("EXCHANGE DEBUG: Step D complete")
-                    // TODO: Figure out how/when to dismiss Sync view
                 } else {
                     // Polling was likeley cancelled elsewhere (e.g. dialog closed)
                     print("EXCHANGE DEBUG: Polling cancelled")
@@ -586,6 +587,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
             } catch {
                 print("EXCHANGE DEBUG: Polling errored: \(error)")
             }
+            onEndFlow()
         }
     }
 
