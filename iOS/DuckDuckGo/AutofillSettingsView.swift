@@ -26,7 +26,7 @@ struct AutofillSettingsView: View {
     
     var body: some View {
         List {
-            Section(header: Text(UserText.autofillSettingsViewSectionHeader).foregroundColor(.secondary)) {
+            Section {
                 Button {
                     viewModel.navigateToPasswords()
                 } label: {
@@ -52,9 +52,8 @@ struct AutofillSettingsView: View {
                 }
             }
             
-            Section(header: Text(UserText.autofillSettingsAskToSaveAndAutofill).foregroundColor(.secondary).daxFootnoteRegular(),
-                    footer: PasswordFooterView(viewModel: viewModel)) {
-                Toggle(UserText.autofillLoginListTitle, isOn: $viewModel.savePasswordsEnabled)
+            Section(footer: PasswordFooterView(viewModel: viewModel)) {
+                Toggle(UserText.autofillSettingsAskToSaveAndAutofill, isOn: $viewModel.savePasswordsEnabled)
                     .toggleStyle(.switch)
                     .tint(Color(designSystemColor: .accent))
                     .foregroundColor(Color(designSystemColor: .textPrimary))
