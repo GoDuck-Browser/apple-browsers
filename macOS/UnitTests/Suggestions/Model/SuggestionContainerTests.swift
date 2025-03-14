@@ -137,7 +137,7 @@ final class SuggestionContainerTests: XCTestCase {
             } catch let error as NSError {
                 throw NSError(domain: error.domain, code: error.code, userInfo: error.userInfo.merging([NSFilePathErrorKey: fileURL.lastPathComponent]) { $1 })
             }
-            
+
             // Skip non-desktop scenarios - only run desktop platform tests
             guard testScenario.platform == .desktop else {
                 Logger.tests.info("Skipping non-desktop test scenario: \(fileURL.lastPathComponent)")
@@ -235,7 +235,7 @@ extension SuggestionContainerTests {
             case mobile
             case desktop
         }
-        
+
         let platform: Platform
         let description: String
         let input: TestInput

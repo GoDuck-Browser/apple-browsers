@@ -71,10 +71,11 @@ struct SuggestionProcessing {
         ]
             .joined()
             .sorted { $0.score > $1.score }
+            .prefix(100) // limit max len optimization
 
         // STEP 3: Combine all navigational suggestions
         // All bookmark/favorite, history and duckDuckGoDomainSuggestions point directly to a URL browser can navigate to
-        let navigationalSuggestions = allHistoryAndBookmarkAndOpenTabSuggestions + duckDuckGoDomainSuggestions
+        let navigationalSuggestions = Array(allHistoryAndBookmarkAndOpenTabSuggestions) + duckDuckGoDomainSuggestions
 
         // STEP 4: Deduplicate the results by grouping on URL and get the "best" suggestion for each. We also receive
         // a list of SuggestionKind values for each URL to support better categorization below.
@@ -106,7 +107,7 @@ struct SuggestionProcessing {
         // STEP 9: Build history, bookmarks, and open tabs suggestions
         let historyAndBookmarksAndOpenTabs = dedupedSuggestionTuples
             .filter {
-                guard $0.kinds.intersects([.historyEntry, .bookmark, .favorite, .browserTab]),
+                guard $0.kinds.intersects([.historyEntry, .bookmark, .favorite, .browserTab, .internalPage]),
                       let suggestion = Suggestion($0.suggestion),
                       !topHits.contains(suggestion) else { return false } // Don't include items already in top hits
                 return true
@@ -121,12 +122,11 @@ struct SuggestionProcessing {
                 return Suggestion.phrase(phrase: phrase)
             }
             .prefix(Self.maximumNumberOfSuggestions - (topHits.count + historyAndBookmarksAndOpenTabs.count))
-            .map(\.self)
 
         // STEP 11: Return final ordered suggestions
         return SuggestionResult(
             topHits: topHits,
-            duckduckgoSuggestions: duckDuckGoPhrases,
+            duckduckgoSuggestions: Array(duckDuckGoPhrases),
             localSuggestions: historyAndBookmarksAndOpenTabs
         )
     }
@@ -231,7 +231,6 @@ struct SuggestionProcessing {
         }
 
         // …we split the open tab/other suggestion into separate suggestions…
-        // Note: In real implementation, we would create a new suggestion here with the chosen kind
         var newSuggestion = topHit.suggestion
         newSuggestion.kind = newSuggestionKind
         // …and prioritize the non-open tab suggestion so it can autocomplete.
