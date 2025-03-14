@@ -16,18 +16,18 @@
 //  limitations under the License.
 //
 
-internal class ActionsHandler {
+public class ActionsHandler {
     private var lastExecutedActionIndex: Int?
 
     var captchaTransactionId: CaptchaTransactionId?
 
     let step: Step
 
-    init(step: Step) {
+    public init(step: Step) {
         self.step = step
     }
 
-    func currentAction() -> Action? {
+    public func currentAction() -> Action? {
         guard let lastExecutedActionIndex = self.lastExecutedActionIndex else { return nil }
 
         if lastExecutedActionIndex < step.actions.count {
@@ -37,7 +37,7 @@ internal class ActionsHandler {
         }
     }
 
-    func nextAction() -> Action? {
+    public func nextAction() -> Action? {
         guard let lastExecutedActionIndex = self.lastExecutedActionIndex else {
             // If last executed action index is nil. Means we didn't execute any action, so we return the first action.
             self.lastExecutedActionIndex = 0

@@ -1,5 +1,5 @@
 //
-//  AttemptInformation.swift
+//  Action.swift
 //
 //  Copyright © 2023 DuckDuckGo. All rights reserved.
 //
@@ -18,10 +18,30 @@
 
 import Foundation
 
-public struct AttemptInformation {
-    let extractedProfileId: Int64
-    let dataBroker: String
-    let attemptId: String
-    let lastStageDate: Date
-    let startDate: Date
+public enum ActionType: String, Codable, Sendable {
+    case extract
+    case navigate
+    case fillForm
+    case click
+    case expectation
+    case emailConfirmation
+    case getCaptchaInfo
+    case solveCaptcha
+}
+
+public enum DataSource: String, Codable, Sendable {
+    case userProfile
+    case extractedProfile
+}
+
+public protocol Action: Codable, Sendable {
+    var id: String { get }
+    var actionType: ActionType { get }
+    var needsEmail: Bool { get }
+    var dataSource: DataSource { get }
+}
+
+extension Action {
+    public var needsEmail: Bool { false }
+    public var dataSource: DataSource { .userProfile }
 }

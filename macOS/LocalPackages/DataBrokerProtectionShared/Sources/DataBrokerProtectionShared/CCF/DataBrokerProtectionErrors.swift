@@ -55,7 +55,7 @@ public enum DataBrokerProtectionError: Error, Equatable, Codable {
 }
 
 extension DataBrokerProtectionError {
-    var name: String {
+    public var name: String {
         switch self {
         case .malformedURL:
             return "malformedURL"

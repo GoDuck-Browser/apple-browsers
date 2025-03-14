@@ -22,7 +22,7 @@ import BrowserServicesKit
 import UserScript
 import os.log
 
-protocol CCFCommunicationDelegate: AnyObject {
+public protocol CCFCommunicationDelegate: AnyObject {
     func loadURL(url: URL) async
     func extractedProfiles(profiles: [ExtractedProfile], meta: [String: Any]?) async
     func captchaInformation(captchaInfo: GetCaptchaInfoResponse) async
@@ -31,27 +31,27 @@ protocol CCFCommunicationDelegate: AnyObject {
     func onError(error: Error) async
 }
 
-enum CCFSubscribeActionName: String {
+public enum CCFSubscribeActionName: String {
     case onActionReceived
 }
 
-enum CCFReceivedMethodName: String {
+public enum CCFReceivedMethodName: String {
     case actionCompleted
     case actionError
 }
 
-struct DataBrokerProtectionFeature: Subfeature {
-    var messageOriginPolicy: MessageOriginPolicy = .all
-    var featureName: String = "brokerProtection"
-    weak var broker: UserScriptMessageBroker? // This broker is not related to DBP brokers. It's just a name we inherit from Subfeature
+public struct DataBrokerProtectionFeature: Subfeature {
+    public var messageOriginPolicy: MessageOriginPolicy = .all
+    public var featureName: String = "brokerProtection"
+    public weak var broker: UserScriptMessageBroker? // This broker is not related to DBP brokers. It's just a name we inherit from Subfeature
 
     weak var delegate: CCFCommunicationDelegate?
 
-    init(delegate: CCFCommunicationDelegate) {
+    public init(delegate: CCFCommunicationDelegate) {
         self.delegate = delegate
     }
 
-    func handler(forMethodNamed methodName: String) -> Handler? {
+    public func handler(forMethodNamed methodName: String) -> Handler? {
         let actionResult = CCFReceivedMethodName(rawValue: methodName)
 
         if let actionResult = actionResult {

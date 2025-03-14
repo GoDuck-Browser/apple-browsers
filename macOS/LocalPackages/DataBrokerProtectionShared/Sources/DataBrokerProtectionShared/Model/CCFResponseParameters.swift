@@ -27,7 +27,7 @@ struct SolveCaptchaCallback: Encodable {
     let token: String
 }
 
-struct GetCaptchaInfoResponse: Decodable {
+public struct GetCaptchaInfoResponse: Decodable {
     let siteKey: String
     let url: String
     let type: String
@@ -44,7 +44,7 @@ struct GetCaptchaInfoResponse: Decodable {
         self.type = type
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.siteKey = try container.decode(String.self, forKey: .siteKey)
         self.url = try container.decode(String.self, forKey: .url)
@@ -56,7 +56,7 @@ struct EvalResponse: Decodable {
     let eval: String
 }
 
-struct SolveCaptchaResponse: Decodable {
+public struct SolveCaptchaResponse: Decodable {
     let callback: EvalResponse
 }
 

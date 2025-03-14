@@ -1,5 +1,5 @@
 //
-//  Extract.swift
+//  AttemptInformation.swift
 //
 //  Copyright © 2023 DuckDuckGo. All rights reserved.
 //
@@ -16,11 +16,12 @@
 //  limitations under the License.
 //
 
-struct ExtractAction: Action {
-    let id: String
-    let actionType: ActionType
-    let selector: String
-    let noResultsSelector: String?
-    let profile: ExtractProfileSelectors
-    let dataSource: DataSource?
+import Foundation
+
+public struct AttemptInformation {
+    public let extractedProfileId: Int64
+    public let dataBroker: String
+    public let attemptId: String
+    public let lastStageDate: Date
+    public let startDate: Date
 }

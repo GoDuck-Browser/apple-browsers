@@ -23,7 +23,7 @@ import UserScript
 import Common
 import os.log
 
-protocol WebViewHandler: NSObject {
+public protocol WebViewHandler: NSObject {
     func initializeWebView(showWebView: Bool) async
     func load(url: URL) async throws
     func takeSnaphost(path: String, fileName: String) async throws

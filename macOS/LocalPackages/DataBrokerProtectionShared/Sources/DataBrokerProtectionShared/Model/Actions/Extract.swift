@@ -1,5 +1,5 @@
 //
-//  Action.swift
+//  Extract.swift
 //
 //  Copyright © 2023 DuckDuckGo. All rights reserved.
 //
@@ -16,32 +16,11 @@
 //  limitations under the License.
 //
 
-import Foundation
-
-enum ActionType: String, Codable, Sendable {
-    case extract
-    case navigate
-    case fillForm
-    case click
-    case expectation
-    case emailConfirmation
-    case getCaptchaInfo
-    case solveCaptcha
-}
-
-enum DataSource: String, Codable {
-    case userProfile
-    case extractedProfile
-}
-
-protocol Action: Codable, Sendable {
-    var id: String { get }
-    var actionType: ActionType { get }
-    var needsEmail: Bool { get }
-    var dataSource: DataSource { get }
-}
-
-extension Action {
-    var needsEmail: Bool { false }
-    var dataSource: DataSource { .userProfile }
+public struct ExtractAction: Action {
+    public let id: String
+    public let actionType: ActionType
+    public let selector: String
+    public let noResultsSelector: String?
+    public let profile: ExtractProfileSelectors
+    public let dataSource: DataSource?
 }

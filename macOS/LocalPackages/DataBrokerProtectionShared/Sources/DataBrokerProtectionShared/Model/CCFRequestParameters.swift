@@ -18,12 +18,12 @@
 
 import Foundation
 
-enum CCFRequestData: Encodable {
+public enum CCFRequestData: Encodable {
     case solveCaptcha(CaptchaToken)
     case userData(ProfileQuery, ExtractedProfile?)
 }
 
-struct CaptchaToken: Encodable, Sendable {
+public struct CaptchaToken: Encodable, Sendable {
     let token: String
 }
 

@@ -18,17 +18,17 @@
 
 import Foundation
 
-enum StepType: String, Codable, Sendable {
+public enum StepType: String, Codable, Sendable {
     case scan
     case optOut
 }
 
-enum OptOutType: String, Codable, Sendable {
+public enum OptOutType: String, Codable, Sendable {
     case formOptOut
     case parentSiteOptOut
 }
 
-struct Step: Codable, Sendable {
+public struct Step: Codable, Sendable {
     let type: StepType
     let optOutType: OptOutType?
     let actions: [Action]
@@ -43,7 +43,7 @@ struct Step: Codable, Sendable {
         self.optOutType = optOutType
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         type = try container.decode(StepType.self, forKey: .stepType)
         optOutType = try? container.decode(OptOutType.self, forKey: .optOutType)
@@ -52,7 +52,7 @@ struct Step: Codable, Sendable {
         actions = try Step.parse(actionsList)
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(type, forKey: .stepType)
         try container.encode(optOutType, forKey: .optOutType)

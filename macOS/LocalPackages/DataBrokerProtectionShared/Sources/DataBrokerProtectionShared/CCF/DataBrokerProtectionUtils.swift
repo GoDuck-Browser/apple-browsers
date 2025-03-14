@@ -141,7 +141,7 @@ extension WKWebViewConfiguration {
      }
 }
 
-extension WKWebView {
+public extension WKWebView {
     func load(_ url: URL) {
         // Occasionally, the web view will try to load a URL but will find itself with no cookies, even if they've been restored.
         // The consumeCookies call is finishing before this line executes, but if you're fast enough it can happen that WKWebView still hasn't
