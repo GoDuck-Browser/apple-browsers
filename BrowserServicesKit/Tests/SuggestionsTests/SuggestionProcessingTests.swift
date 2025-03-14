@@ -54,7 +54,6 @@ final class SuggestionProcessingTests: XCTestCase {
         XCTAssertTrue(result?.topHits.contains(where: { $0.title == "DuckDuckGo" }) ?? false)
     }
 
-
     // MARK: - Combined Source Tests
 
     func testWhenTabsAndMultipleMatchingHistoryAndBookmarksAvailable_ThenCorrectOrdering() {
