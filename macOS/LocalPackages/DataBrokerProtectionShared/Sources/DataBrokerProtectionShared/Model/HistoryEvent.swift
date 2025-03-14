@@ -79,3 +79,23 @@ public struct HistoryEvent: Identifiable, Sendable {
         }
     }
 }
+
+public extension HistoryEvent {
+
+    var isError: Bool {
+        switch type {
+        case .error:
+            return true
+        default:
+            return false
+        }
+    }
+
+    var error: String? {
+        switch type {
+        case .error(let error):
+            return error.name
+        default: return nil
+        }
+    }
+}

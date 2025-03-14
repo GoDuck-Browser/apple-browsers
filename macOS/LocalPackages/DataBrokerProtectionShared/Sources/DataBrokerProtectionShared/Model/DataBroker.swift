@@ -20,7 +20,7 @@ import Foundation
 import Common
 import os.log
 
-struct DataBrokerScheduleConfig: Codable {
+public struct DataBrokerScheduleConfig: Codable {
     let retryError: Int
     let confirmOptOutScan: Int
     let maintenanceScan: Int
@@ -40,11 +40,11 @@ extension Int {
     }
 }
 
-struct MirrorSite: Codable, Sendable {
-    let name: String
-    let url: String
-    let addedAt: Date
-    let removedAt: Date?
+public struct MirrorSite: Codable, Sendable {
+    public let name: String
+    public let url: String
+    public let addedAt: Date
+    public let removedAt: Date?
 
     enum CodingKeys: CodingKey {
         case name
@@ -53,14 +53,14 @@ struct MirrorSite: Codable, Sendable {
         case removedAt
     }
 
-    init(name: String, url: String, addedAt: Date, removedAt: Date? = nil) {
+    public init(name: String, url: String, addedAt: Date, removedAt: Date? = nil) {
         self.name = name
         self.url = url
         self.addedAt = addedAt
         self.removedAt = removedAt
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decode(String.self, forKey: .name)
 
@@ -88,9 +88,9 @@ struct MirrorSite: Codable, Sendable {
 
 extension MirrorSite {
 
-    typealias ScannedBroker = DBPUIScanProgress.ScannedBroker
+    public typealias ScannedBroker = DBPUIScanProgress.ScannedBroker
 
-    func scannedBroker(withStatus status: ScannedBroker.Status) -> ScannedBroker {
+    public func scannedBroker(withStatus status: ScannedBroker.Status) -> ScannedBroker {
         ScannedBroker(name: name, url: url, status: status)
     }
 
@@ -100,7 +100,7 @@ extension MirrorSite {
     /// - Returns: A Boolean value indicating whether the mirror site should be included.
     ///   - `true`: If the profile was added before the given date and has not been removed, or if it was removed but the provided date is between the `addedAt` and `removedAt` timestamps.
     ///   - `false`: If the profile was either added after the given date or has been removed before the given date.
-    func shouldWeIncludeMirrorSite(for date: Date = Date()) -> Bool {
+    public func shouldWeIncludeMirrorSite(for date: Date = Date()) -> Bool {
         if let removedAt = self.removedAt {
             return self.addedAt < date && date < removedAt
         } else {
@@ -115,17 +115,17 @@ public enum DataBrokerHierarchy: Int {
 }
 
 public struct DataBroker: Codable, Sendable {
-    let id: Int64?
-    let name: String
-    let url: String
-    let steps: [Step]
-    let version: String
-    let schedulingConfig: DataBrokerScheduleConfig
-    let parent: String?
-    let mirrorSites: [MirrorSite]
-    let optOutUrl: String
+    public let id: Int64?
+    public let name: String
+    public let url: String
+    public let steps: [Step]
+    public let version: String
+    public let schedulingConfig: DataBrokerScheduleConfig
+    public let parent: String?
+    public let mirrorSites: [MirrorSite]
+    public let optOutUrl: String
 
-    var isFakeBroker: Bool {
+    public var isFakeBroker: Bool {
         name.contains("fake") // A future improvement will be to add a property in the JSON file.
     }
 
@@ -201,7 +201,7 @@ public struct DataBroker: Codable, Sendable {
         id = nil
     }
 
-    func scanStep() throws -> Step {
+    public func scanStep() throws -> Step {
         guard let scanStep = steps.first(where: { $0.type == .scan }) else {
             assertionFailure("Broker is missing the scan step.")
             throw DataBrokerProtectionError.unrecoverableError
@@ -210,7 +210,7 @@ public struct DataBroker: Codable, Sendable {
         return scanStep
     }
 
-    func optOutStep() -> Step? {
+    public func optOutStep() -> Step? {
         guard let optOutStep = steps.first(where: { $0.type == .optOut }) else {
             return nil
         }
@@ -218,7 +218,7 @@ public struct DataBroker: Codable, Sendable {
         return optOutStep
     }
 
-    func performsOptOutWithinParent() -> Bool {
+    public func performsOptOutWithinParent() -> Bool {
         guard let optOutStep = optOutStep(), let optOutType = optOutStep.optOutType else { return false }
 
         return optOutType == .parentSiteOptOut

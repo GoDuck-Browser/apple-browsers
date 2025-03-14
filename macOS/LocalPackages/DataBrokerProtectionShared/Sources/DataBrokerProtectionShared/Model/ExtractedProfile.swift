@@ -18,7 +18,7 @@
 
 import Foundation
 
-struct ProfileSelector: Codable {
+public struct ProfileSelector: Codable, Sendable {
     let selector: String?
     let findElements: Bool?
     let afterText: String?
@@ -28,7 +28,7 @@ struct ProfileSelector: Codable {
     let identifierType: String?
 }
 
-struct ExtractProfileSelectors: Codable, Sendable {
+public struct ExtractProfileSelectors: Codable, Sendable {
     let name: ProfileSelector?
     let alternativeNamesList: ProfileSelector?
     let addressFull: ProfileSelector?
@@ -56,30 +56,30 @@ struct ExtractProfileSelectors: Codable, Sendable {
     }
 }
 
-struct AddressCityState: Codable, Hashable {
-    let city: String
-    let state: String
+public struct AddressCityState: Codable, Hashable {
+    public let city: String
+    public let state: String
 
-    var fullAddress: String {
+    public var fullAddress: String {
         "\(city), \(state)"
     }
 }
 
 public struct ExtractedProfile: Codable, Sendable {
-    let id: Int64?
-    let name: String?
-    let alternativeNames: [String]?
-    let addressFull: String?
-    let addresses: [AddressCityState]?
-    let phoneNumbers: [String]?
-    let relatives: [String]?
-    let profileUrl: String?
-    let reportId: String?
-    let age: String?
-    var email: String?
-    var removedDate: Date?
-    let fullName: String?
-    let identifier: String?
+    public let id: Int64?
+    public let name: String?
+    public let alternativeNames: [String]?
+    public let addressFull: String?
+    public let addresses: [AddressCityState]?
+    public let phoneNumbers: [String]?
+    public let relatives: [String]?
+    public let profileUrl: String?
+    public let reportId: String?
+    public let age: String?
+    public var email: String?
+    public var removedDate: Date?
+    public let fullName: String?
+    public let identifier: String?
 
     enum CodingKeys: CodingKey {
         case id

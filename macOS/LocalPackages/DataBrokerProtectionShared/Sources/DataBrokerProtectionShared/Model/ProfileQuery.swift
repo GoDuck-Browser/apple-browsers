@@ -18,29 +18,29 @@
 
 import Foundation
 
-struct Address: Encodable, Sendable {
-    let city: String
-    let state: String
+public struct Address: Encodable, Sendable {
+    public let city: String
+    public let state: String
 }
 
-struct ProfileQuery: Encodable, Sendable {
+public struct ProfileQuery: Encodable, Sendable {
     static let currentYear = Calendar.current.component(.year, from: Date())
 
-    let id: Int64?
-    let firstName: String
-    let lastName: String
-    let middleName: String?
-    let suffix: String?
-    let city: String
-    let state: String
-    let street: String?
-    let zip: String?
-    let addresses: [Address]
-    let birthYear: Int
-    let phone: String?
-    let fullName: String
-    let age: Int
-    let deprecated: Bool
+    public let id: Int64?
+    public let firstName: String
+    public let lastName: String
+    public let middleName: String?
+    public let suffix: String?
+    public let city: String
+    public let state: String
+    public let street: String?
+    public let zip: String?
+    public let addresses: [Address]
+    public let birthYear: Int
+    public let phone: String?
+    public let fullName: String
+    public let age: Int
+    public let deprecated: Bool
 
     public init(id: Int64? = nil,
                 firstName: String,
@@ -76,7 +76,7 @@ extension ProfileQuery: Equatable {
 
     // We're intentionally not comparing IDs since we want to verify only the attributes
     // when we're searching for a potential match in the database
-    static func == (lhs: ProfileQuery, rhs: ProfileQuery) -> Bool {
+    public static func == (lhs: ProfileQuery, rhs: ProfileQuery) -> Bool {
         return
             lhs.firstName.lowercased() == rhs.firstName.lowercased() &&
             lhs.lastName.lowercased() == rhs.lastName.lowercased() &&
@@ -109,7 +109,7 @@ extension Optional where Wrapped == String {
 }
 
 extension Address: Equatable {
-    static func == (lhs: Address, rhs: Address) -> Bool {
+    public static func == (lhs: Address, rhs: Address) -> Bool {
         return lhs.city.lowercased() == rhs.city.lowercased() &&
                lhs.state.lowercased() == rhs.state.lowercased()
     }
@@ -132,7 +132,7 @@ extension ProfileQuery {
                              deprecated: deprecated)
      }
 
-    func with(id: Int64) -> ProfileQuery {
+    public func with(id: Int64) -> ProfileQuery {
         return ProfileQuery(id: id,
                             firstName: firstName,
                             lastName: lastName,
@@ -149,7 +149,7 @@ extension ProfileQuery {
 }
 
 extension ProfileQuery: Hashable {
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(firstName.lowercased())
         hasher.combine(lastName.lowercased())
         hasher.combine(middleName?.lowercased())
@@ -167,7 +167,7 @@ extension ProfileQuery: Hashable {
 }
 
 extension Address: Hashable {
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(city.lowercased())
         hasher.combine(state.lowercased())
     }

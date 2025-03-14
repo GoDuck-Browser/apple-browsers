@@ -20,28 +20,28 @@ import Foundation
 import Common
 
 public struct BrokerProfileQueryData: Sendable {
-    let dataBroker: DataBroker
-    let profileQuery: ProfileQuery
-    let scanJobData: ScanJobData
-    let optOutJobData: [OptOutJobData]
+    public let dataBroker: DataBroker
+    public let profileQuery: ProfileQuery
+    public let scanJobData: ScanJobData
+    public let optOutJobData: [OptOutJobData]
 
-    var operationsData: [BrokerJobData] {
+    public var operationsData: [BrokerJobData] {
         optOutJobData + [scanJobData]
     }
 
-    var extractedProfiles: [ExtractedProfile] {
+    public var extractedProfiles: [ExtractedProfile] {
         optOutJobData.map { $0.extractedProfile }
     }
 
-    var events: [HistoryEvent] {
+    public var events: [HistoryEvent] {
         operationsData.flatMap { $0.historyEvents }.sorted { $0.date < $1.date }
     }
 
-    var hasMatches: Bool {
+    public var hasMatches: Bool {
         !optOutJobData.isEmpty
     }
 
-    init(dataBroker: DataBroker,
+    public init(dataBroker: DataBroker,
          profileQuery: ProfileQuery,
          scanJobData: ScanJobData,
          optOutJobData: [OptOutJobData] = [OptOutJobData]()) {

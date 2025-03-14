@@ -18,7 +18,7 @@
 
 import Foundation
 
-protocol BrokerJobData {
+public protocol BrokerJobData {
     var brokerId: Int64 { get }
     var profileQueryId: Int64 { get }
     var lastRunDate: Date? { get }
@@ -26,18 +26,18 @@ protocol BrokerJobData {
     var historyEvents: [HistoryEvent] { get }
 }
 
-struct ScanJobData: BrokerJobData, Sendable {
-    let brokerId: Int64
-    let profileQueryId: Int64
-    let preferredRunDate: Date?
-    let historyEvents: [HistoryEvent]
-    let lastRunDate: Date?
+public struct ScanJobData: BrokerJobData, Sendable {
+    public let brokerId: Int64
+    public let profileQueryId: Int64
+    public let preferredRunDate: Date?
+    public let historyEvents: [HistoryEvent]
+    public let lastRunDate: Date?
 
-    init(brokerId: Int64,
-         profileQueryId: Int64,
-         preferredRunDate: Date? = nil,
-         historyEvents: [HistoryEvent],
-         lastRunDate: Date? = nil) {
+    public init(brokerId: Int64,
+                profileQueryId: Int64,
+                preferredRunDate: Date? = nil,
+                historyEvents: [HistoryEvent],
+                lastRunDate: Date? = nil) {
         self.brokerId = brokerId
         self.profileQueryId = profileQueryId
         self.preferredRunDate = preferredRunDate
@@ -45,7 +45,7 @@ struct ScanJobData: BrokerJobData, Sendable {
         self.lastRunDate = lastRunDate
     }
 
-    func closestMatchesFoundEvent() -> HistoryEvent? {
+    public func closestMatchesFoundEvent() -> HistoryEvent? {
         return historyEvents.filter { event in
             if case .matchesFound = event.type {
                 return true
@@ -56,7 +56,7 @@ struct ScanJobData: BrokerJobData, Sendable {
         .last
     }
 
-    func scanStartedEvents() -> [HistoryEvent] {
+    public func scanStartedEvents() -> [HistoryEvent] {
         return historyEvents.filter { event in
             if case .scanStarted = event.type {
                 return true
@@ -68,21 +68,21 @@ struct ScanJobData: BrokerJobData, Sendable {
 }
 
 public struct OptOutJobData: BrokerJobData, Sendable {
-    let brokerId: Int64
-    let profileQueryId: Int64
-    let createdDate: Date
-    let preferredRunDate: Date?
-    let historyEvents: [HistoryEvent]
-    let lastRunDate: Date?
-    let attemptCount: Int64
+    public let brokerId: Int64
+    public let profileQueryId: Int64
+    public let createdDate: Date
+    public let preferredRunDate: Date?
+    public let historyEvents: [HistoryEvent]
+    public let lastRunDate: Date?
+    public let attemptCount: Int64
 
     // This was added in a later DB migration (V4), so will be nil for older entries submitted before the migration
-    let submittedSuccessfullyDate: Date?
+    public let submittedSuccessfullyDate: Date?
 
-    let extractedProfile: ExtractedProfile
-    let sevenDaysConfirmationPixelFired: Bool
-    let fourteenDaysConfirmationPixelFired: Bool
-    let twentyOneDaysConfirmationPixelFired: Bool
+    public let extractedProfile: ExtractedProfile
+    public let sevenDaysConfirmationPixelFired: Bool
+    public let fourteenDaysConfirmationPixelFired: Bool
+    public let twentyOneDaysConfirmationPixelFired: Bool
 
     init(brokerId: Int64,
          profileQueryId: Int64,
