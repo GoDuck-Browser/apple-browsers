@@ -23,7 +23,7 @@ import AppKitExtensions
 import BrowserServicesKit
 import DataBrokerProtectionShared
 
-extension DataBrokerProtectionSettings: VPNBypassSettingsProviding {
+extension DataBrokerProtectionSettings {
 
     public func updateStoredRunType() {
         storedRunType = AppVersion.runType
@@ -60,49 +60,6 @@ extension DataBrokerProtectionSettings: VPNBypassSettingsProviding {
             defaults.dataBrokerProtectionShowMenuBarIcon = newValue
         }
     }
-
-    // MARK: - VPN exclusion
-
-    public var vpnBypass: Bool {
-        get {
-            proxySettings[bundleId: Bundle.main.dbpBackgroundAgentBundleId] == .exclude
-        }
-        set {
-            proxySettings[bundleId: Bundle.main.dbpBackgroundAgentBundleId] = newValue ? .exclude : nil
-        }
-    }
-
-    /// This requires VPN system extension, so App Store version is not currently supported
-    public var vpnBypassSupport: Bool {
-#if APPSTORE
-#if NETP_SYSTEM_EXTENSION
-        return true
-#else
-        return false
-#endif
-#else
-        return true
-#endif
-    }
-
-    public var vpnBypassStatus: VPNBypassStatus {
-        guard vpnBypassSupport else { return .unsupported }
-        return vpnBypass ? .on : .off
-    }
-
-    public var vpnBypassOnboardingShownPublisher: AnyPublisher<Bool, Never> {
-        defaults.dataBrokerProtectionVPNBypassOnboardingShownPublisher
-    }
-
-    public var vpnBypassOnboardingShown: Bool {
-        get {
-            defaults.dataBrokerProtectionVPNBypassOnboardingShown
-        }
-
-        set {
-            defaults.dataBrokerProtectionVPNBypassOnboardingShown = newValue
-        }
-    }
 }
 
 extension UserDefaults {
@@ -131,26 +88,5 @@ extension UserDefaults {
 
     var networkProtectionSettingShowInMenuBarPublisher: AnyPublisher<Bool, Never> {
         publisher(for: \.dataBrokerProtectionShowMenuBarIcon).eraseToAnyPublisher()
-    }
-
-    // MARK: - VPN exclusion
-
-    @objc
-    dynamic var dataBrokerProtectionVPNBypassOnboardingShown: Bool {
-        get {
-            value(forKey: bypassOnboardingShownKey) as? Bool ?? Self.bypassOnboardingShownDefaultValue
-        }
-
-        set {
-            guard newValue != dataBrokerProtectionVPNBypassOnboardingShown else {
-                return
-            }
-
-            set(newValue, forKey: bypassOnboardingShownKey)
-        }
-    }
-
-    var dataBrokerProtectionVPNBypassOnboardingShownPublisher: AnyPublisher<Bool, Never> {
-        publisher(for: \.dataBrokerProtectionVPNBypassOnboardingShown).eraseToAnyPublisher()
     }
 }

@@ -102,7 +102,7 @@ final class DuckDuckGoDBPBackgroundAgentApplication: NSApplication {
 
 @main
 final class DuckDuckGoDBPBackgroundAgentAppDelegate: NSObject, NSApplicationDelegate {
-    private let settings = DataBrokerProtectionSettings(defaults: .dbp)
+    private let settings = DataBrokerProtectionSettings(defaults: .dbp, proxySettings: .init(defaults: .netP))
     private var cancellables = Set<AnyCancellable>()
     private var statusBarMenu: StatusBarMenu?
     private let subscriptionManager: any SubscriptionAuthV1toV2Bridge

@@ -24,9 +24,8 @@ import Subscription
 final public class DataBrokerAuthenticationManagerBuilder {
 
     static func buildAuthenticationManager(subscriptionManager: any SubscriptionAuthV1toV2Bridge) -> DataBrokerProtectionAuthenticationManager {
-        let settings = DataBrokerProtectionSettings(defaults: .dbp)
+        let settings = DataBrokerProtectionSettings(defaults: .dbp, proxySettings: .init(defaults: .netP))
         let subscriptionManager = DataBrokerProtectionSubscriptionManager(subscriptionManager: subscriptionManager, dbpSettings: settings)
-        let subscriptionManager = DataBrokerProtectionSubscriptionManager(subscriptionManager: subscriptionManager)
         return DataBrokerProtectionAuthenticationManager(subscriptionManager: subscriptionManager)
     }
 }

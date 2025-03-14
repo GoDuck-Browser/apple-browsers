@@ -179,7 +179,7 @@ final class DataBrokerRunCustomJSONViewModel: ObservableObject {
                                                             messageSecret: messageSecret,
                                                             featureToggles: features)
 
-        let dbpSettings = DataBrokerProtectionSettings(defaults: .dbp)
+        let dbpSettings = DataBrokerProtectionSettings(defaults: .dbp, proxySettings: .init(defaults: .netP))
         let backendServicePixels = DefaultDataBrokerProtectionBackendServicePixels(pixelHandler: fakePixelHandler,
                                                                                    settings: dbpSettings)
         self.emailService = EmailService(authenticationManager:authenticationManager,

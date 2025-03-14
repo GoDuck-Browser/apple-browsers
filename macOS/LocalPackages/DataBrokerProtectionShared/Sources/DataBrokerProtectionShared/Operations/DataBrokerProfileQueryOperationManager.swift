@@ -77,10 +77,6 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
         self.dbpSettings = dbpSettings
     }
 
-    init() {
-        self.init(vpnIPCClient: VPNControllerXPCClient.shared, dbpSettings: DataBrokerProtectionSettings())
-    }
-
     private var vpnConnectionState: String {
         vpnIPCClient?.connectionStatusObserver.recentValue.description ?? "unknown"
     }
@@ -335,7 +331,7 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
         profileQueryId: Int64,
         brokerProfileQueryData: BrokerProfileQueryData,
         database: DataBrokerProtectionRepository,
-        pixelHandler: EventMapping<DataBrokerProtectionPixels>,
+        pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>,
         userNotificationService: DataBrokerProtectionUserNotificationService
     ) throws {
         var shouldSendProfileRemovedNotification = false
@@ -611,7 +607,6 @@ struct DataBrokerProfileQueryOperationManager: OperationsManager {
 extension Bundle {
     struct Keys {
         static let vpnMenuAgentBundleId = "AGENT_BUNDLE_ID"
-        static let dbpBackgroundAgentBundleId = "DBP_BACKGROUND_AGENT_BUNDLE_ID"
     }
 
     var vpnMenuAgentBundleId: String {
@@ -620,16 +615,9 @@ extension Bundle {
         }
         return bundleID
     }
-
-    var dbpBackgroundAgentBundleId: String {
-        guard let bundleID = object(forInfoDictionaryKey: Keys.dbpBackgroundAgentBundleId) as? String else {
-            fatalError("Info.plist is missing \(Keys.dbpBackgroundAgentBundleId)")
-        }
-        return bundleID
-    }
 }
 
-extension VPNControllerXPCClient {
+public extension VPNControllerXPCClient {
     static let shared = VPNControllerXPCClient()
 
     convenience init() {

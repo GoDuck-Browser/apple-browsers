@@ -347,8 +347,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         vpnSettings.alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
 
         // Update DBP environment and match the Subscription environment
-        let dbpSettings = DataBrokerProtectionSettings(defaults: .dbp)
-        DataBrokerProtectionSettings().alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
+        let dbpSettings = DataBrokerProtectionSettings(defaults: .dbp, proxySettings: .init(defaults: .netP))
+        dbpSettings.alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
 
         // Also update the stored run type so the login item knows if tests are running
         dbpSettings.updateStoredRunType()

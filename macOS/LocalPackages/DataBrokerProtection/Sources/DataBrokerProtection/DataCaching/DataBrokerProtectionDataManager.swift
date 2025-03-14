@@ -433,11 +433,11 @@ extension InMemoryDataCache: DBPUICommunicationDelegate {
         return mapper.mapToUIDebugMetadata(metadata: metadata, brokerProfileQueryData: brokerProfileQueryData)
     }
 
-    public  func openSendFeedbackModal() async {
+    public func openSendFeedbackModal() async {
         delegate?.willOpenSendFeedbackForm()
     }
 
-    func applyVPNBypassSetting() async {
+    public func applyVPNBypassSetting() async {
         await delegate?.willApplyVPNBypassSetting()
     }
 }

@@ -28,6 +28,7 @@ extension Bundle {
 
     static let dbpAppGroupName = "DBP_APP_GROUP"
     static let configAppGroupName = "APP_CONFIGURATION_APP_GROUP"
+    static let netPAppGroupName = "NETP_APP_GROUP"
 
     public var appGroupName: String {
         guard let appGroup = object(forInfoDictionaryKey: Bundle.dbpAppGroupName) as? String else {
