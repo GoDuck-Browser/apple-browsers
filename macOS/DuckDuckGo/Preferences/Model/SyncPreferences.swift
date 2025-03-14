@@ -650,6 +650,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                     await handleRecoveryKey(recoveryKey)
                 }
             } catch {
+                // TODO: Handle error
                 print("EXCHANGE DEBUG: Error \(error)")
             }
         }
@@ -664,6 +665,8 @@ extension SyncPreferences: ManagementDialogModelDelegate {
             presentDialog(for: .prepareToSync)
             if let recoveryKey = syncCode.recovery {
                 await handleRecoveryKey(recoveryKey)
+            } else if let exchangeKey = syncCode.exchangeKey {
+                try await handleExchangeKey(exchangeKey)
             } else if let connectKey = syncCode.connect {
                 await handleConnectKey(connectKey, code: recoveryCode)
             } else {
