@@ -52,7 +52,7 @@ final class RemoteExchanger: RemoteExchanging {
             }
             
             if isPolling {
-                try await Task.sleep(nanoseconds: 5 * 1_000_000_000)
+                try await Task.sleep(nanoseconds: 2 * 1_000_000_000)
             }
         }
         return nil
@@ -154,7 +154,7 @@ final class RemoteExchangeRecoverer: RemoteExchangeRecovering {
             }
 
             if isPolling {
-                try await Task.sleep(nanoseconds: 5 * 1_000_000_000)
+                try await Task.sleep(nanoseconds: 2 * 1_000_000_000)
             }
         }
         return nil
