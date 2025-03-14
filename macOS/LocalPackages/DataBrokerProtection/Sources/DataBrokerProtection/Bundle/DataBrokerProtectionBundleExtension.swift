@@ -21,6 +21,7 @@ import Foundation
 public extension UserDefaults {
     static let dbp = UserDefaults(suiteName: Bundle.main.dbpAppGroup)!
     static let config = UserDefaults(suiteName: Bundle.main.configAppGroup)!
+    static let netP = UserDefaults(suiteName: Bundle.main.netPAppGroup)!
 }
 
 extension Bundle {
@@ -44,7 +45,7 @@ extension Bundle {
 
     var dbpAppGroup: String {
         guard let appGroup = object(forInfoDictionaryKey: Bundle.dbpAppGroupName) as? String else {
-            fatalError("Info.plist is missing \(appGroupName)")
+            fatalError("Info.plist is missing \(Bundle.dbpAppGroupName)")
         }
         return appGroup
     }
@@ -52,6 +53,13 @@ extension Bundle {
     var configAppGroup: String {
         guard let appGroup = object(forInfoDictionaryKey: Bundle.configAppGroupName) as? String else {
             fatalError("Info.plist is missing \(Bundle.configAppGroupName)")
+        }
+        return appGroup
+    }
+
+    var netPAppGroup: String {
+        guard let appGroup = object(forInfoDictionaryKey: Bundle.netPAppGroupName) as? String else {
+            fatalError("Info.plist is missing \(Bundle.netPAppGroupName)")
         }
         return appGroup
     }

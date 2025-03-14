@@ -55,6 +55,7 @@ public protocol DataBrokerProtectionDataManagerDelegate: AnyObject {
     func dataBrokerProtectionDataManagerDidUpdateData()
     func dataBrokerProtectionDataManagerDidDeleteData()
     func dataBrokerProtectionDataManagerWillOpenSendFeedbackForm()
+    func dataBrokerProtectionDataManagerWillApplyVPNBypassSetting() async
     func isAuthenticatedUser() -> Bool
 }
 
@@ -207,6 +208,10 @@ extension DataBrokerProtectionDataManager: InMemoryDataCacheDelegate {
         delegate?.dataBrokerProtectionDataManagerWillOpenSendFeedbackForm()
     }
 
+    public func willApplyVPNBypassSetting() async {
+        await delegate?.dataBrokerProtectionDataManagerWillApplyVPNBypassSetting()
+    }
+
     public func isAuthenticatedUser() -> Bool {
         delegate?.isAuthenticatedUser() ?? true
     }
@@ -216,6 +221,7 @@ public protocol InMemoryDataCacheDelegate: AnyObject {
     func saveCachedProfileToDatabase(_ profile: DataBrokerProtectionProfile) async throws
     func removeAllData() throws
     func willOpenSendFeedbackForm()
+    func willApplyVPNBypassSetting() async
     func isAuthenticatedUser() -> Bool
 }
 
@@ -429,5 +435,9 @@ extension InMemoryDataCache: DBPUICommunicationDelegate {
 
     public  func openSendFeedbackModal() async {
         delegate?.willOpenSendFeedbackForm()
+    }
+
+    func applyVPNBypassSetting() async {
+        await delegate?.willApplyVPNBypassSetting()
     }
 }

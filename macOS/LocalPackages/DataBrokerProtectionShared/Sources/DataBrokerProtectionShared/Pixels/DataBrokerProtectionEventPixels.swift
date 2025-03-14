@@ -75,7 +75,7 @@ public final class DataBrokerProtectionEventPixels {
         handler.fire(.scanningEventNewMatch)
     }
 
-    func fireReAppereanceEventPixel() {
+    func fireReappeareanceEventPixel() {
         handler.fire(.scanningEventReAppearance)
     }
 

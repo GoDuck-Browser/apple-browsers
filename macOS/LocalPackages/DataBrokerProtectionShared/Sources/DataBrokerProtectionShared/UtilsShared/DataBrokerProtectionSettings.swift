@@ -20,9 +20,18 @@ import Foundation
 import Combine
 import Common
 import BrowserServicesKit
+import AppKitExtensions
+import NetworkProtectionProxy
 
-public class DataBrokerProtectionSettings {
+public protocol VPNBypassSettingsProviding: AnyObject {
+    var vpnBypassSupport: Bool { get }
+    var vpnBypass: Bool { get set }
+    var vpnBypassOnboardingShown: Bool { get set }
+}
+
+public final class DataBrokerProtectionSettings {
     public let defaults: UserDefaults
+    private let proxySettings: TransparentProxySettings
 
     public enum Keys {
         public static let runType = "dbp.environment.run-type"
@@ -48,8 +57,9 @@ public class DataBrokerProtectionSettings {
         return AppVersion.runType
     }
 
-    public init(defaults: UserDefaults) {
+    init(defaults: UserDefaults, proxySettings: TransparentProxySettings) {
         self.defaults = defaults
+        self.proxySettings = proxySettings
     }
 
     // MARK: - Environment
@@ -68,6 +78,16 @@ public class DataBrokerProtectionSettings {
 extension UserDefaults {
     private var selectedEnvironmentKey: String {
         "dataBrokerProtectionSelectedEnvironmentRawValue"
+    }
+
+    static let showMenuBarIconDefaultValue = false
+    private var showMenuBarIconKey: String {
+        "dataBrokerProtectionShowMenuBarIcon"
+    }
+
+    static let bypassOnboardingShownDefaultValue = false
+    private var bypassOnboardingShownKey: String {
+        "hasShownBypassOnboarding"
     }
 
     // MARK: - Environment
