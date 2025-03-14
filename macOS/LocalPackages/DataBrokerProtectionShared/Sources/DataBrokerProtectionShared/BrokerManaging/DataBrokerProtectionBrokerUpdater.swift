@@ -40,7 +40,7 @@ public final class FileResources: ResourcesRepository {
     }
 
     public func fetchBrokerFromResourceFiles() throws -> [DataBroker]? {
-        guard NSApplication.runType != .unitTests && NSApplication.runType != .uiTests else {
+        guard AppVersion.runType != .unitTests && AppVersion.runType != .uiTests else {
             /*
              There's a bug with the bundle resources in tests:
              https://forums.swift.org/t/swift-5-3-swiftpm-resources-in-tests-uses-wrong-bundle-path/37051/49
@@ -54,7 +54,7 @@ public final class FileResources: ResourcesRepository {
             throw FileResourcesError.bundleResourceURLNil
         }
 
-        let shouldUseFakeBrokers = (NSApp.runType == .integrationTests)
+        let shouldUseFakeBrokers = (AppVersion.runType == .integrationTests)
         let brokersURL = resourceURL.appendingPathComponent("Resources").appendingPathComponent("JSON")
         do {
             let fileURLs = try fileManager.contentsOfDirectory(
