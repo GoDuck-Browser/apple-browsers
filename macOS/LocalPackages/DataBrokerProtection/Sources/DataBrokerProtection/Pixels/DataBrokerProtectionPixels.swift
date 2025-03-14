@@ -21,6 +21,7 @@ import Common
 import BrowserServicesKit
 import Configuration
 import PixelKit
+import DataBrokerProtectionShared
 
 enum ErrorCategory: Equatable {
     case networkError

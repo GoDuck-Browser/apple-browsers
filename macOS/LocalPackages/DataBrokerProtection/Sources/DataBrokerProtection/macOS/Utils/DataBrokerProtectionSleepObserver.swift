@@ -20,10 +20,8 @@ import Foundation
 import Cocoa
 import Common
 import os.log
+import DataBrokerProtectionShared
 
-protocol SleepObserver {
-    func totalSleepTime() -> TimeInterval
-}
 /// This class purpose is to measure from the background agent how much time the operations
 /// are working while the computer is asleep.
 /// This will help us gather metrics around what happen to WebViews when the computer is sleeping.

@@ -50,7 +50,6 @@ let package = Package(
                 .product(name: "Persistence", package: "BrowserServicesKit"),
                 .product(name: "Freemium", package: "Freemium"),
             ],
-            resources: [.copy("Resources")],
             swiftSettings: [
                 .define("DEBUG", .when(configuration: .debug))
             ]
