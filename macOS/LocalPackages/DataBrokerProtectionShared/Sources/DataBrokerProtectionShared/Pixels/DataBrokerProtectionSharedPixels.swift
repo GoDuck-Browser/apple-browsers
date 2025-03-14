@@ -72,7 +72,6 @@ public enum DataBrokerProtectionSharedPixels {
         public static let profileQueries = "profile_queries"
         public static let hasError = "has_error"
         public static let brokerURL = "broker_url"
-        public static let sleepDuration = "sleep_duration"
         public static let numberOfRecordsFound = "num_found"
         public static let numberOfOptOutsInProgress = "num_inprogress"
         public static let numberOfSucessfulOptOuts = "num_optoutsuccess"
@@ -356,10 +355,10 @@ extension DataBrokerProtectionSharedPixels: PixelKitEvent {
                     Consts.backendServiceCallSite: backendServiceCallSite.rawValue]
         case .initialScanTotalDuration(let duration, let profileQueries):
             return [Consts.durationInMs: String(duration), Consts.profileQueries: String(profileQueries)]
-        case .initialScanSiteLoadDuration(let duration, let hasError, let brokerURL, let sleepDuration):
-            return [Consts.durationInMs: String(duration), Consts.hasError: hasError.description, Consts.brokerURL: brokerURL, Consts.sleepDuration: String(sleepDuration)]
-        case .initialScanPostLoadingDuration(let duration, let hasError, let brokerURL, let sleepDuration):
-            return [Consts.durationInMs: String(duration), Consts.hasError: hasError.description, Consts.brokerURL: brokerURL, Consts.sleepDuration: String(sleepDuration)]
+        case .initialScanSiteLoadDuration(let duration, let hasError, let brokerURL):
+            return [Consts.durationInMs: String(duration), Consts.hasError: hasError.description, Consts.brokerURL: brokerURL]
+        case .initialScanPostLoadingDuration(let duration, let hasError, let brokerURL):
+            return [Consts.durationInMs: String(duration), Consts.hasError: hasError.description, Consts.brokerURL: brokerURL]
         case .initialScanPreStartDuration(let duration):
             return [Consts.durationInMs: String(duration)]
         case .globalMetricsWeeklyStats(let profilesFound, let optOutsInProgress, let successfulOptOuts, let failedOptOuts, let durationOfFirstOptOut, let numberOfNewRecordsFound),
