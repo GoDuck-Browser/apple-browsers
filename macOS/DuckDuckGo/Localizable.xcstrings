@@ -1000,7 +1000,7 @@
     },
     "add.favorite" : {
       "comment" : "Button for adding a favorite bookmark",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -29569,7 +29569,7 @@
     },
     "home.page.settings.background" : {
       "comment" : "Section title in Home Page Settings to customization Home Page background",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -29629,7 +29629,7 @@
     },
     "home.page.settings.browser.theme" : {
       "comment" : "Section title in Home Page Settings to adjust browser theme",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -30229,7 +30229,7 @@
     },
     "home.page.settings.sections" : {
       "comment" : "Section title in Home Page Settings to adjust Home Page sections visibility",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

@@ -25,7 +25,6 @@ import XCTest
 final class NewTabPageCustomizationProviderTests: XCTestCase {
     var storageLocation: URL!
     var appearancePreferences: AppearancePreferences!
-    var userColorProvider: MockUserColorProvider!
     var userBackgroundImagesManager: CapturingUserBackgroundImagesManager!
     var openFilePanelCalls: Int = 0
     private var settingsModel: HomePage.Models.SettingsModel!
@@ -37,7 +36,6 @@ final class NewTabPageCustomizationProviderTests: XCTestCase {
         appearancePreferences = AppearancePreferences(persistor: MockAppearancePreferencesPersistor())
         storageLocation = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         userBackgroundImagesManager = CapturingUserBackgroundImagesManager(storageLocation: storageLocation, maximumNumberOfImages: 4)
-        userColorProvider = MockUserColorProvider()
         openFilePanelCalls = 0
 
         settingsModel = HomePage.Models.SettingsModel(
@@ -48,7 +46,6 @@ final class NewTabPageCustomizationProviderTests: XCTestCase {
                 self.openFilePanelCalls += 1
                 return nil
             },
-            userColorProvider: self.userColorProvider,
             showAddImageFailedAlert: {},
             navigator: MockHomePageSettingsModelNavigator()
         )

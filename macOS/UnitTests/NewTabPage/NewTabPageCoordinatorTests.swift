@@ -61,7 +61,6 @@ final class NewTabPageCoordinatorTests: XCTestCase {
             userBackgroundImagesManager: nil,
             sendPixel: { _ in },
             openFilePanel: { nil },
-            userColorProvider: MockUserColorProvider(),
             showAddImageFailedAlert: {},
             navigator: MockHomePageSettingsModelNavigator()
         )

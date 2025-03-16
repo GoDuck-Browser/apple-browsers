@@ -41,30 +41,17 @@ extension HomePage.Models {
             case defaultBackground
         }
 
-        struct CustomBackgroundModeModel: Identifiable, Hashable {
-            let contentType: ContentType
-            let title: String
-            let customBackgroundThumbnail: CustomBackground?
-
-            var id: String {
-                title
-            }
-        }
-
         let appearancePreferences: AppearancePreferences
         let customImagesManager: UserBackgroundImagesManaging?
         let sendPixel: (PixelKitEvent) -> Void
         let openFilePanel: () -> URL?
-        let userColorProvider: () -> UserColorProviding
         let showAddImageFailedAlert: () -> Void
         let navigator: HomePageSettingsModelNavigator
         let customizerOpener = NewTabPageCustomizerOpener()
 
-        @Published var settingsButtonWidth: CGFloat = .infinity
         @Published private(set) var availableUserBackgroundImages: [UserBackgroundImage] = []
 
         private var availableCustomImagesCancellable: AnyCancellable?
-        private var userColorCancellable: AnyCancellable?
         private var customBackgroundPixelCancellable: AnyCancellable?
 
         convenience init() {
@@ -84,7 +71,6 @@ extension HomePage.Models {
                     }
                     return url
                 },
-                userColorProvider: NSColorPanel.shared,
                 showAddImageFailedAlert: {
                     let alert = NSAlert.cannotReadImageAlert()
                     alert.runModal()
@@ -98,7 +84,6 @@ extension HomePage.Models {
             userBackgroundImagesManager: UserBackgroundImagesManaging?,
             sendPixel: @escaping (PixelKitEvent) -> Void,
             openFilePanel: @escaping () -> URL?,
-            userColorProvider: @autoclosure @escaping () -> UserColorProviding,
             showAddImageFailedAlert: @escaping () -> Void,
             navigator: HomePageSettingsModelNavigator
         ) {
@@ -113,7 +98,6 @@ extension HomePage.Models {
 
             self.sendPixel = sendPixel
             self.openFilePanel = openFilePanel
-            self.userColorProvider = userColorProvider
             self.showAddImageFailedAlert = showAddImageFailedAlert
             self.navigator = navigator
 
@@ -123,7 +107,6 @@ extension HomePage.Models {
             if let lastPickedCustomColorHexValue, let customColor = NSColor(hex: lastPickedCustomColorHexValue) {
                 lastPickedCustomColor = customColor
             }
-            updateSolidColorPickerItems(pickerColor: lastPickedCustomColor ?? Const.defaultColorPickerColor)
         }
 
         private func subscribeToUserBackgroundImages() {
@@ -170,39 +153,6 @@ extension HomePage.Models {
                 }
         }
 
-        var hasUserImages: Bool {
-            guard let customImagesManager else {
-                return false
-            }
-            return !customImagesManager.availableImages.isEmpty
-        }
-
-        func popToRootView() {
-            withAnimation {
-                contentType = .root
-            }
-        }
-
-        func handleRootGridSelection(_ modeModel: CustomBackgroundModeModel) {
-            if modeModel.contentType == .customImagePicker && !hasUserImages {
-                Task {
-                    await addNewImage()
-                }
-            } else if modeModel.contentType == .defaultBackground {
-                withAnimation {
-                    customBackground = nil
-                }
-            } else {
-                withAnimation {
-                    contentType = modeModel.contentType
-                }
-            }
-        }
-
-        func openSettings() {
-            navigator.openAppearanceSettings()
-        }
-
         @Published private(set) var contentType: ContentType = .root {
             didSet {
                 assert(contentType != .defaultBackground, "contentType can't be set to .defaultBackground")
@@ -231,8 +181,6 @@ extension HomePage.Models {
             }
         }
 
-        private(set) var solidColorPickerItems: [SolidColorBackgroundPickerItem] = []
-
         @MainActor
         func addNewImage() async {
             guard let customImagesManager, let url = openFilePanel() else {
@@ -256,42 +204,11 @@ extension HomePage.Models {
                     return
                 }
                 lastPickedCustomColorHexValue = lastPickedCustomColor.hex()
-                updateSolidColorPickerItems(pickerColor: lastPickedCustomColor)
             }
-        }
-
-        private func updateSolidColorPickerItems(pickerColor: NSColor = Const.defaultColorPickerColor) {
-            let predefinedColorBackgrounds = SolidColorBackground.predefinedColors.map(SolidColorBackgroundPickerItem.background)
-            solidColorPickerItems = [.picker(.init(color: pickerColor))] + predefinedColorBackgrounds
         }
 
         @UserDefaultsWrapper(key: .homePageLastPickedCustomColor, defaultValue: nil)
         private var lastPickedCustomColorHexValue: String?
-
-        func openColorPanel() {
-            userColorCancellable?.cancel()
-            let provider = userColorProvider()
-            provider.showColorPanel(with: lastPickedCustomColorHexValue.flatMap(NSColor.init(hex:)) ?? Const.defaultColorPickerColor)
-
-            userColorCancellable = provider.colorPublisher
-                .map { CustomBackground.solidColor(.init(color: $0)) }
-                .assign(to: \.customBackground, onWeaklyHeld: self)
-        }
-
-        func onColorPickerDisappear() {
-            userColorCancellable?.cancel()
-            userColorProvider().closeColorPanel()
-        }
-
-        var customBackgroundModes: [CustomBackgroundModeModel] {
-            [
-                customBackgroundModeModel(for: .defaultBackground),
-                customBackgroundModeModel(for: .colorPicker),
-                customBackgroundModeModel(for: .gradientPicker),
-                customBackgroundModeModel(for: .customImagePicker)
-            ]
-                .compactMap { $0 }
-        }
 
         /**
          * This function is used from Debug Menu and shouldn't otherwise be used in the code accessible to the users.
@@ -302,45 +219,6 @@ extension HomePage.Models {
             lastPickedCustomColorHexValue = nil
             customImagesManager?.availableImages.forEach { image in
                 customImagesManager?.deleteImage(image)
-            }
-            updateSolidColorPickerItems()
-            onColorPickerDisappear()
-        }
-
-        private func customBackgroundModeModel(for contentType: ContentType) -> CustomBackgroundModeModel? {
-            switch contentType {
-            case .root:
-                assertionFailure("\(#function) must not be called for ContentType.root")
-                return CustomBackgroundModeModel(contentType: .root, title: "", customBackgroundThumbnail: nil)
-            case .gradientPicker:
-                return CustomBackgroundModeModel(
-                    contentType: .gradientPicker,
-                    title: UserText.gradients,
-                    customBackgroundThumbnail: .gradient(customBackground?.gradient ?? CustomBackground.placeholderGradient)
-                )
-            case .colorPicker:
-                return CustomBackgroundModeModel(
-                    contentType: .colorPicker,
-                    title: UserText.solidColors,
-                    customBackgroundThumbnail: .solidColor(customBackground?.solidColor ?? CustomBackground.placeholderColor)
-                )
-            case .customImagePicker:
-                guard let customImagesManager else {
-                    return nil
-                }
-                let title = customImagesManager.availableImages.isEmpty ? UserText.addBackground : UserText.myBackgrounds
-                let thumbnail: CustomBackground? = {
-                    guard customBackground?.userBackgroundImage == nil else {
-                        return customBackground
-                    }
-                    guard let lastUsedUserBackgroundImage = customImagesManager.availableImages.first else {
-                        return nil
-                    }
-                    return .userImage(lastUsedUserBackgroundImage)
-                }()
-                return CustomBackgroundModeModel(contentType: .customImagePicker, title: title, customBackgroundThumbnail: thumbnail)
-            case .defaultBackground:
-                return CustomBackgroundModeModel(contentType: .defaultBackground, title: UserText.defaultBackground, customBackgroundThumbnail: nil)
             }
         }
     }

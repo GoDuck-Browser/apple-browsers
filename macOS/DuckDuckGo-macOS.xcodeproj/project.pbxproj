@@ -1273,8 +1273,6 @@
 		37DF370A2CF38CD7005ED34B /* PrivacyStatsDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DF37082CF38CD3005ED34B /* PrivacyStatsDatabase.swift */; };
 		37E13B8E2D54B03D002ECD62 /* HistoryViewDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E13B8D2D54B023002ECD62 /* HistoryViewDataProvider.swift */; };
 		37E13B8F2D54B03D002ECD62 /* HistoryViewDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E13B8D2D54B023002ECD62 /* HistoryViewDataProvider.swift */; };
-		37E2608C2C8A1F6D006EE07F /* UserColorProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E2608B2C8A1F6D006EE07F /* UserColorProviding.swift */; };
-		37E2608D2C8A1F6D006EE07F /* UserColorProviding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E2608B2C8A1F6D006EE07F /* UserColorProviding.swift */; };
 		37E2608F2C8A3ABE006EE07F /* HomePageSettingsModelNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E2608E2C8A3ABE006EE07F /* HomePageSettingsModelNavigator.swift */; };
 		37E260902C8A3ABE006EE07F /* HomePageSettingsModelNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E2608E2C8A3ABE006EE07F /* HomePageSettingsModelNavigator.swift */; };
 		37E260922C8A3EB4006EE07F /* MockHomePageSettingsModelNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E260912C8A3EB4006EE07F /* MockHomePageSettingsModelNavigator.swift */; };
@@ -3972,7 +3970,6 @@
 		37DF37082CF38CD3005ED34B /* PrivacyStatsDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyStatsDatabase.swift; sourceTree = "<group>"; };
 		37E1116C2C578F1B00583C19 /* DuckDuckGoAppStoreDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DuckDuckGoAppStoreDebug.entitlements; sourceTree = "<group>"; };
 		37E13B8D2D54B023002ECD62 /* HistoryViewDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewDataProvider.swift; sourceTree = "<group>"; };
-		37E2608B2C8A1F6D006EE07F /* UserColorProviding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserColorProviding.swift; sourceTree = "<group>"; };
 		37E2608E2C8A3ABE006EE07F /* HomePageSettingsModelNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePageSettingsModelNavigator.swift; sourceTree = "<group>"; };
 		37E260912C8A3EB4006EE07F /* MockHomePageSettingsModelNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockHomePageSettingsModelNavigator.swift; sourceTree = "<group>"; };
 		37E307AA2D0745D500599500 /* PrivacyStatsErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyStatsErrorHandler.swift; sourceTree = "<group>"; };
@@ -6025,7 +6022,6 @@
 				379026D02C650CCD00A089E8 /* UserBackgroundImagesManager.swift */,
 				370C23102C7747E200A80A3E /* ImageProcessor.swift */,
 				376731A02C7F50D200EB097B /* Logger+HomePageSettings.swift */,
-				37E2608B2C8A1F6D006EE07F /* UserColorProviding.swift */,
 				37E2608E2C8A3ABE006EE07F /* HomePageSettingsModelNavigator.swift */,
 			);
 			path = HomePageSettings;
@@ -12087,7 +12083,6 @@
 				3706FB5D293F65D500E42796 /* VisitMenuItem.swift in Sources */,
 				3706FB5E293F65D500E42796 /* EncryptionKeyStore.swift in Sources */,
 				F1DA51872BF607D200CF29FA /* SubscriptionAttributionPixelHandler.swift in Sources */,
-				37E2608D2C8A1F6D006EE07F /* UserColorProviding.swift in Sources */,
 				BDBA85A02C5D25B700BC54F5 /* VPNMetadataCollector.swift in Sources */,
 				3706FB60293F65D500E42796 /* PasswordManagementIdentityItemView.swift in Sources */,
 				3706FB61293F65D500E42796 /* ProgressExtension.swift in Sources */,
@@ -14175,7 +14170,6 @@
 				4BD18F01283F0BC500058124 /* BookmarksBarViewController.swift in Sources */,
 				379DE4BD27EA31AC002CC3DE /* PreferencesAutofillView.swift in Sources */,
 				F1476FC02C1359FB00EAE46A /* SubscriptionUIHandler.swift in Sources */,
-				37E2608C2C8A1F6D006EE07F /* UserColorProviding.swift in Sources */,
 				1DCFBC8A29ADF32B00313531 /* BurnerHomePageView.swift in Sources */,
 				858A797F26A79EAA00A75A42 /* UserText+PasswordManager.swift in Sources */,
 				B693954E26F04BEB0015B914 /* LoadingProgressView.swift in Sources */,
