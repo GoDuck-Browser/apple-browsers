@@ -839,7 +839,7 @@ extension MainViewController {
         AppearancePreferences.shared.isContinueSetUpCardsViewOutdated = false
         AppearancePreferences.shared.continueSetUpCardsClosed = false
         AppearancePreferences.shared.isContinueSetUpVisible = true
-        HomePage.Models.ContinueSetUpModel.Settings().clear()
+        NewTabPageNextStepsModel.Settings().clear()
         NotificationCenter.default.post(name: NSApplication.didBecomeActiveNotification, object: NSApp)
     }
 

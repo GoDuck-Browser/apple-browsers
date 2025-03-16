@@ -74,7 +74,7 @@ extension NewTabPageActionsManager {
             NewTabPageCustomBackgroundClient(model: customizationProvider),
             NewTabPageRMFClient(remoteMessageProvider: activeRemoteMessageModel),
             NewTabPageFreemiumDBPClient(provider: freemiumDBPBannerProvider),
-            NewTabPageNextStepsCardsClient(model: NewTabPageNextStepsCardsProvider(continueSetUpModel: HomePage.Models.ContinueSetUpModel(tabOpener: NewTabPageTabOpener()))),
+            NewTabPageNextStepsCardsClient(model: NewTabPageNextStepsCardsProvider(continueSetUpModel: NewTabPageNextStepsModel(tabOpener: NewTabPageTabOpener()))),
             NewTabPageFavoritesClient(favoritesModel: favoritesModel, preferredFaviconSize: Int(Favicon.SizeCategory.medium.rawValue)),
             NewTabPagePrivacyStatsClient(model: privacyStatsModel),
             NewTabPageRecentActivityClient(model: recentActivityModel)
@@ -82,7 +82,7 @@ extension NewTabPageActionsManager {
     }
 }
 
-struct NewTabPageTabOpener: ContinueSetUpModelTabOpening {
+struct NewTabPageTabOpener: NewTabPageNextStepsModelTabOpening {
     @MainActor
     func openTab(_ tab: Tab) {
         WindowControllersManager.shared.lastKeyMainWindowController?.mainViewController.tabCollectionViewModel.insertOrAppend(tab: tab, selected: true)

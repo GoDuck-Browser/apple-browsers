@@ -337,7 +337,7 @@ final class TabCollectionViewModel: NSObject {
 
         tabCollection.append(tab: tab)
         if tab.content == .newtab {
-            NotificationCenter.default.post(name: HomePage.Models.newHomePageTabOpen, object: nil)
+            NotificationCenter.default.post(name: TabCollectionViewModel.newTabPageDidOpen, object: nil)
         }
 
         if selected {
@@ -861,4 +861,10 @@ extension TabCollectionViewModel {
         tabViewModels.values.filter(\.canBeBookmarked).count >= 2
     }
 
+}
+
+// MARK: - New Tab Page notification
+
+extension TabCollectionViewModel {
+    static let newTabPageDidOpen = Notification.Name("newTabPageDidOpen")
 }

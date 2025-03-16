@@ -1,5 +1,5 @@
 //
-//  ContinueSetUpModelTests.swift
+//  NewTabPageNextStepsModelTests.swift
 //
 //  Copyright © 2023 DuckDuckGo. All rights reserved.
 //
@@ -21,9 +21,9 @@ import BrowserServicesKit
 import Common
 @testable import DuckDuckGo_Privacy_Browser
 
-final class ContinueSetUpModelTests: XCTestCase {
+final class NewTabPageNextStepsModelTests: XCTestCase {
 
-    var vm: HomePage.Models.ContinueSetUpModel!
+    var vm: NewTabPageNextStepsModel!
     var capturingDefaultBrowserProvider: CapturingDefaultBrowserProvider!
     var capturingDataImportProvider: CapturingDataImportProvider!
     var tabCollectionVM: TabCollectionViewModel!
@@ -49,7 +49,7 @@ final class ContinueSetUpModelTests: XCTestCase {
         privacyConfigManager.privacyConfig = config
         dockCustomizer = DockCustomizerMock()
 
-        vm = HomePage.Models.ContinueSetUpModel(
+        vm = NewTabPageNextStepsModel(
             defaultBrowserProvider: capturingDefaultBrowserProvider,
             dockCustomizer: dockCustomizer,
             dataImportProvider: capturingDataImportProvider,
@@ -71,16 +71,16 @@ final class ContinueSetUpModelTests: XCTestCase {
     }
 
     func testModelReturnsCorrectStrings() {
-        XCTAssertEqual(vm.itemsPerRow, HomePage.Models.ContinueSetUpModel.Const.featuresPerRow)
+        XCTAssertEqual(vm.itemsPerRow, NewTabPageNextStepsModel.Const.featuresPerRow)
         XCTAssertEqual(vm.deleteActionTitle, UserText.newTabSetUpRemoveItemAction)
     }
 
     func testModelReturnsCorrectDimensions() {
-        XCTAssertEqual(vm.itemWidth, HomePage.Models.FeaturesGridDimensions.itemWidth)
-        XCTAssertEqual(vm.itemHeight, HomePage.Models.FeaturesGridDimensions.itemHeight)
-        XCTAssertEqual(vm.horizontalSpacing, HomePage.Models.FeaturesGridDimensions.horizontalSpacing)
-        XCTAssertEqual(vm.verticalSpacing, HomePage.Models.FeaturesGridDimensions.verticalSpacing)
-        XCTAssertEqual(vm.gridWidth, HomePage.Models.FeaturesGridDimensions.width)
+        XCTAssertEqual(vm.itemWidth, NewTabPageNextStepsModel.FeaturesGridDimensions.itemWidth)
+        XCTAssertEqual(vm.itemHeight, NewTabPageNextStepsModel.FeaturesGridDimensions.itemHeight)
+        XCTAssertEqual(vm.horizontalSpacing, NewTabPageNextStepsModel.FeaturesGridDimensions.horizontalSpacing)
+        XCTAssertEqual(vm.verticalSpacing, NewTabPageNextStepsModel.FeaturesGridDimensions.verticalSpacing)
+        XCTAssertEqual(vm.gridWidth, NewTabPageNextStepsModel.FeaturesGridDimensions.width)
         XCTAssertEqual(vm.itemsPerRow, 2)
     }
 
@@ -91,7 +91,7 @@ final class ContinueSetUpModelTests: XCTestCase {
         capturingDataImportProvider.didImport = true
         duckPlayerPreferences.youtubeOverlayAnyButtonPressed = true
 
-        vm = HomePage.Models.ContinueSetUpModel(
+        vm = NewTabPageNextStepsModel(
             defaultBrowserProvider: capturingDefaultBrowserProvider,
             dockCustomizer: dockCustomizer,
             dataImportProvider: capturingDataImportProvider,
@@ -106,8 +106,8 @@ final class ContinueSetUpModelTests: XCTestCase {
     @MainActor func testWhenInitializedForTheFirstTimeTheMatrixHasAllElementsInTheRightOrder() {
         let homePageIsFirstSession = UserDefaultsWrapper<Bool>(key: .homePageIsFirstSession, defaultValue: true)
         homePageIsFirstSession.wrappedValue = true
-        var expectedMatrix = [[HomePage.Models.FeatureType.duckplayer, .emailProtection]]
-        vm = HomePage.Models.ContinueSetUpModel(
+        var expectedMatrix = [[NewTabPageNextStepsModel.FeatureType.duckplayer, .emailProtection]]
+        vm = NewTabPageNextStepsModel(
             defaultBrowserProvider: capturingDefaultBrowserProvider,
             dockCustomizer: dockCustomizer,
             dataImportProvider: capturingDataImportProvider,
@@ -128,11 +128,11 @@ final class ContinueSetUpModelTests: XCTestCase {
     @MainActor func testWhenInitializedNotForTheFirstTimeTheMatrixHasAllElementsInTheRightOrder() {
         let homePageIsFirstSession = UserDefaultsWrapper<Bool>(key: .homePageIsFirstSession, defaultValue: true)
         homePageIsFirstSession.wrappedValue = false
-        vm = HomePage.Models.ContinueSetUpModel.fixture(appGroupUserDefaults: userDefaults)
+        vm = NewTabPageNextStepsModel.fixture(appGroupUserDefaults: userDefaults)
         vm.shouldShowAllFeatures = true
 
-        XCTAssertEqual(vm.visibleFeaturesMatrix[0][0], HomePage.Models.FeatureType.defaultBrowser)
-        XCTAssertEqual(vm.visibleFeaturesMatrix.reduce([], +).count, HomePage.Models.FeatureType.allCases.count)
+        XCTAssertEqual(vm.visibleFeaturesMatrix[0][0], NewTabPageNextStepsModel.FeatureType.defaultBrowser)
+        XCTAssertEqual(vm.visibleFeaturesMatrix.reduce([], +).count, NewTabPageNextStepsModel.FeatureType.allCases.count)
     }
 
     func testWhenTogglingShowAllFeatureThenCorrectElementsAreVisible() {
@@ -167,7 +167,7 @@ final class ContinueSetUpModelTests: XCTestCase {
         let expectedMatrix = expectedFeatureMatrixWithout(types: [.defaultBrowser])
 
         capturingDefaultBrowserProvider.isDefault = true
-        vm = HomePage.Models.ContinueSetUpModel.fixture(defaultBrowserProvider: capturingDefaultBrowserProvider, appGroupUserDefaults: userDefaults)
+        vm = NewTabPageNextStepsModel.fixture(defaultBrowserProvider: capturingDefaultBrowserProvider, appGroupUserDefaults: userDefaults)
 
         vm.shouldShowAllFeatures = true
 
@@ -180,7 +180,7 @@ final class ContinueSetUpModelTests: XCTestCase {
     }
 
     @MainActor func testWhenAskedToPerformActionForImportPromptThrowsThenItOpensImportWindow() {
-        let numberOfFeatures = HomePage.Models.FeatureType.allCases.count
+        let numberOfFeatures = NewTabPageNextStepsModel.FeatureType.allCases.count
 
         vm.shouldShowAllFeatures = true
         XCTAssertEqual(vm.visibleFeaturesMatrix.flatMap { $0 }.count, numberOfFeatures)
@@ -196,7 +196,7 @@ final class ContinueSetUpModelTests: XCTestCase {
         let expectedMatrix = expectedFeatureMatrixWithout(types: [.importBookmarksAndPasswords])
 
         capturingDataImportProvider.didImport = true
-        vm = HomePage.Models.ContinueSetUpModel.fixture(dataImportProvider: capturingDataImportProvider, appGroupUserDefaults: userDefaults)
+        vm = NewTabPageNextStepsModel.fixture(dataImportProvider: capturingDataImportProvider, appGroupUserDefaults: userDefaults)
 
         vm.shouldShowAllFeatures = true
 
@@ -218,7 +218,7 @@ final class ContinueSetUpModelTests: XCTestCase {
         let expectedMatrix = expectedFeatureMatrixWithout(types: [.emailProtection])
 
         emailStorage.isEmailProtectionEnabled = true
-        vm = HomePage.Models.ContinueSetUpModel.fixture(emailManager: emailManager, appGroupUserDefaults: userDefaults)
+        vm = NewTabPageNextStepsModel.fixture(emailManager: emailManager, appGroupUserDefaults: userDefaults)
 
         vm.shouldShowAllFeatures = true
 
@@ -241,7 +241,7 @@ final class ContinueSetUpModelTests: XCTestCase {
 
         duckPlayerPreferences.youtubeOverlayAnyButtonPressed = false
         duckPlayerPreferences.duckPlayerModeBool = true
-        vm = HomePage.Models.ContinueSetUpModel.fixture(duckPlayerPreferences: duckPlayerPreferences, appGroupUserDefaults: userDefaults)
+        vm = NewTabPageNextStepsModel.fixture(duckPlayerPreferences: duckPlayerPreferences, appGroupUserDefaults: userDefaults)
 
         vm.shouldShowAllFeatures = true
 
@@ -258,7 +258,7 @@ final class ContinueSetUpModelTests: XCTestCase {
 
         duckPlayerPreferences.youtubeOverlayAnyButtonPressed = false
         duckPlayerPreferences.duckPlayerModeBool = false
-        vm = HomePage.Models.ContinueSetUpModel.fixture(duckPlayerPreferences: duckPlayerPreferences, appGroupUserDefaults: userDefaults)
+        vm = NewTabPageNextStepsModel.fixture(duckPlayerPreferences: duckPlayerPreferences, appGroupUserDefaults: userDefaults)
 
         vm.shouldShowAllFeatures = true
 
@@ -275,7 +275,7 @@ final class ContinueSetUpModelTests: XCTestCase {
 
         duckPlayerPreferences.youtubeOverlayAnyButtonPressed = false
         duckPlayerPreferences.duckPlayerModeBool = nil
-        vm = HomePage.Models.ContinueSetUpModel.fixture(duckPlayerPreferences: duckPlayerPreferences, appGroupUserDefaults: userDefaults)
+        vm = NewTabPageNextStepsModel.fixture(duckPlayerPreferences: duckPlayerPreferences, appGroupUserDefaults: userDefaults)
 
         vm.shouldShowAllFeatures = true
 
@@ -292,7 +292,7 @@ final class ContinueSetUpModelTests: XCTestCase {
 
         duckPlayerPreferences.youtubeOverlayAnyButtonPressed = true
         duckPlayerPreferences.duckPlayerModeBool = nil
-        vm = HomePage.Models.ContinueSetUpModel.fixture(duckPlayerPreferences: duckPlayerPreferences, appGroupUserDefaults: userDefaults)
+        vm = NewTabPageNextStepsModel.fixture(duckPlayerPreferences: duckPlayerPreferences, appGroupUserDefaults: userDefaults)
 
         vm.shouldShowAllFeatures = true
 
@@ -301,7 +301,7 @@ final class ContinueSetUpModelTests: XCTestCase {
         vm.shouldShowAllFeatures = false
 
         XCTAssertEqual(vm.visibleFeaturesMatrix.count, 1)
-        XCTAssertTrue(vm.visibleFeaturesMatrix[0].count <= HomePage.Models.ContinueSetUpModel.Const.featuresPerRow)
+        XCTAssertTrue(vm.visibleFeaturesMatrix[0].count <= NewTabPageNextStepsModel.Const.featuresPerRow)
     }
 
     @MainActor func testThatWhenAllFeatureInactiveThenVisibleMatrixIsEmpty() {
@@ -311,7 +311,7 @@ final class ContinueSetUpModelTests: XCTestCase {
         capturingDataImportProvider.didImport = true
         dockCustomizer.addToDock()
 
-        vm = HomePage.Models.ContinueSetUpModel(
+        vm = NewTabPageNextStepsModel(
             defaultBrowserProvider: capturingDefaultBrowserProvider,
             dockCustomizer: dockCustomizer,
             dataImportProvider: capturingDataImportProvider,
@@ -326,7 +326,7 @@ final class ContinueSetUpModelTests: XCTestCase {
     @MainActor func testDismissedItemsAreRemovedFromVisibleMatrixAndChoicesArePersisted() {
         let homePageIsFirstSession = UserDefaultsWrapper<Bool>(key: .homePageIsFirstSession, defaultValue: true)
         homePageIsFirstSession.wrappedValue = true
-        vm = HomePage.Models.ContinueSetUpModel(
+        vm = NewTabPageNextStepsModel(
             defaultBrowserProvider: capturingDefaultBrowserProvider,
             dockCustomizer: dockCustomizer,
             dataImportProvider: capturingDataImportProvider,
@@ -355,23 +355,23 @@ final class ContinueSetUpModelTests: XCTestCase {
         XCTAssertFalse(vm.visibleFeaturesMatrix.flatMap { $0 }.contains(.dock))
 #endif
 
-        let vm2 = HomePage.Models.ContinueSetUpModel.fixture(appGroupUserDefaults: userDefaults)
+        let vm2 = NewTabPageNextStepsModel.fixture(appGroupUserDefaults: userDefaults)
         XCTAssertTrue(vm2.visibleFeaturesMatrix.flatMap { $0 }.isEmpty)
     }
 
     @MainActor func testShowAllFeatureUserPreferencesIsPersisted() {
-        let vm2 = HomePage.Models.ContinueSetUpModel.fixture(appGroupUserDefaults: userDefaults)
+        let vm2 = NewTabPageNextStepsModel.fixture(appGroupUserDefaults: userDefaults)
         vm2.shouldShowAllFeatures = true
         vm.shouldShowAllFeatures = false
 
         XCTAssertFalse(vm2.shouldShowAllFeatures)
     }
 
-    private func doTheyContainTheSameElements(matrix1: [[HomePage.Models.FeatureType]], matrix2: [[HomePage.Models.FeatureType]]) -> Bool {
+    private func doTheyContainTheSameElements(matrix1: [[NewTabPageNextStepsModel.FeatureType]], matrix2: [[NewTabPageNextStepsModel.FeatureType]]) -> Bool {
         Set(matrix1.flatMap { $0 }) == Set(matrix2.flatMap { $0 })
     }
-    private func expectedFeatureMatrixWithout(types: [HomePage.Models.FeatureType]) -> [[HomePage.Models.FeatureType]] {
-        var features = HomePage.Models.FeatureType.allCases
+    private func expectedFeatureMatrixWithout(types: [NewTabPageNextStepsModel.FeatureType]) -> [[NewTabPageNextStepsModel.FeatureType]] {
+        var features = NewTabPageNextStepsModel.FeatureType.allCases
         var indexesToRemove: [Int] = []
         for type in types {
             indexesToRemove.append(features.firstIndex(of: type)!)
@@ -381,17 +381,17 @@ final class ContinueSetUpModelTests: XCTestCase {
         for index in indexesToRemove {
             features.remove(at: index)
         }
-        return features.chunked(into: HomePage.Models.ContinueSetUpModel.Const.featuresPerRow)
+        return features.chunked(into: NewTabPageNextStepsModel.Const.featuresPerRow)
     }
 
     @MainActor func test_WhenUserDoesntHaveApplicationInTheDock_ThenAddToDockCardIsDisplayed() {
 #if !APPSTORE
         let dockCustomizer = DockCustomizerMock()
 
-        let vm = HomePage.Models.ContinueSetUpModel.fixture(appGroupUserDefaults: userDefaults, dockCustomizer: dockCustomizer)
+        let vm = NewTabPageNextStepsModel.fixture(appGroupUserDefaults: userDefaults, dockCustomizer: dockCustomizer)
         vm.shouldShowAllFeatures = true
 
-        XCTAssert(vm.visibleFeaturesMatrix.reduce([], +).contains(HomePage.Models.FeatureType.dock))
+        XCTAssert(vm.visibleFeaturesMatrix.reduce([], +).contains(NewTabPageNextStepsModel.FeatureType.dock))
 #endif
     }
 
@@ -399,15 +399,15 @@ final class ContinueSetUpModelTests: XCTestCase {
         let dockCustomizer = DockCustomizerMock()
         dockCustomizer.addToDock()
 
-        let vm = HomePage.Models.ContinueSetUpModel.fixture(appGroupUserDefaults: userDefaults, dockCustomizer: dockCustomizer)
+        let vm = NewTabPageNextStepsModel.fixture(appGroupUserDefaults: userDefaults, dockCustomizer: dockCustomizer)
         vm.shouldShowAllFeatures = true
 
-        XCTAssertFalse(vm.visibleFeaturesMatrix.reduce([], +).contains(HomePage.Models.FeatureType.dock))
+        XCTAssertFalse(vm.visibleFeaturesMatrix.reduce([], +).contains(NewTabPageNextStepsModel.FeatureType.dock))
     }
 
 }
 
-extension HomePage.Models.ContinueSetUpModel {
+extension NewTabPageNextStepsModel {
     @MainActor static func fixture(
         defaultBrowserProvider: DefaultBrowserProvider = CapturingDefaultBrowserProvider(),
         dataImportProvider: DataImportStatusProviding = CapturingDataImportProvider(),
@@ -416,14 +416,14 @@ extension HomePage.Models.ContinueSetUpModel {
         privacyConfig: MockPrivacyConfiguration = MockPrivacyConfiguration(),
         appGroupUserDefaults: UserDefaults,
         dockCustomizer: DockCustomization = DockCustomizerMock()
-    ) -> HomePage.Models.ContinueSetUpModel {
+    ) -> NewTabPageNextStepsModel {
         privacyConfig.featureSettings = [
             "networkProtection": "disabled"
         ] as! [String: String]
         let manager = MockPrivacyConfigurationManager()
         manager.privacyConfig = privacyConfig
 
-        return HomePage.Models.ContinueSetUpModel(
+        return NewTabPageNextStepsModel(
             defaultBrowserProvider: defaultBrowserProvider,
             dockCustomizer: dockCustomizer,
             dataImportProvider: dataImportProvider,

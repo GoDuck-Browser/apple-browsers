@@ -23,36 +23,36 @@ import PixelKit
 import UserScript
 
 final class NewTabPageNextStepsCardsProvider: NewTabPageNextStepsCardsProviding {
-    let continueSetUpModel: HomePage.Models.ContinueSetUpModel
+    let nextStepsModel: NewTabPageNextStepsModel
     let appearancePreferences: AppearancePreferences
 
-    init(continueSetUpModel: HomePage.Models.ContinueSetUpModel, appearancePreferences: AppearancePreferences = .shared) {
-        self.continueSetUpModel = continueSetUpModel
+    init(continueSetUpModel: NewTabPageNextStepsModel, appearancePreferences: AppearancePreferences = .shared) {
+        self.nextStepsModel = continueSetUpModel
         self.appearancePreferences = appearancePreferences
     }
 
     var isViewExpanded: Bool {
         get {
-            continueSetUpModel.shouldShowAllFeatures
+            nextStepsModel.shouldShowAllFeatures
         }
         set {
-            continueSetUpModel.shouldShowAllFeatures = newValue
+            nextStepsModel.shouldShowAllFeatures = newValue
         }
     }
 
     var isViewExpandedPublisher: AnyPublisher<Bool, Never> {
-        continueSetUpModel.shouldShowAllFeaturesPublisher.eraseToAnyPublisher()
+        nextStepsModel.shouldShowAllFeaturesPublisher.eraseToAnyPublisher()
     }
 
     var cards: [NewTabPageDataModel.CardID] {
         guard !appearancePreferences.isContinueSetUpCardsViewOutdated else {
             return []
         }
-        return continueSetUpModel.featuresMatrix.flatMap { $0.map(NewTabPageDataModel.CardID.init) }
+        return nextStepsModel.featuresMatrix.flatMap { $0.map(NewTabPageDataModel.CardID.init) }
     }
 
     var cardsPublisher: AnyPublisher<[NewTabPageDataModel.CardID], Never> {
-        let features = continueSetUpModel.$featuresMatrix.dropFirst().removeDuplicates()
+        let features = nextStepsModel.$featuresMatrix.dropFirst().removeDuplicates()
         let cardsDidBecomeOutdated = appearancePreferences.$isContinueSetUpCardsViewOutdated.removeDuplicates()
 
         return Publishers.CombineLatest(features, cardsDidBecomeOutdated)
@@ -67,12 +67,12 @@ final class NewTabPageNextStepsCardsProvider: NewTabPageNextStepsCardsProviding 
 
     @MainActor
     func handleAction(for card: NewTabPageDataModel.CardID) {
-        continueSetUpModel.performAction(for: .init(card))
+        nextStepsModel.performAction(for: .init(card))
     }
 
     @MainActor
     func dismiss(_ card: NewTabPageDataModel.CardID) {
-        continueSetUpModel.removeItem(for: .init(card))
+        nextStepsModel.removeItem(for: .init(card))
     }
 
     @MainActor
@@ -91,7 +91,7 @@ final class NewTabPageNextStepsCardsProvider: NewTabPageNextStepsCardsProviding 
     }
 }
 
-extension HomePage.Models.FeatureType {
+extension NewTabPageNextStepsModel.FeatureType {
     init(_ card: NewTabPageDataModel.CardID) {
         switch card {
         case .bringStuff:
@@ -109,7 +109,7 @@ extension HomePage.Models.FeatureType {
 }
 
 extension NewTabPageDataModel.CardID {
-    init(_ feature: HomePage.Models.FeatureType) {
+    init(_ feature: NewTabPageNextStepsModel.FeatureType) {
         switch feature {
         case .duckplayer:
             self = .duckplayer

@@ -31,7 +31,7 @@ final class NewTabPageNextStepsCardsProviderTests: XCTestCase {
         let config = MockPrivacyConfiguration()
         privacyConfigManager.privacyConfig = config
 
-        let continueSetUpModel = HomePage.Models.ContinueSetUpModel(
+        let continueSetUpModel = NewTabPageNextStepsModel(
             defaultBrowserProvider: CapturingDefaultBrowserProvider(),
             dockCustomizer: DockCustomizerMock(),
             dataImportProvider: CapturingDataImportProvider(),
@@ -49,21 +49,21 @@ final class NewTabPageNextStepsCardsProviderTests: XCTestCase {
 
     func testWhenCardsViewIsNotOutdatedThenCardsAreReportedByModel() {
         provider.appearancePreferences.isContinueSetUpCardsViewOutdated = false
-        provider.continueSetUpModel.featuresMatrix = [[.defaultBrowser, .dock, .emailProtection]]
+        provider.nextStepsModel.featuresMatrix = [[.defaultBrowser, .dock, .emailProtection]]
 
         XCTAssertEqual(provider.cards, [.defaultApp, .addAppToDockMac, .emailProtection])
     }
 
     func testWhenCardsViewIsOutdatedThenCardsAreEmpty() {
         provider.appearancePreferences.isContinueSetUpCardsViewOutdated = true
-        provider.continueSetUpModel.featuresMatrix = [[.defaultBrowser, .dock, .emailProtection]]
+        provider.nextStepsModel.featuresMatrix = [[.defaultBrowser, .dock, .emailProtection]]
 
         XCTAssertEqual(provider.cards, [])
     }
 
     func testWhenCardsViewIsNotOutdatedThenCardsAreEmitted() {
         provider.appearancePreferences.isContinueSetUpCardsViewOutdated = false
-        provider.continueSetUpModel.featuresMatrix = [[.defaultBrowser]]
+        provider.nextStepsModel.featuresMatrix = [[.defaultBrowser]]
 
         var cardsEvents = [[NewTabPageDataModel.CardID]]()
 
@@ -72,9 +72,9 @@ final class NewTabPageNextStepsCardsProviderTests: XCTestCase {
                 cardsEvents.append(cards)
             }
 
-        provider.continueSetUpModel.featuresMatrix = [[.dock]]
-        provider.continueSetUpModel.featuresMatrix = [[.dock, .duckplayer]]
-        provider.continueSetUpModel.featuresMatrix = [[.defaultBrowser]]
+        provider.nextStepsModel.featuresMatrix = [[.dock]]
+        provider.nextStepsModel.featuresMatrix = [[.dock, .duckplayer]]
+        provider.nextStepsModel.featuresMatrix = [[.defaultBrowser]]
 
         cancellable.cancel()
         XCTAssertEqual(cardsEvents, [[.addAppToDockMac], [.addAppToDockMac, .duckplayer], [.defaultApp]])
@@ -82,7 +82,7 @@ final class NewTabPageNextStepsCardsProviderTests: XCTestCase {
 
     func testWhenCardsViewIsOutdatedThenEmptyCardsAreEmitted() {
         provider.appearancePreferences.isContinueSetUpCardsViewOutdated = true
-        provider.continueSetUpModel.featuresMatrix = [[.defaultBrowser]]
+        provider.nextStepsModel.featuresMatrix = [[.defaultBrowser]]
 
         var cardsEvents = [[NewTabPageDataModel.CardID]]()
 
@@ -91,9 +91,9 @@ final class NewTabPageNextStepsCardsProviderTests: XCTestCase {
                 cardsEvents.append(cards)
             }
 
-        provider.continueSetUpModel.featuresMatrix = [[.dock]]
-        provider.continueSetUpModel.featuresMatrix = [[.duckplayer]]
-        provider.continueSetUpModel.featuresMatrix = [[.defaultBrowser]]
+        provider.nextStepsModel.featuresMatrix = [[.dock]]
+        provider.nextStepsModel.featuresMatrix = [[.duckplayer]]
+        provider.nextStepsModel.featuresMatrix = [[.defaultBrowser]]
 
         cancellable.cancel()
         XCTAssertEqual(cardsEvents, [[], [], []])
@@ -101,7 +101,7 @@ final class NewTabPageNextStepsCardsProviderTests: XCTestCase {
 
     func testWhenCardsViewBecomesOutdatedThenCardsStopBeingEmitted() {
         provider.appearancePreferences.isContinueSetUpCardsViewOutdated = false
-        provider.continueSetUpModel.featuresMatrix = [[.defaultBrowser]]
+        provider.nextStepsModel.featuresMatrix = [[.defaultBrowser]]
 
         var cardsEvents = [[NewTabPageDataModel.CardID]]()
 
@@ -110,10 +110,10 @@ final class NewTabPageNextStepsCardsProviderTests: XCTestCase {
                 cardsEvents.append(cards)
             }
 
-        provider.continueSetUpModel.featuresMatrix = [[.dock]]
-        provider.continueSetUpModel.featuresMatrix = [[.dock, .duckplayer]]
+        provider.nextStepsModel.featuresMatrix = [[.dock]]
+        provider.nextStepsModel.featuresMatrix = [[.dock, .duckplayer]]
         provider.appearancePreferences.isContinueSetUpCardsViewOutdated = true
-        provider.continueSetUpModel.featuresMatrix = [[.defaultBrowser]]
+        provider.nextStepsModel.featuresMatrix = [[.defaultBrowser]]
 
         cancellable.cancel()
         XCTAssertEqual(cardsEvents, [[.addAppToDockMac], [.addAppToDockMac, .duckplayer], [], []])
