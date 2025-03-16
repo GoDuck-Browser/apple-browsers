@@ -23,11 +23,9 @@ import PixelKit
 import SwiftUI
 import XCTest
 
-private typealias SettingsModel = HomePage.Models.SettingsModel
+final class NewTabPageCustomizationModelTests: XCTestCase {
 
-final class HomePageSettingsModelTests: XCTestCase {
-
-    fileprivate var model: SettingsModel!
+    fileprivate var model: NewTabPageCustomizationModel!
     var storageLocation: URL!
     var appearancePreferences: AppearancePreferences!
     var userBackgroundImagesManager: CapturingUserBackgroundImagesManager!
@@ -46,7 +44,7 @@ final class HomePageSettingsModelTests: XCTestCase {
 
         UserDefaultsWrapper<Any>.sharedDefaults.removeObject(forKey: UserDefaultsWrapper<Any>.Key.homePageLastPickedCustomColor.rawValue)
 
-        model = SettingsModel(
+        model = NewTabPageCustomizationModel(
             appearancePreferences: appearancePreferences,
             userBackgroundImagesManager: userBackgroundImagesManager,
             sendPixel: { [weak self] in self?.sendPixelEvents.append($0) },
@@ -54,17 +52,12 @@ final class HomePageSettingsModelTests: XCTestCase {
                 self?.openFilePanelCallCount += 1
                 return self?.openFilePanel()
             },
-            showAddImageFailedAlert: { [weak self] in self?.showImageFailedAlertCallCount += 1 },
-            navigator: MockHomePageSettingsModelNavigator()
+            showAddImageFailedAlert: { [weak self] in self?.showImageFailedAlertCallCount += 1 }
         )
     }
 
     override func tearDown() async throws {
         try? FileManager.default.removeItem(at: storageLocation)
-    }
-
-    func testThatContentTypeIsRootByDefault() {
-        XCTAssertEqual(model.contentType, .root)
     }
 
     func testThatCustomBackgroundIsNilByDefault() {

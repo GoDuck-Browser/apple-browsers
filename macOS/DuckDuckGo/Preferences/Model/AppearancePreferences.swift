@@ -110,18 +110,18 @@ struct AppearancePreferencesUserDefaultsPersistor: AppearancePreferencesPersisto
     var showTabsAndBookmarksBarOnFullScreen: Bool
 }
 
-protocol HomePageNavigator {
+protocol NewTabPageNavigator {
     func openNewTabPageBackgroundCustomizationSettings()
 }
 
-final class DefaultHomePageNavigator: HomePageNavigator {
+final class DefaultNewTabPageNavigator: NewTabPageNavigator {
     func openNewTabPageBackgroundCustomizationSettings() {
         Task { @MainActor in
             WindowControllersManager.shared.showTab(with: .newtab)
             try? await Task.sleep(interval: 0.2)
             if let window = WindowControllersManager.shared.lastKeyMainWindowController {
                 let newTabPageViewModel = window.mainViewController.browserTabViewController.newTabPageWebViewModel
-                NSApp.delegateTyped.homePageSettingsModel.customizerOpener.openSettings(for: newTabPageViewModel.webView)
+                NSApp.delegateTyped.newTabPageCustomizationModel.customizerOpener.openSettings(for: newTabPageViewModel.webView)
             }
         }
     }
@@ -358,18 +358,18 @@ final class AppearancePreferences: ObservableObject {
     }
 
     func openNewTabPageBackgroundCustomizationSettings() {
-        homePageNavigator.openNewTabPageBackgroundCustomizationSettings()
+        newTabPageNavigator.openNewTabPageBackgroundCustomizationSettings()
     }
 
     init(
         persistor: AppearancePreferencesPersistor = AppearancePreferencesUserDefaultsPersistor(),
-        homePageNavigator: HomePageNavigator = DefaultHomePageNavigator(),
+        newTabPageNavigator: NewTabPageNavigator = DefaultNewTabPageNavigator(),
         newTabPageSectionsAvailabilityProvider: NewTabPageSectionsAvailabilityProviding = NewTabPageModeDecider(),
         featureFlagger: @autoclosure @escaping () -> FeatureFlagger = NSApp.delegateTyped.featureFlagger,
         dateTimeProvider: @escaping () -> Date = Date.init
     ) {
         self.persistor = persistor
-        self.homePageNavigator = homePageNavigator
+        self.newTabPageNavigator = newTabPageNavigator
         self.dateTimeProvider = dateTimeProvider
         self.isContinueSetUpCardsViewOutdated = persistor.continueSetUpCardsNumberOfDaysDemonstrated >= Constants.dismissNextStepsCardsAfterDays
         self.featureFlagger = featureFlagger
@@ -390,7 +390,7 @@ final class AppearancePreferences: ObservableObject {
     }
 
     private var persistor: AppearancePreferencesPersistor
-    private var homePageNavigator: HomePageNavigator
+    private var newTabPageNavigator: NewTabPageNavigator
     private let newTabPageSectionsAvailabilityProvider: NewTabPageSectionsAvailabilityProviding
     private let featureFlagger: () -> FeatureFlagger
     private let dateTimeProvider: () -> Date

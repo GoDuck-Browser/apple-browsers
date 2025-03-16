@@ -361,7 +361,7 @@ extension AppDelegate {
     }
 
     @objc func resetNewTabPageCustomization(_ sender: Any?) {
-        homePageSettingsModel.resetAllCustomizations()
+        newTabPageCustomizationModel.resetAllCustomizations()
     }
 }
 
