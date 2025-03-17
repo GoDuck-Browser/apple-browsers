@@ -81,9 +81,6 @@ protocol DuckPlayerNavigationHandling: AnyObject {
     /// The DuckPlayer instance used for handling video playback.
     var duckPlayer: DuckPlayerControlling { get }
 
-    /// DuckPlayerOverlayUsagePixels instance used for handling pixel firing.
-    var duckPlayerOverlayUsagePixels: DuckPlayerOverlayPixelFiring? { get }
-
     /// Handles URL changes in the web view.
     ///
     /// - Parameter webView: The web view where the URL change occurred.
@@ -138,6 +135,13 @@ protocol DuckPlayerNavigationHandling: AnyObject {
 
     /// Sets the host view controller for the navigation handler.
     func setHostViewController(_ hostViewController: TabViewController)
+
+    /// Handles DuckPlayer Updates when WebView appears
+    func updateDuckPlayerForWebViewAppearance(_ hostViewController: TabViewController)
+
+    /// Handles DuckPlayer Updates when WebView dissapears
+    func updateDuckPlayerForWebViewDisappearance(_ hostViewController: TabViewController)
+
 }
 
 /// Protocol defining the tab navigation handling for Duck Player.

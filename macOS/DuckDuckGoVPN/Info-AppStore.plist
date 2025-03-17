@@ -24,5 +24,7 @@
 	<string>$(PROXY_APPEX_BUNDLE_ID)</string>
 	<key>PROXY_SYSEX_BUNDLE_ID</key>
 	<string>$(PROXY_SYSEX_BUNDLE_ID)</string>
+	<key>DBP_BACKGROUND_AGENT_BUNDLE_ID</key>
+	<string>$(DBP_BACKGROUND_AGENT_BUNDLE_ID)</string>
 </dict>
 </plist>
