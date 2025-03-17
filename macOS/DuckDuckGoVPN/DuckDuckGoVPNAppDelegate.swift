@@ -342,7 +342,7 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
                 }))
         }
 
-        if proxySettings.proxyAvailable {
+        if vpnAppState.isUsingSystemExtension {
             menuItems.append(contentsOf: [
                 .textWithDetail(
                     icon: Image(.window16),

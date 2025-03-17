@@ -107,6 +107,7 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
 
     private func statusViewSubmenu() -> [StatusBarMenu.MenuItem] {
         let appLauncher = AppLauncher(appBundleURL: Bundle.main.bundleURL)
+        let vpnAppState = VPNAppState(defaults: .netP)
 
         var menuItems = [StatusBarMenu.MenuItem]()
 
@@ -117,7 +118,7 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
                 }))
         }
 
-        if proxySettings.proxyAvailable {
+        if vpnAppState.isUsingSystemExtension {
             menuItems.append(contentsOf: [
                 .textWithDetail(
                     icon: Image(.window16),
