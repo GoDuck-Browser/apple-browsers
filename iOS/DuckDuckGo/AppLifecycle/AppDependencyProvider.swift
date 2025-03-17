@@ -239,8 +239,9 @@ final class AppDependencyProvider: DependencyProvider {
             tokenHandler = subscriptionManager
             authenticationStateProvider = subscriptionManager
             subscriptionAuthV1toV2Bridge = subscriptionManager
-
-            subscriptionManager.loadInitialData()
+            Task {
+                await subscriptionManager.loadInitialData()
+            }
         }
         vpnFeatureVisibility = DefaultNetworkProtectionVisibility(authenticationStateProvider: authenticationStateProvider)
         networkProtectionKeychainTokenStore = NetworkProtectionKeychainTokenStore(accessTokenProvider: accessTokenProvider)

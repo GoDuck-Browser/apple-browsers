@@ -45,8 +45,9 @@ final class SubscriptionService {
                 self?.handlePrivacyConfigurationUpdates()
             }
             .store(in: &cancellables)
-
-        subscriptionManager?.loadInitialData() // only for v1
+        Task {
+            await subscriptionManager?.loadInitialData() // only for v1
+        }
     }
 
     private static func makeSubscriptionCookieManager(application: UIApplication,
