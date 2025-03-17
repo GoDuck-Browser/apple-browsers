@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="DuckDuckGo/Localizable.xcstrings" source-language="en" target-language="it" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+    </header>
+    <body>
+      <trans-unit id="email.optionsMenu.turnOn" xml:space="preserve">
+        <source>Enable Email Protection</source>
+        <target>Attiva Email Protection</target>
+        <note>Sub menu item to enable Email Protection</note>
+      </trans-unit>
+      <trans-unit id="find.in.page" xml:space="preserve">
+        <source>%1$d of %2$d</source>
+        <target>%1$d di %2$d</target>
+        <note>Find in page status (e.g. 1 of 99)</note>
+      </trans-unit>
+      <trans-unit id="%@ does not support storing passwords" xml:space="preserve">
+        <source>%@ does not support storing passwords</source>
+        <target>%@ non supporta il salvataggio delle password</target>
+        <note>Data Import disabled checkbox message about a browser (%@) not supporting storing passwords</note>
+      </trans-unit>
+      <trans-unit id="duckai.onboarding.popover.confirmation" xml:space="preserve">
+        <source>Duck.ai shortcut added!</source>
+        <target>Scorciatoia Duck.ai aggiunta!</target>
+        <note>Confirmation for accepting the AI Chat onboarding popover</note>
+      </trans-unit>
+      <trans-unit id="duckai.preferences.caption" xml:space="preserve">
+        <source>Duck.ai is an optional feature that lets you chat anonymously with popular 3rd-party AI chat models. Your chats are not used to train AI.</source>
+        <target>Duck.ai è una funzionalità opzionale che ti consente di chattare in modo anonimo con popolari modelli di chat AI di terze parti. Le tue chat non vengono utilizzate per addestrare l'IA.</target>
+        <note>Ai Chat preferences explanation</note>
+      </trans-unit>
+      <trans-unit id="duck-player.title" xml:space="preserve">
+        <source>Duck Player</source>
+        <target>Duck Player</target>
+        <note>Private YouTube Player settings title</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="LocalPackages/NetworkProtectionMac/Sources/NetworkProtectionUI/Resources/Localizable.xcstrings" source-language="en" target-language="it" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+    </header>
+    <body>
+      <trans-unit id="network.protection.status.header.message.on" xml:space="preserve">
+        <source>All device Internet traffic is being secured
+through the VPN.</source>
+        <target>Tutto il traffico Internet del dispositivo viene protetto
+tramite la VPN.</target>
+        <note>Message label text for the status view when VPN is connected</note>
+      </trans-unit>
+      <trans-unit id="network.protection.report.site.issues.title" xml:space="preserve">
+        <source>Report an issue with %@?</source>
+        <target>Segnalare un problema con %@?</target>
+        <note>Title for report site issues view for website “%@”</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="LocalPackages/SyncUI-macOS/Sources/SyncUI-macOS/Resources/Localizable.xcstrings" source-language="en" target-language="it" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a"/>
+    </header>
+    <body>
+      <trans-unit id="sync.warning.sync-unavailable-message" xml:space="preserve">
+        <source>Sorry, but Sync &amp; Backup is currently unavailable. Please try again later.</source>
+        <target>Spiacenti, ma Sync &amp; Backup non è al momento disponibile. Riprova più tardi.</target>
+        <note>Data syncing unavailable warning message</note>
+      </trans-unit>
+      <trans-unit id="prefrences.sync.device-details.label" xml:space="preserve">
+        <source>Name</source>
+        <target>Nome</target>
+        <note>The text entry label to name the device</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -51,7 +51,7 @@ final_xliff_path="${script_dir}/assets/loc"
 mkdir -p "$final_xliff_path"
 
 # Export localizations
-xcodebuild -exportLocalizations -localizationPath "$export_path" -derivedDataPath "${script_dir}/DerivedData" -scheme "macOS Browser" APP_STORE_PRODUCT_MODULE_NAME_OVERRIDE=DuckDuckGo_Privacy_Browser_App_Store PRIVACY_PRO_PRODUCT_MODULE_NAME_OVERRIDE=DuckDuckGo_Privacy_Browser_Privacy_Pro
+xcodebuild -exportLocalizations -localizationPath "$export_path" -derivedDataPath "${script_dir}/DerivedData" -scheme "macOS Browser" -exportLanguage it APP_STORE_PRODUCT_MODULE_NAME_OVERRIDE=DuckDuckGo_Privacy_Browser_App_Store PRIVACY_PRO_PRODUCT_MODULE_NAME_OVERRIDE=DuckDuckGo_Privacy_Browser_Privacy_Pro
 
 # Attempt to find the .xcloc package
 xcloc_package=$(find "$export_path" -type d -name "*.xcloc")
@@ -66,7 +66,7 @@ echo "Extracting .xliff from $xcloc_package"
 xliff_file="${new_xliff_name:-en}.xliff" # Use provided name or default to "en.xliff"
 
 # Extract the .xliff file to the final path
-cp "${xcloc_package}/Localized Contents/en.xliff" "${final_xliff_path}/${xliff_file}"
+cp "${xcloc_package}/Localized Contents/it.xliff" "${final_xliff_path}/${xliff_file}"
 echo "Extraction complete. .xliff file is now in ${final_xliff_path} as ${xliff_file}"
 
 # Cleanup
