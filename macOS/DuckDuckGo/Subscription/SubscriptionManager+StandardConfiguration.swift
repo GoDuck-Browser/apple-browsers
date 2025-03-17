@@ -125,7 +125,13 @@ extension DefaultSubscriptionManagerV2 {
         let authClient = DefaultOAuthClient(tokensStorage: tokenStorage,
                                             legacyTokenStorage: legacyAccountStorage,
                                             authService: authService)
-        apiService.authorizationRefresherCallback = { _ in
+        apiService.authorizationRefresherCallback = { request in
+
+            guard request.url?.absoluteString.contains("api/auth/v2") == false else {
+                Logger.networkProtection.debug("Skipping refresh token for Auth V2 API calls")
+                throw OAuthClientError.internalError("Skipping refresh token for Auth V2 API calls")
+            }
+
             guard let tokenContainer = tokenStorage.tokenContainer else {
                 throw OAuthClientError.internalError("Missing refresh token")
             }

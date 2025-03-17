@@ -315,7 +315,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             subscriptionManagerV1 = nil
             subscriptionAuthV1toV2Bridge = subscriptionManager
 
-            subscriptionManager.loadInitialData()
+            Task {
+                await subscriptionManager.loadInitialData()
+            }
         }
         // --------
 
@@ -458,8 +460,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         startupSync()
 
-        subscriptionManagerV1?.loadInitialData()
-
+        Task {
+            await subscriptionManagerV1?.loadInitialData()
+        }
         let privacyConfigurationManager = ContentBlocking.shared.privacyConfigurationManager
 
         // Enable subscriptionCookieManager if feature flag is present

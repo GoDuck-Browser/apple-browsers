@@ -151,8 +151,8 @@ public struct StartupOptions {
     }
 
     var description: String {
-        return """
-        StartupOptions(
+        var result = """
+        StartupOptions:
             startupMethod: \(self.startupMethod.debugDescription),
             simulateError: \(self.simulateError.description),
             simulateCrash: \(self.simulateCrash.description),
@@ -163,9 +163,16 @@ public struct StartupOptions {
             selectedLocation: \(self.selectedLocation.description),
             dnsSettings: \(self.dnsSettings.description),
             enableTester: \(self.enableTester),
-            excludeLocalNetworks: \(self.excludeLocalNetworks)
-        )
+            excludeLocalNetworks: \(self.excludeLocalNetworks),
         """
+#if os(macOS)
+        result += """
+            isAuthV2Enabled: \(self.isAuthV2Enabled),
+            authToken: \(self.authToken),
+            tokenContainer: \(self.tokenContainer),
+        """
+#endif
+        return result
     }
 
     // MARK: - Helpers for reading stored options

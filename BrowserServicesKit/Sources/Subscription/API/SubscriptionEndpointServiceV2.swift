@@ -131,7 +131,7 @@ public struct DefaultSubscriptionEndpointServiceV2: SubscriptionEndpointServiceV
                 throw SubscriptionEndpointServiceError.noData
             } else {
                 let bodyString: String = try response.decodeBody()
-                Logger.subscriptionEndpointService.log("(\(statusCode.description) Failed to retrieve Subscription details: \(bodyString)")
+                Logger.subscriptionEndpointService.log("(\(statusCode.description) Failed to retrieve Subscription details: \(bodyString, privacy: .public)")
                 throw SubscriptionEndpointServiceError.invalidResponseCode(statusCode)
             }
         }

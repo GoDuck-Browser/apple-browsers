@@ -256,7 +256,7 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
             do {
                 let refreshTokenResponse = try await authService.refreshAccessToken(clientID: Constants.clientID, refreshToken: refreshToken)
                 let refreshedTokens = try await decode(accessToken: refreshTokenResponse.accessToken, refreshToken: refreshTokenResponse.refreshToken)
-                Logger.OAuthClient.log("Tokens refreshed: \(refreshedTokens.debugDescription)")
+                Logger.OAuthClient.log("Tokens refreshed, expiry: \(refreshedTokens.decodedAccessToken.exp.value.description, privacy: .public)")
                 tokenStorage.tokenContainer = refreshedTokens
                 return refreshedTokens
             } catch OAuthServiceError.authAPIError(let code) where code == OAuthRequest.BodyErrorCode.invalidTokenRequest {
@@ -319,7 +319,7 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
     }
 
     public func adopt(tokenContainer: TokenContainer) {
-        Logger.OAuthClient.log("Adopting TokenContainer: \(tokenContainer.debugDescription)")
+        Logger.OAuthClient.log("Adopting TokenContainer")
         tokenStorage.tokenContainer = tokenContainer
     }
 

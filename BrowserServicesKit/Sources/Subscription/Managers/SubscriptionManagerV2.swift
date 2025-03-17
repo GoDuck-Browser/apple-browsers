@@ -70,7 +70,7 @@ public protocol SubscriptionManagerV2: SubscriptionTokenProvider, SubscriptionAu
     var currentEnvironment: SubscriptionEnvironment { get }
 
     /// Tries to get an authentication token and request the subscription
-    func loadInitialData()
+    func loadInitialData() async
 
     // Subscription
     @discardableResult func getSubscription(cachePolicy: SubscriptionCachePolicy) async throws -> PrivacyProSubscription
@@ -228,6 +228,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     // MARK: - Subscription
 
     func migrateAuthV1toAuthV2IfNeeded() async {
+
         guard v1MigrationNeeded else {
             return
         }
@@ -247,19 +248,17 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
         }
     }
 
-    public func loadInitialData() {
-        Task {
-            // Fetching fresh subscription
-            if isUserAuthenticated {
-                do {
-                    let subscription = try await getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
-                    Logger.subscription.log("Subscription is \(subscription.isActive ? "active" : "not active", privacy: .public)")
-                    if subscription.isActive {
-                        pixelHandler(.subscriptionIsActive)
-                    }
-                } catch {
-                    Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
+    public func loadInitialData() async {
+        // Fetching fresh subscription
+        if isUserAuthenticated {
+            do {
+                let subscription = try await getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
+                Logger.subscription.log("Subscription is \(subscription.isActive ? "active" : "not active", privacy: .public)")
+                if subscription.isActive {
+                    pixelHandler(.subscriptionIsActive)
                 }
+            } catch {
+                Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
             }
         }
     }
@@ -401,11 +400,16 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     }
 
     func attemptTokenRecovery() async throws -> TokenContainer {
+
+        guard let tokenRecoveryHandler else {
+            throw SubscriptionManagerError.tokenUnavailable(error: nil)
+        }
+        
         Logger.subscription.log("The refresh token is expired, attempting subscription recovery...")
         pixelHandler(.deadToken)
         await signOut(notifyUI: false)
 
-        try await tokenRecoveryHandler?()
+        try await tokenRecoveryHandler()
 
         return try await getTokenContainer(policy: .local)
     }

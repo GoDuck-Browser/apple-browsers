@@ -68,7 +68,7 @@ public class DefaultAPIService: APIService {
            request.isAuthenticated == true,
            !authAlreadyRefreshed,
            let authorizationRefresherCallback {
-
+            Logger.networking.log("Refreshing token for \(request.url?.absoluteString ?? "unknown URL", privacy: .public)")
             // Ask to refresh the token
             let refreshedToken = try await authorizationRefresherCallback(request)
             request.updateAuthorizationHeader(refreshedToken)

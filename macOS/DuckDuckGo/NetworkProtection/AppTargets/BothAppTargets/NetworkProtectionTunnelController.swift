@@ -622,8 +622,12 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
             options[NetworkProtectionOptionKey.authToken] = authToken
         } else {
             Logger.networkProtection.log("Using Auth V2")
-            let tokenContainer = try await fetchTokenContainerAndRefresh()
+            let tokenContainer = try await fetchTokenContainer()
             options[NetworkProtectionOptionKey.tokenContainer] = tokenContainer.data
+
+            // Important: Here we force the token refresh in order to immediately branch the one used by the main app from the system extension one.
+            // See discussion https://app.asana.com/0/1199230911884351/1208785842165508/f
+            try await subscriptionManagerV2.getTokenContainer(policy: .localForceRefresh)
         }
 
         options[NetworkProtectionOptionKey.selectedEnvironment] = settings.selectedEnvironment.rawValue as NSString
@@ -830,14 +834,10 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         }
     }
 
-    private func fetchTokenContainerAndRefresh() async throws -> TokenContainer {
+    private func fetchTokenContainer() async throws -> TokenContainer {
         do {
             let tokenContainer = try await subscriptionManagerV2.getTokenContainer(policy: .localValid)
             Logger.networkProtection.log("🟢 TunnelController found token container")
-
-            // refresh token in order to brach it from the one sent to VPN
-            try await subscriptionManagerV2.getTokenContainer(policy: .localForceRefresh)
-
             return tokenContainer
         } catch {
             Logger.networkProtection.fault("🔴 TunnelController found no token container")
