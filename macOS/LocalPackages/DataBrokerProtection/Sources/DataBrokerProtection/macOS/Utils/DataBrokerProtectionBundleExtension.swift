@@ -19,9 +19,9 @@
 import Foundation
 
 extension UserDefaults {
-    static let dbp = UserDefaults(suiteName: Bundle.main.dbpAppGroup)!
-    static let config = UserDefaults(suiteName: Bundle.main.configAppGroup)!
-    static let netP = UserDefaults(suiteName: Bundle.main.netPAppGroup)!
+    public static let dbp = UserDefaults(suiteName: Bundle.main.dbpAppGroup)!
+    public static let config = UserDefaults(suiteName: Bundle.main.configAppGroup)!
+    public static let netP = UserDefaults(suiteName: Bundle.main.netPAppGroup)!
 }
 
 extension Bundle {

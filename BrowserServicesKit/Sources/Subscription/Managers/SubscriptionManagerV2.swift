@@ -70,7 +70,7 @@ public protocol SubscriptionManagerV2: SubscriptionTokenProvider, SubscriptionAu
     var currentEnvironment: SubscriptionEnvironment { get }
 
     /// Tries to get an authentication token and request the subscription
-    func loadInitialData() async
+    func loadInitialData()
 
     // Subscription
     @discardableResult func getSubscription(cachePolicy: SubscriptionCachePolicy) async throws -> PrivacyProSubscription
@@ -155,6 +155,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     public var tokenRecoveryHandler: TokenRecoveryHandler?
     public let currentEnvironment: SubscriptionEnvironment
     private let isInternalUserEnabled: () -> Bool
+    private var v1MigrationNeeded: Bool = true
 
     public init(storePurchaseManager: StorePurchaseManagerV2? = nil,
                 oAuthClient: any OAuthClient,
@@ -226,10 +227,13 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
 
     // MARK: - Subscription
 
-    public func loadInitialData() async {
+    func migrateAuthV1toAuthV2IfNeeded() async {
+        guard v1MigrationNeeded else {
+            return
+        }
+        v1MigrationNeeded = false
 
         // Attempting V1 token migration
-        // IMPORTANT: This MUST be the first operation executed by Subscription
         do {
             if (try await oAuthClient.migrateV1Token()) != nil {
                 pixelHandler(.v1MigrationSuccessful)
@@ -241,17 +245,21 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
             Logger.subscription.error("Failed to migrate V1 token: \(error, privacy: .public)")
             pixelHandler(.v1MigrationFailed)
         }
+    }
 
-        // Fetching fresh subscription
-        if isUserAuthenticated {
-            do {
-                let subscription = try await getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
-                Logger.subscription.log("Subscription is \(subscription.isActive ? "active" : "not active", privacy: .public)")
-                if subscription.isActive {
-                    pixelHandler(.subscriptionIsActive)
+    public func loadInitialData() {
+        Task {
+            // Fetching fresh subscription
+            if isUserAuthenticated {
+                do {
+                    let subscription = try await getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
+                    Logger.subscription.log("Subscription is \(subscription.isActive ? "active" : "not active", privacy: .public)")
+                    if subscription.isActive {
+                        pixelHandler(.subscriptionIsActive)
+                    }
+                } catch {
+                    Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
                 }
-            } catch {
-                Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
             }
         }
     }
@@ -356,6 +364,9 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
 
     @discardableResult public func getTokenContainer(policy: AuthTokensCachePolicy) async throws -> TokenContainer {
         Logger.subscription.debug("Get tokens \(policy.description, privacy: .public)")
+
+        await migrateAuthV1toAuthV2IfNeeded()
+
         do {
             let currentCachedTokenContainer = oAuthClient.currentTokenContainer
             let currentCachedEntitlements = currentCachedTokenContainer?.decodedAccessToken.subscriptionEntitlements

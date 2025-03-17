@@ -271,8 +271,7 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
         settings: tunnelSettings,
         defaults: userDefaults,
         accessTokenStorage: accessTokenStorage,
-        subscriptionManagerV2: subscriptionManagerV2,
-        isAuthV2Enable: DuckDuckGoVPNApplication.isAuthV2Enabled)
+        subscriptionManagerV2: subscriptionManagerV2)
 
     /// An IPC server that provides access to the tunnel controller.
     ///
@@ -359,24 +358,29 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
                 }))
         }
 
+        if proxySettings.proxyAvailable {
+            menuItems.append(contentsOf: [
+                .textWithDetail(
+                    icon: Image(.window16),
+                    title: UserText.vpnStatusViewExcludedAppsMenuItemTitle,
+                    detail: "(\(excludedAppsMinusDBPAgent.count))",
+                    action: { [weak self] in
+
+                        try? await self?.appLauncher.launchApp(withCommand: VPNAppLaunchCommand.manageExcludedApps)
+                    }),
+                .textWithDetail(
+                    icon: Image(.globe16),
+                    title: UserText.vpnStatusViewExcludedDomainsMenuItemTitle,
+                    detail: "(\(proxySettings.excludedDomains.count))",
+                    action: { [weak self] in
+
+                        try? await self?.appLauncher.launchApp(withCommand: VPNAppLaunchCommand.manageExcludedDomains)
+                    }),
+                .divider()
+            ])
+        }
+
         menuItems.append(contentsOf: [
-            .textWithDetail(
-                icon: Image(.window16),
-                title: UserText.vpnStatusViewExcludedAppsMenuItemTitle,
-                detail: "(\(excludedAppsMinusDBPAgent.count))",
-                action: { [weak self] in
-
-                    try? await self?.appLauncher.launchApp(withCommand: VPNAppLaunchCommand.manageExcludedApps)
-            }),
-            .textWithDetail(
-                icon: Image(.globe16),
-                title: UserText.vpnStatusViewExcludedDomainsMenuItemTitle,
-                detail: "(\(proxySettings.excludedDomains.count))",
-                action: { [weak self] in
-
-                    try? await self?.appLauncher.launchApp(withCommand: VPNAppLaunchCommand.manageExcludedDomains)
-            }),
-            .divider(),
             .text(icon: Image(.help16), title: UserText.vpnStatusViewFAQMenuItemTitle, action: { [weak self] in
                 try? await self?.appLauncher.launchApp(withCommand: VPNAppLaunchCommand.showFAQ)
             }),

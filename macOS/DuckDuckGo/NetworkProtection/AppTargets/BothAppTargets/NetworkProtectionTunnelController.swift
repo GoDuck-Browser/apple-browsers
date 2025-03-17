@@ -70,7 +70,7 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
 
     private let accessTokenStorage: SubscriptionTokenKeychainStorage
     private let subscriptionManagerV2: any SubscriptionManagerV2
-    private let isAuthV2Enable: Bool
+//    private let isAuthV2Enable: Bool
 
     // MARK: - Debug Options Support
 
@@ -152,7 +152,6 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
     ///
     /// - Parameters:
     ///         - notificationCenter: (meant for testing) the notification center that this object will use.
-    ///         - logger: (meant for testing) the logger that this object will use.
     ///
     init(networkExtensionBundleID: String,
          networkExtensionController: NetworkExtensionController,
@@ -161,8 +160,7 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
          defaults: UserDefaults,
          notificationCenter: NotificationCenter = .default,
          accessTokenStorage: SubscriptionTokenKeychainStorage,
-         subscriptionManagerV2: any SubscriptionManagerV2,
-         isAuthV2Enable: Bool) {
+         subscriptionManagerV2: any SubscriptionManagerV2) {
 
         self.featureFlagger = featureFlagger
         self.networkExtensionBundleID = networkExtensionBundleID
@@ -172,7 +170,6 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         self.defaults = defaults
         self.accessTokenStorage = accessTokenStorage
         self.subscriptionManagerV2 = subscriptionManagerV2
-        self.isAuthV2Enable = isAuthV2Enable
 
         subscribeToSettingsChanges()
         subscribeToStatusChanges()
@@ -279,7 +276,8 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
                 .setSelectedLocation,
                 .setDNSSettings,
                 .setShowInMenuBar,
-                .setDisableRekeying:
+                .setDisableRekeying,
+                .setIsAuthV2Enabled: // TODO: restart??
             // Intentional no-op as this is handled by the extension or the agent's app delegate
             break
         }
@@ -616,12 +614,14 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
 
         options[NetworkProtectionOptionKey.activationAttemptId] = UUID().uuidString as NSString
 
-        // AuthV1
-        if !isAuthV2Enable {
+        let isAuthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
+        options[NetworkProtectionOptionKey.isAuthV2Enabled] = NSNumber(value: isAuthV2Enabled)
+        if !isAuthV2Enabled {
+            Logger.networkProtection.log("Using Auth V1")
             let authToken = try fetchAuthToken()
             options[NetworkProtectionOptionKey.authToken] = authToken
         } else {
-            // AuthV2
+            Logger.networkProtection.log("Using Auth V2")
             let tokenContainer = try await fetchTokenContainerAndRefresh()
             options[NetworkProtectionOptionKey.tokenContainer] = tokenContainer.data
         }

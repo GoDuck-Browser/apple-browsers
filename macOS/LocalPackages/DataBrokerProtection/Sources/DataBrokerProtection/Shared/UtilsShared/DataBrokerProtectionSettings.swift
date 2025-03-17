@@ -33,6 +33,7 @@ public final class DataBrokerProtectionSettings: VPNBypassSettingsProviding {
 
     private enum Keys {
         static let runType = "dbp.environment.run-type"
+        static let isAuthV2Enabled = "dbp.environment.isAuthV2Enabled"
     }
 
     public enum SelectedEnvironment: String, Codable {
@@ -51,13 +52,10 @@ public final class DataBrokerProtectionSettings: VPNBypassSettingsProviding {
         }
     }
 
-    init(defaults: UserDefaults, proxySettings: TransparentProxySettings) {
+    public init(defaults: UserDefaults = .dbp,
+                proxySettings: TransparentProxySettings = .init(defaults: .netP)) {
         self.defaults = defaults
         self.proxySettings = proxySettings
-    }
-
-    public convenience init() {
-        self.init(defaults: .dbp, proxySettings: .init(defaults: .netP))
     }
 
     // MARK: - Environment
@@ -69,6 +67,15 @@ public final class DataBrokerProtectionSettings: VPNBypassSettingsProviding {
 
         set {
             defaults.dataBrokerProtectionSelectedEnvironment = newValue
+        }
+    }
+
+    public var isAuthV2Enabled: Bool {
+        get {
+            defaults.value(forKey: Keys.isAuthV2Enabled) as? Bool ?? false
+        }
+        set {
+            defaults.setValue(newValue, forKey: Keys.isAuthV2Enabled)
         }
     }
 

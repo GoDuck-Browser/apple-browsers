@@ -114,7 +114,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let onboardingStateMachine: ContextualOnboardingStateMachine & ContextualOnboardingStateUpdater
     let defaultBrowserAndDockPromptPresenter: DefaultBrowserAndDockPromptPresenter
 
-    let isAuthV2Enabled = false
+    let isAuthV2Enabled: Bool
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
     let subscriptionManagerV1: (any SubscriptionManager)?
     let subscriptionManagerV2: (any SubscriptionManagerV2)?
@@ -272,8 +272,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return WindowControllersManager.shared
         })
 
+        self.isAuthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
         if !isAuthV2Enabled {
             // MARK: V1
+            Logger.general.log("Using Auth V1")
             let subscriptionManager = DefaultSubscriptionManager(featureFlagger: featureFlagger)
             subscriptionCookieManager = SubscriptionCookieManager(tokenProvider: subscriptionManager, currentCookieStore: {
                 WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
@@ -283,6 +285,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             subscriptionAuthV1toV2Bridge = subscriptionManager
         } else {
             // MARK: V2
+            Logger.general.log("Using Auth V2")
             let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
             let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
             let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
@@ -311,6 +314,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             subscriptionManagerV2 = subscriptionManager
             subscriptionManagerV1 = nil
             subscriptionAuthV1toV2Bridge = subscriptionManager
+
+            subscriptionManager.loadInitialData()
         }
         // --------
 
@@ -349,7 +354,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Update DBP environment and match the Subscription environment
         let dbpSettings = DataBrokerProtectionSettings()
-        DataBrokerProtectionSettings().alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
+        dbpSettings.alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
+        dbpSettings.isAuthV2Enabled = isAuthV2Enabled
 
         // Also update the stored run type so the login item knows if tests are running
         dbpSettings.updateStoredRunType()

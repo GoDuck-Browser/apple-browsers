@@ -53,7 +53,6 @@ protocol DependencyProvider {
     var persistentPixel: PersistentPixelFiring { get }
 
     // Subscription
-    var isAuthV2Enabled: Bool { get }
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge { get }
     var subscriptionManager: (any SubscriptionManager)? { get }
     var subscriptionManagerV2: (any SubscriptionManagerV2)? { get }
@@ -80,14 +79,7 @@ final class AppDependencyProvider: DependencyProvider {
     let pageRefreshMonitor = PageRefreshMonitor(onDidDetectRefreshPattern: PageRefreshMonitor.onDidDetectRefreshPattern)
 
     // Subscription
-    let isAuthV2Enabled = false
-    var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge {
-        if !isAuthV2Enabled {
-            return subscriptionManager!
-        } else {
-            return subscriptionManagerV2!
-        }
-    }
+    let subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
     var subscriptionManager: (any SubscriptionManager)?
     var subscriptionManagerV2: (any SubscriptionManagerV2)?
 
@@ -112,7 +104,6 @@ final class AppDependencyProvider: DependencyProvider {
                                                localOverrides: featureFlaggerOverrides,
                                                experimentManager: experimentManager,
                                                for: FeatureFlag.self)
-
         configurationManager = ConfigurationManager(store: configurationStore)
 
         // MARK: - Configure Subscription
@@ -123,8 +114,11 @@ final class AppDependencyProvider: DependencyProvider {
         var accessTokenProvider: () -> String?
         var authenticationStateProvider: (any SubscriptionAuthenticationStateProvider)!
 
-        if !isAuthV2Enabled {
+        let isAUthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
+        vpnSettings.isAuthV2Enabled = isAUthV2Enabled
+        if !isAUthV2Enabled {
             // MARK: Subscription V1
+            Logger.subscription.debug("Configuring Subscription V1")
             vpnSettings.alignTo(subscriptionEnvironment: subscriptionEnvironment)
 
             let entitlementsCache = UserDefaultsCache<[Entitlement]>(userDefaults: subscriptionUserDefaults,
@@ -158,8 +152,10 @@ final class AppDependencyProvider: DependencyProvider {
             }()
             tokenHandler = accountManager
             authenticationStateProvider = subscriptionManager
+            subscriptionAuthV1toV2Bridge = subscriptionManager
         } else {
             // MARK: Subscription V2
+            Logger.subscription.debug("Configuring Subscription V2")
             vpnSettings.alignTo(subscriptionEnvironment: subscriptionEnvironment)
 
             let configuration = URLSessionConfiguration.default
@@ -242,6 +238,9 @@ final class AppDependencyProvider: DependencyProvider {
             }()
             tokenHandler = subscriptionManager
             authenticationStateProvider = subscriptionManager
+            subscriptionAuthV1toV2Bridge = subscriptionManager
+
+            subscriptionManager.loadInitialData()
         }
         vpnFeatureVisibility = DefaultNetworkProtectionVisibility(authenticationStateProvider: authenticationStateProvider)
         networkProtectionKeychainTokenStore = NetworkProtectionKeychainTokenStore(accessTokenProvider: accessTokenProvider)

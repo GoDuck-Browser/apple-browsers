@@ -431,8 +431,8 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         var tokenHandler: any SubscriptionTokenHandling
         var entitlementsCheck: (() async -> Result<Bool, Error>)
 
-        if !PacketTunnelProvider.isAuthV2Enabled {
-            // MARK: V1
+        if !settings.isAuthV2Enabled { CAN'T WORK
+            Logger.networkProtection.log("Using Auth V1")
             let tokenStore = NetworkProtectionKeychainTokenStore(keychainType: Bundle.keychainType,
                                                                                serviceName: Self.tokenServiceName,
                                                                                errorEvents: debugEvents,
@@ -460,7 +460,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
             self.accountManager = accountManager
             tokenHandler = tokenStore
         } else {
-            // MARK: V2
+            Logger.networkProtection.log("Using Auth V2")
             let configuration = URLSessionConfiguration.default
             configuration.httpCookieStorage = nil
             configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
@@ -507,16 +507,16 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                     PixelKit.fire(PrivacyProPixel.authV1MigrationSucceeded)
                 }
             }
-
+            
             let subscriptionManager = DefaultSubscriptionManagerV2(oAuthClient: authClient,
-                                                                 subscriptionEndpointService: subscriptionEndpointService,
-                                                                 subscriptionEnvironment: subscriptionEnvironment,
+                                                                   subscriptionEndpointService: subscriptionEndpointService,
+                                                                   subscriptionEnvironment: subscriptionEnvironment,
                                                                    pixelHandler: pixelHandler,
                                                                    tokenRecoveryHandler: {
                 Logger.networkProtection.error("Expired refresh token detected")
             },
                                                                    initForPurchase: false)
-
+            
             entitlementsCheck = {
                 Logger.networkProtection.log("Subscription Entitlements check...")
                 do {
@@ -528,13 +528,10 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                 }
             }
 
-            // Subscription initial tasks
-            Task {
-                await subscriptionManager.loadInitialData()
-            }
-
             self.accountManager = nil
             tokenHandler = subscriptionManager
+
+            subscriptionManager.loadInitialData()
         }
 
         // MARK: -
@@ -554,7 +551,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                    settings: settings,
                    defaults: defaults,
                    entitlementCheck: entitlementsCheck)
-
+        Logger.networkProtection.log("[+] MacPacketTunnelProvider")
         setupPixels()
         accountManager?.delegate = self
         observeServerChanges()

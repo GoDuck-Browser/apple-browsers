@@ -28,8 +28,6 @@ import os.log
 
 open class PacketTunnelProvider: NEPacketTunnelProvider {
 
-    public static let isAuthV2Enabled = false
-
     public enum Event {
         case userBecameActive
         case connectionTesterStatusChange(_ status: ConnectionTesterStatus, server: String)
@@ -503,7 +501,8 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         loadDNSSettings(from: options)
         loadTesterEnabled(from: options)
 #if os(macOS)
-        if !Self.isAuthV2Enabled {
+        loadAuthVersion(from: options)
+        if !settings.isAuthV2Enabled {
             try await loadAuthToken(from: options)
         } else {
             try await loadTokenContainer(from: options)
@@ -586,6 +585,20 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
     }
 
 #if os(macOS)
+    private func loadAuthVersion(from options: StartupOptions) {
+        Logger.networkProtection.log("Load isAuthV2Enabled")
+        switch options.isAuthV2Enabled {
+        case .set(let newAuthVersion):
+            Logger.networkProtection.log("Set new isAuthV2Enabled")
+            settings.isAuthV2Enabled = newAuthVersion
+        case .useExisting:
+            Logger.networkProtection.log("Use existing isAuthV2Enabled")
+            break
+        case .reset:
+            settings.isAuthV2Enabled = false
+        }
+    }
+
     private func loadAuthToken(from options: StartupOptions) async throws {
         Logger.networkProtection.log("Load auth token")
         switch options.authToken {
@@ -1170,7 +1183,8 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
                 .setRegistrationKeyValidity,
                 .setSelectedEnvironment,
                 .setShowInMenuBar,
-                .setDisableRekeying:
+                .setDisableRekeying,
+                .setIsAuthV2Enabled:
             // Intentional no-op
             // Some of these don't require further action
             // Some may require an adapter restart, but it's best if that's taken care of by

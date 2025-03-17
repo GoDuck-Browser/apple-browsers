@@ -31,7 +31,6 @@ import WidgetKit
 import WireGuard
 import BrowserServicesKit
 
-// Initial implementation for initial Network Protection tests. Will be fleshed out with https://app.asana.com/0/1203137811378537/1204630829332227/f
 final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
 
     private static var vpnLogger = VPNLogger()
@@ -440,8 +439,9 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
         var tokenHandler: any SubscriptionTokenHandling
         var entitlementsCheck: (() async -> Result<Bool, Error>)
 
-        if !Self.isAuthV2Enabled {
+        if !settings.isAuthV2Enabled {
             // MARK: Subscription V1
+            Logger.networkProtection.log("Configure Subscription V1")
             let entitlementsCache = UserDefaultsCache<[Entitlement]>(userDefaults: UserDefaults.standard,
                                                                      key: UserDefaultsCacheKey.subscriptionEntitlements,
                                                                      settings: UserDefaultsCacheSettings(defaultExpirationInterval: .minutes(20)))
@@ -466,9 +466,8 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
             entitlementsCheck = { return await Self.entitlementCheck(accountManager: accountManager) }
             self.subscriptionManager = nil
         } else {
-            
             // MARK: Subscription V2
-            
+            Logger.networkProtection.log("Configure Subscription V2")
             let configuration = URLSessionConfiguration.default
             configuration.httpCookieStorage = nil
             configuration.requestCachePolicy = .reloadIgnoringLocalCacheData

@@ -40,6 +40,7 @@ public final class VPNSettings {
         case setDNSSettings(_ dnsSettings: NetworkProtectionDNSSettings)
         case setShowInMenuBar(_ showInMenuBar: Bool)
         case setDisableRekeying(_ disableRekeying: Bool)
+        case setIsAuthV2Enabled(_ isAuthV2Enabled: Bool)
     }
 
     public enum RegistrationKeyValidity: Codable, Equatable {
@@ -175,6 +176,13 @@ public final class VPNSettings {
                 Change.setDisableRekeying(disableRekeying)
             }.eraseToAnyPublisher()
 
+        let isAuthV2EnabledPublisher = isAuthV2EnabledPublisher
+            .dropFirst()
+            .removeDuplicates()
+            .map { isAuthV2Enabled in
+                Change.setIsAuthV2Enabled(isAuthV2Enabled)
+            }.eraseToAnyPublisher()
+
         return Publishers.MergeMany(
             connectOnLoginPublisher,
             includeAllNetworksPublisher,
@@ -186,7 +194,8 @@ public final class VPNSettings {
             environmentChangePublisher,
             dnsSettingsChangePublisher,
             showInMenuBarPublisher,
-            disableRekeyingPublisher).eraseToAnyPublisher()
+            disableRekeyingPublisher,
+            isAuthV2EnabledPublisher).eraseToAnyPublisher()
     }()
 
     public init(defaults: UserDefaults) {
@@ -205,6 +214,7 @@ public final class VPNSettings {
         defaults.resetNetworkProtectionSettingSelectedServer()
         defaults.resetDNSSettings()
         defaults.resetNetworkProtectionSettingShowInMenuBar()
+        defaults.resetNetworkProtectionSettingIsAuthV2Enabled()
     }
 
     // MARK: - Applying Changes
@@ -235,6 +245,8 @@ public final class VPNSettings {
             self.showInMenuBar = showInMenuBar
         case .setDisableRekeying(let disableRekeying):
             self.disableRekeying = disableRekeying
+        case .setIsAuthV2Enabled(let isAuthV2Enabled):
+            self.isAuthV2Enabled = isAuthV2Enabled
         }
     }
 
@@ -451,6 +463,22 @@ public final class VPNSettings {
 
         set {
             defaults.networkProtectionSettingDisableRekeying = newValue
+        }
+    }
+
+    // MARK: - Privacy Pro
+
+    public var isAuthV2EnabledPublisher: AnyPublisher<Bool, Never> {
+        defaults.networkProtectionSettingIsAuthV2EnabledPublisher
+    }
+
+    public var isAuthV2Enabled: Bool {
+        get {
+            defaults.networkProtectionSettingIsAuthV2Enabled
+        }
+
+        set {
+            defaults.networkProtectionSettingIsAuthV2Enabled = newValue
         }
     }
 }

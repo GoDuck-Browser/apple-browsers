@@ -279,13 +279,13 @@ final class DataBrokerProtectionDebugMenu: NSMenu {
 
     @objc private func toggleVPNBypass() {
         Task {
-            DataBrokerProtectionSettings().vpnBypass.toggle()
+            settings.vpnBypass.toggle()
             await DataBrokerProtectionManager.shared.dataBrokerProtectionDataManagerWillApplyVPNBypassSetting()
         }
     }
 
     @objc private func resetVPNBypassOnboarding() {
-        DataBrokerProtectionSettings().vpnBypassOnboardingShown = false
+        settings.vpnBypassOnboardingShown = false
     }
 
     @objc private func toggleShowStatusMenuItem() {
