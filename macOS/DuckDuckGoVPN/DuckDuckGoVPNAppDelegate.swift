@@ -353,7 +353,7 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
                 .textWithDetail(
                     icon: Image(.window16),
                     title: UserText.vpnStatusViewExcludedAppsMenuItemTitle,
-                    detail: "(\(excludedAppsMinusDBPAgent.count))",
+                    detail: "(\(proxySettings.excludedApps.count))",
                     action: { [weak self] in
 
                         try? await self?.appLauncher.launchApp(withCommand: VPNAppLaunchCommand.manageExcludedApps)
