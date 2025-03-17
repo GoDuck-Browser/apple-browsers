@@ -1,5 +1,5 @@
 //
-//  ExchangeKeyTransmitter.swift
+//  ExchangeKeyTransmitters.swift
 //
 //  Copyright © 2023 DuckDuckGo. All rights reserved.
 //
@@ -18,17 +18,12 @@
 
 import Foundation
 
-// TODO: Create similar class for exchange flow
-
-struct ExchangeKeyTransmitter: ExchangeKeyTransmitting {
-
+struct ExchangePublicKeyTransmitter: ExchangePublicKeyTransmitting {
     let endpoints: Endpoints
     let api: RemoteAPIRequestCreating
-    let storage: SecureStoring
     let crypter: CryptingInternal
-
-    // Step B
-    func send(_ code: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo {
+    
+    func sendGeneratedExchangeInfo(_ code: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo {
         let exchangeInfo = try crypter.prepareForExchange()
         let exchangeKey = try JSONEncoder.snakeCaseKeys.encode(
             ExchangeMessage(keyId: exchangeInfo.keyId, publicKey: exchangeInfo.publicKey, deviceName: deviceName)
@@ -53,19 +48,32 @@ struct ExchangeKeyTransmitter: ExchangeKeyTransmitting {
         _ = try await request.execute()
         return exchangeInfo
     }
+}
+
+struct ExchangeRecoveryKeyTransmitter: ExchangeRecoveryKeyTransmitting {
+    let endpoints: Endpoints
+    let api: RemoteAPIRequestCreating
+    let crypter: CryptingInternal
+    let storage: SecureStoring
+    let exchangeMessage: ExchangeMessage
     
-    // Step D
-    func sendRecovery(_ code: SyncCode.RecoveryKey, keyID: String, publicKey: Data) async throws {
-        let recoveryJSON = try SyncCode(recovery: code).toJSON()
+    func send() async throws {
+        guard let recoveryCode = try storage.account()?.recoveryCode else {
+            throw SyncError.accountNotFound
+        }
         
-        let encryptedRecoveryKey = try crypter.seal(recoveryJSON, secretKey: publicKey)
+        guard let recoveryCodeData = Data(base64Encoded: recoveryCode) else {
+            throw SyncError.unableToEncodeRequestBody("Base64 encoding failed")
+        }
+        
+        let encryptedRecoveryKey = try crypter.seal(recoveryCodeData, secretKey: exchangeMessage.publicKey)
         let encodedRecoveryKey = encryptedRecoveryKey.base64EncodedString()
 
         let body = try JSONEncoder.snakeCaseKeys.encode(
-            ExchangeRequest(keyId: keyID, encryptedMessage: encodedRecoveryKey)
+            ExchangeRequest(keyId: exchangeMessage.keyId, encryptedMessage: encodedRecoveryKey)
         )
         
-        print("🦄 D: Send recovery key with keyID: \(keyID), recoveryKey: \(recoveryJSON)")
+        print("🦄 D: Send recovery key with keyID: \(exchangeMessage.keyId), recoveryCode: \(recoveryCode)")
         print("Exchange JSON request is: \(String(data: body, encoding: .utf8) ?? "nil")")
 
         let request = api.createRequest(url: endpoints.exchange,
@@ -76,10 +84,9 @@ struct ExchangeKeyTransmitter: ExchangeKeyTransmitting {
                                         contentType: "application/json")
         _ = try await request.execute()
     }
+}
 
-    struct ExchangeRequest: Encodable {
-        let keyId: String
-        let encryptedMessage: String
-    }
-
+private struct ExchangeRequest: Encodable {
+    let keyId: String
+    let encryptedMessage: String
 }

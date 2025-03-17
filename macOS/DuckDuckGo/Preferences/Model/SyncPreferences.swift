@@ -418,11 +418,9 @@ final class SyncPreferences: ObservableObject, SyncUI_macOS.ManagementViewModel 
             return
         }
 
-        onEndFlow = { [weak self] in
-            self?.connector?.stopPolling()
-            self?.connector = nil
-            self?.exchanger?.stopPolling()
-            self?.exchanger = nil
+        onEndFlow = {
+            self.connector?.stopPolling()
+            self.connector = nil
 
             Task { @MainActor in
                 guard let window = syncWindowController.window, let sheetParent = window.sheetParent else {
@@ -563,13 +561,13 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                 // Step C
                 if let exchangeMessage = try await exchanger?.pollForPublicKey() {
                     print("EXCHANGE DEBUG: Step C complete")
-                    let recoveryKey = SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey)
                     presentDialog(for: .prepareToSync)
                     do {
-                        try await syncService.transmitExchangeRecoveryKey(from: recoveryKey, keyID: exchangeMessage.keyId, publicKey: exchangeMessage.publicKey)
+                        try await syncService.transmitExchangeRecoveryKey(for: exchangeMessage)
                     } catch {
                         if case SyncError.accountAlreadyExists = error,
-                            featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
+                           let recoveryKey = account.recoveryKey,
+                           featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
                             handleAccountAlreadyExists(recoveryKey)
                         } else if case SyncError.accountAlreadyExists = error {
                             managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToMergeTwoAccounts, description: "")

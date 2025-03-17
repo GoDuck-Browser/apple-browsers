@@ -95,8 +95,12 @@ struct ProductionDependencies: SyncDependencies {
         return RecoveryKeyTransmitter(endpoints: endpoints, api: api, storage: secureStore, crypter: crypter)
     }
     
-    func createExchangeKeyTransmitter() throws -> any ExchangeKeyTransmitting {
-        return ExchangeKeyTransmitter(endpoints: endpoints, api: api, storage: secureStore, crypter: crypter)
+    func createExchangePublicKeyTransmitter() throws -> any ExchangePublicKeyTransmitting {
+        return ExchangePublicKeyTransmitter(endpoints: endpoints, api: api, crypter: crypter)
+    }
+    
+    func createExchangeRecoveryKeyTransmitter(exchangeMessage: ExchangeMessage) throws -> any ExchangeRecoveryKeyTransmitting {
+        return ExchangeRecoveryKeyTransmitter(endpoints: endpoints, api: api, crypter: crypter, storage: secureStore, exchangeMessage: exchangeMessage)
     }
 
     func updateServerEnvironment(_ serverEnvironment: ServerEnvironment) {

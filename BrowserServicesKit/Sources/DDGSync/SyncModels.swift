@@ -38,6 +38,11 @@ public struct SyncAccount: Codable, Sendable {
             return nil
         }
     }
+    
+    /// Convenience var which calls `SyncCode().recovery
+    public var recoveryKey: SyncCode.RecoveryKey? {
+        return SyncCode(recovery: .init(userId: userId, primaryKey: primaryKey)).recovery
+    }
 
     init(
         deviceId: String,
@@ -121,15 +126,12 @@ public struct ExtractedLoginInfo {
     public let stretchedPrimaryKey: Data
 }
 
-// TODO: Rename and reuse?
 public struct ConnectInfo {
-    // TODO: Rename?
     public let deviceID: String
     public let publicKey: Data
     public let secretKey: Data
 }
 
-// TODO: Rename and reuse?
 public struct ExchangeInfo {
     public let keyId: String
     public let publicKey: Data
@@ -149,13 +151,8 @@ public struct SyncCode: Codable {
     }
 
     public struct RecoveryKey: Codable, Sendable {
-        public init(userId: String, primaryKey: Data) {
-            self.userId = userId
-            self.primaryKey = primaryKey
-        }
-        
-        public let userId: String
-        public let primaryKey: Data
+        let userId: String
+        let primaryKey: Data
     }
 
     public struct ConnectCode: Codable, Sendable {
@@ -163,25 +160,14 @@ public struct SyncCode: Codable {
         let secretKey: Data
     }
     
-    // TD: Step A https://app.asana.com/0/481882893211075/1209571867429615
-    // TODO: Check access levels
     public struct ExchangeKey: Codable, Sendable {
-        public let keyId: String
-        public let publicKey: Data
+        let keyId: String
+        let publicKey: Data
     }
-    
-    // TD: Step B https://app.asana.com/0/481882893211075/1209571867429615
-    // TODO: Check access levels
 
     public var recovery: RecoveryKey?
     public var connect: ConnectCode?
     public var exchangeKey: ExchangeKey?
-    
-    public init(recovery: RecoveryKey? = nil, connect: ConnectCode? = nil, exchangeKey: ExchangeKey? = nil) {
-        self.recovery = recovery
-        self.connect = connect
-        self.exchangeKey = exchangeKey
-    }
 
     public static func decode(_ data: Data) throws -> Self {
         return try JSONDecoder.snakeCaseKeys.decode(self, from: data)
@@ -197,5 +183,4 @@ public struct SyncCode: Codable {
         }
         return try Self.decode(data)
     }
-
 }

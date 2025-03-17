@@ -133,36 +133,6 @@ public class DDGSync: DDGSyncing {
         }
     }
     
-//    // Steps B + E
-//    public func sendPublicKeyGetRecoveryKeyAndLogIn() async throws {
-//        Task {
-//            
-//        }
-//    }
-//    
-//    var exchanger: RemoteExchanging?
-//    
-//    // Steps A + C + D
-//    public func createQRCodeAndGetPublicKeyAndPostRecoveryKey() async throws -> String {
-//        let info = try dependencies.crypter.prepareForExchange()
-//        let localExchanger = try dependencies.createRemoteExchanger(info)
-//        exchanger = localExchanger
-//        
-//        Task {
-//            // Step C
-//            if let exchangeMessage = try await exchanger?.pollForPublicKey() {
-//                let recoveryKey = SyncCode.RecoveryKey(userId: account.userId, primaryKey: account.primaryKey)
-//                // Step D
-//                try await syncService.transmitExchangeRecoveryKey(from: recoveryKey, keyID: exchangeMessage.keyId, publicKey: exchangeMessage.publicKey)
-//            } else {
-//                // Polling was likeley cancelled elsewhere (e.g. dialog closed)
-//                return
-//            }
-//        }
-//
-//        return localExchanger.code
-//    }
-    
     // Step A + C
     public func remoteExchange() throws -> RemoteExchanging {
         return try dependencies.createRemoteExchanger()
@@ -176,7 +146,7 @@ public class DDGSync: DDGSyncing {
     // Step B
     public func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo? {
         do {
-            return try await dependencies.createExchangeKeyTransmitter().send(exchangeCode, deviceName: deviceName)
+            return try await dependencies.createExchangePublicKeyTransmitter().sendGeneratedExchangeInfo(exchangeCode, deviceName: deviceName)
         } catch {
             try handleUnauthenticated(error)
         }
@@ -184,9 +154,9 @@ public class DDGSync: DDGSyncing {
     }
     
     // Step D
-    public func transmitExchangeRecoveryKey(from recoveryKey: SyncCode.RecoveryKey, keyID: String, publicKey: Data) async throws {
+    public func transmitExchangeRecoveryKey(for exchangeMessage: ExchangeMessage) async throws {
         do {
-            try await dependencies.createExchangeKeyTransmitter().sendRecovery(recoveryKey, keyID: keyID, publicKey: publicKey)
+            try await dependencies.createExchangeRecoveryKeyTransmitter(exchangeMessage: exchangeMessage).send()
         } catch {
             try handleUnauthenticated(error)
         }
