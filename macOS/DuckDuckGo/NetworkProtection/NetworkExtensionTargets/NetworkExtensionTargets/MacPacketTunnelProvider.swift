@@ -557,11 +557,8 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                    settings: settings,
                    defaults: defaults,
                    entitlementCheck: entitlementsCheck)
-        Logger.networkProtection.log("[+] MacPacketTunnelProvider")
-        setupPixels()
+
         accountManager.delegate = self
-        observeServerChanges()
-        observeStatusUpdateRequests()
         Logger.networkProtection.log("[+] MacPacketTunnelProvider Initialised")
     }
 
@@ -698,6 +695,17 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
     }
 
     // MARK: - Overrideable Connection Events
+
+    // MARK: - Tunnel Start
+
+    @MainActor
+    public override func startTunnel(options: [String: NSObject]? = nil) async throws {
+        try await super.startTunnel(options: options)
+
+        setupPixels()
+        observeServerChanges()
+        observeStatusUpdateRequests()
+    }
 
     override func prepareToConnect(using provider: NETunnelProviderProtocol?) {
         Logger.networkProtection.log("Preparing to connect...")

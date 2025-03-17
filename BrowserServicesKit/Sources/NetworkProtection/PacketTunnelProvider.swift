@@ -456,7 +456,6 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
         super.init()
 
-        observeSettingChanges()
         Logger.networkProtectionMemory.debug("[+] PacketTunnelProvider initialized")
     }
 
@@ -707,6 +706,8 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
     @MainActor
     open override func startTunnel(options: [String: NSObject]? = nil) async throws {
         Logger.networkProtection.log("🚀 Starting tunnel")
+
+        observeSettingChanges()
 
         // It's important to have this as soon as possible since it helps setup PixelKit
         prepareToConnect(using: tunnelProviderProtocol)
