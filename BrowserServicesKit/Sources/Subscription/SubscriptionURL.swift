@@ -54,7 +54,7 @@ public enum SubscriptionURL {
             case .activateViaEmail:
                 baseURL.appendingPathComponent("activate")
             case .addEmail:
-                baseURL.appendingPathComponent("add-email")
+                baseURL.appendingPathComponent("add-email") // TODO: To be removed ?
             case .manageEmail:
                 baseURL.appendingPathComponent("manage")
             case .activateSuccess:

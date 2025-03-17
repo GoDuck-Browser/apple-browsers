@@ -31,18 +31,21 @@ final class SubscriptionEmailViewModel: ObservableObject {
 
     private var canGoBackCancellable: AnyCancellable?
     private var urlCancellable: AnyCancellable?
-    
-    private var emailURL: URL
+
     var webViewModel: AsyncHeadlessWebViewViewModel
 
 
     enum SelectedFeature {
         case netP, dbp, itr, none
     }
-    
+
+    enum EmailViewFlow {
+        case activationFlow, manageEmailFlow
+    }
+
     struct State {
+        var currentFlow: EmailViewFlow = .activationFlow
         var subscriptionEmail: String?
-        var managingSubscriptionEmail = false
         var transactionError: SubscriptionRestoreError?
         var shouldDisplaynavigationError: Bool = false
         var isPresentingInactiveError: Bool = false
@@ -54,7 +57,7 @@ final class SubscriptionEmailViewModel: ObservableObject {
         var selectedFeature: SelectedFeature = .none
         var shouldPopToSubscriptionSettings: Bool = false
         var shouldPopToAppSettings: Bool = false
-        var viewTitle = UserText.subscriptionActivateViewTitle
+        var viewTitle:String = ""
     }
     
     // Read only View State - Should only be modified from the VM
@@ -95,9 +98,12 @@ final class SubscriptionEmailViewModel: ObservableObject {
                                                           settings: AsyncHeadlessWebViewSettings(bounces: false,
                                                                                                  allowedDomains: allowedDomains,
                                                                                                  contentBlocking: false))
-        self.emailURL = subscriptionManager.url(for: .activationFlow)
     }
-    
+
+    func setEmailFlowMode(_ flow: EmailViewFlow) {
+        state.currentFlow = flow
+    }
+
     @MainActor
     func navigateBack() async {
         if state.canNavigateBack {
@@ -131,20 +137,21 @@ final class SubscriptionEmailViewModel: ObservableObject {
     
     func onAppear() {
         state.shouldDismissView = false
-        // If the user is Authenticated & not in the Welcome page
-        if subscriptionManager.isUserAuthenticated && !isWelcomePageOrSuccessPage {
-            // If user is authenticated, we want to "Add or manage email" instead of activating
-            let addEmailToSubscriptionURL = subscriptionManager.url(for: .addEmail)
-            let manageSubscriptionEmailURL = subscriptionManager.url(for: .manageEmail)
-            emailURL = subscriptionManager.email == nil ? addEmailToSubscriptionURL : manageSubscriptionEmailURL
-            state.viewTitle = subscriptionManager.email == nil ?  UserText.subscriptionRestoreAddEmailTitle : UserText.subscriptionEditEmailTitle
-            
-            // Also we assume subscription requires managing, and not activation
-            state.managingSubscriptionEmail = true
+
+        let url: URL
+
+        switch state.currentFlow {
+        case .activationFlow:
+            url = subscriptionManager.url(for: .activationFlow)
+            state.viewTitle = ""
+        case .manageEmailFlow:
+            url = subscriptionManager.url(for: .manageEmail)
+            state.viewTitle = UserText.subscriptionEditEmailTitle
         }
+
         // Load the Email Management URL unless the user has activated a subscription or is on the welcome page
         if !isWelcomePageOrSuccessPage {
-            self.webViewModel.navigationCoordinator.navigateTo(url: self.emailURL)
+            self.webViewModel.navigationCoordinator.navigateTo(url: url)
         }
     }
     
@@ -161,11 +168,11 @@ final class SubscriptionEmailViewModel: ObservableObject {
         }
         
         subFeature.onBackToSettings = {
-            if self.state.managingSubscriptionEmail {
+//            if self.state.currentFlow == .manageEmailFlow {
                 self.backToSubscriptionSettings()
-            } else {
-                self.backToAppSettings()
-            }
+//            } else {
+//                self.backToAppSettings()
+//            }
         }
         
         subFeature.onFeatureSelected = { feature in

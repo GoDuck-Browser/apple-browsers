@@ -2648,6 +2648,9 @@ Take back control of your personal information with the browser designed for dat
 /* Button for adding email address to subscription */
 "subscription.activate.add.email.button" = "Add Email";
 
+/* Button for adding this subscription to another device */
+"subscription.activate.add.to.device.button" = "Add to Device";
+
 /* Button for editing email address added to subscription */
 "subscription.activate.edit.email.button" = "Edit Email";
 
@@ -2693,6 +2696,15 @@ Take back control of your personal information with the browser designed for dat
 /* View title for adding email to subscription */
 "subscription.add.email.title" = "Add Email";
 
+/* Header for section for activating subscription on other devices */
+"subscription.add.to.devices.header" = "Add Privacy Pro to Other Devices";
+
+/* Footer for section for activating subscription on other devices when email was not yet added */
+"subscription.add.to.devices.no.email.footer" = "Add Privacy Pro to your other devices via Apple ID or by linking an email address. **[Learn more](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)**";
+
+/* Footer for section for activating subscription on other devices when email is added */
+"subscription.add.to.devices.with.email.footer" = "Use this email to add your subscription on your other devices in the DuckDuckGo app. Go to Settings > Privacy Pro > I Have a Subscription. **[Learn more](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)**";
+
 /* Subscription availability message on Apple devices */
 "subscription.available.apple" = "Privacy Pro is available on any device signed in to the same Apple Account.";
 
@@ -2713,15 +2725,6 @@ Take back control of your personal information with the browser designed for dat
 
 /* Title for Confirm messages */
 "subscription.confirm.title" = "Are you sure?";
-
-/* Header for section for activating subscription on other devices */
-"subscription.devices.header" = "Activate on Other Devices";
-
-/* Footer for section for activating subscription on other devices when email was not yet added */
-"subscription.devices.no.email.footer" = "Add an optional email to your subscription to access Privacy Pro on other devices. **[Learn more](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)**";
-
-/* Footer for section for activating subscription on other devices when email is added */
-"subscription.devices.with.email.footer" = "Use this email to activate your subscription in Settings > Privacy Pro in the DuckDuckGo app on your other devices. **[Learn more](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)**";
 
 /* Alert content for not found subscription */
 "subscription.email.inactive.alert.message" = "The subscription associated with this email is no longer active.";

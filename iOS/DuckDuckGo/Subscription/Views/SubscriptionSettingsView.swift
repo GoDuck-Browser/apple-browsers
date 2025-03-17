@@ -45,7 +45,8 @@ struct SubscriptionSettingsView: View {
     @State var isShowingRemovalNotice = false
     @State var isShowingFAQView = false
     @State var isShowingLearnMoreView = false
-    @State var isShowingEmailView = false
+    @State var isShowingActivationView = false
+    @State var isShowingManageEmailView = false
     @State var isShowingConnectionError = false
     @State var isShowingSubscriptionError = false
 
@@ -85,30 +86,44 @@ struct SubscriptionSettingsView: View {
         Section(header: Text(UserText.subscriptionDevicesSectionHeader),
                 footer: devicesSectionFooter) {
 
-            if !viewModel.state.isLoadingEmailInfo {
+            if let email = viewModel.state.subscriptionEmail, !email.isEmpty {
                 NavigationLink(destination: SubscriptionContainerViewFactory.makeEmailFlow(
                     navigationCoordinator: subscriptionNavigationCoordinator,
                     subscriptionManager: AppDependencyProvider.shared.subscriptionManager!,
                     subscriptionFeatureAvailability: settingsViewModel.subscriptionFeatureAvailability,
                     internalUserDecider: AppDependencyProvider.shared.internalUserDecider,
+                    emailFlow: .manageEmailFlow,
                     onDisappear: {
                         Task {
                             await viewModel.fetchAndUpdateAccountEmail(
-                                cachePolicy: .reloadIgnoringLocalCacheData,
-                                loadingIndicator: false)
+                                cachePolicy: .reloadIgnoringLocalCacheData)
                         }
                     }),
-                               isActive: $isShowingEmailView) {
-                    if let email = viewModel.state.subscriptionEmail {
+                               isActive: $isShowingManageEmailView) {
                         SettingsCellView(label: UserText.subscriptionEditEmailButton,
                                          subtitle: email)
-                    } else {
-                        SettingsCellView(label: UserText.subscriptionAddEmailButton)
-                    }
                 }.isDetailLink(false)
-            } else {
-                SwiftUI.ProgressView()
             }
+
+            NavigationLink(destination: SubscriptionContainerViewFactory.makeEmailFlow(
+                navigationCoordinator: subscriptionNavigationCoordinator,
+                subscriptionManager: AppDependencyProvider.shared.subscriptionManager!,
+                subscriptionFeatureAvailability: settingsViewModel.subscriptionFeatureAvailability,
+                internalUserDecider: AppDependencyProvider.shared.internalUserDecider,
+                emailFlow: .activationFlow,
+                onDisappear: {
+                    Task {
+                        await viewModel.fetchAndUpdateAccountEmail(
+                            cachePolicy: .reloadIgnoringLocalCacheData)
+                    }
+                }),
+                           isActive: $isShowingActivationView) {
+                SettingsCustomCell(content: {
+                    Text(UserText.subscriptionAddToDeviceButton)
+                        .daxBodyRegular()
+                    .foregroundColor(Color.init(designSystemColor: .accent)) },
+                                   disclosureIndicator: false)
+            }.isDetailLink(false)
         }
     }
 
@@ -353,7 +368,7 @@ struct SubscriptionSettingsView: View {
             viewModel.showConnectionError(value)
         }
 
-        .onChange(of: isShowingEmailView) { value in
+        .onChange(of: isShowingManageEmailView) { value in
             if value {
                 if let email = viewModel.state.subscriptionEmail, !email.isEmpty {
                     Pixel.fire(pixel: .privacyProSubscriptionManagementEmail, debounce: 1)
@@ -365,7 +380,8 @@ struct SubscriptionSettingsView: View {
         
         .onReceive(subscriptionNavigationCoordinator.$shouldPopToSubscriptionSettings) { shouldDismiss in
             if shouldDismiss {
-                isShowingEmailView = false
+                isShowingActivationView = false
+                isShowingManageEmailView = false
             }
         }
         
