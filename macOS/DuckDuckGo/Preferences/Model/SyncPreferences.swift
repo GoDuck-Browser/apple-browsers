@@ -575,10 +575,12 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                 } else {
                     // Polling was likeley cancelled elsewhere (e.g. dialog closed)
                     print("EXCHANGE DEBUG: Polling cancelled")
+                    managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unhandledError(nil))
                     return
                 }
             } catch {
                 print("EXCHANGE DEBUG: Polling errored: \(error)")
+                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unhandledError(error))
             }
         }
     }
@@ -629,9 +631,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     func sendPublicKey(exchangeCode: String) {
         Task { @MainActor in
             do {
-                print("EXCHANGE DEBUG: Started sending public key")
                 let syncCode = try SyncCode.decodeBase64String(exchangeCode)
-                print("EXCHANGE DEBUG: Sync code is \(syncCode)")
                 presentDialog(for: .prepareToSync)
                 
                 if let exchangeKey = syncCode.exchangeKey {
@@ -642,8 +642,8 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                     await handleRecoveryKey(recoveryKey)
                 }
             } catch {
-                // TODO: Handle error
                 print("EXCHANGE DEBUG: Error \(error)")
+                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unhandledError(error))
             }
         }
     }

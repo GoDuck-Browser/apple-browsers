@@ -82,6 +82,8 @@ public enum SyncErrorType {
     case invalidCode
     case unableCreateRecoveryPDF
     case unableToAuthenticateOnDevice
+    
+    case unhandledError(Error?)
 
     var title: String {
         switch self {
@@ -114,6 +116,8 @@ public enum SyncErrorType {
             return UserText.unableCreateRecoveryPdfDescription
         case .unableToAuthenticateOnDevice:
             return UserText.unableToAuthenticateDevice
+        case .unhandledError(let error):
+            return "Unhandled error: \(String(describing: error))"
         }
     }
 
