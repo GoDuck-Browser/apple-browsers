@@ -372,8 +372,6 @@ struct SubscriptionSettingsView: View {
             if value {
                 if let email = viewModel.state.subscriptionEmail, !email.isEmpty {
                     Pixel.fire(pixel: .privacyProSubscriptionManagementEmail, debounce: 1)
-                } else {
-                    Pixel.fire(pixel: .privacyProAddDeviceEnterEmail, debounce: 1)
                 }
             }
         }
@@ -744,8 +742,6 @@ struct SubscriptionSettingsViewV2: View {
             if value {
                 if let email = viewModel.state.subscriptionEmail, !email.isEmpty {
                     Pixel.fire(pixel: .privacyProSubscriptionManagementEmail, debounce: 1)
-                } else {
-                    Pixel.fire(pixel: .privacyProAddDeviceEnterEmail, debounce: 1)
                 }
             }
         }
