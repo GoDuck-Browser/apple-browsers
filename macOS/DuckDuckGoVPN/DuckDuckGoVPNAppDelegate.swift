@@ -448,12 +448,12 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
         let vpnAppState = VPNAppState(defaults: .netP)
 
         let isExtensionUpdateOfferedPublisher: CurrentValuePublisher<Bool, Never> = {
-            let initialValue = featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex)
+            let initialValue = featureFlagger.isFeatureOn(.networkProtectionAppStoreSysexMessage)
                 && !vpnAppState.isUsingSystemExtension
 
             let publisher = vpnAppState.isUsingSystemExtensionPublisher
                 .map { [featureFlagger] value in
-                    featureFlagger.isFeatureOn(.networkProtectionAppStoreSysex) && !value
+                    featureFlagger.isFeatureOn(.networkProtectionAppStoreSysexMessage) && !value
                 }.eraseToAnyPublisher()
 
             return CurrentValuePublisher(initialValue: initialValue, publisher: publisher)
