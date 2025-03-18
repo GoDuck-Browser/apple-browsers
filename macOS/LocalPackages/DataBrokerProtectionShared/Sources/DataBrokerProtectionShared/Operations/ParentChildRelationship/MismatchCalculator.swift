@@ -43,7 +43,7 @@ public protocol MismatchCalculator {
 }
 
 public struct DefaultMismatchCalculator: MismatchCalculator {
-    
+
     let database: DataBrokerProtectionRepository
     let pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>
 

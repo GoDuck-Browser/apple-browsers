@@ -148,9 +148,9 @@ public final class DefaultDataBrokerProtectionQueueManager: DataBrokerProtection
     }
 
     public func startScheduledAllOperationsIfPermitted(showWebView: Bool,
-                                                operationDependencies: DataBrokerOperationDependencies,
-                                                errorHandler: ((DataBrokerProtectionJobsErrorCollection?) -> Void)?,
-                                                completion: (() -> Void)?) {
+                                                       operationDependencies: DataBrokerOperationDependencies,
+                                                       errorHandler: ((DataBrokerProtectionJobsErrorCollection?) -> Void)?,
+                                                       completion: (() -> Void)?) {
         startScheduleOperationsIfPermitted(withOperationType: .all,
                                            showWebView: showWebView,
                                            operationDependencies: operationDependencies,
@@ -159,9 +159,9 @@ public final class DefaultDataBrokerProtectionQueueManager: DataBrokerProtection
     }
 
     public func startScheduledScanOperationsIfPermitted(showWebView: Bool,
-                                                 operationDependencies: DataBrokerOperationDependencies,
-                                                 errorHandler: ((DataBrokerProtectionJobsErrorCollection?) -> Void)?,
-                                                 completion: (() -> Void)?) {
+                                                        operationDependencies: DataBrokerOperationDependencies,
+                                                        errorHandler: ((DataBrokerProtectionJobsErrorCollection?) -> Void)?,
+                                                        completion: (() -> Void)?) {
         startScheduleOperationsIfPermitted(withOperationType: .scheduledScan,
                                            showWebView: showWebView,
                                            operationDependencies: operationDependencies,
