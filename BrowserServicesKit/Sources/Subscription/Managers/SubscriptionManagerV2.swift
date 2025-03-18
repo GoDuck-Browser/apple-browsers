@@ -250,16 +250,17 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
 
     public func loadInitialData() async {
         // Fetching fresh subscription
-        if isUserAuthenticated {
-            do {
-                let subscription = try await getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
-                Logger.subscription.log("Subscription is \(subscription.isActive ? "active" : "not active", privacy: .public)")
-                if subscription.isActive {
-                    pixelHandler(.subscriptionIsActive)
-                }
-            } catch {
-                Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
+        do {
+            let subscription = try await getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
+            Logger.subscription.log("Subscription is \(subscription.isActive ? "active" : "not active", privacy: .public)")
+            if subscription.isActive {
+                pixelHandler(.subscriptionIsActive)
             }
+        } catch SubscriptionEndpointServiceError.noData {
+            Logger.subscription.log("No Subscription available")
+            clearSubscriptionCache()
+        } catch {
+            Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
         }
     }
 

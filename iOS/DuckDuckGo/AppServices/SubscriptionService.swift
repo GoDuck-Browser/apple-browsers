@@ -27,7 +27,8 @@ final class SubscriptionService {
 
     let subscriptionCookieManager: SubscriptionCookieManaging
     let subscriptionFeatureAvailability: DefaultSubscriptionFeatureAvailability
-    private let subscriptionManager = AppDependencyProvider.shared.subscriptionManager
+    private let subscriptionManagerV1 = AppDependencyProvider.shared.subscriptionManager
+    private let subscriptionManagerV2 = AppDependencyProvider.shared.subscriptionManagerV2
     private let privacyConfigurationManager: PrivacyConfigurationManaging
     private var cancellables: Set<AnyCancellable> = []
 
@@ -46,7 +47,8 @@ final class SubscriptionService {
             }
             .store(in: &cancellables)
         Task {
-            await subscriptionManager?.loadInitialData() // only for v1
+            await subscriptionManagerV1?.loadInitialData()
+            await subscriptionManagerV2?.loadInitialData()
         }
     }
 
@@ -91,7 +93,7 @@ final class SubscriptionService {
     // MARK: - Resume
 
     func resume() {
-        subscriptionManager?.refreshCachedSubscriptionAndEntitlements { isSubscriptionActive in // only for v1
+        subscriptionManagerV1?.refreshCachedSubscriptionAndEntitlements { isSubscriptionActive in // only for v1
             if isSubscriptionActive {
                 DailyPixel.fire(pixel: .privacyProSubscriptionActive)
             }

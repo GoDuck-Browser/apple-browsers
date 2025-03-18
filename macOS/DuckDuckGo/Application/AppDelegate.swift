@@ -314,10 +314,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             subscriptionManagerV2 = subscriptionManager
             subscriptionManagerV1 = nil
             subscriptionAuthV1toV2Bridge = subscriptionManager
-
-            Task {
-                await subscriptionManager.loadInitialData()
-            }
         }
         // --------
 
@@ -422,6 +418,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             didFinishLaunching = true
         }
 
+        Task {
+            await subscriptionManagerV1?.loadInitialData()
+            await subscriptionManagerV2?.loadInitialData()
+        }
+
         HistoryCoordinator.shared.loadHistory {
             HistoryCoordinator.shared.migrateModelV5toV6IfNeeded()
         }
@@ -460,9 +461,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         startupSync()
 
-        Task {
-            await subscriptionManagerV1?.loadInitialData()
-        }
         let privacyConfigurationManager = ContentBlocking.shared.privacyConfigurationManager
 
         // Enable subscriptionCookieManager if feature flag is present

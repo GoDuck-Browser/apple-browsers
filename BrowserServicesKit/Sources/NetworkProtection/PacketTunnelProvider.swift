@@ -438,7 +438,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
                 settings: VPNSettings,
                 defaults: UserDefaults,
                 entitlementCheck: (() async -> Result<Bool, Error>)?) {
-        Logger.networkProtectionMemory.debug("[+] PacketTunnelProvider")
+        Logger.networkProtectionMemory.log("[+] PacketTunnelProvider")
 
         self.notificationsPresenter = notificationsPresenter
         self.keychainType = keychainType
@@ -456,7 +456,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
         super.init()
 
-        Logger.networkProtectionMemory.debug("[+] PacketTunnelProvider initialized")
+        Logger.networkProtectionMemory.log("[+] PacketTunnelProvider initialized")
     }
 
     deinit {

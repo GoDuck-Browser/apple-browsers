@@ -557,7 +557,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                    settings: settings,
                    defaults: defaults,
                    entitlementCheck: entitlementsCheck)
-
+        
         accountManager.delegate = self
         Logger.networkProtection.log("[+] MacPacketTunnelProvider Initialised")
     }
@@ -653,9 +653,6 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
 #if NETP_SYSTEM_EXTENSION
         loadExcludeLocalNetworks(from: options)
 #endif
-
-        // here because we need to load the token before running this
-        await subscriptionManagerV2.loadInitialData()
     }
 
     private func loadExcludeLocalNetworks(from options: StartupOptions) {
@@ -694,24 +691,27 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         setupPixels(defaultHeaders: defaultPixelHeaders)
     }
 
-    // MARK: - Overrideable Connection Events
-
-    // MARK: - Tunnel Start
-
-    @MainActor
-    public override func startTunnel(options: [String: NSObject]? = nil) async throws {
-        try await super.startTunnel(options: options)
-
-        setupPixels()
-        observeServerChanges()
-        observeStatusUpdateRequests()
-    }
+    // MARK: - Override-able Connection Events
 
     override func prepareToConnect(using provider: NETunnelProviderProtocol?) {
         Logger.networkProtection.log("Preparing to connect...")
         super.prepareToConnect(using: provider)
         guard PixelKit.shared == nil, let options = provider?.providerConfiguration else { return }
         try? loadDefaultPixelHeaders(from: options)
+    }
+
+    // MARK: - Start
+
+    @MainActor
+    override func startTunnel(options: [String: NSObject]? = nil) async throws {
+        setupPixels()
+        observeServerChanges()
+        observeStatusUpdateRequests()
+
+        // here because we need to load the token before running this
+        await subscriptionManagerV2.loadInitialData()
+
+        try await super.startTunnel(options: options)
     }
 
     // MARK: - Pixels
