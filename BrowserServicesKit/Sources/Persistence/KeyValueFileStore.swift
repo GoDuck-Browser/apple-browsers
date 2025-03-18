@@ -31,6 +31,7 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
         case readFailure(Swift.Error)
         case writeFailure(Swift.Error)
         case wrongFormat
+        case fileAlreadyInUse
 
         var code: Int {
             switch self {
@@ -40,6 +41,8 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
                 return 1
             case .wrongFormat:
                 return 2
+            case .fileAlreadyInUse:
+                return 3
             }
         }
     }
@@ -50,17 +53,19 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
     private var internalRepresentation: [String: Any]?
     private let lock = NSLock()
 
-    public init(location: URL, name: String) {
+    public init(location: URL, name: String) throws {
         self.location = location
         self.name = name
+
+        try Self.ensureSingleAccessTo(fileURL: fileURL)
     }
 
-    private func filePath() -> URL {
-        return location.appending(name)
+    public var fileURL: URL {
+        location.appending(name)
     }
 
     private func persist(dictionary: [String: Any]) throws {
-        let location = filePath()
+        let location = fileURL
 
         do {
             let data = try PropertyListSerialization.data(fromPropertyList: dictionary, format: .binary, options: 0)
@@ -71,7 +76,7 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
     }
 
     private func load() throws -> [String: Any] {
-        let location = filePath()
+        let location = fileURL
 
         do {
             let data = try Data(contentsOf: location)
@@ -134,5 +139,30 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
     }
 
 
-    
+    static private let globalLock = NSLock()
+    static private var openedFiles: Set<URL> = []
+
+    static private func ensureSingleAccessTo(fileURL: URL) throws {
+        globalLock.lock()
+        defer {
+            globalLock.unlock()
+        }
+
+        guard !openedFiles.contains(fileURL) else {
+            throw Error.fileAlreadyInUse
+        }
+
+        openedFiles.insert(fileURL)
+    }
+
+    // Call this to relinquish hold on a file used by an instance of a file store.
+    // Use this only if you are sure that subsequent instantiation of KeyValueFileStore won't result in concurrent file modifications.
+    static public func relinquish(fileURL: URL) {
+        globalLock.lock()
+        defer {
+            globalLock.unlock()
+        }
+
+        openedFiles.remove(fileURL)
+    }
 }

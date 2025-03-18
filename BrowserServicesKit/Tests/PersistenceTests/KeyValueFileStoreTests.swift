@@ -46,15 +46,23 @@ class KeyValueFileStoreTests: XCTestCase {
     func testWhenFileIsMissingNoErrorIsThrown() throws {
 
         let name = UUID().uuidString
-        let s = KeyValueFileStore(location: Self.tempDir, name: name)
+        let s = try KeyValueFileStore(location: Self.tempDir, name: name)
 
         XCTAssertNil(try s.object(forKey: "a"))
+    }
+
+    func testWhenFileIsReusedErrorIsThrown() throws {
+
+        let name = UUID().uuidString
+        let s = try KeyValueFileStore(location: Self.tempDir, name: name)
+
+        XCTAssertThrowsError(try KeyValueFileStore(location: Self.tempDir, name: name))
     }
 
     func testPersistingSimpleObjects() throws {
 
         let name = UUID().uuidString
-        var s = KeyValueFileStore(location: Self.tempDir, name: name)
+        var s = try KeyValueFileStore(location: Self.tempDir, name: name)
 
         try s.set(true, forKey: "tbool")
         try s.set(false, forKey: "fbool")
@@ -69,7 +77,8 @@ class KeyValueFileStoreTests: XCTestCase {
         try s.set("data".data(using: .utf8), forKey: "data")
 
         // Reload from file
-        s = KeyValueFileStore(location: Self.tempDir, name: name)
+        KeyValueFileStore.relinquish(fileURL: s.fileURL)
+        s = try KeyValueFileStore(location: Self.tempDir, name: name)
         XCTAssertEqual(try s.object(forKey: "tbool") as? Bool, true)
         XCTAssertEqual(try s.object(forKey: "fbool") as? Bool, false)
 
@@ -86,7 +95,7 @@ class KeyValueFileStoreTests: XCTestCase {
     func testPersistingCollections() throws {
 
         let name = UUID().uuidString
-        var s = KeyValueFileStore(location: Self.tempDir, name: name)
+        var s = try KeyValueFileStore(location: Self.tempDir, name: name)
 
         try s.set([1, 2], forKey: "arrayI")
         try s.set(["a", "b"], forKey: "arrayS")
@@ -95,7 +104,8 @@ class KeyValueFileStoreTests: XCTestCase {
         try s.set(["a": 1, "b": 2], forKey: "dict")
 
         // Reload from file
-        s = KeyValueFileStore(location: Self.tempDir, name: name)
+        KeyValueFileStore.relinquish(fileURL: s.fileURL)
+        s = try KeyValueFileStore(location: Self.tempDir, name: name)
         XCTAssertEqual(try s.object(forKey: "arrayI") as? [Int], [1, 2])
         XCTAssertEqual(try s.object(forKey: "arrayS") as? [String], ["a", "b"])
 
@@ -109,7 +119,7 @@ class KeyValueFileStoreTests: XCTestCase {
     func testPersistingUnsupportedObjects() throws {
 
         let name = UUID().uuidString
-        var s = KeyValueFileStore(location: Self.tempDir, name: name)
+        var s = try KeyValueFileStore(location: Self.tempDir, name: name)
 
         let set: Set<String> = ["a"]
         do {
@@ -121,7 +131,8 @@ class KeyValueFileStoreTests: XCTestCase {
         try s.set(["a": 1, "b": 2], forKey: "dict")
 
         // Reload from file
-        s = KeyValueFileStore(location: Self.tempDir, name: name)
+        KeyValueFileStore.relinquish(fileURL: s.fileURL)
+        s = try KeyValueFileStore(location: Self.tempDir, name: name)
         XCTAssertNil(try s.object(forKey: "set"))
         XCTAssertEqual(try s.object(forKey: "dict") as? [String: Int], ["a": 1, "b": 2])
     }
