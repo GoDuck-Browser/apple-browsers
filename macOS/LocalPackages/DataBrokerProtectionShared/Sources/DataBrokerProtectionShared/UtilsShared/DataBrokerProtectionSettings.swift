@@ -29,6 +29,10 @@ public protocol VPNBypassSettingsProviding: AnyObject {
     var vpnBypassOnboardingShown: Bool { get set }
 }
 
+public protocol AppRunTypeProviding: AnyObject {
+    var runType: AppVersion.AppRunType { get }
+}
+
 public final class DataBrokerProtectionSettings: VPNBypassSettingsProviding {
     public let defaults: UserDefaults
     public let proxySettings: TransparentProxySettings
@@ -53,10 +57,6 @@ public final class DataBrokerProtectionSettings: VPNBypassSettingsProviding {
         }
     }
 
-    public var runType: AppVersion.AppRunType? {
-        return AppVersion.runType
-    }
-
     public init(defaults: UserDefaults, proxySettings: TransparentProxySettings) {
         self.defaults = defaults
         self.proxySettings = proxySettings
@@ -76,7 +76,6 @@ public final class DataBrokerProtectionSettings: VPNBypassSettingsProviding {
 
     // MARK: - VPN exclusion
 
-    // TODO: This needs to be extacted properly
     public var vpnBypass: Bool {
         get {
             proxySettings[bundleId: "DBP_BACKGROUND_AGENT_BUNDLE_ID"] == .exclude
