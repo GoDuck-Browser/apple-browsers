@@ -24,27 +24,27 @@ import Common
 import DesignResourcesKit
 
 struct FaviconsHelper {
-    
+
     private static let tld: TLD = AppDependencyProvider.shared.storageCache.tld
-    
+
     static func loadFaviconSync(forDomain domain: String?,
                                 usingCache cacheType: FaviconsCacheType,
                                 useFakeFavicon: Bool,
                                 preferredFakeFaviconLetters: String? = nil) -> (image: UIImage?, isFake: Bool) {
-        
+
         // Handle special cases first
         if domain == "player" {
             let image = UIImage(named: "DuckPlayer")
             image?.accessibilityIdentifier = "DuckPlayer"
             return (image, false)
         }
-        
+
         if URL.isDuckDuckGo(domain: domain) {
             let image = UIImage(named: "Logo")
             image?.accessibilityIdentifier = "Logo"
             return (image, false)
         }
-        
+
         // Check cache and resource availability
         guard let cache = Favicons.Constants.caches[cacheType],
               let resource = Favicons.shared.defaultResource(forDomain: domain) else {
@@ -52,34 +52,34 @@ struct FaviconsHelper {
                                       useFakeFavicon: useFakeFavicon,
                                       preferredLetters: preferredFakeFaviconLetters)
         }
-        
+
         // Try memory cache first
         if let cachedImage = cache.retrieveImageInMemoryCache(forKey: resource.cacheKey) {
             return (cachedImage, false)
         }
-        
+
         // Try loading from disk with proper error handling
         do {
             let url = cache.diskStorage.cacheFileURL(forKey: resource.cacheKey)
-            
+
             guard FileManager.default.fileExists(atPath: url.path) else {
                 return createFallbackResult(domain: domain,
                                           useFakeFavicon: useFakeFavicon,
                                           preferredLetters: preferredFakeFaviconLetters)
             }
-            
+
             let data = try Data(contentsOf: url, options: [.uncached])
             guard let image = UIImage(data: data) else {
-                Logger.networking.error("Failed to create image from data for domain: \(domain ?? "unknown")")
+                Logger.general.error("Failed to create image from data for domain: \(domain ?? "unknown")")
                 return createFallbackResult(domain: domain,
                                           useFakeFavicon: useFakeFavicon,
                                           preferredLetters: preferredFakeFaviconLetters)
             }
-            
+
             // Store in memory cache with original expiry date
             if let attributes = try? FileManager.default.attributesOfItem(atPath: url.path),
                let fileModificationDate = attributes[.modificationDate] as? Date {
-                
+
                 cache.store(image,
                            forKey: resource.cacheKey,
                            options: KingfisherParsedOptionsInfo([
@@ -89,11 +89,11 @@ struct FaviconsHelper {
                            ]),
                            toDisk: false)
             }
-            
+
             return (image, false)
-            
+
         } catch {
-            Logger.networking.error("Failed to load favicon from disk for domain: \(domain ?? "unknown"), error: \(error)")
+            Logger.general.error("Failed to load favicon from disk for domain: \(domain ?? "unknown"), error: \(error)")
             return createFallbackResult(domain: domain,
                                       useFakeFavicon: useFakeFavicon,
                                       preferredLetters: preferredFakeFaviconLetters)
@@ -125,11 +125,11 @@ struct FaviconsHelper {
         let renderer = UIGraphicsImageRenderer(size: imageRect.size)
         let icon = renderer.image { imageContext in
             let context = imageContext.cgContext
-                            
+
             context.setFillColor(backgroundColor.cgColor)
             context.addPath(CGPath(roundedRect: imageRect, cornerWidth: cornerRadius, cornerHeight: cornerRadius, transform: nil))
             context.fillPath()
-           
+
             let label = UILabel(frame: labelFrame)
             label.numberOfLines = 1
             label.adjustsFontSizeToFitWidth = true
@@ -144,7 +144,7 @@ struct FaviconsHelper {
             } else {
                 label.text = String(tld.eTLDplus1(domain)?.prefix(letterCount) ?? "#").capitalized
             }
-           
+
             context.translateBy(x: padding, y: padding)
 
             label.layer.draw(in: context)
@@ -164,13 +164,13 @@ struct FaviconsHelper {
     }
 
     private static func createFallbackResult(domain: String?,
-                                           useFakeFavicon: Bool,
-                                           preferredLetters: String?) -> (UIImage?, Bool) {
+                                             useFakeFavicon: Bool,
+                                             preferredLetters: String?) -> (UIImage?, Bool) {
         guard useFakeFavicon,
               let domain = domain else {
             return (nil, false)
         }
-        
+
         let fakeFavicon = createFakeFavicon(forDomain: domain,
                                            backgroundColor: UIColor.forDomain(domain),
                                            preferredFakeFaviconLetters: preferredLetters)
