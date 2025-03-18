@@ -447,7 +447,6 @@ final class SyncPreferences: ObservableObject, SyncUI_macOS.ManagementViewModel 
     private let appearancePreferences: AppearancePreferences
     private var cancellables = Set<AnyCancellable>()
     private var connector: RemoteConnecting?
-    private var exchanger: RemoteExchanging?
     private let userAuthenticator: UserAuthenticating
     private var syncPromoSource: String?
 }
@@ -547,26 +546,22 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     func startPollingForPublicKey() {
         Task { @MainActor in
             do {
-                guard let account = syncService.account else {
-                    // TODO: Handle me
-                    return
-                }
-                self.exchanger = try syncService.remoteExchange()
+                let exchanger = try syncService.remoteExchange()
                 // Step A
-                self.codeToDisplay = exchanger?.code
+                self.codeToDisplay = exchanger.code
                 print("EXCHANGE DEBUG: Step A complete")
                 print("🦄 Displaying code: \(self.codeToDisplay ?? "")")
                 self.presentDialog(for: .syncWithAnotherDevice(code: codeToDisplay ?? ""))
                 
                 // Step C
-                if let exchangeMessage = try await exchanger?.pollForPublicKey() {
+                if let exchangeMessage = try await exchanger.pollForPublicKey() {
                     print("EXCHANGE DEBUG: Step C complete")
                     presentDialog(for: .prepareToSync)
                     do {
                         try await syncService.transmitExchangeRecoveryKey(for: exchangeMessage)
                     } catch {
                         if case SyncError.accountAlreadyExists = error,
-                           let recoveryKey = account.recoveryKey,
+                           let recoveryKey = syncService.account?.recoveryKey,
                            featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
                             handleAccountAlreadyExists(recoveryKey)
                         } else if case SyncError.accountAlreadyExists = error {
@@ -585,7 +580,6 @@ extension SyncPreferences: ManagementDialogModelDelegate {
             } catch {
                 print("EXCHANGE DEBUG: Polling errored: \(error)")
             }
-            onEndFlow()
         }
     }
 
