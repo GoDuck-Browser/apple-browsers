@@ -38,7 +38,7 @@ class FaviconsHelperTests: XCTestCase {
                                                    useFakeFavicon: true)
         
         XCTAssertNotNil(result.image)
-        XCTAssertEqual(result.image?.accessibilityIdentifier, "DuckPlayer")
+        XCTAssertEqual(result.image?.accessibilityIdentifier, "DuckPlayerURLIcon")
         XCTAssertFalse(result.isFake)
     }
     

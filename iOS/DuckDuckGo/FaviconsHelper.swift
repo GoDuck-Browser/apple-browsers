@@ -34,8 +34,8 @@ struct FaviconsHelper {
 
         // Handle special cases first
         if domain == "player" {
-            let image = UIImage(named: "DuckPlayer")
-            image?.accessibilityIdentifier = "DuckPlayer"
+            let image = UIImage(named: "DuckPlayerURLIcon")
+            image?.accessibilityIdentifier = "DuckPlayerURLIcon"
             return (image, false)
         }
 
