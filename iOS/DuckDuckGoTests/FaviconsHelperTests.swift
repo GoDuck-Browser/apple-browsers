@@ -78,4 +78,4 @@ class FaviconsHelperTests: XCTestCase {
         XCTAssertNotNil(result.image)
         XCTAssertFalse(result.isFake)
     }
-} 
+}
