@@ -1,5 +1,5 @@
 //
-//  RemoteExchanger.swift
+//  RemoteKeyExchanger.swift
 //
 //  Copyright © 2022 DuckDuckGo. All rights reserved.
 //
@@ -18,7 +18,7 @@
 
 import Foundation
 
-final class RemoteExchanger: RemoteExchanging {
+final class RemoteKeyExchanger: RemoteKeyExchanging {
     
     
     let code: String

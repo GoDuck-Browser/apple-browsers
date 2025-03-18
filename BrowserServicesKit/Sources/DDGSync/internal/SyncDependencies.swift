@@ -41,7 +41,7 @@ protocol SyncDependencies: SyncDependenciesDebuggingSupport {
     var errorEvents: EventMapping<SyncError> { get }
 
     func createRemoteConnector(_ connectInfo: ConnectInfo) throws -> RemoteConnecting
-    func createRemoteExchanger() throws -> any RemoteExchanging
+    func createRemoteKeyExchanger() throws -> any RemoteKeyExchanging
     func createRemoteExchangeRecoverer(_ exchangeInfo: ExchangeInfo) throws -> any RemoteExchangeRecovering
     func createRecoveryKeyTransmitter() throws -> RecoveryKeyTransmitting
     func createExchangePublicKeyTransmitter() throws -> ExchangePublicKeyTransmitting

@@ -717,7 +717,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     
     private func handleExchangeKey(_ exchangeKey: SyncCode.ExchangeKey) async throws {
         // Step B
-        guard let exchangeInfo = try await self.syncService.transmitExchangeKey(exchangeKey, deviceName: deviceInfo().name) else {
+        guard let exchangeInfo = try await self.syncService.transmitGeneratedExchangeInfo(exchangeKey, deviceName: deviceInfo().name) else {
             print("⚠️⚠️ NIL KEYID")
             return
         }

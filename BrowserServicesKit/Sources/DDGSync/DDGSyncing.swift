@@ -135,7 +135,7 @@ public protocol DDGSyncing: DDGSyncingDebuggingSupport {
      Returns a key id and temporary secret key ready for display and allows callers attempt to fetch the transmitted exchange key.
      // Step A + C
      */
-    func remoteExchange() throws -> RemoteExchanging
+    func remoteExchange() throws -> RemoteKeyExchanging
     
     // Step E
     func remoteExchangeAgain(exchangeInfo: ExchangeInfo) throws -> RemoteExchangeRecovering
@@ -149,7 +149,7 @@ public protocol DDGSyncing: DDGSyncingDebuggingSupport {
      Sends this device's public key to the server encrypted using supplied key
      // Step B
      */
-    func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo?
+    func transmitGeneratedExchangeInfo(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo?
 
     /**
      Sends this device's recovery key to the server encrypted using supplied key
@@ -286,7 +286,7 @@ public protocol RemoteConnecting {
 
 }
 
-public protocol RemoteExchanging {
+public protocol RemoteKeyExchanging {
     
     // Step A
     var code: String { get }

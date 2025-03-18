@@ -134,8 +134,8 @@ public class DDGSync: DDGSyncing {
     }
     
     // Step A + C
-    public func remoteExchange() throws -> RemoteExchanging {
-        return try dependencies.createRemoteExchanger()
+    public func remoteExchange() throws -> RemoteKeyExchanging {
+        return try dependencies.createRemoteKeyExchanger()
     }
     
     // Step E Needs ExchangeInfo
@@ -144,7 +144,7 @@ public class DDGSync: DDGSyncing {
     }
     
     // Step B
-    public func transmitExchangeKey(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo? {
+    public func transmitGeneratedExchangeInfo(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo? {
         do {
             return try await dependencies.createExchangePublicKeyTransmitter().sendGeneratedExchangeInfo(exchangeCode, deviceName: deviceName)
         } catch {

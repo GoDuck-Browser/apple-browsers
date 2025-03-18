@@ -419,7 +419,7 @@ extension SyncSettingsViewController: ScanOrPasteCodeViewModelDelegate {
     private func handleExchangeKey(_ exchangeKey: SyncCode.ExchangeKey) async -> Bool {
         do {
             // Step B
-            guard let exchangeInfo = try await self.syncService.transmitExchangeKey(exchangeKey, deviceName: deviceName) else {
+            guard let exchangeInfo = try await self.syncService.transmitGeneratedExchangeInfo(exchangeKey, deviceName: deviceName) else {
                 return false
             }
             // Step E
