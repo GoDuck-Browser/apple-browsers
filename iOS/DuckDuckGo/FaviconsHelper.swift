@@ -31,63 +31,73 @@ struct FaviconsHelper {
                                 usingCache cacheType: FaviconsCacheType,
                                 useFakeFavicon: Bool,
                                 preferredFakeFaviconLetters: String? = nil) -> (image: UIImage?, isFake: Bool) {
-
-        func complete(_ image: UIImage?) -> (UIImage?, Bool) {
-            var fake = false
-            var resultImage: UIImage?
-            
-            if image != nil {
-                resultImage = image
-            } else if useFakeFavicon, let domain = domain {
-                fake = true
-                resultImage = Self.createFakeFavicon(forDomain: domain,
-                                                     backgroundColor: UIColor.forDomain(domain),
-                                                     preferredFakeFaviconLetters: preferredFakeFaviconLetters)
-            }
-            return (resultImage, fake)
-        }
         
+        // Handle special cases first
         if domain == "player" {
-            return complete(UIImage(named: "DuckPlayer"))
+            let image = UIImage(named: "DuckPlayer")
+            image?.accessibilityIdentifier = "DuckPlayer"
+            return (image, false)
         }
         
         if URL.isDuckDuckGo(domain: domain) {
-            return complete(UIImage(named: "Logo"))
+            let image = UIImage(named: "Logo")
+            image?.accessibilityIdentifier = "Logo"
+            return (image, false)
         }
         
-        guard let cache = Favicons.Constants.caches[cacheType] else {
-            return complete(nil)
+        // Check cache and resource availability
+        guard let cache = Favicons.Constants.caches[cacheType],
+              let resource = Favicons.shared.defaultResource(forDomain: domain) else {
+            return createFallbackResult(domain: domain,
+                                      useFakeFavicon: useFakeFavicon,
+                                      preferredLetters: preferredFakeFaviconLetters)
         }
         
-        guard let resource = Favicons.shared.defaultResource(forDomain: domain) else {
-            return complete(nil)
+        // Try memory cache first
+        if let cachedImage = cache.retrieveImageInMemoryCache(forKey: resource.cacheKey) {
+            return (cachedImage, false)
         }
         
-        if let image = cache.retrieveImageInMemoryCache(forKey: resource.cacheKey) {
-            return complete(image)
-        } else {
-                        
-            // Load manually otherwise Kingfisher won't load it if the file's modification date > current date
+        // Try loading from disk with proper error handling
+        do {
             let url = cache.diskStorage.cacheFileURL(forKey: resource.cacheKey)
-            guard let data = (try? Data(contentsOf: url)), let image = UIImage(data: data) else {
-                return complete(nil)
-            }
-
-            // Cache in memory with the original expiry date so that the image will be refreshed on user interaction.
             
-            if let attributes = (try? FileManager.default.attributesOfItem(atPath: url.path)),
-                let fileModificationDate = attributes[.modificationDate] as? Date {
-                
-                cache.store(image, forKey: resource.cacheKey, options: KingfisherParsedOptionsInfo([
-                    .cacheMemoryOnly,
-                    .diskCacheAccessExtendingExpiration(.none),
-                    .memoryCacheExpiration(.date(fileModificationDate))
-                ]), toDisk: false)
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                return createFallbackResult(domain: domain,
+                                          useFakeFavicon: useFakeFavicon,
+                                          preferredLetters: preferredFakeFaviconLetters)
             }
-
-            return complete(image)
+            
+            let data = try Data(contentsOf: url, options: [.uncached])
+            guard let image = UIImage(data: data) else {
+                Logger.networking.error("Failed to create image from data for domain: \(domain ?? "unknown")")
+                return createFallbackResult(domain: domain,
+                                          useFakeFavicon: useFakeFavicon,
+                                          preferredLetters: preferredFakeFaviconLetters)
+            }
+            
+            // Store in memory cache with original expiry date
+            if let attributes = try? FileManager.default.attributesOfItem(atPath: url.path),
+               let fileModificationDate = attributes[.modificationDate] as? Date {
+                
+                cache.store(image,
+                           forKey: resource.cacheKey,
+                           options: KingfisherParsedOptionsInfo([
+                            .cacheMemoryOnly,
+                            .diskCacheAccessExtendingExpiration(.none),
+                            .memoryCacheExpiration(.date(fileModificationDate))
+                           ]),
+                           toDisk: false)
+            }
+            
+            return (image, false)
+            
+        } catch {
+            Logger.networking.error("Failed to load favicon from disk for domain: \(domain ?? "unknown"), error: \(error)")
+            return createFallbackResult(domain: domain,
+                                      useFakeFavicon: useFakeFavicon,
+                                      preferredLetters: preferredFakeFaviconLetters)
         }
-
     }
 
     static func loadFaviconSync(forDomain domain: String?,
@@ -151,6 +161,20 @@ struct FaviconsHelper {
 
         let key = FaviconHasher.createHash(ofDomain: domain)
         return KF.ImageResource(downloadURL: source, cacheKey: key)
+    }
+
+    private static func createFallbackResult(domain: String?,
+                                           useFakeFavicon: Bool,
+                                           preferredLetters: String?) -> (UIImage?, Bool) {
+        guard useFakeFavicon,
+              let domain = domain else {
+            return (nil, false)
+        }
+        
+        let fakeFavicon = createFakeFavicon(forDomain: domain,
+                                           backgroundColor: UIColor.forDomain(domain),
+                                           preferredFakeFaviconLetters: preferredLetters)
+        return (fakeFavicon, true)
     }
 
 }
