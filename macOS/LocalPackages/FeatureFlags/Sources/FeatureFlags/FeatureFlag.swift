@@ -117,7 +117,7 @@ extension FeatureFlag: FeatureFlagDescribing {
         case .networkProtectionAppExclusions:
             return .remoteReleasable(.subfeature(NetworkProtectionSubfeature.appExclusions))
         case .networkProtectionAppStoreSysex:
-            return .remoteDevelopment(.subfeature(NetworkProtectionSubfeature.appStoreSystemExtension))
+            return .remoteReleasable(.subfeature(NetworkProtectionSubfeature.appStoreSystemExtension))
         case .htmlNewTabPage:
             return .remoteReleasable(.subfeature(HTMLNewTabPageSubfeature.isLaunched))
         case .historyView:
