@@ -484,6 +484,9 @@ extension AutofillUserScript {
     public enum GetAutofillDataSubType: String, Codable {
         case username
         case password
+        case cardName
+        case cardNumber
+        case cardSecurityCode
     }
 
     // https://github.com/duckduckgo/duckduckgo-autofill/blob/main/src/deviceApiCalls/schemas/getAutofillData.params.json
@@ -516,6 +519,10 @@ extension AutofillUserScript {
                     replyHandler(jsonString)
                 }
             }
+            return
+        }
+        if request.mainType == .creditCards {
+            replyHandler("{\"success\":{\"action\":\"fill\",\"creditCards\":{\"cardNumber\":\"1234567890123\",\"cardSecurityCode\":\"123\",\"cardName\":\"Dax Duckling\",\"expirationMonth\":\"12\",\"expirationYear\":\"2025\"}}}")
             return
         }
 
