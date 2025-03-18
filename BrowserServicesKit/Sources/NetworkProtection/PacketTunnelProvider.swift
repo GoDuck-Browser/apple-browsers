@@ -592,7 +592,6 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
             settings.isAuthV2Enabled = newAuthVersion
         case .useExisting:
             Logger.networkProtection.log("Use existing isAuthV2Enabled")
-            break
         case .reset:
             settings.isAuthV2Enabled = false
         }

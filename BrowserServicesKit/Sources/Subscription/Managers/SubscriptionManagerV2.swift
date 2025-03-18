@@ -406,7 +406,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
         guard let tokenRecoveryHandler else {
             throw SubscriptionManagerError.tokenUnavailable(error: nil)
         }
-        
+
         Logger.subscription.log("The refresh token is expired, attempting subscription recovery...")
         pixelHandler(.deadToken)
         await signOut(notifyUI: false)

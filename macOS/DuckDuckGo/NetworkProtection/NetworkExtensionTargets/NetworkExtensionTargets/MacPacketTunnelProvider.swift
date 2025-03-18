@@ -557,7 +557,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                    settings: settings,
                    defaults: defaults,
                    entitlementCheck: entitlementsCheck)
-        
+
         accountManager.delegate = self
         Logger.networkProtection.log("[+] MacPacketTunnelProvider Initialised")
     }

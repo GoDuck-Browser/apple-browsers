@@ -148,7 +148,7 @@ extension FeatureFlag: FeatureFlagDescribing {
         case .popoverVsBannerExperiment:
             return .remoteReleasable(.subfeature(SetAsDefaultAndAddToDockSubfeature.popoverVsBannerExperiment))
         case .privacyProAuthV2:
-            return .disabled //.remoteDevelopment(.subfeature(PrivacyProSubfeature.privacyProAuthV2))
+            return .disabled // .remoteDevelopment(.subfeature(PrivacyProSubfeature.privacyProAuthV2))
         }
     }
 }

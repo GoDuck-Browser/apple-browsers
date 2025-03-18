@@ -1,5 +1,5 @@
 //
-//  UserDefaults+disableRekeying.swift
+//  UserDefaults+isAuthV2Enabled.swift
 //
 //  Copyright © 2023 DuckDuckGo. All rights reserved.
 //

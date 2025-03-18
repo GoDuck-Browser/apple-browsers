@@ -277,7 +277,7 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
                 .setDNSSettings,
                 .setShowInMenuBar,
                 .setDisableRekeying,
-                .setIsAuthV2Enabled: // TODO: restart??
+                .setIsAuthV2Enabled:
             // Intentional no-op as this is handled by the extension or the agent's app delegate
             break
         }
