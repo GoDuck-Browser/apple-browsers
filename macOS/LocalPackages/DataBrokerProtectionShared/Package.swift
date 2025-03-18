@@ -31,7 +31,6 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../../BrowserServicesKit"),
-        .package(path: "../Freemium"),
     ],
     targets: [
         .target(
@@ -41,7 +40,6 @@ let package = Package(
                 .product(name: "PixelKit", package: "BrowserServicesKit"),
                 .product(name: "Configuration", package: "BrowserServicesKit"),
                 .product(name: "Persistence", package: "BrowserServicesKit"),
-                .product(name: "Freemium", package: "Freemium"),
             ],
             resources: [.copy("Resources")],
             swiftSettings: [
@@ -56,7 +54,6 @@ let package = Package(
                 .product(name: "PixelKit", package: "BrowserServicesKit"),
                 .product(name: "Configuration", package: "BrowserServicesKit"),
                 .product(name: "Persistence", package: "BrowserServicesKit"),
-                .product(name: "Freemium", package: "Freemium"),
             ],
             swiftSettings: [
                 .define("DEBUG", .when(configuration: .debug))
@@ -68,7 +65,6 @@ let package = Package(
                 "DataBrokerProtectionShared",
                 "DataBrokerProtectionSharedTestsUtils",
                 "BrowserServicesKit",
-                "Freemium",
                 .product(name: "PersistenceTestingUtils", package: "BrowserServicesKit"),
                 .product(name: "SubscriptionTestingUtilities", package: "BrowserServicesKit"),
             ],
