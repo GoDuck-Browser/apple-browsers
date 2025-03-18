@@ -5,6 +5,9 @@
       location = "group:BrowserServicesKit">
    </FileRef>
    <FileRef
+      location = "group:DataBrokerProtectionShared">
+   </FileRef>
+   <FileRef
       location = "group:iOS/DuckDuckGo-iOS.xcodeproj">
    </FileRef>
    <FileRef
