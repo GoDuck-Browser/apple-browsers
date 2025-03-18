@@ -6,12 +6,13 @@ defaults:
 
 on:
   push:
-    branches: [ main, "release/**" ]
+    branches: [ main, "release/macos/**", "hotfix/macos/**" ]
     paths:
       - 'BrowserServicesKit/**'
       - 'macOS/**'
   pull_request:
     paths:
+      - '.github/**'
       - 'BrowserServicesKit/**'
       - 'macOS/**'
   workflow_call:

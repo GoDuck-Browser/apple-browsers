@@ -358,7 +358,6 @@ class MainViewController: UIViewController {
 
         decorate()
 
-        tabsBarController?.refresh(tabsModel: tabManager.model, scrollToSelected: true)
         swipeTabsCoordinator?.refresh(tabsModel: tabManager.model, scrollToSelected: true)
 
         _ = AppWidthObserver.shared.willResize(toWidth: view.frame.width)
@@ -389,7 +388,7 @@ class MainViewController: UIViewController {
         refreshViewsBasedOnAddressBarPosition(appSettings.currentAddressBarPosition)
 
         startOnboardingFlowIfNotSeenBefore()
-        tabsBarController?.refresh(tabsModel: tabManager.model)
+        tabsBarController?.refresh(tabsModel: tabManager.model, scrollToSelected: true)
         swipeTabsCoordinator?.refresh(tabsModel: tabManager.model, scrollToSelected: true)
 
         _ = AppWidthObserver.shared.willResize(toWidth: view.frame.width)
@@ -528,8 +527,8 @@ class MainViewController: UIViewController {
 
     func presentNetworkProtectionStatusSettingsModal() {
         Task {
-            let accountManager = AppDependencyProvider.shared.subscriptionManager.accountManager
-            if case .success(let hasEntitlements) = await accountManager.hasEntitlement(forProductName: .networkProtection), hasEntitlements {
+            let subscriptionManager = AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge
+            if let hasEntitlement = try? await subscriptionManager.isEnabled(feature: .networkProtection), hasEntitlement {
                 segueToVPN()
             } else {
                 segueToPrivacyPro()
@@ -696,17 +695,6 @@ class MainViewController: UIViewController {
 
         findInPageBottomLayoutConstraint.constant = keyboardHeight
 
-        if let suggestionsTray = suggestionTrayController {
-            let suggestionsFrameInView = suggestionsTray.view.convert(suggestionsTray.contentFrame, to: view)
-
-            let overflow = suggestionsFrameInView.intersection(keyboardFrameInView).height
-            if overflow > 0 && !appSettings.currentAddressBarPosition.isBottom {
-                suggestionsTray.applyContentInset(UIEdgeInsets(top: 0, left: 0, bottom: overflow, right: 0))
-            } else {
-                suggestionsTray.applyContentInset(.zero)
-            }
-        }
-
         let y = self.view.frame.height - keyboardHeight
         let frame = self.findInPageView.frame
         UIView.animate(withDuration: duration, delay: 0, options: animationCurve, animations: {
@@ -869,7 +857,7 @@ class MainViewController: UIViewController {
             fatalError("No tab model")
         }
 
-        let newTabDaxDialogFactory = NewTabDaxDialogFactory(delegate: self, contextualOnboardingLogic: DaxDialogs.shared, onboardingPixelReporter: contextualOnboardingPixelReporter)
+        let newTabDaxDialogFactory = NewTabDaxDialogFactory(delegate: self, daxDialogsFlowCoordinator: DaxDialogs.shared, onboardingPixelReporter: contextualOnboardingPixelReporter)
         let controller = NewTabPageViewController(tab: tabModel,
                                                   isNewTabPageCustomizationEnabled: homeTabManager.isNewTabPageSectionsEnabled,
                                                   interactionModel: favoritesViewModel,
@@ -964,46 +952,79 @@ class MainViewController: UIViewController {
         }
     }
 
-    func loadQueryInNewTab(_ query: String, reuseExisting: Bool = false) {
+    /// Represents the policy for reusing existing tabs for a query or URL being opened.
+    enum ExistingTabReusePolicy: Equatable {
+        /// Reuse any existing tab that matches the URL or is a New Tab Page.
+        case any
+        /// Reuse a specific tab identified by its ID.
+        case tabWithId(String)
+    }
+
+    /// Loads a search query in a new tab, with an option to reuse an existing tab.
+    ///
+    /// - Parameters:
+    ///   - query: The search query to be loaded.
+    ///   - reuseExisting: The policy for reusing an existing tab. Defaults to `none`, meaning no reuse.
+    func loadQueryInNewTab(_ query: String, reuseExisting: ExistingTabReusePolicy? = .none) {
         dismissOmniBar()
         guard let url = URL.makeSearchURL(query: query) else {
             Logger.lifecycle.error("Couldn‘t form URL for query: \(query, privacy: .public)")
             return
         }
+
         loadUrlInNewTab(url, reuseExisting: reuseExisting, inheritedAttribution: nil)
     }
 
-    func loadUrlInNewTab(_ url: URL, reuseExisting: Bool = false, inheritedAttribution: AdClickAttributionLogic.State?, fromExternalLink: Bool = false) {
+    /// Load URL in a new tab, with option to reuse an existing tab.
+    ///
+    /// - Parameters:
+    ///   - url: The URL to be loaded.
+    ///   - reuseExisting: The policy for reusing an existing tab. Defaults to `none`, meaning no reuse.
+    ///   - inheritedAttribution: The attribution state to be inherited from a parent tab, if any.
+    ///   - fromExternalLink: A flag indicating if the URL is from an external link. Defaults to `false`.
+    func loadUrlInNewTab(_ url: URL, reuseExisting: ExistingTabReusePolicy? = .none, inheritedAttribution: AdClickAttributionLogic.State?, fromExternalLink: Bool = false) {
+
         func worker() {
             allowContentUnderflow = false
             viewCoordinator.navigationBarContainer.alpha = 1
             loadViewIfNeeded()
-            if reuseExisting, let existing = tabManager.first(withUrl: url) {
+
+            // Check if a specific tab ID should be reused.
+            if case .tabWithId(let id) = reuseExisting, let existing = tabManager.first(withId: id) {
+                selectTab(existing)
+            }
+            // Check if an existing tab with the same URL should be reused.
+            else if reuseExisting != .none, let existing = tabManager.first(withUrl: url) {
                 selectTab(existing)
                 return
-            } else if reuseExisting, let existing = tabManager.firstHomeTab() {
+            }
+            // Check if a tab presenting a New Tab page should be reused.
+            else if reuseExisting != .none, let existing = tabManager.firstHomeTab() {
                 if autoClearInProgress {
                     autoClearShouldRefreshUIAfterClear = false
                 }
                 tabManager.selectTab(existing)
                 loadUrl(url, fromExternalLink: fromExternalLink)
-            } else {
+            }
+            // Add a new tab if no existing tab is reused.
+            else {
                 addTab(url: url, inheritedAttribution: inheritedAttribution, fromExternalLink: fromExternalLink)
             }
+
             refreshOmniBar()
             refreshTabIcon()
             refreshControls()
             tabsBarController?.refresh(tabsModel: tabManager.model)
             swipeTabsCoordinator?.refresh(tabsModel: tabManager.model, scrollToSelected: true)
         }
-        
+
         if clearInProgress {
             postClear = worker
         } else {
             worker()
         }
     }
-    
+
     func enterSearch() {
         if presentedViewController == nil {
             showBars()
@@ -1039,7 +1060,7 @@ class MainViewController: UIViewController {
             currentTab?.executeBookmarklet(url: url)
         }
     }
-    
+
     private func loadBackForwardItem(_ item: WKBackForwardListItem) {
         prepareTabForRequest {
             currentTab?.load(backForwardListItem: item)
@@ -1343,7 +1364,9 @@ class MainViewController: UIViewController {
             syncDataProviders: syncDataProviders,
             selectedAccount: nil,
             openSearch: openSearch,
-            source: source
+            source: source,
+            bookmarksDatabase: self.bookmarksDatabase,
+            favoritesDisplayMode: self.appSettings.favoritesDisplayMode
         )
         autofillSettingsViewController.delegate = self
         let navigationController = UINavigationController(rootViewController: autofillSettingsViewController)
@@ -1425,9 +1448,9 @@ class MainViewController: UIViewController {
 
     func fireOnboardingCustomSearchPixelIfNeeded(query: String) {
         if contextualOnboardingLogic.isShowingSearchSuggestions {
-            contextualOnboardingPixelReporter.trackCustomSearch()
+            contextualOnboardingPixelReporter.measureCustomSearch()
         } else if contextualOnboardingLogic.isShowingSitesSuggestions {
-            contextualOnboardingPixelReporter.trackCustomSite()
+            contextualOnboardingPixelReporter.measureCustomSite()
         }
     }
 
@@ -1577,6 +1600,8 @@ class MainViewController: UIViewController {
                     let deepLinkTarget: SettingsViewModel.SettingsDeepLinkSection
                         deepLinkTarget = .duckPlayer
                     self?.launchSettings(deepLinkTarget: deepLinkTarget)
+                case .subscriptionFlow(let components):
+                    self?.launchSettings(deepLinkTarget: .subscriptionFlow(redirectURLComponents: components))
                 default:
                     return
                 }
@@ -1601,12 +1626,14 @@ class MainViewController: UIViewController {
                 self?.onNetworkProtectionAccountSignIn(notification)
             }
             .store(in: &vpnCancellables)
+
         NotificationCenter.default.publisher(for: .entitlementsDidChange)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] notification in
                 self?.onEntitlementsChange(notification)
             }
             .store(in: &vpnCancellables)
+
         NotificationCenter.default.publisher(for: .accountDidSignOut)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] notification in
@@ -1618,6 +1645,13 @@ class MainViewController: UIViewController {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.onNetworkProtectionEntitlementMessagingChange()
+            }
+            .store(in: &vpnCancellables)
+
+        NotificationCenter.default.publisher(for: .expiredRefreshTokenDetected)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                self?.onExpiredRefreshTokenDetected(notification)
             }
             .store(in: &vpnCancellables)
 
@@ -1681,6 +1715,11 @@ class MainViewController: UIViewController {
         Logger.networkProtection.info("[NetP Subscription] Reset expired entitlement messaging")
     }
 
+    @objc
+    private func onExpiredRefreshTokenDetected(_ notification: Notification) {
+        // Not implemented : https://app.asana.com/0/1205842942115003/1209622270835329/f
+    }
+
     var networkProtectionTunnelController: NetworkProtectionTunnelController {
         AppDependencyProvider.shared.networkProtectionTunnelController
     }
@@ -1688,8 +1727,10 @@ class MainViewController: UIViewController {
     @objc
     private func onEntitlementsChange(_ notification: Notification) {
         Task {
-            let accountManager = AppDependencyProvider.shared.subscriptionManager.accountManager
-            guard case .success(false) = await accountManager.hasEntitlement(forProductName: .networkProtection) else { return }
+            let subscriptionManager = AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge
+            guard let hasEntitlement = try? await subscriptionManager.isEnabled(feature: .networkProtection),
+                      hasEntitlement == false
+            else { return }
 
             if await networkProtectionTunnelController.isInstalled {
                 tunnelDefaults.enableEntitlementMessaging()
@@ -1800,7 +1841,7 @@ extension MainViewController: BrowserChromeDelegate {
         setBarsVisibility(hidden ? 0 : 1.0, animated: animated, animationDuration: customAnimationDuration)
     }
     
-    func setBarsVisibility(_ percent: CGFloat, animated: Bool = false, animationDuration: CGFloat?) {
+    func setBarsVisibility(_ percent: CGFloat, animated: Bool, animationDuration: CGFloat?) {
         if percent < 1 {
             hideKeyboard()
             hideMenuHighlighter()
@@ -1815,6 +1856,15 @@ extension MainViewController: BrowserChromeDelegate {
             self.viewCoordinator.navigationBarContainer.alpha = percent
             self.viewCoordinator.tabBarContainer.alpha = percent
             self.viewCoordinator.toolbar.alpha = percent
+            
+            // Post notification only when bars are fully shown or hidden
+            if percent == 0 || percent == 1 {
+                NotificationCenter.default.post(
+                    name: .browserChromeVisibilityChanged,
+                    object: nil,
+                    userInfo: ["isHidden": percent == 0]
+                )
+            }
         }
            
         if animated {
@@ -1925,9 +1975,9 @@ extension MainViewController: OmniBarDelegate {
     func onPrivacyIconPressed(isHighlighted: Bool) {
         guard !isSERPPresented else { return }
 
-        // Track first tap of privacy icon button
+        // Measure first tap of privacy icon button
         if isHighlighted {
-            contextualOnboardingPixelReporter.trackPrivacyDashboardOpenedForFirstTime()
+            contextualOnboardingPixelReporter.measurePrivacyDashboardOpenedForFirstTime()
         }
         // Dismiss privacy icon animation when showing privacy dashboard
         dismissPrivacyDashboardButtonPulse()
@@ -2254,11 +2304,11 @@ extension MainViewController: AutocompleteViewControllerDelegate {
         case .historyEntry(_, url: let url, _):
             loadUrl(url)
 
-        case .openTab(title: _, url: let url):
+        case .openTab(title: _, url: let url, tabId: let tabId):
             if newTabPageViewController != nil, let tab = tabManager.model.currentTab {
                 self.closeTab(tab)
             }
-            loadUrlInNewTab(url, reuseExisting: true, inheritedAttribution: .noAttribution)
+            loadUrlInNewTab(url, reuseExisting: tabId.map(ExistingTabReusePolicy.tabWithId) ?? .any, inheritedAttribution: .noAttribution)
 
         case .unknown(value: let value), .internalPage(title: let value, url: _):
             assertionFailure("Unknown suggestion: \(value)")
@@ -2299,7 +2349,7 @@ extension MainViewController: AutocompleteViewControllerDelegate {
             }
         case .website(url: let url):
             viewCoordinator.omniBar.textField.text = url.absoluteString
-        case .bookmark(title: let title, _, _, _), .openTab(title: let title, url: _):
+        case .bookmark(title: let title, _, _, _), .openTab(title: let title, url: _, _):
             viewCoordinator.omniBar.textField.text = title
             if title.hasPrefix(query) {
                 viewCoordinator.omniBar.selectTextToEnd(query.count)
@@ -2641,6 +2691,18 @@ extension MainViewController: TabSwitcherDelegate {
         if DaxDialogs.shared.shouldShowFireButtonPulse {
             showFireButtonPulse()
         }
+    }
+    
+    func tabSwitcher(_ tabSwitcher: TabSwitcherViewController, editBookmarkForUrl url: URL) {
+        guard let bookmark = self.menuBookmarksViewModel.bookmark(for: url) else { return }
+        tabSwitcher.dismiss(animated: true) {
+            self.segueToEditBookmark(bookmark)
+        }
+    }
+    
+    func tabSwitcherDidBulkCloseTabs(tabSwitcher: TabSwitcherViewController) {
+        tabsBarController?.refresh(tabsModel: tabManager.model, scrollToSelected: true)
+        updateCurrentTab()
     }
 
     func tabSwitcher(_ tabSwitcher: TabSwitcherViewController, didRemoveTab tab: Tab) {
@@ -3029,12 +3091,24 @@ extension MainViewController: UIDropInteractionDelegate {
 // MARK: - VoiceSearchViewControllerDelegate
 
 extension MainViewController: VoiceSearchViewControllerDelegate {
-    
-    func voiceSearchViewController(_ controller: VoiceSearchViewController, didFinishQuery query: String?) {
-        controller.dismiss(animated: true, completion: nil)
-        if let query = query {
-            Pixel.fire(pixel: .voiceSearchDone)
+
+    func voiceSearchViewController(_ controller: VoiceSearchViewController, didFinishQuery query: String?, target: VoiceSearchTarget) {
+        controller.dismiss(animated: true) { [weak self] in
+            guard let self = self, let query = query else { return }
+            self.handleVoiceSearchCompletion(with: query, for: target)
+        }
+    }
+
+    private func handleVoiceSearchCompletion(with query: String, for target: VoiceSearchTarget) {
+        switch target {
+        case .SERP:
+            Pixel.fire(pixel: .voiceSearchSERPDone)
             loadQuery(query)
+
+        case .AIChat:
+            Pixel.fire(pixel: .voiceSearchAIChatDone)
+            performCancel()
+            openAIChat(query, autoSend: true)
         }
     }
 }
@@ -3089,5 +3163,8 @@ extension MainViewController: AIChatViewControllerManagerDelegate {
     func aiChatViewControllerManager(_ manager: AIChatViewControllerManager, didRequestToLoad url: URL) {
         loadUrlInNewTab(url, inheritedAttribution: nil)
     }
-    
+
+    func aiChatViewControllerManager(_ manager: AIChatViewControllerManager, didRequestOpenDownloadWithFileName fileName: String) {
+        segueToDownloads()
+    }
 }

@@ -26,6 +26,7 @@ import Core
 
 protocol AIChatViewControllerManagerDelegate: AnyObject {
     func aiChatViewControllerManager(_ manager: AIChatViewControllerManager, didRequestToLoad url: URL)
+    func aiChatViewControllerManager(_ manager: AIChatViewControllerManager, didRequestOpenDownloadWithFileName fileName: String)
 }
 
 final class AIChatViewControllerManager {
@@ -34,14 +35,24 @@ final class AIChatViewControllerManager {
     private var payloadHandler = AIChatPayloadHandler()
     private let privacyConfigurationManager: PrivacyConfigurationManaging
     private weak var userContentController: UserContentController?
+    private let downloadsDirectoryHandler: DownloadsDirectoryHandling
 
-    init(privacyConfigurationManager: PrivacyConfigurationManaging = ContentBlocking.shared.privacyConfigurationManager) {
+    init(privacyConfigurationManager: PrivacyConfigurationManaging = ContentBlocking.shared.privacyConfigurationManager,
+         downloadsDirectoryHandler: DownloadsDirectoryHandling = DownloadsDirectoryHandler()) {
         self.privacyConfigurationManager = privacyConfigurationManager
+        self.downloadsDirectoryHandler = downloadsDirectoryHandler
     }
 
     @MainActor
     func openAIChat(_ query: String? = nil, payload: Any? = nil, autoSend: Bool = false, on viewController: UIViewController) {
         let settings = AIChatSettings(privacyConfigurationManager: privacyConfigurationManager)
+
+        let inspectableWebView: Bool
+#if DEBUG
+        inspectableWebView = true
+#else
+        inspectableWebView = AppUserDefaults().inspectableWebViewEnabled
+#endif
 
         // Check if the viewController is already presenting a RoundedPageSheetContainerViewController with AIChatViewController inside
         if let presentedVC = viewController.presentedViewController as? RoundedPageSheetContainerViewController,
@@ -55,11 +66,15 @@ final class AIChatViewControllerManager {
         let userContentController = UserContentController()
         userContentController.delegate = self
 
+        downloadsDirectoryHandler.createDownloadsDirectoryIfNeeded()
+
         webviewConfiguration.userContentController = userContentController
         self.userContentController = userContentController
         let aiChatViewController = AIChatViewController(settings: settings,
                                                         webViewConfiguration: webviewConfiguration,
-                                                        requestAuthHandler: AIChatRequestAuthorizationHandler(debugSettings: AIChatDebugSettings()))
+                                                        requestAuthHandler: AIChatRequestAuthorizationHandler(debugSettings: AIChatDebugSettings()),
+                                                        inspectableWebView: inspectableWebView,
+                                                        downloadsPath: downloadsDirectoryHandler.downloadsDirectory)
         aiChatViewController.delegate = self
 
         let roundedPageSheet = RoundedPageSheetContainerViewController(
@@ -110,6 +125,13 @@ extension AIChatViewControllerManager: AIChatViewControllerDelegate {
 
     func aiChatViewControllerDidFinish(_ viewController: AIChatViewController) {
         viewController.dismiss(animated: true)
+    }
+
+    func aiChatViewController(_ viewController: AIChatViewController, didRequestOpenDownloadWithFileName fileName: String) {
+        viewController.dismiss(animated: true) { [weak self] in
+            guard let self = self else { return }
+            self.delegate?.aiChatViewControllerManager(self, didRequestOpenDownloadWithFileName: fileName)
+        }
     }
 }
 

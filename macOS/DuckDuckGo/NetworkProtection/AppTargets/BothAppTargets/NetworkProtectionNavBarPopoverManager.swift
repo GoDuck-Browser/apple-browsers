@@ -116,22 +116,27 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
                 }))
         }
 
+        if proxySettings.proxyAvailable {
+            menuItems.append(contentsOf: [
+                .textWithDetail(
+                    icon: Image(.window16),
+                    title: UserText.vpnStatusViewExcludedAppsMenuItemTitle,
+                    detail: "(\(proxySettings.excludedAppsMinusDBPAgent.count))",
+                    action: { [weak self] in
+                        self?.manageExcludedApps()
+                    }),
+                .textWithDetail(
+                    icon: Image(.globe16),
+                    title: UserText.vpnStatusViewExcludedDomainsMenuItemTitle,
+                    detail: "(\(proxySettings.excludedDomains.count))",
+                    action: { [weak self] in
+                        self?.manageExcludedSites()
+                    }),
+                .divider()
+            ])
+        }
+
         menuItems.append(contentsOf: [
-            .textWithDetail(
-                icon: Image(.window16),
-                title: UserText.vpnStatusViewExcludedAppsMenuItemTitle,
-                detail: "(\(proxySettings.excludedApps.count))",
-                action: { [weak self] in
-                    self?.manageExcludedApps()
-            }),
-            .textWithDetail(
-                icon: Image(.globe16),
-                title: UserText.vpnStatusViewExcludedDomainsMenuItemTitle,
-                detail: "(\(proxySettings.excludedDomains.count))",
-                action: { [weak self] in
-                    self?.manageExcludedSites()
-            }),
-            .divider(),
             .text(icon: Image(.help16), title: UserText.vpnStatusViewFAQMenuItemTitle, action: {
                 try? await appLauncher.launchApp(withCommand: VPNAppLaunchCommand.showFAQ)
             }),
@@ -230,25 +235,7 @@ final class NetworkProtectionNavBarPopoverManager: NetPPopoverManager {
                 _ = try? await self?.vpnUninstaller.uninstall(removeSystemExtension: true)
             })
 
-            let tipsFeatureFlagInitialValue = featureFlagger.isFeatureOn(.networkProtectionUserTips)
-            let tipsFeatureFlagPublisher: CurrentValuePublisher<Bool, Never>
-
-            if let overridesHandler = featureFlagger.localOverrides?.actionHandler as? FeatureFlagOverridesPublishingHandler<FeatureFlag> {
-
-                let featureFlagPublisher = overridesHandler.flagDidChangePublisher
-                    .filter { $0.0 == .networkProtectionUserTips }
-
-                tipsFeatureFlagPublisher = CurrentValuePublisher(
-                    initialValue: tipsFeatureFlagInitialValue,
-                    publisher: Just(tipsFeatureFlagInitialValue).eraseToAnyPublisher())
-            } else {
-                tipsFeatureFlagPublisher = CurrentValuePublisher(
-                    initialValue: tipsFeatureFlagInitialValue,
-                    publisher: Just(tipsFeatureFlagInitialValue).eraseToAnyPublisher())
-            }
-
-            let tipsModel = VPNTipsModel(featureFlagPublisher: tipsFeatureFlagPublisher,
-                                         statusObserver: statusReporter.statusObserver,
+            let tipsModel = VPNTipsModel(statusObserver: statusReporter.statusObserver,
                                          activeSitePublisher: activeSitePublisher,
                                          forMenuApp: false,
                                          vpnSettings: vpnSettings,

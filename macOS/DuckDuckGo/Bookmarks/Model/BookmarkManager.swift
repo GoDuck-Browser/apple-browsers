@@ -34,7 +34,7 @@ protocol BookmarkManager: AnyObject {
     func getBookmark(forVariantUrl variantURL: URL) -> Bookmark?
     func getBookmarkFolder(withId id: String) -> BookmarkFolder?
     @discardableResult func makeBookmark(for url: URL, title: String, isFavorite: Bool, index: Int?, parent: BookmarkFolder?) -> Bookmark?
-    func makeBookmarks(for websitesInfo: [WebsiteInfo], inNewFolderNamed folderName: String, withinParentFolder parent: ParentFolderType)
+    func makeBookmarks(for websitesInfo: [WebsiteInfo], inNewFolderNamed folderName: String?, withinParentFolder parent: ParentFolderType)
     func makeFolder(named title: String, parent: BookmarkFolder?, completion: @escaping (Result<BookmarkFolder, Error>) -> Void)
     func remove(bookmark: Bookmark, undoManager: UndoManager?)
     func remove(folder: BookmarkFolder, undoManager: UndoManager?)
@@ -84,7 +84,8 @@ extension BookmarkManager {
 final class LocalBookmarkManager: BookmarkManager {
     static let shared = LocalBookmarkManager()
 
-    init(bookmarkStore: BookmarkStore? = nil, faviconManagement: FaviconManagement? = nil) {
+    init(bookmarkStore: BookmarkStore? = nil, faviconManagement: FaviconManagement? = nil, foldersStore: BookmarkFoldersStore = UserDefaultsBookmarkFoldersStore()) {
+        self.foldersStore = foldersStore
         if let bookmarkStore {
             self.bookmarkStore = bookmarkStore
         }
@@ -120,6 +121,7 @@ final class LocalBookmarkManager: BookmarkManager {
     private lazy var bookmarkStore: BookmarkStore = LocalBookmarkStore(bookmarkDatabase: BookmarkDatabase.shared)
     private lazy var faviconManagement: FaviconManagement = FaviconManager.shared
     private lazy var sortRepository: SortBookmarksRepository = SortBookmarksUserDefaults()
+    private let foldersStore: BookmarkFoldersStore
 
     private var favoritesDisplayMode: FavoritesDisplayMode = .displayNative(.desktop)
     private var favoritesDisplayModeCancellable: AnyCancellable?
@@ -222,6 +224,7 @@ final class LocalBookmarkManager: BookmarkManager {
                 return
             }
 
+            self?.foldersStore.lastBookmarkSingleTabFolderIdUsed = parent?.id
             self?.loadBookmarks()
             self?.requestSync()
         }
@@ -229,7 +232,7 @@ final class LocalBookmarkManager: BookmarkManager {
         return bookmark
     }
 
-    func makeBookmarks(for websitesInfo: [WebsiteInfo], inNewFolderNamed folderName: String, withinParentFolder parent: ParentFolderType) {
+    func makeBookmarks(for websitesInfo: [WebsiteInfo], inNewFolderNamed folderName: String?, withinParentFolder parent: ParentFolderType) {
         bookmarkStore.saveBookmarks(for: websitesInfo, inNewFolderNamed: folderName, withinParentFolder: parent)
         loadBookmarks()
         requestSync()
@@ -397,6 +400,7 @@ final class LocalBookmarkManager: BookmarkManager {
             if error == nil {
                 self?.requestSync()
             }
+            self?.foldersStore.lastBookmarkSingleTabFolderIdUsed = parent?.id
             completion(error)
         }
     }
@@ -421,6 +425,7 @@ final class LocalBookmarkManager: BookmarkManager {
             if error == nil {
                 self?.requestSync()
             }
+            self?.foldersStore.lastBookmarkSingleTabFolderIdUsed = parent.folderID
             completion(error)
         }
     }

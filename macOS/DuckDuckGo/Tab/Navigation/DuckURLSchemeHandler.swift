@@ -347,6 +347,7 @@ private extension DuckURLSchemeHandler {
         let threatKind: MaliciousSiteProtection.ThreatKind = switch reason {
         case .malware: .malware
         case .phishing: .phishing
+        case .scam: .scam
         case .ssl: {
             assertionFailure("SSL error page is handled with NSURLError: NSURLErrorServerCertificateUntrusted error")
             return .phishing
@@ -355,6 +356,12 @@ private extension DuckURLSchemeHandler {
 
         let error = MaliciousSiteError(threat: threatKind, failingUrl: failingUrl)
         urlSchemeTask.didFailWithError(error)
+    }
+}
+
+extension URL {
+    var isHistory: Bool {
+        return isDuckURLScheme && host == "history"
     }
 }
 
@@ -412,10 +419,6 @@ private extension URL {
 
     var isFavicon: Bool {
         return isDuckURLScheme && host == "favicon"
-    }
-
-    var isHistory: Bool {
-        return isDuckURLScheme && host == "history"
     }
 
     var isCustomBackgroundImage: Bool {
