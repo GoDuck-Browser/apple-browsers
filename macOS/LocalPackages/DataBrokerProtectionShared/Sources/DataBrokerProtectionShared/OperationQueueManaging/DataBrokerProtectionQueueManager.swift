@@ -118,10 +118,10 @@ public final class DefaultDataBrokerProtectionQueueManager: DataBrokerProtection
     }
 
     public init(operationQueue: DataBrokerProtectionOperationQueue,
-         operationsCreator: DataBrokerOperationsCreator,
-         mismatchCalculator: MismatchCalculator,
-         brokerUpdater: DataBrokerProtectionBrokerUpdater?,
-         pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>) {
+                operationsCreator: DataBrokerOperationsCreator,
+                mismatchCalculator: MismatchCalculator,
+                brokerUpdater: DataBrokerProtectionBrokerUpdater?,
+                pixelHandler: EventMapping<DataBrokerProtectionSharedPixels>) {
 
         self.operationQueue = operationQueue
         self.operationsCreator = operationsCreator
@@ -131,9 +131,9 @@ public final class DefaultDataBrokerProtectionQueueManager: DataBrokerProtection
     }
 
     public func startImmediateScanOperationsIfPermitted(showWebView: Bool,
-                                                 operationDependencies: DataBrokerOperationDependencies,
-                                                 errorHandler: ((DataBrokerProtectionJobsErrorCollection?) -> Void)?,
-                                                 completion: (() -> Void)?) {
+                                                        operationDependencies: DataBrokerOperationDependencies,
+                                                        errorHandler: ((DataBrokerProtectionJobsErrorCollection?) -> Void)?,
+                                                        completion: (() -> Void)?) {
 
         let newMode = DataBrokerProtectionQueueMode.immediate(errorHandler: errorHandler, completion: completion)
         startOperationsIfPermitted(forNewMode: newMode,
