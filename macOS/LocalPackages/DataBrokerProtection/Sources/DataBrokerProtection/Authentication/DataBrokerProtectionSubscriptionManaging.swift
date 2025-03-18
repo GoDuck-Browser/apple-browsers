@@ -40,7 +40,7 @@ public final class DataBrokerProtectionSubscriptionManager: DataBrokerProtection
             if !dataBrokerProtectionSettings.isAuthV2Enabled {
                 tokenKey = "PRIVACYPRO_STAGING_TOKEN"
             } else {
-                tokenKey = "PRIVACYPRO_STAGING_TOKEN"
+                tokenKey = "PRIVACYPRO_STAGING_TOKEN_V2"
             }
 
             if let token = ProcessInfo.processInfo.environment[tokenKey] {
