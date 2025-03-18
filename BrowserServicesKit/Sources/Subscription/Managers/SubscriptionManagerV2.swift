@@ -365,11 +365,12 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     @discardableResult public func getTokenContainer(policy: AuthTokensCachePolicy) async throws -> TokenContainer {
         Logger.subscription.debug("Get tokens \(policy.description, privacy: .public)")
 
-        await migrateAuthV1toAuthV2IfNeeded()
-
         do {
             let currentCachedTokenContainer = oAuthClient.currentTokenContainer
             let currentCachedEntitlements = currentCachedTokenContainer?.decodedAccessToken.subscriptionEntitlements
+
+            await migrateAuthV1toAuthV2IfNeeded()
+
             let resultTokenContainer = try await oAuthClient.getTokens(policy: policy)
             let newEntitlements = resultTokenContainer.decodedAccessToken.subscriptionEntitlements
 

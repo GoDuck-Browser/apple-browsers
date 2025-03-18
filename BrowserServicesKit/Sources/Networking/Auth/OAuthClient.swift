@@ -310,7 +310,7 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
             // NOTE: We don't remove the old token to allow roll back to Auth V1
 
             // Store new tokens
-            tokenStorage.tokenContainer = tokenContainer
+            adopt(tokenContainer: tokenContainer)
             return tokenContainer
         } catch {
             Logger.OAuthClient.error("Failed to migrate legacy token: \(error, privacy: .public)")
