@@ -293,7 +293,6 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
 
         guard let legacyTokenStorage else {
             Logger.OAuthClient.fault("Auth migration attempted without a LegacyTokenStorage")
-            assertionFailure("Auth migration attempted without a LegacyTokenStorage")
             return nil
         }
 
