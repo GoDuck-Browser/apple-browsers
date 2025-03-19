@@ -406,10 +406,6 @@ extension SyncSettingsViewController: SyncActivationControllerDelegate {
         await showPreparingSyncAsync()
     }
     
-    func controllerDidNOTRecognizeScannedCode() {
-        // TODO: Show alert
-    }
-    
     func controllerDidFindTwoAccountsDuringRecovery(_ recoveryKey: SyncCode.RecoveryKey) async {
         if rootView.model.devices.count > 1 {
             promptToSwitchAccounts(recoveryKey: recoveryKey)

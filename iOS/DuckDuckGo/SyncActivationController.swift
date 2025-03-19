@@ -31,7 +31,6 @@ protocol SyncActivationControllerDelegate: AnyObject {
     func controllerDidReceiveRecoveryKey()
 
     func controllerDidRecognizeScannedCode() async
-    func controllerDidNOTRecognizeScannedCode()
     
     func controllerDidCreateSyncAccount()
     func controllerDidCompleteAccountConnection(shouldShowSyncEnabled: Bool)
@@ -149,8 +148,7 @@ final class SyncActivationController {
                     return
                 }
             } catch {
-                // TODO: Handle this properly
-                delegate?.controllerDidReceiveError(SyncErrorMessage.unhandledError, underlyingError: error, relatedPixelEvent: .syncLoginError)
+                delegate?.controllerDidReceiveError(SyncErrorMessage.unableToSyncWithDevice, underlyingError: error, relatedPixelEvent: .syncLoginError)
             }
             exchanger.stopPolling()
         }
@@ -174,17 +172,14 @@ final class SyncActivationController {
     
     private func handleExchangeKey(_ exchangeKey: SyncCode.ExchangeKey) async -> Bool {
         do {
-            // Step B
             let exchangeInfo = try await self.syncService.transmitGeneratedExchangeInfo(exchangeKey, deviceName: deviceName)
-            // Step E
             guard let recoveryKey = try await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
                 // Polling likelly cancelled. Would love to handle this in a more elegant way.
                 return false
             }
             return await handleRecoveryKey(recoveryKey)
         } catch {
-            // TODO: Handle this properly
-            await delegate?.controllerDidReceiveError(SyncErrorMessage.unhandledError, underlyingError: error, relatedPixelEvent: .syncLoginError)
+            await delegate?.controllerDidReceiveError(SyncErrorMessage.unableToSyncWithDevice, underlyingError: error, relatedPixelEvent: .syncLoginError)
             return false
         }
     }
