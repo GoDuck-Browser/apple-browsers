@@ -106,10 +106,14 @@ final class SyncActivationController {
     }
     
     func syncCodeEntered(code: String) async -> Bool {
-        guard let syncCode = try? SyncCode.decodeBase64String(code) else {
-            await delegate?.controllerDidNOTRecognizeScannedCode()
+        let syncCode: SyncCode
+        do {
+            syncCode = try SyncCode.decodeBase64String(code)
+        } catch {
+            await delegate?.controllerDidReceiveError(.unableToScanQRCode, underlyingError: error, relatedPixelEvent: .syncSignupError)
             return false
         }
+        
         await delegate?.controllerDidRecognizeScannedCode()
 
         if let exchangeKey = syncCode.exchangeKey {
@@ -118,8 +122,10 @@ final class SyncActivationController {
             return await handleRecoveryKey(recoveryKey)
         } else if let connectKey = syncCode.connect {
             return await handleConnectKey(connectKey)
+        } else {
+            await delegate?.controllerDidReceiveError(.unableToScanQRCode, underlyingError: nil, relatedPixelEvent: .syncSignupError)
+            return false
         }
-        return false
     }
     
     func loginAndShowDeviceConnected(recoveryKey: SyncCode.RecoveryKey) async throws {

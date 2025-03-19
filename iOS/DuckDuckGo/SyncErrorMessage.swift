@@ -28,6 +28,7 @@ enum SyncErrorMessage: Equatable {
     case unableToDeleteData
     case unableToRemoveDevice
     case unableToCreateRecoveryPdf
+    case unableToScanQRCode
     case unhandledError
 
     var title: String {
@@ -52,6 +53,8 @@ enum SyncErrorMessage: Equatable {
             return UserText.unableToRemoveDeviceDescription
         case .unableToCreateRecoveryPdf:
             return UserText.unableToCreateRecoveryPDF
+        case .unableToScanQRCode:
+            return UserText.unableToScanQRCode
         case .unhandledError: // TODO: Remove me
             return "Unhandled error"
         }
