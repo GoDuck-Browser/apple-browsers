@@ -25,6 +25,7 @@ public enum PrivacyFeature: String {
     case fingerprintingTemporaryStorage
     case fingerprintingBattery
     case fingerprintingScreenSize
+    case fingerprintingCanvas
     case gpc
     case httpsUpgrade = "https"
     case autoconsent
@@ -71,6 +72,7 @@ public enum PrivacyFeature: String {
     case experimentalBrowserTheming
     case setAsDefaultAndAddToDock
     case onboarding
+    case cssExperiments
 }
 
 /// An abstraction to be implemented by any "subfeature" of a given `PrivacyConfiguration` feature.
@@ -115,6 +117,14 @@ public enum DBPSubfeature: String, Equatable, PrivacySubfeature {
     case waitlist
     case waitlistBetaActive
     case freemium
+}
+
+public enum CSSExperimentsSubfeatures:  String, Equatable, PrivacySubfeature {
+    public var parent: PrivacyFeature {
+        .cssExperiments
+    }
+
+    case fingerprintingCanvasExperiment
 }
 
 public enum AIChatSubfeature: String, Equatable, PrivacySubfeature {

@@ -95,7 +95,8 @@ public struct ContentScopeFeatureToggles: Encodable {
                 inlineIconCredentials: Bool,
                 thirdPartyCredentialsProvider: Bool,
                 unknownUsernameCategorization: Bool,
-                partialFormSaves: Bool) {
+                partialFormSaves: Bool
+) {
 
         self.emailProtection = emailProtection
         self.emailProtectionIncontextSignup = emailProtectionIncontextSignup
@@ -147,7 +148,8 @@ public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessa
 
     public init(_ privacyConfigManager: PrivacyConfigurationManaging,
                 properties: ContentScopeProperties,
-                isIsolated: Bool = false
+                isIsolated: Bool = false,
+                privacyConfigurationJsonGenerator:  CSSPrivacyConfigurationJsonGenerator?
     ) {
         self.isIsolated = isIsolated
         let contextName = self.isIsolated ? "contentScopeScriptsIsolated" : "contentScopeScripts"
@@ -161,17 +163,19 @@ public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessa
                 privacyConfigManager,
                 properties: properties,
                 isolated: isIsolated,
-                config: broker.messagingConfig()
+                config: broker.messagingConfig(),
+                privacyConfigurationJsonGenerator: privacyConfigurationJsonGenerator
         )
     }
 
     public static func generateSource(_ privacyConfigurationManager: PrivacyConfigurationManaging,
                                       properties: ContentScopeProperties,
                                       isolated: Bool,
-                                      config: WebkitMessagingConfig
+                                      config: WebkitMessagingConfig,
+                                      privacyConfigurationJsonGenerator: CSSPrivacyConfigurationJsonGenerator?
     ) -> String {
-
-        guard let privacyConfigJson = String(data: privacyConfigurationManager.currentConfig, encoding: .utf8),
+        let privacyConfigJsonData = privacyConfigurationJsonGenerator?.privacyConfiguration ?? privacyConfigurationManager.currentConfig
+        guard let privacyConfigJson = String(data: privacyConfigJsonData, encoding: .utf8),
               let userUnprotectedDomains = try? JSONEncoder().encode(privacyConfigurationManager.privacyConfig.userUnprotectedDomains),
               let userUnprotectedDomainsString = String(data: userUnprotectedDomains, encoding: .utf8),
               let jsonProperties = try? JSONEncoder().encode(properties),
@@ -219,4 +223,112 @@ extension ContentScopeUserScript: WKScriptMessageHandler {
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         // unsupported
     }
+}
+
+
+public struct CSSPrivacyConfigurationJsonGenerator {
+    let featureFlagger: FeatureFlagger
+    let privacyConfigurationManager: PrivacyConfigurationManaging
+
+    public init(featureFlagger: FeatureFlagger, privacyConfigurationManager: PrivacyConfigurationManaging) {
+        self.featureFlagger = featureFlagger
+        self.privacyConfigurationManager = privacyConfigurationManager
+    }
+
+    var privacyConfiguration: Data? {
+        guard let config = try? PrivacyConfigurationData(data: privacyConfigurationManager.currentConfig) else { return nil }
+
+        let newFeatures = self.changeFingerprintingCanvasConfigStateBasedOnCohort(config: config.features)
+        let newConfig = PrivacyConfigurationData(features: newFeatures, unprotectedTemporary: config.unprotectedTemporary, trackerAllowlist: config.trackerAllowlist, version: config.version)
+        print(newConfig.toJSONDictionary())
+        if let sadds = try? newConfig.toJSONData() {
+            print(String(data: privacyConfigurationManager.currentConfig, encoding: .utf8))
+            print(String(data: sadds, encoding: .utf8))
+
+        if let configString = String(data: privacyConfigurationManager.currentConfig, encoding: .utf8),
+           let saddsString = String(data: sadds, encoding: .utf8) {
+            
+            // Combine the two outputs into one String (with a separator)
+            let combinedString = """
+            privacyConfigurationManager.currentConfig:
+            \(configString)
+            
+            sadds:
+            \(saddsString)
+            """
+            
+            // Get the URL for the Documents directory
+            if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                // Create a file URL with a file name of your choice
+                let fileURL = documentsDirectory.appendingPathComponent("output.txt")
+                
+                do {
+                    // Write the combined string to the file
+                    try combinedString.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
+                    print("File saved successfully at \(fileURL)")
+                } catch {
+                    print("Error saving file: \(error)")
+                }
+            }
+        }
+        }
+
+
+        return try? newConfig.toJSONData()
+    }
+
+    
+
+    private func changeFingerprintingCanvasConfigStateBasedOnCohort(config: [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature]) -> [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature] {
+        var newConfig = config
+        guard let fingerprintingCanvasCohort = featureFlagger.resolveCohort(for: CSSExperimentsFeatureFlags.fingerprintingCanvas) as? CSSExperimentsFeatureFlags.CSSExperimentsCohort
+        else {
+            return newConfig
+        }
+        var fingerprintingCanvasState: String {
+            switch fingerprintingCanvasCohort {
+            case .control:
+                "disabled"
+            case .treatment:
+                "enabled"
+            }
+        }
+        let fingerprintingCanvasConfig = config[PrivacyFeature.fingerprintingCanvas.rawValue]
+        let expectations = fingerprintingCanvasConfig?.exceptions ?? []
+        let settings = fingerprintingCanvasConfig?.settings ?? [:]
+        let features = fingerprintingCanvasConfig?.features ?? [:]
+        let minSupportedVersion = fingerprintingCanvasConfig?.minSupportedVersion
+        let hash = fingerprintingCanvasConfig?.hash
+
+        newConfig[PrivacyFeature.fingerprintingCanvas.rawValue] = PrivacyConfigurationData.PrivacyFeature(state: fingerprintingCanvasState, exceptions: expectations, settings: settings, features: features, minSupportedVersion: minSupportedVersion, hash: hash)
+        return newConfig
+    }
+
+}
+
+
+enum CSSExperimentsFeatureFlags: String, CaseIterable {
+    case fingerprintingCanvas
+}
+
+extension CSSExperimentsFeatureFlags: FeatureFlagDescribing {
+    var supportsLocalOverriding: Bool {
+        return true
+    }
+
+    var source: FeatureFlagSource {
+        return .remoteReleasable(.subfeature(CSSExperimentsSubfeatures.fingerprintingCanvasExperiment))
+    }
+
+    var cohortType: (any FeatureFlagCohortDescribing.Type)? {
+        return CSSExperimentsCohort.self
+    }
+
+    enum CSSExperimentsCohort: String, FeatureFlagCohortDescribing {
+        /// Control cohort with no changes applied.
+        case control
+        /// Treatment cohort where the experiment modifications are applied.
+        case treatment
+    }
+
 }
