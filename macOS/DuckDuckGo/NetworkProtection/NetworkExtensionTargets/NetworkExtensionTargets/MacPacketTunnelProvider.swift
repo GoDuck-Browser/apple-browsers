@@ -558,7 +558,10 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                    defaults: defaults,
                    entitlementCheck: entitlementsCheck)
 
+        setupPixels()
         accountManager.delegate = self
+        observeServerChanges()
+        observeStatusUpdateRequests()
         Logger.networkProtection.log("[+] MacPacketTunnelProvider Initialised")
     }
 
@@ -704,10 +707,6 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
 
     @MainActor
     override func startTunnel(options: [String: NSObject]? = nil) async throws {
-        setupPixels()
-        observeServerChanges()
-        observeStatusUpdateRequests()
-
         // here because we need to load the token before running this
         await subscriptionManagerV2.loadInitialData()
 
