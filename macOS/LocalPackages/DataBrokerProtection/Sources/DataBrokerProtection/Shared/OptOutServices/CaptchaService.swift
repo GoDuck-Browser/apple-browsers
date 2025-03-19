@@ -176,7 +176,9 @@ struct CaptchaService: CaptchaServiceProtocol {
     }
 
     private func submitCaptchaInformationRequest(_ captchaInfo: GetCaptchaInfoResponse, attemptId: UUID) async throws -> CaptchaTransaction {
-        var urlComponents = URLComponents(url: settings.selectedEnvironment.endpointURL, resolvingAgainstBaseURL: true)
+        //var urlComponents = URLComponents(url: settings.selectedEnvironment.endpointURL, resolvingAgainstBaseURL: true)
+        let testUrl = URL(string: "http://localhost:8080")!
+        var urlComponents = URLComponents(url: testUrl, resolvingAgainstBaseURL: true)
         urlComponents?.path = "\(Constants.endpointSubPath)/submit"
         urlComponents?.queryItems = [URLQueryItem(name: "attemptId", value: attemptId.uuidString)]
 
@@ -187,10 +189,11 @@ struct CaptchaService: CaptchaServiceProtocol {
         Logger.service.debug("Submitting captcha request ...")
         var request = URLRequest(url: url)
 
-        guard let authHeader = await authenticationManager.getAuthHeader() else {
-            servicePixel.fireEmptyAccessToken(callSite: .submitCaptchaInformationRequest)
-            throw AuthenticationError.noAuthToken
-        }
+//        guard let authHeader = await authenticationManager.getAuthHeader() else {
+  //          servicePixel.fireEmptyAccessToken(callSite: .submitCaptchaInformationRequest)
+    //        throw AuthenticationError.noAuthToken
+      //  }
+        let authHeader = ServicesAuthHeaderBuilder().getAuthHeader("12345")
 
         request.setValue(authHeader, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
@@ -259,8 +262,9 @@ struct CaptchaService: CaptchaServiceProtocol {
     }
 
     private func submitCaptchaToBeResolvedRequest(_ transactionID: CaptchaTransactionId, attemptId: UUID) async throws -> CaptchaResult {
-
-        var urlComponents = URLComponents(url: settings.selectedEnvironment.endpointURL, resolvingAgainstBaseURL: true)
+        let testUrl = URL(string: "http://localhost:8080")!
+        var urlComponents = URLComponents(url: testUrl, resolvingAgainstBaseURL: true)
+        //var urlComponents = URLComponents(url: settings.selectedEnvironment.endpointURL, resolvingAgainstBaseURL: true)
         urlComponents?.path = "\(Constants.endpointSubPath)/result"
 
         urlComponents?.queryItems = [
@@ -273,10 +277,11 @@ struct CaptchaService: CaptchaServiceProtocol {
         }
 
         var request = URLRequest(url: url)
-        guard let authHeader = await authenticationManager.getAuthHeader() else {
-            servicePixel.fireEmptyAccessToken(callSite: .submitCaptchaToBeResolvedRequest)
-            throw AuthenticationError.noAuthToken
-        }
+        let authHeader = ServicesAuthHeaderBuilder().getAuthHeader("12345")
+        //guard let authHeader = await authenticationManager.getAuthHeader() else {
+        //    servicePixel.fireEmptyAccessToken(callSite: .submitCaptchaToBeResolvedRequest)
+        //    throw AuthenticationError.noAuthToken
+        //}
 
         request.setValue(authHeader, forHTTPHeaderField: "Authorization")
         request.addValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
