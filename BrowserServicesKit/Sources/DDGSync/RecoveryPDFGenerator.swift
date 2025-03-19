@@ -103,7 +103,7 @@ public struct RecoveryPDFGenerator {
         let data = Data(text.utf8)
         let qrCodeFilter: CIFilter = CIFilter(name: "CIQRCodeGenerator")!
         qrCodeFilter.setValue(data, forKey: "inputMessage")
-        qrCodeFilter.setValue("H", forKey: "inputCorrectionLevel")
+        qrCodeFilter.setValue("M", forKey: "inputCorrectionLevel")
 
         guard let naturalSize = qrCodeFilter.outputImage?.extent.width else {
             fatalError()
