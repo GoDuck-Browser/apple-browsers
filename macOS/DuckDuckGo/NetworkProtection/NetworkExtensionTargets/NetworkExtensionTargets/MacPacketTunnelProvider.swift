@@ -555,11 +555,14 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                    defaults: defaults,
                    entitlementCheck: entitlementsCheck)
 
-        setupPixels()
         accountManager?.delegate = self
-        observeServerChanges()
-        observeStatusUpdateRequests()
         Logger.networkProtection.log("[+] MacPacketTunnelProvider Initialised")
+
+        Task {
+            setupPixels()
+            observeServerChanges()
+            observeStatusUpdateRequests()
+        }
     }
 
     deinit {

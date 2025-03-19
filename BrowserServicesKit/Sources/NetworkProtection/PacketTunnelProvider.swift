@@ -456,9 +456,11 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         self.entitlementCheck = entitlementCheck
 
         super.init()
-
-        observeSettingChanges()
         Logger.networkProtectionMemory.debug("[+] PacketTunnelProvider initialized")
+        
+        Task {
+            observeSettingChanges()
+        }
     }
 
     deinit {
@@ -507,6 +509,11 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
             try await loadAuthToken(from: options)
         } else {
             try await loadTokenContainer(from: options)
+        }
+#endif
+#if os(iOS)
+        if (try? await tokenHandler.getToken()) == nil {
+            throw TunnelError.startingTunnelWithoutAuthToken(internalError: nil)
         }
 #endif
     }
@@ -706,13 +713,10 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         do {
             try await load(options: startupOptions)
             Logger.networkProtection.log("🟢 Startup options loaded correctly")
-
-#if os(iOS)
-            if (try? await tokenHandler.getToken()) == nil {
-                throw TunnelError.startingTunnelWithoutAuthToken(internalError: nil)
-            }
-#endif
         } catch {
+            let errorDescription = (error as? LocalizedError)?.localizedDescription ?? String(describing: error)
+            Logger.networkProtection.error("🔴 Failed to start tunnel due to no auth token: \(errorDescription, privacy: .public)")
+
             if startupOptions.startupMethod == .automaticOnDemand {
                 // If the VPN was started by on-demand without the basic prerequisites for
                 // it to work we skip firing pixels.  This should only be possible if the
@@ -728,7 +732,10 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
                 providerEvents.fire(.tunnelStartAttempt(.failure(error)))
             }
 
-            Logger.networkProtection.error("🔴 Stopping VPN due to no auth token")
+            self.controllerErrorStore.lastErrorMessage = errorDescription
+            self.connectionStatus = .disconnected
+            self.knownFailureStore.lastKnownFailure = KnownFailure(error)
+
             throw error
         }
 
@@ -742,7 +749,8 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 
             providerEvents.fire(.tunnelStartAttempt(.success))
         } catch {
-            Logger.networkProtection.error("🔴 Failed to start tunnel \(error.localizedDescription, privacy: .public)")
+            let errorDescription = (error as? LocalizedError)?.localizedDescription ?? String(describing: error)
+            Logger.networkProtection.error("🔴 Failed to start tunnel \(errorDescription, privacy: .public)")
 
             if startupOptions.startupMethod == .automaticOnDemand {
                 // We add a delay when the VPN is started by
@@ -751,7 +759,6 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
                 try? await Task.sleep(interval: .seconds(15))
             }
 
-            let errorDescription = (error as? LocalizedError)?.localizedDescription ?? String(describing: error)
 
             self.controllerErrorStore.lastErrorMessage = errorDescription
             self.connectionStatus = .disconnected
