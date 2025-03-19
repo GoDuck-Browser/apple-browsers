@@ -19,11 +19,11 @@
 
 import Foundation
 
+@MainActor
 public protocol ScanOrPasteCodeViewModelDelegate: AnyObject {
 
     var pasteboardString: String? { get }
 
-    func startConnectMode() async -> String?
     func endConnectMode()
 
     /// Returns true if we were able to use the code. Either way, stop validating.
@@ -80,6 +80,7 @@ public class ScanOrPasteCodeViewModel: ObservableObject {
         showCamera = false
     }
 
+    @MainActor
     func pasteCode() {
         guard let string = delegate?
             .pasteboardString?
@@ -101,19 +102,27 @@ public class ScanOrPasteCodeViewModel: ObservableObject {
     }
 
     func cancel() {
-        delegate?.codeCollectionCancelled()
+        Task {
+            await delegate?.codeCollectionCancelled()
+        }
     }
 
     func showShareCodeSheet() {
-        delegate?.shareCode(showQRCodeModel.code ?? "")
+        Task {
+            await delegate?.shareCode(showQRCodeModel.code ?? "")
+        }
     }
 
     func endConnectMode() {
-        self.delegate?.endConnectMode()
+        Task {
+            await delegate?.endConnectMode()
+        }
     }
 
     func gotoSettings() {
-        delegate?.gotoSettings()
+        Task {
+            await delegate?.gotoSettings()
+        }
     }
 
 }
