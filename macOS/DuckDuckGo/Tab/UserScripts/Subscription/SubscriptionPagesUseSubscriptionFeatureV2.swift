@@ -131,11 +131,13 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
     }
 
     /// Values that the Frontend can use to determine the current state.
-    struct SubscriptionValues: Codable {
+    struct SubscriptionValuesV2: Codable {
         enum CodingKeys: String, CodingKey {
-            case token
+            case accessToken
+            case refreshToken
         }
-        let token: String
+        let accessToken: String
+        let refreshToken: String
     }
 
     func getSubscription(params: Any, original: WKScriptMessage) async throws -> Encodable? {
@@ -150,12 +152,12 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         }
     }
 
-    func setSubscription(params: Any, original: WKScriptMessage) async throws -> Encodable? {
-        // Note: This is called by the web FE when a subscription is retrieved, `params` contains an auth token V1 that will need to be exchanged for a V2. This is a temporary workaround until the FE fully supports v2 auth.
+    // https://app.asana.com/0/481882893211075/1209103340050807/f
+    func setAuthTokens(params: Any, original: WKScriptMessage) async throws -> Encodable? {
 
         PixelKit.fire(PrivacyProPixel.privacyProRestorePurchaseEmailSuccess, frequency: .legacyDailyAndCount)
 
-        guard let subscriptionValues: SubscriptionValues = CodableHelper.decode(from: params) else {
+        guard let subscriptionValues: SubscriptionValuesV2 = CodableHelper.decode(from: params) else {
             Logger.subscription.fault("SubscriptionPagesUserScript: expected JSON representation of SubscriptionValues")
             PixelKit.fire(PrivacyProPixel.setSubscriptionInvalidSubscriptionValues)
             assertionFailure("SubscriptionPagesUserScript: expected JSON representation of SubscriptionValues")
@@ -165,16 +167,14 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         // Clear subscription Cache
         subscriptionManager.clearSubscriptionCache()
 
-        guard !subscriptionValues.token.isEmpty else {
-            Logger.subscription.fault("Empty token provided, Failed to exchange v1 token for v2")
+        guard !subscriptionValues.token.isEmpty, !subscriptionValues.refreshToken.isEmpty else {
+            Logger.subscription.fault("Empty token or refreshToken provided")
             PixelKit.fire(PrivacyProPixel.setSubscriptionInvalidSubscriptionValues)
             return nil
         }
 
         do {
-            _ = try await subscriptionManager.exchange(tokenV1: subscriptionValues.token)
-            Logger.subscription.log("v1 token exchanged for v2")
-            // forcing subscription refresh
+            let newTokenContainer = subscriptionManager.adopt(accessToken: <#T##String#>, refreshToken: <#T##String#>)
             try await subscriptionManager.getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
             Logger.subscription.log("Subscription retrieved")
         } catch {
