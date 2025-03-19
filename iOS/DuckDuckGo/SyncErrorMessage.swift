@@ -19,7 +19,7 @@
 
 import Foundation
 
-enum SyncErrorMessage {
+enum SyncErrorMessage: Equatable {
     case unableToSyncToServer
     case unableToSyncWithDevice
     case unableToMergeTwoAccounts
@@ -28,6 +28,7 @@ enum SyncErrorMessage {
     case unableToDeleteData
     case unableToRemoveDevice
     case unableToCreateRecoveryPdf
+    case unhandledError
 
     var title: String {
         return UserText.syncErrorAlertTitle
@@ -51,6 +52,8 @@ enum SyncErrorMessage {
             return UserText.unableToRemoveDeviceDescription
         case .unableToCreateRecoveryPdf:
             return UserText.unableToCreateRecoveryPDF
+        case .unhandledError: // TODO: Remove me
+            return "Unhandled error"
         }
     }
 }
