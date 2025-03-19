@@ -16,7 +16,6 @@
 //  limitations under the License.
 //
 
-
 import Foundation
 
 // Basic Key-Value store using file as a persistence.
@@ -100,7 +99,6 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
         }
     }
 
-
     public func object(forKey key: String) throws -> Any? {
         lock.lock()
         defer {
@@ -137,7 +135,6 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
         try persist(dictionary: dictionary)
         self.internalRepresentation = dictionary
     }
-
 
     static private let globalLock = NSLock()
     static private var openedFiles: Set<URL> = []

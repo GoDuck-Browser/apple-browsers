@@ -137,5 +137,4 @@ class KeyValueFileStoreTests: XCTestCase {
         XCTAssertEqual(try s.object(forKey: "dict") as? [String: Int], ["a": 1, "b": 2])
     }
 
-
 }
