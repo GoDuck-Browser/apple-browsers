@@ -20,20 +20,23 @@ import Combine
 import Foundation
 
 extension UserDefaults {
-    private var isAuthV2EnabledKey: String {
-        "networkProtectionSettingIsAuthV2Enabled"
-    }
-
-    static let isAuthV2EnabledDefaultValue = false
-
     @objc
-    dynamic var networkProtectionSettingIsAuthV2Enabled: Bool {
+    public dynamic var networkProtectionSettingIsAuthV2Enabled: Bool {
         get {
-            value(forKey: isAuthV2EnabledKey) as? Bool ?? Self.isAuthV2EnabledDefaultValue
+            bool(forKey: #keyPath(networkProtectionSettingIsAuthV2Enabled))
         }
 
         set {
-            set(newValue, forKey: isAuthV2EnabledKey)
+            guard newValue != bool(forKey: #keyPath(networkProtectionSettingIsAuthV2Enabled)) else {
+                return
+            }
+
+            guard newValue else {
+                removeObject(forKey: #keyPath(networkProtectionSettingIsAuthV2Enabled))
+                return
+            }
+
+            set(newValue, forKey: #keyPath(networkProtectionSettingIsAuthV2Enabled))
         }
     }
 
@@ -42,6 +45,6 @@ extension UserDefaults {
     }
 
     func resetNetworkProtectionSettingIsAuthV2Enabled() {
-        removeObject(forKey: isAuthV2EnabledKey)
+        removeObject(forKey: #keyPath(networkProtectionSettingIsAuthV2Enabled))
     }
 }
