@@ -149,7 +149,7 @@ public protocol DDGSyncing: DDGSyncingDebuggingSupport {
      Sends this device's public key to the server encrypted using supplied key
      // Step B
      */
-    func transmitGeneratedExchangeInfo(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo?
+    func transmitGeneratedExchangeInfo(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo
 
     /**
      Sends this device's recovery key to the server encrypted using supplied key
