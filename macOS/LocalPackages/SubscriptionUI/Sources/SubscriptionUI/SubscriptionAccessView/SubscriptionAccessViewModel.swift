@@ -25,7 +25,7 @@ public final class SubscriptionAccessViewModel {
     private let purchasePlatform: SubscriptionEnvironment.PurchasePlatform
 
     public var title = UserText.activateModalTitle
-    public lazy var description = UserText.activateModalDescription(platform: purchasePlatform)
+    public lazy var description = UserText.activateModalDescription(platform: purchasePlatform) // TODO: not used
 
     public var emailLabel = UserText.email
     public var emailDescription = UserText.activateModalEmailDescription
