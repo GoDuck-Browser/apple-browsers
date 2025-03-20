@@ -193,7 +193,7 @@ final class SyncActivationController {
                 shouldShowSyncEnabled = false
             } catch {
                 Task {
-                    await delegate?.controllerDidReceiveError(.unableToSyncToServer, underlyingError: error, relatedPixelEvent: .syncSignupError)
+                    await delegate?.controllerDidReceiveError(.unableToSyncWithDevice, underlyingError: error, relatedPixelEvent: .syncSignupError)
                 }
             }
         }

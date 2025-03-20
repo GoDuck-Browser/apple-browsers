@@ -447,6 +447,7 @@ final class SyncPreferences: ObservableObject, SyncUI_macOS.ManagementViewModel 
     private let appearancePreferences: AppearancePreferences
     private var cancellables = Set<AnyCancellable>()
     private var connector: RemoteConnecting?
+    private var exchanger: RemoteKeyExchanging?
     private let userAuthenticator: UserAuthenticating
     private var syncPromoSource: String?
 }
@@ -542,50 +543,32 @@ extension SyncPreferences: ManagementDialogModelDelegate {
             }
         }
     }
-    
+        
     func startPollingForPublicKey() {
         Task { @MainActor in
             do {
                 let exchanger = try syncService.remoteExchange()
+                self.exchanger = exchanger
                 // Step A
                 self.codeToDisplay = exchanger.code
-                print("EXCHANGE DEBUG: Step A complete")
-                print("🦄 Displaying code: \(self.codeToDisplay ?? "")")
                 self.presentDialog(for: .syncWithAnotherDevice(code: codeToDisplay ?? ""))
                 
                 // Step C
                 if let exchangeMessage = try await exchanger.pollForPublicKey() {
-                    print("EXCHANGE DEBUG: Step C complete")
                     presentDialog(for: .prepareToSync)
-                    do {
-                        try await syncService.transmitExchangeRecoveryKey(for: exchangeMessage)
-                    } catch {
-                        if case SyncError.accountAlreadyExists = error,
-                           let recoveryKey = syncService.account?.recoveryKey,
-                           featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
-                            handleAccountAlreadyExists(recoveryKey)
-                        } else if case SyncError.accountAlreadyExists = error {
-                            managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToMergeTwoAccounts, description: "")
-                            PixelKit.fire(DebugEvent(GeneralPixel.syncLoginExistingAccountError(error: error)))
-                        } else {
-                            managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToSyncToOtherDevice)
-                        }
-                    }
-                    print("EXCHANGE DEBUG: Step D complete")
+                    try await syncService.transmitExchangeRecoveryKey(for: exchangeMessage)
                 } else {
                     // Polling was likeley cancelled elsewhere (e.g. dialog closed)
-                    print("EXCHANGE DEBUG: Polling cancelled")
                     managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unhandledError(nil))
                     return
                 }
             } catch {
-                print("EXCHANGE DEBUG: Polling errored: \(error)")
-                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unhandledError(error))
+                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToSyncToOtherDevice, description: error.localizedDescription)
+                PixelKit.fire(DebugEvent(GeneralPixel.syncLoginError(error: error)))
             }
         }
     }
 
-    // TODO: Consider splitting in two to break control coupling
     func startPollingForRecoveryKey(isRecovery: Bool) {
         Task { @MainActor in
             do {
@@ -628,44 +611,29 @@ extension SyncPreferences: ManagementDialogModelDelegate {
         self.connector = nil
     }
     
-    func sendPublicKey(exchangeCode: String) {
+    func syncCodeEntered(_ code: String) {
+        let syncCode: SyncCode
+        do {
+            syncCode = try SyncCode.decodeBase64String(code)
+        } catch {
+            managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .invalidCode, description: "")
+            return
+        }
         Task { @MainActor in
-            do {
-                let syncCode = try SyncCode.decodeBase64String(exchangeCode)
-                presentDialog(for: .prepareToSync)
-                
-                if let exchangeKey = syncCode.exchangeKey {
-                    try await handleExchangeKey(exchangeKey)
-                } else if let connectKey = syncCode.connect {
-                    await handleConnectKey(connectKey, code: exchangeCode)
-                } else if let recoveryKey = syncCode.recovery {
-                    await handleRecoveryKey(recoveryKey)
-                }
-            } catch {
-                print("EXCHANGE DEBUG: Error \(error)")
-                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unhandledError(error))
+            presentDialog(for: .prepareToSync)
+            
+            if let exchangeKey = syncCode.exchangeKey {
+                await handleExchangeKey(exchangeKey)
+            } else if let connectKey = syncCode.connect {
+                await handleConnectKey(connectKey, code: code)
+            } else if let recoveryKey = syncCode.recovery {
+                await handleRecoveryKey(recoveryKey)
             }
         }
     }
 
     func recoverDevice(recoveryCode: String) {
-        Task { @MainActor in
-            guard let syncCode = try? SyncCode.decodeBase64String(recoveryCode) else {
-                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .invalidCode, description: "")
-                return
-            }
-            presentDialog(for: .prepareToSync)
-            if let recoveryKey = syncCode.recovery {
-                await handleRecoveryKey(recoveryKey)
-            } else if let exchangeKey = syncCode.exchangeKey {
-                try await handleExchangeKey(exchangeKey)
-            } else if let connectKey = syncCode.connect {
-                await handleConnectKey(connectKey, code: recoveryCode)
-            } else {
-                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .invalidCode, description: "")
-                return
-            }
-        }
+        syncCodeEntered(recoveryCode)
     }
     
     private func handleRecoveryKey(_ recoveryKey: SyncCode.RecoveryKey) async {
@@ -693,7 +661,15 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                 PixelKit.fire(GeneralPixel.syncSignupConnect, withAdditionalParameters: additionalParameters)
                 await presentDialog(for: .saveRecoveryCode(code))
             }
+        } catch {
+            managementDialogModel.syncErrorMessage = SyncErrorMessage(
+                type: .unableToSyncToOtherDevice,
+                description: error.localizedDescription
+            )
+            PixelKit.fire(DebugEvent(GeneralPixel.syncSignupError(error: error)))
+        }
 
+        do {
             try await syncService.transmitRecoveryKey(connectKey)
             self.$devices
                 .removeDuplicates()
@@ -715,29 +691,23 @@ extension SyncPreferences: ManagementDialogModelDelegate {
         }
     }
     
-    private func handleExchangeKey(_ exchangeKey: SyncCode.ExchangeKey) async throws {
-        // Step B
-        guard let exchangeInfo = try await self.syncService.transmitGeneratedExchangeInfo(exchangeKey, deviceName: deviceInfo().name) else {
-            print("⚠️⚠️ NIL KEYID")
-            return
-        }
-        // Step E
-        guard let recoveryKey = try await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
-            print("⚠️⚠️ NIL KEY")
-            return
-        }
+    private func handleExchangeKey(_ exchangeKey: SyncCode.ExchangeKey) async {
         do {
-            try await loginAndShowPresentedDialog(recoveryKey, isRecovery: false)
-        } catch {
-            if case SyncError.accountAlreadyExists = error,
-                featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
-                handleAccountAlreadyExists(recoveryKey)
-            } else if case SyncError.accountAlreadyExists = error {
-                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToMergeTwoAccounts, description: "")
-                PixelKit.fire(DebugEvent(GeneralPixel.syncLoginExistingAccountError(error: error)))
-            } else {
-                managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unableToSyncToOtherDevice)
+            // Step B
+            let exchangeInfo = try await self.syncService.transmitGeneratedExchangeInfo(exchangeKey, deviceName: deviceInfo().name)
+            
+            // Step E
+            guard let recoveryKey = try await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
+                // Polling likely cancelled.
+                return
             }
+            await handleRecoveryKey(recoveryKey)
+        } catch {
+            managementDialogModel.syncErrorMessage = SyncErrorMessage(
+                type: .unableToSyncToOtherDevice,
+                description: error.localizedDescription
+            )
+            PixelKit.fire(DebugEvent(GeneralPixel.syncLoginError(error: error)))
         }
     }
 
@@ -850,11 +820,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     @MainActor
     func copyCode() {
         var code: String?
-//        if isSyncEnabled {
-//            code = recoveryCode // TODO: Figure out why and what to do here...
-//        } else {
-            code = codeToDisplay
-//        }
+        code = codeToDisplay
         guard let code else { return }
         let pasteboard = NSPasteboard.general
         pasteboard.declareTypes([.string], owner: nil)
@@ -882,7 +848,7 @@ extension SyncPreferences: ManagementDialogModelDelegate {
     
     func exchangeCodePasted(_ code: String) {
         print("🦄 B: Exchange code pasted: \(code)")
-        sendPublicKey(exchangeCode: code)
+        syncCodeEntered(code)
     }
 
     private func handleAccountAlreadyExists(_ recoveryKey: SyncCode.RecoveryKey) {
