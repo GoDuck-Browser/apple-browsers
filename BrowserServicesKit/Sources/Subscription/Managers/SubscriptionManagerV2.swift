@@ -141,8 +141,8 @@ public protocol SubscriptionManagerV2: SubscriptionTokenProvider, SubscriptionAu
     /// Used only from the Mac Packet Tunnel Provider when a token is received during configuration
     func adopt(tokenContainer: TokenContainer)
 
-    /// Remove the stored token container
-    func removeTokenContainer()
+    /// Remove the stored token container and the legacy token
+    func removeLocalAccount()
 }
 
 /// Single entry point for everything related to Subscription. This manager is disposable, every time something related to the environment changes this need to be recreated.
@@ -249,9 +249,14 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     }
 
     public func loadInitialData() async {
+        Logger.subscription.log("Loading initial data...")
+
+        await migrateAuthV1toAuthV2IfNeeded()
+
         // Fetching fresh subscription
         do {
-            let subscription = try await getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
+            _ = try await currentSubscriptionFeatures(forceRefresh: true)
+            let subscription = try await getSubscription(cachePolicy: .returnCacheDataDontLoad)
             Logger.subscription.log("Subscription is \(subscription.isActive ? "active" : "not active", privacy: .public)")
             if subscription.isActive {
                 pixelHandler(.subscriptionIsActive)
@@ -369,8 +374,6 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
             let currentCachedTokenContainer = oAuthClient.currentTokenContainer
             let currentCachedEntitlements = currentCachedTokenContainer?.decodedAccessToken.subscriptionEntitlements
 
-            await migrateAuthV1toAuthV2IfNeeded()
-
             let resultTokenContainer = try await oAuthClient.getTokens(policy: policy)
             let newEntitlements = resultTokenContainer.decodedAccessToken.subscriptionEntitlements
 
@@ -426,12 +429,13 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
         oAuthClient.adopt(tokenContainer: tokenContainer)
     }
 
-    public func removeTokenContainer() {
+    public func removeLocalAccount() {
+        Logger.subscription.log("Removing local account")
         oAuthClient.removeLocalAccount()
     }
 
     public func signOut(notifyUI: Bool) async {
-        Logger.subscription.log("SignOut: Removing all traces of the subscription and auth tokens")
+        Logger.subscription.log("SignOut: Removing all traces of the subscription and account")
         try? await oAuthClient.logout()
         clearSubscriptionCache()
         if notifyUI {
@@ -502,7 +506,7 @@ extension DefaultSubscriptionManagerV2: SubscriptionTokenProvider {
     }
 
     public func removeAccessToken() {
-        removeTokenContainer()
+        removeLocalAccount()
     }
 }
 

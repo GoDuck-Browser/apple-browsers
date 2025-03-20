@@ -36,7 +36,8 @@ extension DefaultSubscriptionManager {
         let entitlementsCache = UserDefaultsCache<[Entitlement]>(userDefaults: subscriptionUserDefaults,
                                                                  key: UserDefaultsCacheKey.subscriptionEntitlements,
                                                                  settings: UserDefaultsCacheSettings(defaultExpirationInterval: .minutes(20)))
-        let accessTokenStorage = SubscriptionTokenKeychainStorage(keychainType: .dataProtection(.named(subscriptionAppGroup)))
+        let keychainType = KeychainType.dataProtection(.named(subscriptionAppGroup))
+        let accessTokenStorage = SubscriptionTokenKeychainStorage(keychainType: keychainType)
         let subscriptionEndpointService = DefaultSubscriptionEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
         let authEndpointService = DefaultAuthEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
         let subscriptionFeatureMappingCache = DefaultSubscriptionFeatureMappingCache(subscriptionEndpointService: subscriptionEndpointService,
@@ -87,10 +88,16 @@ extension DefaultSubscriptionManager {
         }
 
         accountManager.delegate = self
+
+        // Auth V2 cleanup in case of rollback
+        let tokenStorage = SubscriptionTokenKeychainStorageV2(keychainType: keychainType) { keychainType, error in
+            Logger.subscription.error("Failed to remove AuthV2 token container : \(error.localizedDescription, privacy: .public)")
+        }
+        tokenStorage.tokenContainer = nil
     }
 }
 
-extension DefaultSubscriptionManager: AccountManagerKeychainAccessDelegate {
+extension DefaultSubscriptionManager: @retroactive AccountManagerKeychainAccessDelegate {
 
     public func accountManagerKeychainAccessFailed(accessType: AccountKeychainAccessType, error: any Error) {
         PixelKit.fire(PrivacyProErrorPixel.privacyProKeychainAccessError(accessType: accessType, accessError: error),

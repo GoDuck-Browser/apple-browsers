@@ -869,6 +869,7 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
                     subscriptionStatus = subscription.status
                 }
             } catch {
+                Logger.subscription.error("Error getting subscription: \(error, privacy: .public)")
                 Task { @MainActor in
                     subscriptionPlatform = .unknown
                     subscriptionStatus = .unknown

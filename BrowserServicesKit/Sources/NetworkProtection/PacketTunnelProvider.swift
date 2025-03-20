@@ -734,7 +734,9 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
                 // expired.  In either case it should be enough to record the manual failures
                 // for these prerequisited to avoid flooding our metrics.
                 providerEvents.fire(.tunnelStartOnDemandWithoutAccessToken)
+                Logger.networkProtection.log("Going to sleep...")
                 try? await Task.sleep(interval: .seconds(15))
+                Logger.networkProtection.log("Waking up...")
             } else {
                 // If the VPN was started manually without the basic prerequisites we always
                 // want to know as this should not be possible.
@@ -762,7 +764,9 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
                 // We add a delay when the VPN is started by
                 // on-demand and there's an error, to avoid frenetic ON/OFF
                 // cycling.
+                Logger.networkProtection.log("Going to sleep...")
                 try? await Task.sleep(interval: .seconds(15))
+                Logger.networkProtection.log("Waking up...")
             }
 
             let errorDescription = (error as? LocalizedError)?.localizedDescription ?? String(describing: error)

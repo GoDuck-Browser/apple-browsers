@@ -59,7 +59,7 @@ public class DefaultAPIService: APIService {
 #if DEBUG
         if let bodyString = String(data: data, encoding: .utf8),
            !bodyString.isEmpty {
-            Logger.networking.debug("Request body: \(bodyString, privacy: .public)")
+            Logger.networking.debug("Response body: \(bodyString, privacy: .public)")
         }
 #endif
 

@@ -114,7 +114,7 @@ public final class SubscriptionManagerMockV2: SubscriptionManagerV2 {
         resultTokenContainer = nil
     }
 
-    public func removeTokenContainer() {
+    public func removeLocalAccount() {
         resultTokenContainer = nil
     }
 
