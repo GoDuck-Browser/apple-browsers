@@ -73,7 +73,7 @@ public struct SiteBreakageExperimentMetrics {
     }
 
     public static func fireCSSExperimentMetric( metricType: TDSExperimentMetricType) {
-        for experiment in CSSExperimentsFeatureFlags.allCases {
+        for experiment in ContentScopeExperimentsFeatureFlags.allCases {
             for day in 0...5 {
                 ExperimentConfig.firePixelExperiment(experiment.subfeature.rawValue,
                                                      metricType.rawValue,

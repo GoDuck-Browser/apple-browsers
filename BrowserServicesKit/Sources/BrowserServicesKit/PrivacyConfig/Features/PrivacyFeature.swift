@@ -72,7 +72,7 @@ public enum PrivacyFeature: String {
     case experimentalBrowserTheming
     case setAsDefaultAndAddToDock
     case onboarding
-    case cssExperiments
+    case contentScopeExperiments
 }
 
 /// An abstraction to be implemented by any "subfeature" of a given `PrivacyConfiguration` feature.
@@ -119,9 +119,9 @@ public enum DBPSubfeature: String, Equatable, PrivacySubfeature {
     case freemium
 }
 
-public enum CSSExperimentsSubfeatures:  String, Equatable, PrivacySubfeature {
+public enum ContentScopeExperimentsSubfeatures:  String, Equatable, PrivacySubfeature {
     public var parent: PrivacyFeature {
-        .cssExperiments
+        .contentScopeExperiments
     }
 
     case fingerprintingCanvasExperiment
