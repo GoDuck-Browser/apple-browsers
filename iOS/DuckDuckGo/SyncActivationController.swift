@@ -69,15 +69,11 @@ final class SyncActivationController {
         self.delegate = delegate
     }
     
-    func startExchangeMode() -> String? {
-        do {
-            return try startExchangePolling()
-        } catch {
-            Task {
-                await delegate?.controllerDidReceiveError(SyncErrorMessage.unableToSyncToServer, underlyingError: error, relatedPixelEvent: .syncLoginError)
-            }
-            return nil
-        }
+    func startExchangeMode() throws -> String {
+        let exchanger = try syncService.remoteExchange()
+        self.exchanger = exchanger
+        startExchangePolling()
+        return exchanger.code
     }
     
     func stopExchangeMode() {
@@ -85,18 +81,11 @@ final class SyncActivationController {
         exchanger = nil
     }
     
-    func startConnectMode() -> String? {
-        do {
-            let connector = try syncService.remoteConnect()
-            self.connector = connector
-            self.startConnectPolling()
-            return connector.code
-        } catch {
-            Task {
-                await delegate?.controllerDidReceiveError(SyncErrorMessage.unableToSyncToServer, underlyingError: error, relatedPixelEvent: .syncLoginError)
-            }
-            return nil
-        }
+    func startConnectMode() throws -> String {
+        let connector = try syncService.remoteConnect()
+        self.connector = connector
+        self.startConnectPolling()
+        return connector.code
     }
     
     func stopConnectMode() {
@@ -132,27 +121,25 @@ final class SyncActivationController {
         await delegate?.controllerDidCompleteLogin(registeredDevices: registeredDevices)
     }
     
-    private func startExchangePolling() throws -> String {
-        let exchanger = try syncService.remoteExchange()
-        self.exchanger = exchanger
+    private func startExchangePolling() {
         Task { @MainActor in
             do {
                 // Step C
-                if let exchangeMessage = try await exchanger.pollForPublicKey() {
+                if let exchangeMessage = try await exchanger?.pollForPublicKey() {
                     await delegate?.controllerWillBeginTransmittingRecoveryKey()
+                    // Step D
                     try await syncService.transmitExchangeRecoveryKey(for: exchangeMessage)
                     // TODO: Still has the preparingSync view showing
                     delegate?.controllerDidFinishTransmittingRecoveryKey()
                 } else {
-                    // Polling likelly cancelled
+                    // Polling likely cancelled
                     return
                 }
             } catch {
                 delegate?.controllerDidReceiveError(SyncErrorMessage.unableToSyncWithDevice, underlyingError: error, relatedPixelEvent: .syncLoginError)
             }
-            exchanger.stopPolling()
+            exchanger?.stopPolling()
         }
-        return exchanger.code
     }
     
     private func startConnectPolling() {

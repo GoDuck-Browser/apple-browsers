@@ -308,29 +308,30 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
     }
 
     private func collectCode(showConnectMode: Bool) {
-        guard let code = isSyncEnabled ? activationController.startExchangeMode() : activationController.startConnectMode() else {
-            // TODO: Errors handled in start functions above, but could be better here
-            return
-        }
-        let model = ScanOrPasteCodeViewModel(code: code)
-        model.delegate = self
-
-        var controller: UIHostingController<AnyView>
-        if showConnectMode {
-            controller = UIHostingController(rootView: AnyView(ScanOrSeeCode(model: model)))
-        } else {
-            controller = UIHostingController(rootView: AnyView(ScanOrEnterCodeToRecoverSyncedDataView(model: model)))
-        }
-
-        let navController = UIDevice.current.userInterfaceIdiom == .phone
-        ? PortraitNavigationController(rootViewController: controller)
-        : UINavigationController(rootViewController: controller)
-
-        navController.overrideUserInterfaceStyle = .dark
-        navController.setNeedsStatusBarAppearanceUpdate()
-        navController.modalPresentationStyle = .fullScreen
-        navigationController?.present(navController, animated: true) {
-            self.checkCameraPermission(model: model)
+        do {
+            let code = isSyncEnabled ? try activationController.startExchangeMode() : try activationController.startConnectMode()
+            let model = ScanOrPasteCodeViewModel(code: code)
+            model.delegate = self
+            
+            var controller: UIHostingController<AnyView>
+            if showConnectMode {
+                controller = UIHostingController(rootView: AnyView(ScanOrSeeCode(model: model)))
+            } else {
+                controller = UIHostingController(rootView: AnyView(ScanOrEnterCodeToRecoverSyncedDataView(model: model)))
+            }
+            
+            let navController = UIDevice.current.userInterfaceIdiom == .phone
+            ? PortraitNavigationController(rootViewController: controller)
+            : UINavigationController(rootViewController: controller)
+            
+            navController.overrideUserInterfaceStyle = .dark
+            navController.setNeedsStatusBarAppearanceUpdate()
+            navController.modalPresentationStyle = .fullScreen
+            navigationController?.present(navController, animated: true) {
+                self.checkCameraPermission(model: model)
+            }
+        } catch {
+            handleError(SyncErrorMessage.unableToSyncToServer, error: error, event: .syncLoginError)
         }
     }
 

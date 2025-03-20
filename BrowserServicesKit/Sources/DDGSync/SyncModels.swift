@@ -104,7 +104,7 @@ public struct SyncAccount: Codable, Sendable {
     }
 }
 
-public struct RegisteredDevice: Codable, Sendable {
+public struct RegisteredDevice: Codable, Sendable, Equatable {
 
     public let id: String
     public let name: String

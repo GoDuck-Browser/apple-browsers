@@ -23,6 +23,21 @@ import Combine
 @testable import DDGSync
 
 final class MockDDGSyncing: DDGSyncing {
+    func remoteExchange() throws -> any RemoteKeyExchanging {
+        MockRemoteKeyExchanging()
+    }
+    
+    func remoteExchangeAgain(exchangeInfo: ExchangeInfo) throws -> any RemoteExchangeRecovering {
+        MockRemoteExchangeRecovering()
+    }
+    
+    func transmitGeneratedExchangeInfo(_ exchangeCode: SyncCode.ExchangeKey, deviceName: String) async throws -> ExchangeInfo {
+        ExchangeInfo(keyId: "", publicKey: Data(), secretKey: Data())
+    }
+    
+    func transmitExchangeRecoveryKey(for exchangeMessage: ExchangeMessage) async throws {
+    }
+    
 
     var registeredDevices = [
         RegisteredDevice(id: "1", name: "Device 1", type: "desktop"),
@@ -81,7 +96,7 @@ final class MockDDGSyncing: DDGSyncing {
     }
 
     func remoteConnect() throws -> RemoteConnecting {
-        return MockRemoteConnecting()
+        return MockRemoteConnecting(code: "")
     }
 
     func transmitRecoveryKey(_ connectCode: SyncCode.ConnectCode) async throws {
@@ -131,13 +146,25 @@ class CapturingScheduler: Scheduling {
     }
 }
 
-struct MockRemoteConnecting: RemoteConnecting {
-    var code: String = ""
-
-    func pollForRecoveryKey() async throws -> SyncCode.RecoveryKey? {
-        return nil
+final class MockRemoteConnecting: RemoteConnecting {
+    var code: String
+    var pollForRecoveryKeyCalled = 0
+    var pollForRecoveryKeyResult: SyncCode.RecoveryKey?
+    var pollForRecoveryKeyError: Error?
+    var stopPollingCalled = 0
+    
+    init(code: String = "", pollResult: SyncCode.RecoveryKey? = nil) {
+        self.code = code
+        self.pollForRecoveryKeyResult = pollResult
     }
-
+    
+    func pollForRecoveryKey() async throws -> SyncCode.RecoveryKey? {
+        pollForRecoveryKeyCalled += 1
+        if let error = pollForRecoveryKeyError { throw error }
+        return pollForRecoveryKeyResult
+    }
+    
     func stopPolling() {
+        stopPollingCalled += 1
     }
 }

@@ -1294,6 +1294,7 @@
 		EEDFE2DA2AC6ED4F00F0E19C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = EEDFE2DC2AC6ED4F00F0E19C /* Localizable.strings */; };
 		EEEB80A32A421CE600386378 /* NetworkProtectionPacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEEB80A22A421CE600386378 /* NetworkProtectionPacketTunnelProvider.swift */; };
 		EEF0F8CC2ABC832300630031 /* NetworkProtectionDebugFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF0F8CB2ABC832200630031 /* NetworkProtectionDebugFeatures.swift */; };
+		EEFC58A02D8B3C1E0031CDB3 /* SyncActivationControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEFC589F2D8B3C160031CDB3 /* SyncActivationControllerTests.swift */; };
 		EEFC6A602AC0F2F80065027D /* UserText.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEFC6A5F2AC0F2F80065027D /* UserText.swift */; };
 		EEFE9C732A603CE9005B0A26 /* NetworkProtectionStatusViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEFE9C722A603CE9005B0A26 /* NetworkProtectionStatusViewModelTests.swift */; };
 		F103073B1E7C91330059FEC7 /* BookmarksDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = F103073A1E7C91330059FEC7 /* BookmarksDataSource.swift */; };
@@ -3389,6 +3390,7 @@
 		EEDFE2F42AC6EDA700F0E19C /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		EEEB80A22A421CE600386378 /* NetworkProtectionPacketTunnelProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkProtectionPacketTunnelProvider.swift; sourceTree = "<group>"; };
 		EEF0F8CB2ABC832200630031 /* NetworkProtectionDebugFeatures.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NetworkProtectionDebugFeatures.swift; sourceTree = "<group>"; };
+		EEFC589F2D8B3C160031CDB3 /* SyncActivationControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncActivationControllerTests.swift; sourceTree = "<group>"; };
 		EEFC6A5F2AC0F2F80065027D /* UserText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserText.swift; sourceTree = "<group>"; };
 		EEFE9C722A603CE9005B0A26 /* NetworkProtectionStatusViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkProtectionStatusViewModelTests.swift; sourceTree = "<group>"; };
 		F103073A1E7C91330059FEC7 /* BookmarksDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarksDataSource.swift; sourceTree = "<group>"; };
@@ -4417,6 +4419,7 @@
 		569437222BDD402600C0881B /* Sync */ = {
 			isa = PBXGroup;
 			children = (
+				EEFC589F2D8B3C160031CDB3 /* SyncActivationControllerTests.swift */,
 				569437252BDD465700C0881B /* Mock */,
 				569437232BDD405400C0881B /* SyncBookmarksAdapterTests.swift */,
 				569437282BDD487600C0881B /* SyncCredentialsAdapterTests.swift */,
@@ -9398,6 +9401,7 @@
 				6F03CB052C32EFCC004179A8 /* MockPixelFiring.swift in Sources */,
 				987130C4294AAB9F00AB05E0 /* FavoriteListViewModelTests.swift in Sources */,
 				CB3B4D542D648C44006DAD63 /* AuthenticationServiceTests.swift in Sources */,
+				EEFC58A02D8B3C1E0031CDB3 /* SyncActivationControllerTests.swift in Sources */,
 				8565A34D1FC8DFE400239327 /* LaunchTabNotificationTests.swift in Sources */,
 				C162A1B42D786D0E00C34BAB /* OnboardingPrivacyProPromoExperimentTests.swift in Sources */,
 				982995A22CE64DC1004126D2 /* WebViewWarmupHelper.swift in Sources */,
