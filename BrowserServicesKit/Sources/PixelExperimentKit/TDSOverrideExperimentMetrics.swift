@@ -30,7 +30,7 @@ public enum TDSExperimentMetricType: String {
     case refresh3X = "3XRefresh"
 }
 
-public struct TDSOverrideExperimentMetrics {
+public struct SiteBreakageExperimentMetrics {
 
     public typealias FirePixelExperiment = (SubfeatureID, String, ConversionWindow, String) -> Void
     public typealias FireDebugExperiment = (_ parameters: [String: String]) -> Void
@@ -41,7 +41,7 @@ public struct TDSOverrideExperimentMetrics {
         }
     }
 
-    static func configureTDSOverrideExperimentMetrics(firePixelExperiment: @escaping FirePixelExperiment) {
+    static func configureSiteBreakageExperimentMetrics(firePixelExperiment: @escaping FirePixelExperiment) {
         ExperimentConfig.firePixelExperiment = firePixelExperiment
     }
 
@@ -67,6 +67,18 @@ public struct TDSOverrideExperimentMetrics {
                 fireDebugBreakageExperiment(experimentType: experiment,
                                             etag: etag,
                                             fire: fireDebugExperiment
+                )
+            }
+        }
+    }
+
+    public static func fireCSSExperimentMetric( metricType: TDSExperimentMetricType) {
+        for experiment in CSSExperimentsFeatureFlags.allCases {
+            for day in 0...5 {
+                ExperimentConfig.firePixelExperiment(experiment.subfeature.rawValue,
+                                                     metricType.rawValue,
+                                                     0...day,
+                                                     "1"
                 )
             }
         }

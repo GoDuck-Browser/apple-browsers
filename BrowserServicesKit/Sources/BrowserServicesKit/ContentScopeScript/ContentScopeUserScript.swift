@@ -240,44 +240,8 @@ public struct CSSPrivacyConfigurationJsonGenerator {
 
         let newFeatures = self.changeFingerprintingCanvasConfigStateBasedOnCohort(config: config.features)
         let newConfig = PrivacyConfigurationData(features: newFeatures, unprotectedTemporary: config.unprotectedTemporary, trackerAllowlist: config.trackerAllowlist, version: config.version)
-        print(newConfig.toJSONDictionary())
-        if let sadds = try? newConfig.toJSONData() {
-            print(String(data: privacyConfigurationManager.currentConfig, encoding: .utf8))
-            print(String(data: sadds, encoding: .utf8))
-
-        if let configString = String(data: privacyConfigurationManager.currentConfig, encoding: .utf8),
-           let saddsString = String(data: sadds, encoding: .utf8) {
-            
-            // Combine the two outputs into one String (with a separator)
-            let combinedString = """
-            privacyConfigurationManager.currentConfig:
-            \(configString)
-            
-            sadds:
-            \(saddsString)
-            """
-            
-            // Get the URL for the Documents directory
-            if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                // Create a file URL with a file name of your choice
-                let fileURL = documentsDirectory.appendingPathComponent("output.txt")
-                
-                do {
-                    // Write the combined string to the file
-                    try combinedString.write(to: fileURL, atomically: true, encoding: String.Encoding.utf8)
-                    print("File saved successfully at \(fileURL)")
-                } catch {
-                    print("Error saving file: \(error)")
-                }
-            }
-        }
-        }
-
-
         return try? newConfig.toJSONData()
     }
-
-    
 
     private func changeFingerprintingCanvasConfigStateBasedOnCohort(config: [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature]) -> [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature] {
         var newConfig = config
@@ -306,25 +270,31 @@ public struct CSSPrivacyConfigurationJsonGenerator {
 
 }
 
-
-enum CSSExperimentsFeatureFlags: String, CaseIterable {
+public enum CSSExperimentsFeatureFlags: String, CaseIterable {
     case fingerprintingCanvas
+
+    public var subfeature: any PrivacySubfeature {
+        switch self {
+        case .fingerprintingCanvas:
+            CSSExperimentsSubfeatures.fingerprintingCanvasExperiment
+        }
+    }
 }
 
 extension CSSExperimentsFeatureFlags: FeatureFlagDescribing {
-    var supportsLocalOverriding: Bool {
+    public var supportsLocalOverriding: Bool {
         return true
     }
 
-    var source: FeatureFlagSource {
+    public var source: FeatureFlagSource {
         return .remoteReleasable(.subfeature(CSSExperimentsSubfeatures.fingerprintingCanvasExperiment))
     }
 
-    var cohortType: (any FeatureFlagCohortDescribing.Type)? {
+    public var cohortType: (any FeatureFlagCohortDescribing.Type)? {
         return CSSExperimentsCohort.self
     }
 
-    enum CSSExperimentsCohort: String, FeatureFlagCohortDescribing {
+    public enum CSSExperimentsCohort: String, FeatureFlagCohortDescribing {
         /// Control cohort with no changes applied.
         case control
         /// Treatment cohort where the experiment modifications are applied.

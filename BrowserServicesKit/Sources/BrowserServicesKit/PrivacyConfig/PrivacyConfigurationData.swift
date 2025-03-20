@@ -40,9 +40,14 @@ public struct PrivacyConfigurationData {
         public let name: String
         public let weight: Int
 
+        enum CodingKeys: String {
+            case name
+            case weight
+        }
+
         public init?(json: [String: Any]) {
-            guard let name = json["name"] as? String,
-                  let weight = json["weight"] as? Int else {
+            guard let name = json[CodingKeys.name.rawValue] as? String,
+                  let weight = json[CodingKeys.weight.rawValue] as? Int else {
                 return nil
             }
 
@@ -356,6 +361,7 @@ public struct PrivacyConfigurationData {
     }
 }
 
+// MARK: Encoding Functions
 extension PrivacyConfigurationData {
     /// Returns a dictionary representation of the configuration.
     public func toJSONDictionary() -> [String: Any] {
@@ -392,6 +398,7 @@ extension PrivacyConfigurationData {
 }
 
 extension PrivacyConfigurationData.ExceptionEntry {
+    /// Encodes ExceptionEntry
     public func toJSONDictionary() -> [String: String] {
         var dict: [String: String] = [CodingKeys.domain.rawValue: domain]
         if let reason = reason {
@@ -402,6 +409,7 @@ extension PrivacyConfigurationData.ExceptionEntry {
 }
 
 extension PrivacyConfigurationData.PrivacyFeature {
+    /// Encodes PrivacyFeature
     public func toJSONDictionary() -> [String: Any]? {
         var dict: [String: Any] = [:]
         dict[CodingKeys.state.rawValue] = state
@@ -428,6 +436,7 @@ extension PrivacyConfigurationData.PrivacyFeature {
 }
 
 extension PrivacyConfigurationData.PrivacyFeature.Feature {
+    /// Encodes Sub-features
     public func toJSONDictionary() -> [String: Any]? {
         var dict: [String: Any] = [:]
         dict[CodingKeys.state.rawValue] = state
@@ -451,18 +460,21 @@ extension PrivacyConfigurationData.PrivacyFeature.Feature {
 }
 
 extension PrivacyConfigurationData.PrivacyFeature.Feature.Rollout {
+    /// Encodes Rollout
     public func toJSONDictionary() -> [String: Any] {
         return [CodingKeys.steps.rawValue: steps.map { $0.toJSONDictionary() }]
     }
 }
 
 extension PrivacyConfigurationData.PrivacyFeature.Feature.RolloutStep {
+    // Encodes RolloutStep
     public func toJSONDictionary() -> [String: Any] {
         return [CodingKeys.percent.rawValue: percent]
     }
 }
 
 extension PrivacyConfigurationData.PrivacyFeature.Feature.Target {
+    // Encodes Targets
     public func toJSONDictionary() -> [String: Any] {
         var dict = [String: Any]()
         if let country = localeCountry {
@@ -476,12 +488,14 @@ extension PrivacyConfigurationData.PrivacyFeature.Feature.Target {
 }
 
 extension PrivacyConfigurationData.Cohort {
+    // Encodes Cohorts
     public func toJSONDictionary() -> [String: Any] {
-        return ["name": name, "weight": weight]
+        return [CodingKeys.name.rawValue: name, CodingKeys.weight.rawValue: weight]
     }
 }
 
 extension PrivacyConfigurationData.TrackerAllowlist {
+    // Encodes TrackerAllowlist
     func toTrackerAllowListJSONDictionary() -> [String: Any]? {
         var trackerDict = [String: Any]()
         var allowlistedTrackers = [String: Any]()
