@@ -702,15 +702,6 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
             // Auth V2 cleanup in case of rollback
             Logger.subscription.debug("Cleaning up Auth V2 token")
             tokenStorageV2.tokenContainer = nil
-        } else {
-//            Logger.subscription.log("Loading subscription and entitlements...")
-//            do {
-//                _ = try await subscriptionManagerV2.currentSubscriptionFeatures(forceRefresh: false)
-//            } catch SubscriptionEndpointServiceError.noData {
-//                Logger.subscription.log("No Subscription available")
-//            } catch {
-//                Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
-//            }
         }
     }
 
