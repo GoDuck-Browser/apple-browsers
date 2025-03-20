@@ -89,6 +89,9 @@ struct OnboardingPrivacyProPromoExperiment: OnboardingPrivacyProPromoExperimenti
     /// Returns the experiment cohort if the feature is enabled, nil otherwise.
     func getCohortIfEnabled() -> PrivacyProOnboardingCTAMarch25Cohort? {
 
+        // TEMP SHIP REVIEW CHANGE
+        return .treatment
+
         // Exclude returning users from experiment enrollment
         guard variantManager.isNewUser else { return nil }
 
