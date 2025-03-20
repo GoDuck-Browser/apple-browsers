@@ -423,12 +423,12 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
 
         // Align Subscription environment to the VPN environment
         var subscriptionEnvironment = SubscriptionEnvironment.default
-//        switch settings.selectedEnvironment { // Settings is not populated yet
-//        case .production:
-//            subscriptionEnvironment.serviceEnvironment = .production
-//        case .staging:
-//            subscriptionEnvironment.serviceEnvironment = .staging
-//        }
+        switch settings.selectedEnvironment {
+        case .production:
+            subscriptionEnvironment.serviceEnvironment = .production
+        case .staging:
+            subscriptionEnvironment.serviceEnvironment = .staging
+        }
         // The SysExt doesn't care about the purchase platform because the only operations executed here are about the Auth token. No purchase or
         // platforms-related operations are performed.
         subscriptionEnvironment.purchasePlatform = .stripe
@@ -460,7 +460,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                                                    authEndpointService: authEndpointService)
         self.accountManager = accountManager
         self.tokenStoreV1 = tokenStore
-        
+
         // MARK: - V2
         let configuration = URLSessionConfiguration.default
         configuration.httpCookieStorage = nil
@@ -471,33 +471,9 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         let tokenStoreV2 = NetworkProtectionKeychainTokenStoreV2(keychainType: Bundle.keychainType,
                                                                  serviceName: Self.tokenContainerServiceName,
                                                                  errorEvents: debugEvents)
-//        let legacyTokenStore = NetworkProtectionKeychainTokenStore(keychainType: Bundle.keychainType,
-//                                                                   serviceName: Self.tokenServiceName,
-//                                                                   errorEvents: debugEvents,
-//                                                                   useAccessTokenProvider: false,
-//                                                                   accessTokenProvider: { nil })
         let authClient = DefaultOAuthClient(tokensStorage: tokenStoreV2,
                                             legacyTokenStorage: nil,
                                             authService: authService)
-//        apiService.authorizationRefresherCallback = { request in
-//
-//            guard request.url?.absoluteString.contains("api/auth/v2") == false else {
-//                Logger.networkProtection.log("Skipping refresh token for Auth V2 API calls")
-//                throw OAuthClientError.internalError("Skipping refresh token for Auth V2 API calls")
-//            }
-//
-//            guard let tokenContainer = tokenStoreV2.tokenContainer else {
-//                throw OAuthClientError.internalError("Missing refresh token")
-//            }
-//            if tokenContainer.decodedAccessToken.isExpired() {
-//                Logger.networkProtection.log("Access token expired, attempting to refresh...")
-//                let tokens = try await authClient.getTokens(policy: .localForceRefresh)
-//                return VPNAuthTokenBuilder.getVPNAuthToken(from: tokens.accessToken)
-//            } else {
-//                Logger.networkProtection.error("Trying to refresh valid token, using the old one")
-//                return VPNAuthTokenBuilder.getVPNAuthToken(from: tokenContainer.accessToken)
-//            }
-//        }
 
         let subscriptionEndpointServiceV2 = DefaultSubscriptionEndpointServiceV2(apiService: apiService,
                                                                                baseURL: subscriptionEnvironment.serviceEnvironment.url)
@@ -528,18 +504,6 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                 Logger.networkProtection.log("Using Auth V1")
                 return await accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
             } else {
-
-//                if true { // TODO: do it only once
-//                    Logger.subscription.log("Loading subscription and entitlements...")
-//                    do {
-//                        _ = try await subscriptionManager.currentSubscriptionFeatures(forceRefresh: false)
-//                    } catch SubscriptionEndpointServiceError.noData {
-//                        Logger.subscription.log("No Subscription available")
-//                    } catch {
-//                        Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
-//                    }
-//                }
-
                 Logger.networkProtection.log("Using Auth V2")
                 do {
                     let isNetworkProtectionEnabled = try await subscriptionManager.isFeatureAvailableForUser(.networkProtection)

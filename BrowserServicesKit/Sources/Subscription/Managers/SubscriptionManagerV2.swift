@@ -251,8 +251,6 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     public func loadInitialData() async {
         Logger.subscription.log("Loading initial data...")
 
-        await migrateAuthV1toAuthV2IfNeeded()
-
         // Fetching fresh subscription
         do {
             _ = try await currentSubscriptionFeatures(forceRefresh: true)
@@ -373,6 +371,8 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
         do {
             let currentCachedTokenContainer = oAuthClient.currentTokenContainer
             let currentCachedEntitlements = currentCachedTokenContainer?.decodedAccessToken.subscriptionEntitlements
+
+            await migrateAuthV1toAuthV2IfNeeded()
 
             let resultTokenContainer = try await oAuthClient.getTokens(policy: policy)
             let newEntitlements = resultTokenContainer.decodedAccessToken.subscriptionEntitlements

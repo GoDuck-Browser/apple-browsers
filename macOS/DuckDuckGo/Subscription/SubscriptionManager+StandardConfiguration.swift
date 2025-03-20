@@ -90,7 +90,7 @@ extension DefaultSubscriptionManager {
         accountManager.delegate = self
 
         // Auth V2 cleanup in case of rollback
-        let tokenStorage = SubscriptionTokenKeychainStorageV2(keychainType: keychainType) { keychainType, error in
+        let tokenStorage = SubscriptionTokenKeychainStorageV2(keychainType: keychainType) { _, error in
             Logger.subscription.error("Failed to remove AuthV2 token container : \(error.localizedDescription, privacy: .public)")
         }
         tokenStorage.tokenContainer = nil
