@@ -1128,11 +1128,16 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         case .cancelSnooze:
             cancelSnooze(completionHandler: completionHandler)
         }
+
+        if message != .getDataVolume {
+            Logger.networkProtectionIPC.log("⚪️ Message handled: \(String(describing: message), privacy: .public)")
+        }
     }
 
     // MARK: - App Requests: Handling
 
     private func handleRequest(_ request: ExtensionRequest, completionHandler: ((Data?) -> Void)? = nil) {
+        Logger.networkProtectionIPC.log("⚪️ Handling app request: \(String(describing: request), privacy: .public)")
         switch request {
         case .changeTunnelSetting(let change):
             handleSettingChangeAppRequest(change, completionHandler: completionHandler)

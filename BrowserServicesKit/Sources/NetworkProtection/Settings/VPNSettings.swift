@@ -18,6 +18,7 @@
 
 import Combine
 import Foundation
+import Networking
 
 /// Persists and publishes changes to tunnel settings.
 ///
@@ -41,6 +42,8 @@ public final class VPNSettings {
         case setShowInMenuBar(_ showInMenuBar: Bool)
         case setDisableRekeying(_ disableRekeying: Bool)
         case setIsAuthV2Enabled(_ isAuthV2Enabled: Bool)
+//        case setAccessToken(_ accessToken: String)
+//        case setTokenContainer(_ tokenContainer: TokenContainer)
     }
 
     public enum RegistrationKeyValidity: Codable, Equatable {
@@ -247,6 +250,10 @@ public final class VPNSettings {
             self.disableRekeying = disableRekeying
         case .setIsAuthV2Enabled(let isAuthV2Enabled):
             self.isAuthV2Enabled = isAuthV2Enabled
+//        case .setAccessToken(let accessToken):
+//            break
+//        case .setTokenContainer(let tokenContainer):
+//            break
         }
     }
 

@@ -405,6 +405,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
     let accountManager: DefaultAccountManager
     let subscriptionManagerV2: DefaultSubscriptionManagerV2
     let tokenStorageV2: NetworkProtectionKeychainTokenStoreV2
+    let tokenStoreV1: NetworkProtectionKeychainTokenStore
 
     @MainActor @objc public init() {
         Logger.networkProtection.log("[+] MacPacketTunnelProvider")
@@ -422,12 +423,12 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
 
         // Align Subscription environment to the VPN environment
         var subscriptionEnvironment = SubscriptionEnvironment.default
-        switch settings.selectedEnvironment {
-        case .production:
-            subscriptionEnvironment.serviceEnvironment = .production
-        case .staging:
-            subscriptionEnvironment.serviceEnvironment = .staging
-        }
+//        switch settings.selectedEnvironment { // Settings is not populated yet
+//        case .production:
+//            subscriptionEnvironment.serviceEnvironment = .production
+//        case .staging:
+//            subscriptionEnvironment.serviceEnvironment = .staging
+//        }
         // The SysExt doesn't care about the purchase platform because the only operations executed here are about the Auth token. No purchase or
         // platforms-related operations are performed.
         subscriptionEnvironment.purchasePlatform = .stripe
@@ -458,7 +459,8 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                                                    subscriptionEndpointService: subscriptionEndpointService,
                                                    authEndpointService: authEndpointService)
         self.accountManager = accountManager
-
+        self.tokenStoreV1 = tokenStore
+        
         // MARK: - V2
         let configuration = URLSessionConfiguration.default
         configuration.httpCookieStorage = nil
@@ -468,7 +470,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         let authService = DefaultOAuthService(baseURL: subscriptionEnvironment.authEnvironment.url, apiService: apiService)
         let tokenStoreV2 = NetworkProtectionKeychainTokenStoreV2(keychainType: Bundle.keychainType,
                                                                  serviceName: Self.tokenContainerServiceName,
-                                                             errorEvents: debugEvents)
+                                                                 errorEvents: debugEvents)
 //        let legacyTokenStore = NetworkProtectionKeychainTokenStore(keychainType: Bundle.keychainType,
 //                                                                   serviceName: Self.tokenServiceName,
 //                                                                   errorEvents: debugEvents,
@@ -526,6 +528,18 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                 Logger.networkProtection.log("Using Auth V1")
                 return await accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
             } else {
+
+//                if true { // TODO: do it only once
+//                    Logger.subscription.log("Loading subscription and entitlements...")
+//                    do {
+//                        _ = try await subscriptionManager.currentSubscriptionFeatures(forceRefresh: false)
+//                    } catch SubscriptionEndpointServiceError.noData {
+//                        Logger.subscription.log("No Subscription available")
+//                    } catch {
+//                        Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
+//                    }
+//                }
+
                 Logger.networkProtection.log("Using Auth V2")
                 do {
                     let isNetworkProtectionEnabled = try await subscriptionManager.isFeatureAvailableForUser(.networkProtection)
@@ -543,7 +557,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         let tokenHandlerProvider: () -> any SubscriptionTokenHandling = {
             if !Self.isAuthV2Enabled  {
                 Logger.networkProtection.debug("tokenHandlerProvider: Using Auth V1")
-                return accountManager
+                return tokenStore
             } else {
                 Logger.networkProtection.debug("tokenHandlerProvider: Using Auth V2")
                 return subscriptionManager
@@ -725,14 +739,14 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
             Logger.subscription.debug("Cleaning up Auth V2 token")
             tokenStorageV2.tokenContainer = nil
         } else {
-            Logger.subscription.log("Loading subscription and entitlements...")
-            do {
-                _ = try await subscriptionManagerV2.currentSubscriptionFeatures(forceRefresh: false)
-            } catch SubscriptionEndpointServiceError.noData {
-                Logger.subscription.log("No Subscription available")
-            } catch {
-                Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
-            }
+//            Logger.subscription.log("Loading subscription and entitlements...")
+//            do {
+//                _ = try await subscriptionManagerV2.currentSubscriptionFeatures(forceRefresh: false)
+//            } catch SubscriptionEndpointServiceError.noData {
+//                Logger.subscription.log("No Subscription available")
+//            } catch {
+//                Logger.subscription.error("Failed to load initial subscription data: \(error, privacy: .public)")
+//            }
         }
     }
 
