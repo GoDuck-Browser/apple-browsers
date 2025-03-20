@@ -85,10 +85,10 @@ public struct SubscriptionAccessView: View {
 
     @ViewBuilder
     private var addViaAppleAccountOption: some View {
-        RoundedOptionView(title: "Add via Apple Account",
-                          description: model.restorePurchaseDescription,
+        RoundedOptionView(title: model.appleAccountLabel,
+                          description: model.appleAccountDescription,
                           imageName: "apple-icon",
-                          buttonTitle: model.restorePurchaseButtonTitle,
+                          buttonTitle: model.appleAccountButtonTitle,
                           buttonAction: {
             dismiss {
                 model.handleRestorePurchaseAction()

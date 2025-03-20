@@ -141,26 +141,19 @@ enum UserText {
     static let removeSubscriptionDialogCancel = NSLocalizedString("subscription.dialog.remove.cancel.button", bundle: Bundle.module, value: "Cancel", comment: "Button to cancel removing subscription from device")
     static let removeSubscriptionDialogConfirm = NSLocalizedString("subscription.dialog.remove.confirm", bundle: Bundle.module, value: "Remove Subscription", comment: "Button to confirm removing subscription from device")
 
-    // MARK: - Services for accessing the subscription
-    static let email = NSLocalizedString("subscription.access.channel.email.name", bundle: Bundle.module, value: "Email", comment: "Service name displayed when accessing subscription using email address")
-
     // MARK: - Activate subscription modal
-    static let activateModalTitle = NSLocalizedString("subscription.activate.modal.title", bundle: Bundle.module, value: "Activate your subscription on this device", comment: "Activate subscription modal view title")
-    static func activateModalDescription(platform: SubscriptionEnvironment.PurchasePlatform) -> String {
-        switch platform {
-        case .appStore:
-            NSLocalizedString("subscription.appstore.activate.modal.description", bundle: Bundle.module, value: "Access your Privacy Pro subscription on this device via Apple Account or an email address.", comment: "Activate subscription modal view subtitle description")
-        case .stripe:
-            NSLocalizedString("subscription.activate.modal.description", bundle: Bundle.module, value: "Access your Privacy Pro subscription via an email address.", comment: "Activate subscription modal view subtitle description")
-        }
-    }
+    static let addSubscriptionModalTitle = NSLocalizedString("subscription.add.subscription.modal.title", bundle: Bundle.module, value: "Add your Privacy Pro subscription to this device", comment: "Title of a view for adding subscription to the device")
 
-    static let activateModalEmailDescription = NSLocalizedString("subscription.activate.modal.email.description", bundle: Bundle.module, value: "Use your email to activate your subscription on this device.", comment: "Activate subscription modal description for email address channel")
-    static let restorePurchaseDescription = NSLocalizedString("subscription.activate.modal.restore.purchase.description", bundle: Bundle.module, value: "Your subscription is automatically available in DuckDuckGo on any device signed in to your Apple Account.", comment: "Activate subscription modal description via restore purchase from Apple Account")
+    static let addViaEmailTitle = NSLocalizedString("subscription.add.via.email.title", bundle: Bundle.module, value: "Add via email address", comment: "Title of option for adding subscription using email address")
+    static let addViaEmailDescription = NSLocalizedString("subscription.add.via.email.description", bundle: Bundle.module, value: "Link an email address to your subscription to add Privacy Pro to this device.", comment: "Description of option for adding subscription using email address")
+    static let addViaEmailButtonTitle = NSLocalizedString("subscription.add.via.email.button.title", bundle: Bundle.module, value: "Get Started", comment: "Button title for option for adding subscription using email address")
+
+    static let addViaAppleAccountTitle = NSLocalizedString("subscription.add.via.apple.account.title", bundle: Bundle.module, value: "Add via Apple Account", comment: "Title of option for adding subscription using Apple Account")
+    static let addViaAppleAccountDescription = NSLocalizedString("subscription.add.via.apple.account.description", bundle: Bundle.module, value: "Restore your subscription on Apple devices using your Apple Account.", comment: "Description of option for restoring subscription using Apple Account")
+    static let addViaAppleAccountButtonTitle = NSLocalizedString("subscription.add.via.apple.account.button.title", bundle: Bundle.module, value: "Restore Purchase", comment: "Button title for option for restoring subscription using Apple Account")
 
     // MARK: - Activate/share modal buttons
     static let restorePurchaseButton = NSLocalizedString("subscription.modal.restore.purchase.button", bundle: Bundle.module, value: "Restore Purchase", comment: "Button for restoring past subscription purchase")
-    static let enterEmailButton = NSLocalizedString("subscription.modal.enter.email.button", bundle: Bundle.module, value: "Enter Email", comment: "Button for opening page to enter email address")
 
     // MARK: - Alerts
     static let okButtonTitle = NSLocalizedString("subscription.alert.button.ok", bundle: Bundle.module, value: "OK", comment: "Alert button for confirming it")

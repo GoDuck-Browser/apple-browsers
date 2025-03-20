@@ -107,7 +107,7 @@
     },
     "subscription.access.channel.email.name" : {
       "comment" : "Service name displayed when accessing subscription using email address",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -167,7 +167,7 @@
     },
     "subscription.activate.modal.description" : {
       "comment" : "Activate subscription modal view subtitle description",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -227,7 +227,7 @@
     },
     "subscription.activate.modal.email.description" : {
       "comment" : "Activate subscription modal description for email address channel",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -287,7 +287,7 @@
     },
     "subscription.activate.modal.restore.purchase.description" : {
       "comment" : "Activate subscription modal description via restore purchase from Apple Account",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -347,7 +347,7 @@
     },
     "subscription.activate.modal.title" : {
       "comment" : "Activate subscription modal view title",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -401,6 +401,90 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Активировать подписку на этом устройстве"
+          }
+        }
+      }
+    },
+    "subscription.add.subscription.modal.title" : {
+      "comment" : "Title of a view for adding subscription to the device",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add your Privacy Pro subscription to this device"
+          }
+        }
+      }
+    },
+    "subscription.add.via.apple.account.button.title" : {
+      "comment" : "Button title for option for restoring subscription using Apple Account",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Restore Purchase"
+          }
+        }
+      }
+    },
+    "subscription.add.via.apple.account.description" : {
+      "comment" : "Description of option for restoring subscription using Apple Account",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Restore your subscription on Apple devices using your Apple Account."
+          }
+        }
+      }
+    },
+    "subscription.add.via.apple.account.title" : {
+      "comment" : "Title of option for adding subscription using Apple Account",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add via Apple Account"
+          }
+        }
+      }
+    },
+    "subscription.add.via.email.button.title" : {
+      "comment" : "Button title for option for adding subscription using email address",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Get Started"
+          }
+        }
+      }
+    },
+    "subscription.add.via.email.description" : {
+      "comment" : "Description of option for adding subscription using email address",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Link an email address to your subscription to add Privacy Pro to this device."
+          }
+        }
+      }
+    },
+    "subscription.add.via.email.title" : {
+      "comment" : "Title of option for adding subscription using email address",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add via email address"
           }
         }
       }
@@ -1247,7 +1331,7 @@
     },
     "subscription.appstore.activate.modal.description" : {
       "comment" : "Activate subscription modal view subtitle description",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -1787,7 +1871,7 @@
     },
     "subscription.modal.enter.email.button" : {
       "comment" : "Button for opening page to enter email address",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
