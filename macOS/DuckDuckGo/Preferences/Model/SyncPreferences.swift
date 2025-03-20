@@ -555,8 +555,8 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                 
                 // Step C
                 if let exchangeMessage = try await exchanger.pollForPublicKey() {
-                    presentDialog(for: .prepareToSync)
                     try await syncService.transmitExchangeRecoveryKey(for: exchangeMessage)
+                    waitForDevicesToChangeThenPresentSyncing()
                 } else {
                     // Polling was likeley cancelled elsewhere (e.g. dialog closed)
                     managementDialogModel.syncErrorMessage = SyncErrorMessage(type: .unhandledError(nil))
@@ -567,6 +567,18 @@ extension SyncPreferences: ManagementDialogModelDelegate {
                 PixelKit.fire(DebugEvent(GeneralPixel.syncLoginError(error: error)))
             }
         }
+    }
+    
+    private func waitForDevicesToChangeThenPresentSyncing() {
+        $devices.removeDuplicates()
+            .dropFirst()
+            .prefix(1)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                Task {
+                    await self.presentDialog(for: .nowSyncing)
+                }
+            }.store(in: &cancellables)
     }
 
     func startPollingForRecoveryKey(isRecovery: Bool) {
