@@ -420,10 +420,10 @@ extension SyncSettingsViewController: SyncActivationControllerDelegate {
     
     func controllerDidError(_ error: SyncActivationError, underlyingError: (any Error)?) {
         switch error {
-        case .unableToScanQRCode:
-            handleError(.unableToScanQRCode, error: underlyingError, event: .syncSignupError)
+        case .unableToRecogniseCode:
+            handleError(.unableToRecogniseCode, error: underlyingError, event: .syncSignupError)
         case .failedToFetchPublicKey, .failedToTransmitExchangeRecoveryKey, .failedToFetchConnectRecoveryKey, .failedToLogIn, .failedToTransmitExchangeKey, .failedToFetchExchangeRecoveryKey, .failedToTransmitConnectRecoveryKey:
-            handleError(.unableToScanQRCode, error: underlyingError, event: .syncLoginError)
+            handleError(.unableToRecogniseCode, error: underlyingError, event: .syncLoginError)
         case .failedToCreateAccount:
             handleError(.unableToSyncWithDevice, error: underlyingError, event: .syncSignupError)
         case .foundExistingAccount:

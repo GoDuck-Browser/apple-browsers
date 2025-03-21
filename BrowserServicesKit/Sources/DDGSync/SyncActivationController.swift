@@ -120,7 +120,7 @@ final class SyncActivationController {
         do {
             syncCode = try SyncCode.decodeBase64String(code)
         } catch {
-            await delegate?.controllerDidError(.unableToScanQRCode, underlyingError: error)
+            await delegate?.controllerDidError(.unableToRecogniseCode, underlyingError: error)
             return false
         }
         
@@ -133,7 +133,7 @@ final class SyncActivationController {
         } else if let connectKey = syncCode.connect {
             return await handleConnectKey(connectKey)
         } else {
-            await delegate?.controllerDidError(.unableToScanQRCode, underlyingError: nil)
+            await delegate?.controllerDidError(.unableToRecogniseCode, underlyingError: nil)
             return false
         }
     }
