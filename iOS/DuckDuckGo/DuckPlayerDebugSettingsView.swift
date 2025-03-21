@@ -34,7 +34,7 @@ struct DuckPlayerDebugSettingsView: View {
     var body: some View {
         List {
             Section(header: Text("UI Settings")) {
-                Button() {
+                Button {
                     resetPrimingModalSettings()
                 } label: {
                     Text("Reset Priming Modal State")
