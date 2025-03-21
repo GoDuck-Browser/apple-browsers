@@ -52,7 +52,7 @@ final class DuckPlayerNativeUIPresenter {
         static let primingModalHeight: CGFloat = 360
         static let detentIdentifier: String = "priming"
         static let primingModalPresentedCountThreshold: Int = 3
-        static let primingModalTimeSinceLastPresentedThreshold: Int = 30  // 24h
+        static let primingModalTimeSinceLastPresentedThreshold: Int = 86400  // 24h
     }
 
     /// The container view model for the entry pill
