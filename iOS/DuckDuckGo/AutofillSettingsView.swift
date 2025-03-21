@@ -34,7 +34,7 @@ struct AutofillSettingsView: View {
                 }
                 
                 if viewModel.showCreditCards {
-                    NavigationLink(destination: EmptyView()) {
+                    NavigationLink(destination: viewModel.autofillCreditCardListView) {
                         CountRowView(viewModel: viewModel, autofillType: .creditCards)
                     }
                 }

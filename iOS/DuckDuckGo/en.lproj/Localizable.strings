@@ -295,6 +295,15 @@
 /* No comment provided by engineer. */
 "autoconsent.info.header" = "When DuckDuckGo detects cookie consent pop-ups on sites you visit, we can try to automatically set your cookie preferences to minimize cookies and maximize privacy, then close the pop-ups. Some sites don't provide an option to manage cookie preferences, so we can only hide pop-ups like these.";
 
+/* Subtitle for view displayed when no autofill passwords have been saved */
+"autofill.creditcard.empty-view.subtitle.first.paragraph" = "Payment methods are stored securely on your device.";
+
+/* Title for view displayed when autofill has no payment methods saved */
+"autofill.creditcard.empty-view.title" = "No payment methods saved yet";
+
+/* Credit card row label for credit card expiry date */
+"autofill.creditcard.list.item.expiry" = "Expiry:";
+
 /* Title for screen listing autofill credit cards */
 "autofill.creditcard.list.title" = "Payment Methods";
 

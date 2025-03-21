@@ -1069,6 +1069,8 @@
 		C1935A242C89CC6D001AD72D /* AutofillHeaderViewFactoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1935A232C89CC6D001AD72D /* AutofillHeaderViewFactoryTests.swift */; };
 		C1963863283794A000298D4D /* BookmarksCachingSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1963862283794A000298D4D /* BookmarksCachingSearch.swift */; };
 		C19D90D12CFE3A7F00D17DF3 /* AutofillLoginListSectionType.swift in Sources */ = {isa = PBXBuildFile; fileRef = C19D90D02CFE3A7F00D17DF3 /* AutofillLoginListSectionType.swift */; };
+		C1B3BF472D8D99DA00EE1D43 /* AutofillCreditCardListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B3BF432D8D99DA00EE1D43 /* AutofillCreditCardListView.swift */; };
+		C1B3BF482D8D99DA00EE1D43 /* AutofillCreditCardListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B3BF442D8D99DA00EE1D43 /* AutofillCreditCardListViewModel.swift */; };
 		C1B7B51C28941E980098FD6A /* HomeMessageViewModelBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B7B51B28941E980098FD6A /* HomeMessageViewModelBuilder.swift */; };
 		C1B7B52528941F2A0098FD6A /* RemoteMessagingClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B7B52128941F2A0098FD6A /* RemoteMessagingClient.swift */; };
 		C1B7B52D2894469D0098FD6A /* DefaultVariantManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B7B52C2894469D0098FD6A /* DefaultVariantManager.swift */; };
@@ -3118,6 +3120,8 @@
 		C1A001092D08635100372C87 /* lt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = lt; path = lt.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1A0010A2D08635100372C87 /* lt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = lt; path = lt.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1B0F6412AB08BE9001EAF05 /* MockPrivacyConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPrivacyConfiguration.swift; sourceTree = "<group>"; };
+		C1B3BF432D8D99DA00EE1D43 /* AutofillCreditCardListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutofillCreditCardListView.swift; sourceTree = "<group>"; };
+		C1B3BF442D8D99DA00EE1D43 /* AutofillCreditCardListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutofillCreditCardListViewModel.swift; sourceTree = "<group>"; };
 		C1B783DB2D0863110071C53B /* hu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C1B783DC2D0863110071C53B /* hu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C1B7B51B28941E980098FD6A /* HomeMessageViewModelBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeMessageViewModelBuilder.swift; sourceTree = "<group>"; };
@@ -4027,13 +4031,13 @@
 			path = SharedViews;
 			sourceTree = "<group>";
 		};
-		310C4B4A281B69BC00BA79A9 /* Management */ = {
+		310C4B4A281B69BC00BA79A9 /* PasswordManagement */ = {
 			isa = PBXGroup;
 			children = (
 				31584614281AFB34004ADB8B /* LoginDetails */,
 				31584611281AFAFC004ADB8B /* List */,
 			);
-			name = Management;
+			name = PasswordManagement;
 			sourceTree = "<group>";
 		};
 		310D09192799EF5C00DC0060 /* Downloads */ = {
@@ -6206,6 +6210,23 @@
 			name = AuthConfirmation;
 			sourceTree = "<group>";
 		};
+		C1B3BF452D8D99DA00EE1D43 /* List */ = {
+			isa = PBXGroup;
+			children = (
+				C1B3BF432D8D99DA00EE1D43 /* AutofillCreditCardListView.swift */,
+				C1B3BF442D8D99DA00EE1D43 /* AutofillCreditCardListViewModel.swift */,
+			);
+			path = List;
+			sourceTree = "<group>";
+		};
+		C1B3BF462D8D99DA00EE1D43 /* CreditCardManagement */ = {
+			isa = PBXGroup;
+			children = (
+				C1B3BF452D8D99DA00EE1D43 /* List */,
+			);
+			path = CreditCardManagement;
+			sourceTree = "<group>";
+		};
 		C1B7B51D28941F160098FD6A /* RemoteMessaging */ = {
 			isa = PBXGroup;
 			children = (
@@ -7673,9 +7694,10 @@
 				31C70B5428045E3500FB6AD1 /* SecureVaultReporter.swift */,
 				C1AFFC4B2B8773060060448E /* AuthConfirmation */,
 				F407605328131910006B1E0B /* AutofillLoginUI */,
+				C1B3BF462D8D99DA00EE1D43 /* CreditCardManagement */,
 				C1641EAD2BC2F46C0012607A /* ImportViaSync */,
-				310C4B4A281B69BC00BA79A9 /* Management */,
 				C17B59552A03AAC40055F2D1 /* PasswordGeneration */,
+				310C4B4A281B69BC00BA79A9 /* PasswordManagement */,
 				C15516042D47D2D9001B94E9 /* Resources */,
 				F407605428131923006B1E0B /* SaveLogin */,
 				C181289E2D737D5B00807C09 /* Settings */,
@@ -9001,6 +9023,8 @@
 				31B2F11F287846320040427A /* NoMicPermissionAlert.swift in Sources */,
 				310C4B45281B5A9A00BA79A9 /* AutofillLoginDetailsView.swift in Sources */,
 				56CCBA2E2D5CF07D00EA0EB5 /* NetworkProtectionUIElements.swift in Sources */,
+				C1B3BF472D8D99DA00EE1D43 /* AutofillCreditCardListView.swift in Sources */,
+				C1B3BF482D8D99DA00EE1D43 /* AutofillCreditCardListViewModel.swift in Sources */,
 				6F9FFE2D2C57AE8F00A238BE /* NewTabPageShortcutsSettingsModel.swift in Sources */,
 				CBF2597D2D41734700AC63E4 /* Terminating.swift in Sources */,
 				D62EC3C22C248AF800FC9D04 /* DuckPlayerNavigationHandling.swift in Sources */,

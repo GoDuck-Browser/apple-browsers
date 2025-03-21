@@ -894,6 +894,9 @@ public struct UserText {
 
     // Credit cards
     public static let autofillCreditCardListTitle = NSLocalizedString("autofill.creditcard.list.title", value:"Payment Methods", comment: "Title for screen listing autofill credit cards")
+    public static let autofillCreditCardEmptyViewTitle = NSLocalizedString("autofill.creditcard.empty-view.title", value:"No payment methods saved yet", comment: "Title for view displayed when autofill has no payment methods saved")
+    public static let autofillCreditCardEmptyViewSubtitle = NSLocalizedString("autofill.creditcard.empty-view.subtitle.first.paragraph", value:"Payment methods are stored securely on your device.", comment: "Subtitle for view displayed when no autofill passwords have been saved")
+    public static let autofillCreditCardItemExpiry = NSLocalizedString("autofill.creditcard.list.item.expiry", value:"Expiry:", comment: "Credit card row label for credit card expiry date")
 
     public static let aboutProtectionTagline = NSLocalizedString("settings.about.tagline", value: "Protection. Privacy. Peace of Mind.", comment: "about tagline")
 
