@@ -38,7 +38,32 @@ final class AutofillSettingsViewModel: ObservableObject {
     private let keyValueStore: KeyValueStoringDictionaryRepresentable
     private var secureVault: (any AutofillSecureVault)?
     private let source: AutofillSettingsSource
+    private let featureFlagger: FeatureFlagger
     
+    enum AutofillType {
+        case passwords
+        case creditCards
+        
+        var icon: Image {
+            switch self {
+            case .passwords:
+                return Image(.key24)
+            case .creditCards:
+                return Image(.creditCard24)
+            }
+        }
+        
+        var title: String {
+            switch self {
+            case .passwords:
+                return UserText.autofillLoginListTitle
+            case .creditCards:
+                return UserText.autofillCreditCardListTitle
+            }
+        }
+     
+    }
+
     @Published var passwordsCount: Int?
     @Published var savePasswordsEnabled: Bool {
         didSet {
@@ -54,31 +79,57 @@ final class AutofillSettingsViewModel: ObservableObject {
         }
     }
     @Published var showingResetConfirmation = false
-    
+    @Published var showCreditCards = false
+    @Published var creditCardsCount: Int?
+    @Published var saveCreditCardsEnabled: Bool = false {
+        didSet {
+            appSettings.autofillCreditCardsEnabled = saveCreditCardsEnabled
+            //            keyValueStore.set(false, forKey: UserDefaultsWrapper<Bool>.Key.autofillFirstTimeUser.rawValue)
+            //            NotificationCenter.default.post(name: AppUserDefaults.Notifications.autofillEnabledChange, object: self)
+
+            if saveCreditCardsEnabled {
+                //                Pixel.fire(pixel: .autofillLoginsSettingsEnabled)
+            } else {
+                //                Pixel.fire(pixel: .autofillLoginsSettingsDisabled, withAdditionalParameters: ["source": source.rawValue])
+            }
+        }
+    }
+
     init(appSettings: AppSettings = AppDependencyProvider.shared.appSettings,
          keyValueStore: KeyValueStoringDictionaryRepresentable = UserDefaults.standard,
          autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager = AppDependencyProvider.shared.autofillNeverPromptWebsitesManager,
          secureVault: (any AutofillSecureVault)? = nil,
-         source: AutofillSettingsSource) {
+         source: AutofillSettingsSource,
+         featureFlagger: FeatureFlagger = AppDependencyProvider.shared.featureFlagger) {
         self.autofillNeverPromptWebsitesManager = autofillNeverPromptWebsitesManager
         self.appSettings = appSettings
         self.keyValueStore = keyValueStore
         self.secureVault = secureVault
         self.source = source
-        
+        self.featureFlagger = featureFlagger
+
         savePasswordsEnabled = appSettings.autofillCredentialsEnabled
         updatePasswordsCount()
+
+        showCreditCards = featureFlagger.isFeatureOn(.autofillCreditCards)
+        if showCreditCards {
+            saveCreditCardsEnabled = appSettings.autofillCreditCardsEnabled
+            updateCreditCardsCount()
+        }
     }
-    
-    func updatePasswordsCount() {
+
+    func initSecureVaultIfRequired() {
         if secureVault == nil {
             do {
                 secureVault = try AutofillSecureVaultFactory.makeVault(reporter: SecureVaultReporter())
             } catch {
-                passwordsCount = nil
                 return
             }
         }
+    }
+
+    func updatePasswordsCount() {
+        initSecureVaultIfRequired()
         
         guard let vault = secureVault else {
             passwordsCount = nil
@@ -92,6 +143,21 @@ final class AutofillSettingsViewModel: ObservableObject {
         }
     }
     
+    func updateCreditCardsCount() {
+        initSecureVaultIfRequired()
+
+        guard let vault = secureVault else {
+            passwordsCount = nil
+            return
+        }
+
+        do {
+            creditCardsCount = try vault.creditCardsCount()
+        } catch {
+            creditCardsCount = nil
+        }
+    }
+
     func footerAttributedString() -> AttributedString {
         let markdownString = UserText.autofillLearnMoreLinkTitle
         
