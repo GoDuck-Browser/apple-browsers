@@ -106,7 +106,7 @@ final class AppDependencyProvider: DependencyProvider {
                                                for: FeatureFlag.self)
         configurationManager = ConfigurationManager(store: configurationStore)
 
-        // MARK: - Configure Subscription
+        // Configure Subscription
 
         let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
         let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
@@ -114,10 +114,15 @@ final class AppDependencyProvider: DependencyProvider {
         var accessTokenProvider: () -> String?
         var authenticationStateProvider: (any SubscriptionAuthenticationStateProvider)!
 
+        let tokenStorageV2 = SubscriptionTokenKeychainStorageV2(keychainType: .dataProtection(.named(subscriptionAppGroup))) { keychainType, error in
+            Pixel.fire(.privacyProKeychainAccessError, withAdditionalParameters: ["type": keychainType.rawValue, "error": error.errorDescription])
+        }
+
         let isAUthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
         vpnSettings.isAuthV2Enabled = isAUthV2Enabled
         if !isAUthV2Enabled {
-            // MARK: Subscription V1
+            // V1
+
             Logger.subscription.debug("Configuring Subscription V1")
             vpnSettings.alignTo(subscriptionEnvironment: subscriptionEnvironment)
 
@@ -153,8 +158,14 @@ final class AppDependencyProvider: DependencyProvider {
             tokenHandler = accountManager
             authenticationStateProvider = subscriptionManager
             subscriptionAuthV1toV2Bridge = subscriptionManager
+
+            if tokenStorageV2.tokenContainer != nil {
+                Logger.subscription.debug("Cleaning up Auth V2 token")
+                tokenStorageV2.tokenContainer = nil
+                subscriptionEndpointService.clearSubscription()
+            }
         } else {
-            // MARK: Subscription V2
+            // V2
             Logger.subscription.debug("Configuring Subscription V2")
             vpnSettings.alignTo(subscriptionEnvironment: subscriptionEnvironment)
 
@@ -170,18 +181,14 @@ final class AppDependencyProvider: DependencyProvider {
             let authService = DefaultOAuthService(baseURL: authEnvironment.url, apiService: apiService)
 
             // keychain storage
-            let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
-            let tokenStorage = SubscriptionTokenKeychainStorageV2(keychainType: .dataProtection(.named(subscriptionAppGroup))) { keychainType, error in
-                Pixel.fire(.privacyProKeychainAccessError, withAdditionalParameters: ["type": keychainType.rawValue, "error": error.errorDescription])
-            }
             let legacyAccountStorage = SubscriptionTokenKeychainStorage(keychainType: .dataProtection(.named(subscriptionAppGroup)))
 
-            let authClient = DefaultOAuthClient(tokensStorage: tokenStorage,
+            let authClient = DefaultOAuthClient(tokensStorage: tokenStorageV2,
                                                 legacyTokenStorage: legacyAccountStorage,
                                                 authService: authService)
 
             apiService.authorizationRefresherCallback = { _ in
-                guard let tokenContainer = tokenStorage.tokenContainer else {
+                guard let tokenContainer = tokenStorageV2.tokenContainer else {
                     throw OAuthClientError.internalError("Missing refresh token")
                 }
 
@@ -214,6 +221,7 @@ final class AppDependencyProvider: DependencyProvider {
                                                                    subscriptionEndpointService: subscriptionEndpointService,
                                                                    subscriptionEnvironment: subscriptionEnvironment,
                                                                    pixelHandler: pixelHandler,
+                                                                   legacyAccountStorage: AccountKeychainStorage(),
                                                                    isInternalUserEnabled: {
                 ContentBlocking.shared.privacyConfigurationManager.internalUserDecider.isInternalUser
             })

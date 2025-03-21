@@ -297,7 +297,6 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
 
         guard let legacyTokenStorage else {
             Logger.OAuthClient.fault("Auth migration attempted without a LegacyTokenStorage")
-            assertionFailure("Auth migration attempted without a LegacyTokenStorage")
             return nil
         }
 
@@ -313,8 +312,6 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
 
             // NOTE: We don't remove the old token to allow roll back to Auth V1
 
-            // Store new tokens
-            adopt(tokenContainer: tokenContainer)
             return tokenContainer
         } catch {
             Logger.OAuthClient.error("Failed to migrate legacy token: \(error, privacy: .public)")
@@ -369,6 +366,10 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
         let existingToken = tokenStorage.tokenContainer?.accessToken
         removeLocalAccount()
 
+        // Also removing V1
+        Logger.OAuthClient.log("Removing V1 token")
+        legacyTokenStorage?.token = nil
+
         if let existingToken {
             Logger.OAuthClient.log("Logging out")
             try await authService.logout(accessToken: existingToken)
@@ -378,6 +379,5 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
     public func removeLocalAccount() {
         Logger.OAuthClient.log("Removing local account")
         tokenStorage.tokenContainer = nil
-        legacyTokenStorage?.token = nil
     }
 }

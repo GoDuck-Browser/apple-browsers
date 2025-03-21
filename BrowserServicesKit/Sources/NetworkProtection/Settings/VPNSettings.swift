@@ -18,6 +18,7 @@
 
 import Combine
 import Foundation
+import Networking
 
 /// Persists and publishes changes to tunnel settings.
 ///

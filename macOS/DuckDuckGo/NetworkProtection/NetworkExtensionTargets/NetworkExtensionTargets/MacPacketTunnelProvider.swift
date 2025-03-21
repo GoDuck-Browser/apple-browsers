@@ -29,9 +29,6 @@ import WireGuard
 
 final class MacPacketTunnelProvider: PacketTunnelProvider {
 
-    let accountManager: DefaultAccountManager
-    let subscriptionManagerV2: DefaultSubscriptionManagerV2
-
     static var isAppex: Bool {
 #if NETP_SYSTEM_EXTENSION
         false
@@ -395,7 +392,20 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
 #endif
     }
 
+    static var tokenContainerServiceName: String {
+#if NETP_SYSTEM_EXTENSION
+        "\(Bundle.main.bundleIdentifier!).authTokenContainer"
+#else
+        NetworkProtectionKeychainTokenStoreV2.Defaults.tokenStoreService
+#endif
+    }
+
     // MARK: - Initialization
+
+    let accountManager: DefaultAccountManager
+    let subscriptionManagerV2: DefaultSubscriptionManagerV2
+    let tokenStorageV2: NetworkProtectionKeychainTokenStoreV2
+    let tokenStoreV1: NetworkProtectionKeychainTokenStore
 
     @MainActor @objc public init() {
         Logger.networkProtection.log("[+] MacPacketTunnelProvider")
@@ -407,7 +417,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
 
         APIRequest.Headers.setUserAgent(UserAgent.duckDuckGoUserAgent())
         NetworkProtectionLastVersionRunStore(userDefaults: defaults).lastExtensionVersionRun = AppVersion.shared.versionAndBuildNumber
-        let settings = VPNSettings(defaults: defaults)
+        let settings = VPNSettings(defaults: defaults) // Note, settings here is not yet populated with the startup options
 
         // MARK: - Subscription configuration
 
@@ -429,7 +439,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
         let controllerErrorStore = NetworkProtectionTunnelErrorStore(notificationCenter: notificationCenter)
         let debugEvents = Self.networkProtectionDebugEvents(controllerErrorStore: controllerErrorStore)
 
-        // V1
+        // MARK: - V1
         let tokenStore = NetworkProtectionKeychainTokenStore(keychainType: Bundle.keychainType,
                                                              serviceName: Self.tokenServiceName,
                                                              errorEvents: debugEvents,
@@ -449,44 +459,21 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                                                    subscriptionEndpointService: subscriptionEndpointService,
                                                    authEndpointService: authEndpointService)
         self.accountManager = accountManager
+        self.tokenStoreV1 = tokenStore
 
-        // V2
+        // MARK: - V2
         let configuration = URLSessionConfiguration.default
         configuration.httpCookieStorage = nil
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         let urlSession = URLSession(configuration: configuration, delegate: SessionDelegate(), delegateQueue: nil)
         let apiService = DefaultAPIService(urlSession: urlSession)
         let authService = DefaultOAuthService(baseURL: subscriptionEnvironment.authEnvironment.url, apiService: apiService)
-        let tokenStorage = NetworkProtectionKeychainStore(label: "DuckDuckGo Network Protection Auth Token",
-                                                          serviceName: Self.tokenServiceName,
-                                                          keychainType: Bundle.keychainType)
-        let legacyTokenStore = NetworkProtectionKeychainTokenStore(keychainType: Bundle.keychainType,
-                                                                   serviceName: Self.tokenServiceName,
-                                                                   errorEvents: debugEvents,
-                                                                   useAccessTokenProvider: false,
-                                                                   accessTokenProvider: { nil })
-        let authClient = DefaultOAuthClient(tokensStorage: tokenStorage,
-                                            legacyTokenStorage: legacyTokenStore,
+        let tokenStoreV2 = NetworkProtectionKeychainTokenStoreV2(keychainType: Bundle.keychainType,
+                                                                 serviceName: Self.tokenContainerServiceName,
+                                                                 errorEvents: debugEvents)
+        let authClient = DefaultOAuthClient(tokensStorage: tokenStoreV2,
+                                            legacyTokenStorage: nil,
                                             authService: authService)
-        apiService.authorizationRefresherCallback = { request in
-
-            guard request.url?.absoluteString.contains("api/auth/v2") == false else {
-                Logger.networkProtection.log("Skipping refresh token for Auth V2 API calls")
-                throw OAuthClientError.internalError("Skipping refresh token for Auth V2 API calls")
-            }
-
-            guard let tokenContainer = tokenStorage.tokenContainer else {
-                throw OAuthClientError.internalError("Missing refresh token")
-            }
-            if tokenContainer.decodedAccessToken.isExpired() {
-                Logger.networkProtection.log("Access token expired, attempting to refresh...")
-                let tokens = try await authClient.getTokens(policy: .localForceRefresh)
-                return VPNAuthTokenBuilder.getVPNAuthToken(from: tokens.accessToken)
-            } else {
-                Logger.networkProtection.error("Trying to refresh valid token, using the old one")
-                return VPNAuthTokenBuilder.getVPNAuthToken(from: tokenContainer.accessToken)
-            }
-        }
 
         let subscriptionEndpointServiceV2 = DefaultSubscriptionEndpointServiceV2(apiService: apiService,
                                                                                baseURL: subscriptionEnvironment.serviceEnvironment.url)
@@ -513,7 +500,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
 
         let entitlementsCheck: (() async -> Result<Bool, Error>) = {
             Logger.networkProtection.log("Subscription Entitlements check...")
-            if !settings.isAuthV2Enabled {
+            if !Self.isAuthV2Enabled {
                 Logger.networkProtection.log("Using Auth V1")
                 return await accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
             } else {
@@ -528,12 +515,13 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
             }
         }
 
+        self.tokenStorageV2 = tokenStoreV2
         self.subscriptionManagerV2 = subscriptionManager
 
         let tokenHandlerProvider: () -> any SubscriptionTokenHandling = {
-            if !PacketTunnelProvider.isAuthV2Enabled  {
+            if !Self.isAuthV2Enabled  {
                 Logger.networkProtection.debug("tokenHandlerProvider: Using Auth V1")
-                return accountManager
+                return tokenStore
             } else {
                 Logger.networkProtection.debug("tokenHandlerProvider: Using Auth V2")
                 return subscriptionManager
@@ -558,7 +546,10 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                    defaults: defaults,
                    entitlementCheck: entitlementsCheck)
 
+        setupPixels()
         accountManager.delegate = self
+        observeServerChanges()
+        observeStatusUpdateRequests()
         Logger.networkProtection.log("[+] MacPacketTunnelProvider Initialised")
     }
 
@@ -704,14 +695,14 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
 
     @MainActor
     override func startTunnel(options: [String: NSObject]? = nil) async throws {
-        setupPixels()
-        observeServerChanges()
-        observeStatusUpdateRequests()
-
-        // here because we need to load the token before running this
-        await subscriptionManagerV2.loadInitialData()
 
         try await super.startTunnel(options: options)
+
+        if !Self.isAuthV2Enabled {
+            // Auth V2 cleanup in case of rollback
+            Logger.subscription.debug("Cleaning up Auth V2 token")
+            tokenStorageV2.tokenContainer = nil
+        }
     }
 
     // MARK: - Pixels

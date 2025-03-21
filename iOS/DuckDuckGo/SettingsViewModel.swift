@@ -644,8 +644,10 @@ extension SettingsViewModel {
         UIApplication.shared.open(url)
     }
     
-    @MainActor func shouldPresentLoginsViewWithAccount(accountDetails: SecureVaultModels.WebsiteAccount) {
+    @MainActor func shouldPresentLoginsViewWithAccount(accountDetails: SecureVaultModels.WebsiteAccount?, source: AutofillSettingsSource? = nil) {
         state.activeWebsiteAccount = accountDetails
+        state.autofillSource = source
+        
         presentLegacyView(.logins)
     }
 
@@ -723,7 +725,8 @@ extension SettingsViewModel {
             presentViewController(legacyViewProvider.feedback, modal: false)
         case .logins:
             pushViewController(legacyViewProvider.loginSettings(delegate: self,
-                                                            selectedAccount: state.activeWebsiteAccount))
+                                                                selectedAccount: state.activeWebsiteAccount,
+                                                                source: state.autofillSource))
 
         case .gpc:
             firePixel(.settingsDoNotSellShown)
@@ -747,10 +750,10 @@ extension SettingsViewModel {
 }
 
 // MARK: AutofillLoginSettingsListViewControllerDelegate
-extension SettingsViewModel: AutofillLoginSettingsListViewControllerDelegate {
+extension SettingsViewModel: AutofillSettingsViewControllerDelegate {
     
     @MainActor
-    func autofillLoginSettingsListViewControllerDidFinish(_ controller: AutofillLoginSettingsListViewController) {
+    func autofillSettingsViewControllerDidFinish(_ controller: AutofillSettingsViewController) {
         onRequestPopLegacyView?()
     }
 }

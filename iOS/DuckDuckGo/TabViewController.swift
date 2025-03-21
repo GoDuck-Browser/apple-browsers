@@ -1107,10 +1107,11 @@ class TabViewController: UIViewController {
                                       protectionStatus: makeProtectionStatus(for: host),
                                       malicousSiteThreatKind: specialErrorPageNavigationHandler.currentThreatKind,
                                       shouldCheckServerTrust: shouldCheckServerTrust)
-        let isValid = certificateTrustEvaluator.evaluateCertificateTrust(trust: webView.serverTrust)
-        if let isValid {
-            privacyInfo.serverTrust = isValid ? webView.serverTrust : nil
-        }
+        let isCertificateInvalid = certificateTrustEvaluator
+            .evaluateCertificateTrust(trust: webView.serverTrust)
+            .map { !$0 }
+        let serverTrustEvaluation = ServerTrustEvaluation(securityTrust: webView.serverTrust, isCertificateInvalid: isCertificateInvalid)
+        privacyInfo.serverTrustEvaluation = serverTrustEvaluation
         privacyInfo.isSpecialErrorPageVisible = specialErrorPageNavigationHandler.isSpecialErrorPageVisible
 
         previousPrivacyInfosByURL[url] = privacyInfo
@@ -2108,8 +2109,8 @@ extension TabViewController: WKNavigationDelegate {
         checkForReloadOnError()
     }
     
-    private func showLoginDetails(with account: SecureVaultModels.WebsiteAccount) {
-        delegate?.tab(self, didRequestSettingsToLogins: account)
+    private func showLoginDetails(with account: SecureVaultModels.WebsiteAccount, source: AutofillSettingsSource) {
+        delegate?.tab(self, didRequestAutofillLogins: account, source: source)
     }
     
     @objc private func dismissLoginDetails() {
@@ -3068,7 +3069,7 @@ extension TabViewController: SaveLoginViewControllerDelegate {
                                               presentationLocation: .withBottomBar(andAddressBarBottom: addressBarBottom),
                                               onAction: {
 
-                        self.showLoginDetails(with: newCredential.account)
+                        self.showLoginDetails(with: newCredential.account, source: .viewSavedLoginPrompt)
                     })
                     Favicons.shared.loadFavicon(forDomain: newCredential.account.domain, intoCache: .fireproof, fromCache: .tabs)
                 }
@@ -3122,7 +3123,7 @@ extension TabViewController: SaveLoginViewControllerDelegate {
                                       onAction: { [weak self] in
                 Pixel.fire(pixel: .autofillLoginsFillLoginInlineDisableSnackbarOpenSettings)
                 guard let mainVC = self?.view.window?.rootViewController as? MainViewController else { return }
-                mainVC.launchAutofillLogins(source: .saveLoginDisablePrompt)
+                mainVC.segueToSettingsLoginsWithAccount(nil, source: .saveLoginDisablePrompt)
             })
         }
     }

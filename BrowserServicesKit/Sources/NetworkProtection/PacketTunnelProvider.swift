@@ -457,6 +457,8 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         super.init()
 
         Logger.networkProtectionMemory.log("[+] PacketTunnelProvider initialized")
+
+        observeSettingChanges()
     }
 
     deinit {
@@ -706,8 +708,6 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
     open override func startTunnel(options: [String: NSObject]? = nil) async throws {
         Logger.networkProtection.log("🚀 Starting tunnel")
 
-        observeSettingChanges()
-
         // It's important to have this as soon as possible since it helps setup PixelKit
         prepareToConnect(using: tunnelProviderProtocol)
 
@@ -734,7 +734,9 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
                 // expired.  In either case it should be enough to record the manual failures
                 // for these prerequisited to avoid flooding our metrics.
                 providerEvents.fire(.tunnelStartOnDemandWithoutAccessToken)
+                Logger.networkProtection.log("Going to sleep...")
                 try? await Task.sleep(interval: .seconds(15))
+                Logger.networkProtection.log("Waking up...")
             } else {
                 // If the VPN was started manually without the basic prerequisites we always
                 // want to know as this should not be possible.
@@ -762,7 +764,9 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
                 // We add a delay when the VPN is started by
                 // on-demand and there's an error, to avoid frenetic ON/OFF
                 // cycling.
+                Logger.networkProtection.log("Going to sleep...")
                 try? await Task.sleep(interval: .seconds(15))
+                Logger.networkProtection.log("Waking up...")
             }
 
             let errorDescription = (error as? LocalizedError)?.localizedDescription ?? String(describing: error)
@@ -1124,11 +1128,16 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
         case .cancelSnooze:
             cancelSnooze(completionHandler: completionHandler)
         }
+
+        if message != .getDataVolume {
+            Logger.networkProtectionIPC.log("⚪️ Message handled: \(String(describing: message), privacy: .public)")
+        }
     }
 
     // MARK: - App Requests: Handling
 
     private func handleRequest(_ request: ExtensionRequest, completionHandler: ((Data?) -> Void)? = nil) {
+        Logger.networkProtectionIPC.log("⚪️ Handling app request: \(String(describing: request), privacy: .public)")
         switch request {
         case .changeTunnelSetting(let change):
             handleSettingChangeAppRequest(change, completionHandler: completionHandler)
@@ -1599,6 +1608,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
 #if os(macOS)
     @MainActor
     private func attemptShutdownDueToRevokedAccess() async {
+        Logger.networkProtection.log("Shutting down due to revoked access")
         let cancelTunnel = {
             try? await self.tokenHandlerProvider().removeToken()
             self.cancelTunnelWithError(TunnelError.vpnAccessRevoked)

@@ -70,7 +70,6 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
 
     private let accessTokenStorage: SubscriptionTokenKeychainStorage
     private let subscriptionManagerV2: any SubscriptionManagerV2
-//    private let isAuthV2Enable: Bool
 
     // MARK: - Debug Options Support
 
