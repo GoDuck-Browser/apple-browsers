@@ -24,7 +24,29 @@ import class UIKit.UIApplication
 
 @MainActor
 final class OnboardingIntroViewModel: ObservableObject {
+
+    struct AppIconPickerContentState {
+        var animateTitle = true
+        var animateMessage = false
+        var showContent = false
+    }
+
+    struct AddressBarPositionContentState {
+        var animateTitle = true
+        var showContent = false
+    }
+
     @Published private(set) var state: OnboardingView.ViewState = .landing
+
+    @Published var showDaxDialogBox = false
+    @Published var showIntroViewContent = true
+    @Published var showIntroButton = false
+    @Published var animateIntroText = false
+    @Published var showComparisonButton = false
+    @Published var animateComparisonText = false
+
+    @Published var appIconPickerContentState = AppIconPickerContentState()
+    @Published var addressBarPositionContentState = AddressBarPositionContentState()
 
     let copy: Copy
     var onCompletingOnboardingIntro: (() -> Void)?
@@ -136,6 +158,26 @@ final class OnboardingIntroViewModel: ObservableObject {
             pixelReporter.measureChooseBottomAddressBarPosition()
         }
         onCompletingOnboardingIntro?()
+    }
+
+    func tapped() {
+        switch state.intro?.type {
+        case .startOnboardingDialog:
+            showIntroButton = true
+            animateIntroText = false
+        case .browsersComparisonDialog:
+            showComparisonButton = true
+            animateComparisonText = false
+        case .chooseAppIconDialog:
+            appIconPickerContentState.animateTitle = false
+            appIconPickerContentState.animateMessage = false
+            appIconPickerContentState.showContent = true
+        case .chooseAddressBarPositionDialog:
+            addressBarPositionContentState.animateTitle = false
+            addressBarPositionContentState.showContent = true
+        default: break
+        }
+
     }
 
 #if DEBUG || ALPHA

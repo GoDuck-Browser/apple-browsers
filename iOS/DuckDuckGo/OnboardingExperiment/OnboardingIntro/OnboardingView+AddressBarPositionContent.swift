@@ -27,11 +27,6 @@ private enum Metrics {
 
 extension OnboardingView {
 
-    struct AddressBarPositionContentState {
-        var animateTitle = true
-        var showContent = false
-    }
-
     struct AddressBarPositionContent: View {
 
         private var animateTitle: Binding<Bool>

@@ -23,12 +23,6 @@ import Onboarding
 
 extension OnboardingView {
 
-    struct AppIconPickerContentState {
-        var animateTitle = true
-        var animateMessage = false
-        var showContent = false
-    }
-
     struct AppIconPickerContent: View {
 
         private var animateTitle: Binding<Bool>
