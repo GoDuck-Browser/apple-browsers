@@ -23,73 +23,74 @@ import SwiftUI
 struct DuckPlayerPrimingModalView: View {
     @ObservedObject var viewModel: DuckPlayerPrimingModalViewModel
     @Environment(\.colorScheme) var colorScheme
-    
+
     private enum Constants {
         static let cornerRadius: CGFloat = 12
         static let spacing: CGFloat = 16
-        static let buttonHeight: CGFloat = 44
-        static let iconSize: CGFloat = 24
+        static let buttonHeight: CGFloat = 50
+        static let closeButtonSize: CGFloat = 14
         static let maxWidth: CGFloat = 500
-        static let imageHeight: CGFloat = 180
+        static let imageHeight: CGFloat = 96
+        static let contentHorizontalPadding: CGFloat = 32
+        static let headerPadding: CGFloat = 16
+        static let primingImageName: String = "DuckPlayerPrimingImage"
+        static let closeButtonImageName: String = "xmark"
     }
-    
+
     var body: some View {
         VStack(spacing: Constants.spacing) {
             headerView
-            
+
             VStack(spacing: Constants.spacing) {
-                Image("DuckPlayerPrimingImage")  // You'll need to add this asset
+                Image(Constants.primingImageName)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: Constants.imageHeight)
                     .cornerRadius(Constants.cornerRadius)
-                
-                Text("DuckDuckGo comes free with Duck Player!")
-                    .daxTitle2()
+
+                Text(UserText.duckPlayerNativeModalTitle)
+                    .daxTitle3()
                     .foregroundColor(Color(designSystemColor: .textPrimary))
                     .multilineTextAlignment(.center)
-                
-                Text("Watch videos without targeted ads and what you watch won't influence recommendations.")
+                    .lineLimit(3)
+
+                Text(UserText.duckPlayerNativeModalDescription)
                     .daxBodyRegular()
                     .foregroundColor(Color(designSystemColor: .textSecondary))
                     .multilineTextAlignment(.center)
-                
-                Button(action: { viewModel.tryDuckPlayer() }) {
-                    HStack {
-                        Image(systemName: "play.fill")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: Constants.iconSize, height: Constants.iconSize)
-                        Text("Try Duck Player")
-                            .daxBodyBold()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: Constants.buttonHeight)
-                    .background(Color(designSystemColor: .background))
-                    .cornerRadius(Constants.cornerRadius)
-                }
+                    .lineLimit(2)
+                Button(
+                    action: { viewModel.tryDuckPlayer() },
+                    label: {
+                        Text(UserText.duckPlayerNativeModalCTA).daxButton()
+                            .frame(maxWidth: .infinity)
+                            .frame(height: Constants.buttonHeight)
+                            .foregroundColor(Color(designSystemColor: .buttonsPrimaryText))
+                            .background(Color(designSystemColor: .buttonsPrimaryDefault))
+                            .cornerRadius(Constants.cornerRadius)
+
+                    })
             }
-            .padding(.horizontal)
+            .padding(.horizontal, Constants.contentHorizontalPadding)
         }
-        .background(Color(designSystemColor: .backdrop))
+        .background(Color(designSystemColor: .backgroundSheets))
     }
-    
+
     private var headerView: some View {
         HStack {
             Spacer()
-            
-            Button(action: { viewModel.dismiss() }) {
-                Image(systemName: "xmark")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: Constants.iconSize, height: Constants.iconSize)
-                    .foregroundColor(Color(designSystemColor: .textPrimary))
-            }
-            .padding()
+            Button(
+                action: { viewModel.dismiss() },
+                label: {
+                    Image(systemName: Constants.closeButtonImageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: Constants.closeButtonSize, height: Constants.closeButtonSize)
+                        .foregroundColor(Color(designSystemColor: .textPrimary))
+                }
+            )
         }
+        .padding(.horizontal, Constants.headerPadding)
+        .padding(.top, Constants.headerPadding)
     }
-}
-
-#Preview {
-    DuckPlayerPrimingModalView(viewModel: DuckPlayerPrimingModalViewModel())
 }

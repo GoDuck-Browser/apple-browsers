@@ -47,12 +47,10 @@ final class DuckPlayerNativeUIPresenter {
         // Used to update the WebView's bottom constraint
         // When pill is visible
         static let webViewRequiredBottomConstraint: CGFloat = 90
-        static let primingModalHeight: CGFloat = 450
+        static let primingModalHeight: CGFloat = 360
         static let detentIdentifier: String = "priming"
-        //static let primingModalPresentedCountThreshold: Int = 3
-        //static let primingModalTimeSinceLastPresentedThreshold: Int = 86400  // 24h
-        static let primingModalPresentedCountThreshold: Int = 100
-        static let primingModalTimeSinceLastPresentedThreshold: Int = 10  // 24h
+        static let primingModalPresentedCountThreshold: Int = 3
+        static let primingModalTimeSinceLastPresentedThreshold: Int = 86400  // 24h
     }
 
     /// The container view model for the entry pill
@@ -96,7 +94,7 @@ final class DuckPlayerNativeUIPresenter {
         let timeSinceLastShown = now - appSettings.duckPlayerNativeUIPrimingModalTimeSinceLastPresented
 
         return appSettings.duckPlayerNativeUIPrimingModalPresentedCount < Constants.primingModalPresentedCountThreshold
-            && timeSinceLastShown < Constants.primingModalTimeSinceLastPresentedThreshold
+            && timeSinceLastShown > Constants.primingModalTimeSinceLastPresentedThreshold
     }
 
     // MARK: - Public Methods
@@ -260,6 +258,7 @@ final class DuckPlayerNativeUIPresenter {
         viewModel.tryDuckPlayerRequest
             .sink { [weak hostingController, weak self] in
                 hostingController?.dismiss(animated: true) { [weak self] in
+                    
                     guard let self = self else { return }
 
                     let (_, _) = self.presentDuckPlayer(
@@ -401,6 +400,9 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
 
     @MainActor
     func presentDuckPlayer(videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController, title: String?, timestamp: TimeInterval?) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>) {
+
+        // Never show the priming modal for DuckPlayer
+        appSettings.duckPlayerNativeUIPrimingModalPresentedCount = Constants.primingModalPresentedCountThreshold + 1
 
         let navigationRequest = PassthroughSubject<URL, Never>()
         let settingsRequest = PassthroughSubject<Void, Never>()
