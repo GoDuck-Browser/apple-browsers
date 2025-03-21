@@ -383,10 +383,6 @@ extension SyncSettingsViewController: SyncActivationControllerDelegate {
         rootView.model.syncEnabled(recoveryCode: recoveryCode)
     }
     
-    func controllerDidReceiveError(_ type: SyncErrorMessage, underlyingError: (any Error)?, relatedPixelEvent: Core.Pixel.Event) {
-        handleError(type, error: underlyingError, event: relatedPixelEvent)
-    }
-    
     func controllerWillBeginTransmittingRecoveryKey() async {
         dismissPresentedViewController()
         await showPreparingSyncAsync()
@@ -419,6 +415,19 @@ extension SyncSettingsViewController: SyncActivationControllerDelegate {
         Pixel.fire(pixel: .syncLogin, includedParameters: [.appVersion])
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.dismissVCAndShowRecoveryPDF()
+        }
+    }
+    
+    func controllerDidError(_ error: SyncActivationError, underlyingError: (any Error)?) {
+        switch error {
+        case .unableToScanQRCode:
+            handleError(.unableToScanQRCode, error: underlyingError, event: .syncSignupError)
+        case .failedToFetchPublicKey, .failedToTransmitExchangeRecoveryKey, .failedToFetchConnectRecoveryKey, .failedToLogIn, .failedToTransmitExchangeKey, .failedToFetchExchangeRecoveryKey, .failedToTransmitConnectRecoveryKey:
+            handleError(.unableToScanQRCode, error: underlyingError, event: .syncLoginError)
+        case .failedToCreateAccount:
+            handleError(.unableToSyncWithDevice, error: underlyingError, event: .syncSignupError)
+        case .foundExistingAccount:
+            handleError(.unableToMergeTwoAccounts, error: error, event: .syncLoginExistingAccountError)
         }
     }
 }

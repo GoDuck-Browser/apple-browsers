@@ -24,7 +24,6 @@ import Core
 
 @MainActor
 protocol SyncActivationControllerDelegate: AnyObject {
-    func controllerDidReceiveError(_ type: SyncErrorMessage, underlyingError: Error?, relatedPixelEvent: Pixel.Event)
     func controllerWillBeginTransmittingRecoveryKey() async
     func controllerDidFinishTransmittingRecoveryKey()
     
@@ -38,6 +37,26 @@ protocol SyncActivationControllerDelegate: AnyObject {
     func controllerDidCompleteLogin(registeredDevices: [RegisteredDevice])
     
     func controllerDidFindTwoAccountsDuringRecovery(_ recoveryKey: SyncCode.RecoveryKey) async
+    
+    func controllerDidError(_ error: SyncActivationError, underlyingError: Error?)
+}
+
+enum SyncActivationError: Error {
+    case unableToScanQRCode
+    
+    //unableToSyncWithDevice
+    case failedToFetchPublicKey
+    case failedToTransmitExchangeRecoveryKey
+    case failedToFetchConnectRecoveryKey
+    case failedToLogIn
+    
+    case failedToTransmitExchangeKey
+    case failedToFetchExchangeRecoveryKey
+    
+    case failedToCreateAccount
+    case failedToTransmitConnectRecoveryKey
+    
+    case foundExistingAccount
 }
 
 final class SyncActivationController {
@@ -85,6 +104,8 @@ final class SyncActivationController {
         let connector = try syncService.remoteConnect()
         self.connector = connector
         self.startConnectPolling()
+        
+        // Step A
         return connector.code
     }
     
@@ -94,11 +115,12 @@ final class SyncActivationController {
     }
     
     func syncCodeEntered(code: String) async -> Bool {
+        // Step B
         let syncCode: SyncCode
         do {
             syncCode = try SyncCode.decodeBase64String(code)
         } catch {
-            await delegate?.controllerDidReceiveError(.unableToScanQRCode, underlyingError: error, relatedPixelEvent: .syncSignupError)
+            await delegate?.controllerDidError(.unableToScanQRCode, underlyingError: error)
             return false
         }
         
@@ -111,7 +133,7 @@ final class SyncActivationController {
         } else if let connectKey = syncCode.connect {
             return await handleConnectKey(connectKey)
         } else {
-            await delegate?.controllerDidReceiveError(.unableToScanQRCode, underlyingError: nil, relatedPixelEvent: .syncSignupError)
+            await delegate?.controllerDidError(.unableToScanQRCode, underlyingError: nil)
             return false
         }
     }
@@ -123,50 +145,73 @@ final class SyncActivationController {
     
     private func startExchangePolling() {
         Task { @MainActor in
+            let exchangeMessage: ExchangeMessage
             do {
                 // Step C
-                if let exchangeMessage = try await exchanger?.pollForPublicKey() {
-                    await delegate?.controllerWillBeginTransmittingRecoveryKey()
-                    // Step D
-                    try await syncService.transmitExchangeRecoveryKey(for: exchangeMessage)
-                    // TODO: Still has the preparingSync view showing
-                    delegate?.controllerDidFinishTransmittingRecoveryKey()
-                } else {
+                guard let message = try await exchanger?.pollForPublicKey() else {
                     // Polling likely cancelled
                     return
                 }
+                exchangeMessage = message
             } catch {
-                delegate?.controllerDidReceiveError(SyncErrorMessage.unableToSyncWithDevice, underlyingError: error, relatedPixelEvent: .syncLoginError)
+                delegate?.controllerDidError(.failedToFetchPublicKey, underlyingError: error)
+                return
             }
+            
+            await delegate?.controllerWillBeginTransmittingRecoveryKey()
+            do {
+                // Step D
+                try await syncService.transmitExchangeRecoveryKey(for: exchangeMessage)
+            } catch {
+                delegate?.controllerDidError(.failedToTransmitExchangeRecoveryKey, underlyingError: error)
+            }
+            
+            delegate?.controllerDidFinishTransmittingRecoveryKey()
             exchanger?.stopPolling()
         }
     }
     
     private func startConnectPolling() {
         Task { @MainActor in
+            let recoveryKey: SyncCode.RecoveryKey
             do {
-                if let recoveryKey = try await connector?.pollForRecoveryKey() {
-                    delegate?.controllerDidReceiveRecoveryKey()
-                    try await loginAndShowDeviceConnected(recoveryKey: recoveryKey)
-                } else {
+                guard let key = try await connector?.pollForRecoveryKey() else {
+                    // Polling likely cancelled
                     return
                 }
+                recoveryKey = key
             } catch {
-                delegate?.controllerDidReceiveError(SyncErrorMessage.unableToSyncWithDevice, underlyingError: error, relatedPixelEvent: .syncLoginError)
+                delegate?.controllerDidError(.failedToFetchConnectRecoveryKey, underlyingError: error)
+                return
+            }
+            
+            delegate?.controllerDidReceiveRecoveryKey()
+            
+            do {
+                try await loginAndShowDeviceConnected(recoveryKey: recoveryKey)
+            } catch {
+                delegate?.controllerDidError(.failedToLogIn, underlyingError: error)
             }
         }
     }
     
     private func handleExchangeKey(_ exchangeKey: SyncCode.ExchangeKey) async -> Bool {
+        let exchangeInfo: ExchangeInfo
         do {
-            let exchangeInfo = try await self.syncService.transmitGeneratedExchangeInfo(exchangeKey, deviceName: deviceName)
+            exchangeInfo = try await self.syncService.transmitGeneratedExchangeInfo(exchangeKey, deviceName: deviceName)
+        } catch {
+            await delegate?.controllerDidError(.failedToTransmitExchangeKey, underlyingError: error)
+            return false
+        }
+        
+        do {
             guard let recoveryKey = try await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
-                // Polling likelly cancelled. Would love to handle this in a more elegant way.
+                // Polling likelly cancelled.
                 return false
             }
             return await handleRecoveryKey(recoveryKey)
         } catch {
-            await delegate?.controllerDidReceiveError(SyncErrorMessage.unableToSyncWithDevice, underlyingError: error, relatedPixelEvent: .syncLoginError)
+            await delegate?.controllerDidError(.failedToFetchExchangeRecoveryKey, underlyingError: error)
             return false
         }
     }
@@ -193,7 +238,7 @@ final class SyncActivationController {
                 shouldShowSyncEnabled = false
             } catch {
                 Task {
-                    await delegate?.controllerDidReceiveError(.unableToSyncWithDevice, underlyingError: error, relatedPixelEvent: .syncSignupError)
+                    await delegate?.controllerDidError(.failedToCreateAccount, underlyingError: error)
                 }
             }
         }
@@ -201,7 +246,7 @@ final class SyncActivationController {
             try await syncService.transmitRecoveryKey(connectKey)
             await delegate?.controllerDidCompleteAccountConnection(shouldShowSyncEnabled: shouldShowSyncEnabled)
         } catch {
-            await delegate?.controllerDidReceiveError(.unableToSyncWithDevice, underlyingError: error, relatedPixelEvent: .syncLoginError)
+            await delegate?.controllerDidError(.failedToTransmitConnectRecoveryKey, underlyingError: error)
             return false
         }
 
@@ -212,9 +257,9 @@ final class SyncActivationController {
         if syncService.account != nil && featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
             await delegate?.controllerDidFindTwoAccountsDuringRecovery(recoveryKey)
         } else if syncService.account != nil {
-            await delegate?.controllerDidReceiveError(.unableToMergeTwoAccounts, underlyingError: error, relatedPixelEvent: .syncLoginExistingAccountError)
+            await delegate?.controllerDidError(.foundExistingAccount, underlyingError: error)
         } else {
-            await delegate?.controllerDidReceiveError(.unableToSyncToServer, underlyingError: error, relatedPixelEvent: .syncLoginError)
+            await delegate?.controllerDidError(.failedToLogIn, underlyingError: error)
         }
     }
 }
