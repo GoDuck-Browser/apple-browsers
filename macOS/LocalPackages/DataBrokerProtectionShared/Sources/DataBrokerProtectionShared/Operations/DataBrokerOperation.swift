@@ -158,7 +158,7 @@ public class DataBrokerOperation: Operation, @unchecked Sendable {
                 .sortedByPreferredRunDate()
         } else {
             filteredAndSortedOperationsData = operationsData
-                .ignoringUserRemovedJobs()
+                .excludingUserRemoved() 
         }
 
         return filteredAndSortedOperationsData
@@ -276,13 +276,7 @@ extension Array where Element == BrokerJobData {
         }
     }
 
-    func ignoringUserRemovedJobs() -> [BrokerJobData] {
+    func excludingUserRemoved() -> [BrokerJobData] {
         filter { !$0.isRemovedByUser }
-    }
-}
-
-extension BrokerJobData {
-    var isRemovedByUser: Bool {
-        historyEvents.closestHistoryEvent?.type == .matchRemovedByUser
     }
 }
