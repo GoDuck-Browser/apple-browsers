@@ -221,6 +221,7 @@ final class AppDependencyProvider: DependencyProvider {
                                                                    subscriptionEndpointService: subscriptionEndpointService,
                                                                    subscriptionEnvironment: subscriptionEnvironment,
                                                                    pixelHandler: pixelHandler,
+                                                                   legacyAccountStorage: AccountKeychainStorage(),
                                                                    isInternalUserEnabled: {
                 ContentBlocking.shared.privacyConfigurationManager.internalUserDecider.isInternalUser
             })

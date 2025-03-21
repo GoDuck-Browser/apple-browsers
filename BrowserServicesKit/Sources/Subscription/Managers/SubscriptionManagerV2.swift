@@ -156,6 +156,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     public let currentEnvironment: SubscriptionEnvironment
     private let isInternalUserEnabled: () -> Bool
     private var v1MigrationNeeded: Bool = true
+    private let legacyAccountStorage: AccountKeychainStorage?
 
     public init(storePurchaseManager: StorePurchaseManagerV2? = nil,
                 oAuthClient: any OAuthClient,
@@ -164,6 +165,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
                 pixelHandler: @escaping PixelHandler,
                 tokenRecoveryHandler: TokenRecoveryHandler? = nil,
                 initForPurchase: Bool = true,
+                legacyAccountStorage: AccountKeychainStorage? = nil,
                 isInternalUserEnabled: @escaping () -> Bool =  { false }) {
         self._storePurchaseManager = storePurchaseManager
         self.oAuthClient = oAuthClient
@@ -172,7 +174,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
         self.pixelHandler = pixelHandler
         self.tokenRecoveryHandler = tokenRecoveryHandler
         self.isInternalUserEnabled = isInternalUserEnabled
-
+        self.legacyAccountStorage = legacyAccountStorage
         if initForPurchase {
             switch currentEnvironment.purchasePlatform {
             case .appStore:
@@ -439,9 +441,11 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
         try? await oAuthClient.logout()
         clearSubscriptionCache()
         if notifyUI {
-            Logger.subscription.debug("SignOut: Notifying the UI")
+            Logger.subscription.log("SignOut: Notifying the UI")
             NotificationCenter.default.post(name: .accountDidSignOut, object: self, userInfo: nil)
         }
+        Logger.subscription.log("Removing V1 Account")
+        try? legacyAccountStorage?.clearAuthenticationState()
     }
 
     public func confirmPurchase(signature: String, additionalParams: [String: String]?) async throws -> PrivacyProSubscription {

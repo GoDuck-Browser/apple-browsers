@@ -50,11 +50,9 @@ enum Preferences {
         let subscriptionManager: SubscriptionManager
         let subscriptionUIHandler: SubscriptionUIHandling
 
-        init(
-            model: PreferencesSidebarModel,
-            subscriptionManager: SubscriptionManager,
-            subscriptionUIHandler: SubscriptionUIHandling
-        ) {
+        init(model: PreferencesSidebarModel,
+             subscriptionManager: SubscriptionManager,
+             subscriptionUIHandler: SubscriptionUIHandling) {
             self.model = model
             self.subscriptionManager = subscriptionManager
             self.subscriptionUIHandler = subscriptionUIHandler

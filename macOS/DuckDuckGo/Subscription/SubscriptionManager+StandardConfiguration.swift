@@ -128,9 +128,9 @@ extension DefaultSubscriptionManagerV2 {
             PixelKit.fire(PrivacyProErrorPixel.privacyProKeychainAccessError(accessType: keychainType, accessError: error),
                           frequency: .legacyDailyAndCount)
         }
-        let legacyAccountStorage = canPerformAuthMigration == true ? SubscriptionTokenKeychainStorage(keychainType: keychainType) : nil
+        let legacyTokenStorage = canPerformAuthMigration == true ? SubscriptionTokenKeychainStorage(keychainType: keychainType) : nil
         let authClient = DefaultOAuthClient(tokensStorage: tokenStorage,
-                                            legacyTokenStorage: legacyAccountStorage,
+                                            legacyTokenStorage: legacyTokenStorage,
                                             authService: authService)
         apiService.authorizationRefresherCallback = { request in
 
@@ -193,7 +193,7 @@ extension DefaultSubscriptionManagerV2 {
         }
 
         let isInternalUserEnabled = { featureFlagger?.internalUserDecider.isInternalUser ?? false }
-
+        let legacyAccountStorage = AccountKeychainStorage()
         if #available(macOS 12.0, *) {
             self.init(storePurchaseManager: DefaultStorePurchaseManagerV2(subscriptionFeatureMappingCache: subscriptionEndpointService,
                                                                           subscriptionFeatureFlagger: subscriptionFeatureFlagger),
@@ -201,12 +201,14 @@ extension DefaultSubscriptionManagerV2 {
                       subscriptionEndpointService: subscriptionEndpointService,
                       subscriptionEnvironment: environment,
                       pixelHandler: pixelHandler,
+                      legacyAccountStorage: legacyAccountStorage,
                       isInternalUserEnabled: isInternalUserEnabled)
         } else {
             self.init(oAuthClient: authClient,
                       subscriptionEndpointService: subscriptionEndpointService,
                       subscriptionEnvironment: environment,
                       pixelHandler: pixelHandler,
+                      legacyAccountStorage: legacyAccountStorage,
                       isInternalUserEnabled: isInternalUserEnabled)
         }
     }
