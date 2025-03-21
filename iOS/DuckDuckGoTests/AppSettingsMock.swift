@@ -21,7 +21,8 @@ import Bookmarks
 import Foundation
 @testable import DuckDuckGo
 
-class AppSettingsMock: AppSettings {
+class AppSettingsMock: AppSettings {    
+
     var defaultTextZoomLevel: DuckDuckGo.TextZoomLevel = .percent100
 
     var recentlyVisitedSites: Bool = false
@@ -103,5 +104,7 @@ class AppSettingsMock: AppSettings {
     
     var duckPlayerNativeUISERPEnabled: Bool = true
     var duckPlayerNativeYoutubeMode: DuckDuckGo.NativeDuckPlayerYoutubeMode = .allCases.first!
+    var duckPlayerNativeUIPrimingModalPresentedCount: Int = 0
+    var duckPlayerNativeUIPrimingModalTimeSinceLastPresented: Int = 0
 
 }
