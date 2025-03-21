@@ -124,7 +124,7 @@ public enum ContentScopeExperimentsSubfeatures:  String, Equatable, PrivacySubfe
         .contentScopeExperiments
     }
 
-    case fingerprintingCanvasExperiment
+    case fingerprintingCanvas
 }
 
 public enum AIChatSubfeature: String, Equatable, PrivacySubfeature {

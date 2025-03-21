@@ -18,49 +18,65 @@
 
 import Foundation
 
+/// A protocol that defines an interface for generating a JSON representation of a the privacy configuration file.
+/// It can be used to create customised configurations
 public protocol CustomisedPrivacyConfigurationJsonGenerating {
     var privacyConfiguration: Data? { get }
 }
 
+/// A JSON generator for content scope privacy configuration. This struct updates the configuration by enabling
+/// privact features for which the associated experiment cohort in ContentScopeExperiment  is `.treatment`.
+///
+/// Note: The subfeatures of ContentScopeExperiment must have the same name as the parent feature to be updated.
 public struct ContentScopePrivacyConfigurationJsonGenerator: CustomisedPrivacyConfigurationJsonGenerating {
     let featureFlagger: FeatureFlagger
     let privacyConfigurationManager: PrivacyConfigurationManaging
 
+
+    /// Initializes the generator with the required feature flagger and privacy configuration manager.
+    ///
+    /// - Parameters:
+    ///   - featureFlagger: The object responsible for resolving experiment cohorts.
+    ///   - privacyConfigurationManager: The manager that provides the current privacy configuration.
     public init(featureFlagger: FeatureFlagger, privacyConfigurationManager: PrivacyConfigurationManaging) {
         self.featureFlagger = featureFlagger
         self.privacyConfigurationManager = privacyConfigurationManager
     }
 
+    /// Generates and returns the updated privacy configuration as JSON data.
+    ///
+    /// This property attempts to parse the current configuration, update the feature states based on the experiment
+    /// cohorts, and then serialize the updated configuration to JSON.
     public var privacyConfiguration: Data? {
         guard let config = try? PrivacyConfigurationData(data: privacyConfigurationManager.currentConfig) else { return nil }
 
-        let newFeatures = self.changeFingerprintingCanvasConfigStateBasedOnCohort(config: config.features)
+        let newFeatures = updatedFeatureState(config: config.features)
         let newConfig = PrivacyConfigurationData(features: newFeatures, unprotectedTemporary: config.unprotectedTemporary, trackerAllowlist: config.trackerAllowlist, version: config.version)
         return try? newConfig.toJSONData()
     }
 
-    private func changeFingerprintingCanvasConfigStateBasedOnCohort(config: [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature]) -> [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature] {
+    /// Updates the feature states in the configuration based on the content scope experiments experiment cohorts.
+    ///
+    /// Iterates through all available content scope experiment feature flags and, if the resolved cohort for a feature is `.treatment`,
+    /// updates the corresponding feature's state to "enabled". This relies on the assumption that the raw value of each experiment flag matches the feature name in the configuration.
+    ///
+    /// - Parameter config: A dictionary mapping feature names to their current privacy feature configuration.
+    /// - Returns: A new dictionary with updated feature configurations.
+    private func updatedFeatureState(config: [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature]) ->  [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature] {
         var newConfig = config
-        guard let fingerprintingCanvasCohort = featureFlagger.resolveCohort(for: ContentScopeExperimentsFeatureFlags.fingerprintingCanvas) as? ContentScopeExperimentsFeatureFlags.ContentScopeExperimentsCohort
-        else {
-            return newConfig
-        }
-        var fingerprintingCanvasState: String {
-            switch fingerprintingCanvasCohort {
-            case .control:
-                "disabled"
-            case .treatment:
-                "enabled"
+        var configsToEnable = [ContentScopeExperimentsFeatureFlags]()
+        for experiment in ContentScopeExperimentsFeatureFlags.allCases {
+            if let cohort = featureFlagger.resolveCohort(for: experiment) as? ContentScopeExperimentsFeatureFlags.ContentScopeExperimentsCohort, cohort == .treatment {
+                configsToEnable.append(experiment)
             }
         }
-        let fingerprintingCanvasConfig = config[PrivacyFeature.fingerprintingCanvas.rawValue]
-        let expectations = fingerprintingCanvasConfig?.exceptions ?? []
-        let settings = fingerprintingCanvasConfig?.settings ?? [:]
-        let features = fingerprintingCanvasConfig?.features ?? [:]
-        let minSupportedVersion = fingerprintingCanvasConfig?.minSupportedVersion
-        let hash = fingerprintingCanvasConfig?.hash
 
-        newConfig[PrivacyFeature.fingerprintingCanvas.rawValue] = PrivacyConfigurationData.PrivacyFeature(state: fingerprintingCanvasState, exceptions: expectations, settings: settings, features: features, minSupportedVersion: minSupportedVersion, hash: hash)
+        for configToEnable in configsToEnable {
+            if let oldConfig = config[configToEnable.rawValue] {
+                newConfig[configToEnable.rawValue] = PrivacyConfigurationData.PrivacyFeature(state: "enabled", exceptions: oldConfig.exceptions, settings: oldConfig.settings, features: oldConfig.features, minSupportedVersion: oldConfig.minSupportedVersion, hash: oldConfig.hash)
+            }
+        }
+
         return newConfig
     }
 

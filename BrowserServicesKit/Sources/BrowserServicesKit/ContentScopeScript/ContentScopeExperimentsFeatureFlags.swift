@@ -24,7 +24,7 @@ public enum ContentScopeExperimentsFeatureFlags: String, CaseIterable {
     public var subfeature: any PrivacySubfeature {
         switch self {
         case .fingerprintingCanvas:
-            ContentScopeExperimentsSubfeatures.fingerprintingCanvasExperiment
+            ContentScopeExperimentsSubfeatures.fingerprintingCanvas
         }
     }
 }
@@ -35,7 +35,7 @@ extension ContentScopeExperimentsFeatureFlags: FeatureFlagDescribing {
     }
 
     public var source: FeatureFlagSource {
-        return .remoteReleasable(.subfeature(ContentScopeExperimentsSubfeatures.fingerprintingCanvasExperiment))
+        return .remoteReleasable(.subfeature(ContentScopeExperimentsSubfeatures.fingerprintingCanvas))
     }
 
     public var cohortType: (any FeatureFlagCohortDescribing.Type)? {
