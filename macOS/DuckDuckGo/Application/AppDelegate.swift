@@ -352,7 +352,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         vpnSettings.alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
 
         // Update DBP environment and match the Subscription environment
-        let dbpSettings = DataBrokerProtectionSettings(defaults: .netP)
+        let dbpSettings = DataBrokerProtectionSettings(defaults: .dbp)
         dbpSettings.alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
         dbpSettings.isAuthV2Enabled = isAuthV2Enabled
 
