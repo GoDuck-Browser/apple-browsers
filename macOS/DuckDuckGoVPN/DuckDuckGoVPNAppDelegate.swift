@@ -53,13 +53,12 @@ final class DuckDuckGoVPNApplication: NSApplication {
             exit(0)
         }
 
-        // MARK: - Configure Subscription
+        // Configure Subscription
         let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
         let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
         let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
         let keychainType = KeychainType.dataProtection(.named(subscriptionAppGroup))
-
-        // MARK: V1
+        // V1
         let subscriptionEndpointService = DefaultSubscriptionEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
         let authEndpointService = DefaultAuthEndpointService(currentServiceEnvironment: subscriptionEnvironment.serviceEnvironment)
         let entitlementsCache = UserDefaultsCache<[Entitlement]>(userDefaults: subscriptionUserDefaults,
@@ -70,14 +69,12 @@ final class DuckDuckGoVPNApplication: NSApplication {
                                                entitlementsCache: entitlementsCache,
                                                subscriptionEndpointService: subscriptionEndpointService,
                                                authEndpointService: authEndpointService)
-
-        // MARK: V2
+        // V2
         subscriptionManagerV2 = DefaultSubscriptionManagerV2(keychainType: keychainType,
                                                              environment: subscriptionEnvironment,
                                                              userDefaults: subscriptionUserDefaults,
                                                              canPerformAuthMigration: false,
                                                              canHandlePixels: false)
-        // MARK: -
 
         _delegate = DuckDuckGoVPNAppDelegate(accountManager: accountManager,
                                              subscriptionManagerV2: subscriptionManagerV2,

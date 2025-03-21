@@ -434,7 +434,7 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
             subscriptionEnvironment.serviceEnvironment = .staging
         }
 
-        // MARK: - Configure Subscription
+        // Configure Subscription
 
         var tokenHandler: any SubscriptionTokenHandling
         var entitlementsCheck: (() async -> Result<Bool, Error>)
@@ -488,20 +488,6 @@ final class NetworkProtectionPacketTunnelProvider: PacketTunnelProvider {
             let authClient = DefaultOAuthClient(tokensStorage: tokenStorage,
                                                 legacyTokenStorage: legacyAccountStorage,
                                                 authService: authService)
-//            apiService.authorizationRefresherCallback = { _ in
-//                guard let tokenContainer = tokenStorage.tokenContainer else {
-//                    throw OAuthClientError.internalError("Missing refresh token")
-//                }
-//                
-//                if tokenContainer.decodedAccessToken.isExpired() {
-//                    Logger.OAuth.debug("Refreshing tokens")
-//                    let tokens = try await authClient.getTokens(policy: .localForceRefresh)
-//                    return tokens.accessToken
-//                } else {
-//                    Logger.general.debug("Trying to refresh valid token, using the old one")
-//                    return tokenContainer.accessToken
-//                }
-//            }
             let subscriptionEndpointService = DefaultSubscriptionEndpointServiceV2(apiService: apiService,
                                                                                    baseURL: subscriptionEnvironment.serviceEnvironment.url)
             let storePurchaseManager = DefaultStorePurchaseManagerV2(subscriptionFeatureMappingCache: subscriptionEndpointService)

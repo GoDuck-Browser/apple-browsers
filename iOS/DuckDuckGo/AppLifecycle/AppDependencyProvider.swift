@@ -106,7 +106,7 @@ final class AppDependencyProvider: DependencyProvider {
                                                for: FeatureFlag.self)
         configurationManager = ConfigurationManager(store: configurationStore)
 
-        // MARK: - Configure Subscription
+        // Configure Subscription
 
         let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
         let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
@@ -121,7 +121,7 @@ final class AppDependencyProvider: DependencyProvider {
         let isAUthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
         vpnSettings.isAuthV2Enabled = isAUthV2Enabled
         if !isAUthV2Enabled {
-            // MARK: Subscription V1
+            // V1
 
             Logger.subscription.debug("Configuring Subscription V1")
             vpnSettings.alignTo(subscriptionEnvironment: subscriptionEnvironment)
@@ -165,7 +165,7 @@ final class AppDependencyProvider: DependencyProvider {
                 subscriptionEndpointService.clearSubscription()
             }
         } else {
-            // MARK: Subscription V2
+            // V2
             Logger.subscription.debug("Configuring Subscription V2")
             vpnSettings.alignTo(subscriptionEnvironment: subscriptionEnvironment)
 

@@ -89,7 +89,7 @@ final class DuckDuckGoDBPBackgroundAgentAppDelegate: NSObject, NSApplicationDele
 
     override init() {
 
-        // MARK: - Configure Subscription
+        // Configure Subscription
         if !settings.isAuthV2Enabled {
             Logger.dbpBackgroundAgent.log("Using Auth V1")
             subscriptionManager = DefaultSubscriptionManager()
@@ -104,7 +104,6 @@ final class DuckDuckGoDBPBackgroundAgentAppDelegate: NSObject, NSApplicationDele
                                                                canPerformAuthMigration: false,
                                                                canHandlePixels: false)
         }
-        // MARK: -
     }
 
     @MainActor
