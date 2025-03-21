@@ -66,15 +66,15 @@ final class SiteBreakageExperimentMetricsTests: XCTestCase {
     func test_OnfireCSSExperimentMetricPrivacyToggleUsed_WhenExperimentActive_ThenCorrectPixelFunctionsCalled() {
         // GIVEN
         mockFeatureFlagger.experiments = [
-            CSSExperimentsFeatureFlags.allCases[0].subfeature.rawValue: ExperimentData(parentID: "someParentID", cohortID: "testCohort", enrollmentDate: Date())
+            ContentScopeExperimentsFeatureFlags.allCases[0].subfeature.rawValue: ExperimentData(parentID: "someParentID", cohortID: "testCohort", enrollmentDate: Date())
         ]
 
         // WHEN
         SiteBreakageExperimentMetrics.fireCSSExperimentMetric(metricType: .privacyToggleUsed)
 
         // THEN
-        XCTAssertEqual(pixelCalls.count, CSSExperimentsFeatureFlags.allCases.count * 6, "firePixelExperiment should be called for each experiment and each conversionWindow 0...5.")
-        XCTAssertEqual(pixelCalls.first?.0, CSSExperimentsFeatureFlags.allCases[0].subfeature.rawValue, "expected SubfeatureID should be passed as parameter")
+        XCTAssertEqual(pixelCalls.count, ContentScopeExperimentsFeatureFlags.allCases.count * 6, "firePixelExperiment should be called for each experiment and each conversionWindow 0...5.")
+        XCTAssertEqual(pixelCalls.first?.0, ContentScopeExperimentsFeatureFlags.allCases[0].subfeature.rawValue, "expected SubfeatureID should be passed as parameter")
         XCTAssertEqual(pixelCalls.first?.1, "privacyToggleUsed", "expected metric should be passed as parameter")
         XCTAssertEqual(pixelCalls.first?.2, 0...0, "expected Conversion Window should be passed as parameter")
         XCTAssertEqual(pixelCalls.first?.3, "1", "expected Value should be passed as parameter")
