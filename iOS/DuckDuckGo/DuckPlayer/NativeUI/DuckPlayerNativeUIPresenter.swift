@@ -17,10 +17,10 @@
 //  limitations under the License.
 //
 
-import Foundation
-import UIKit
-import SwiftUI
 import Combine
+import Foundation
+import SwiftUI
+import UIKit
 
 protocol DuckPlayerNativeUIPresenting {
 
@@ -28,7 +28,9 @@ protocol DuckPlayerNativeUIPresenting {
 
     @MainActor func presentPill(for videoID: String, in hostViewController: TabViewController, timestamp: TimeInterval?)
     @MainActor func dismissPill(reset: Bool, animated: Bool)
-    @MainActor func presentDuckPlayer(videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController, title: String?, timestamp: TimeInterval?) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>)
+    @MainActor func presentDuckPlayer(
+        videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController, title: String?, timestamp: TimeInterval?
+    ) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>)
     @MainActor func showBottomSheetForVisibleChrome()
     @MainActor func hideBottomSheetForHiddenChrome()
 }
@@ -50,7 +52,7 @@ final class DuckPlayerNativeUIPresenter {
         static let primingModalHeight: CGFloat = 360
         static let detentIdentifier: String = "priming"
         static let primingModalPresentedCountThreshold: Int = 3
-        static let primingModalTimeSinceLastPresentedThreshold: Int = 86400  // 24h
+        static let primingModalTimeSinceLastPresentedThreshold: Int = 30  // 24h
     }
 
     /// The container view model for the entry pill
@@ -94,7 +96,7 @@ final class DuckPlayerNativeUIPresenter {
         let timeSinceLastShown = now - appSettings.duckPlayerNativeUIPrimingModalTimeSinceLastPresented
 
         return appSettings.duckPlayerNativeUIPrimingModalPresentedCount < Constants.primingModalPresentedCountThreshold
-            && timeSinceLastShown > Constants.primingModalTimeSinceLastPresentedThreshold
+            && timeSinceLastShown > Constants.primingModalTimeSinceLastPresentedThreshold && appSettings.duckPlayerNativeYoutubeMode == .ask
     }
 
     // MARK: - Public Methods
@@ -258,7 +260,7 @@ final class DuckPlayerNativeUIPresenter {
         viewModel.tryDuckPlayerRequest
             .sink { [weak hostingController, weak self] in
                 hostingController?.dismiss(animated: true) { [weak self] in
-                    
+
                     guard let self = self else { return }
 
                     let (_, _) = self.presentDuckPlayer(
@@ -399,7 +401,9 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
     }
 
     @MainActor
-    func presentDuckPlayer(videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController, title: String?, timestamp: TimeInterval?) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>) {
+    func presentDuckPlayer(
+        videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController, title: String?, timestamp: TimeInterval?
+    ) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>) {
 
         // Never show the priming modal for DuckPlayer
         appSettings.duckPlayerNativeUIPrimingModalPresentedCount = Constants.primingModalPresentedCountThreshold + 1
@@ -408,7 +412,7 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
         let settingsRequest = PassthroughSubject<Void, Never>()
 
         let viewModel = DuckPlayerViewModel(videoID: videoID, timestamp: timestamp, source: source)
-        self.playerViewModel = viewModel // Keep strong reference
+        self.playerViewModel = viewModel  // Keep strong reference
 
         let webView = DuckPlayerWebView(viewModel: viewModel)
         let duckPlayerView = DuckPlayerView(viewModel: viewModel, webView: webView)
@@ -425,7 +429,7 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
             .sink { [weak hostingController] videoID in
                 if source != .youtube {
                     let url: URL = .youtube(videoID)
-                     navigationRequest.send(url)
+                    navigationRequest.send(url)
                 }
                 hostingController?.dismiss(animated: true)
             }
