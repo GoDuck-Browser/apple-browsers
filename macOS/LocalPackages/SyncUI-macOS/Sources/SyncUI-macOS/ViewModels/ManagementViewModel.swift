@@ -82,6 +82,7 @@ public enum SyncErrorType {
     case invalidCode
     case unableCreateRecoveryPDF
     case unableToAuthenticateOnDevice
+    case unableToRecogniseCode
     
     case unhandledError(Error?)
 
@@ -116,8 +117,11 @@ public enum SyncErrorType {
             return UserText.unableCreateRecoveryPdfDescription
         case .unableToAuthenticateOnDevice:
             return UserText.unableToAuthenticateDevice
+        case .unableToRecogniseCode:
+            return UserText.unableToRecogniseCode
         case .unhandledError(let error):
             return "Unhandled error: \(String(describing: error))"
+
         }
     }
 
