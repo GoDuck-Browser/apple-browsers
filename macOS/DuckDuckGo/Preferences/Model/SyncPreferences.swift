@@ -418,9 +418,11 @@ final class SyncPreferences: ObservableObject, SyncUI_macOS.ManagementViewModel 
             return
         }
 
-        onEndFlow = {
-            self.connector?.stopPolling()
-            self.connector = nil
+        onEndFlow = { [weak self] in
+            self?.connector?.stopPolling()
+            self?.connector = nil
+            self?.connectionController.stopConnectMode()
+            self?.connectionController.stopExchangeMode()
 
             Task { @MainActor in
                 guard let window = syncWindowController.window, let sheetParent = window.sheetParent else {
