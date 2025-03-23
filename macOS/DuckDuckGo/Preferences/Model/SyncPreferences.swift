@@ -933,6 +933,7 @@ extension SyncPreferences: SyncConnectionControllerDelegate {
     }
     
     func controllerDidCompleteLogin(registeredDevices: [RegisteredDevice], isRecovery: Bool) {
+        self.codeToDisplay = self.recoveryCode
         mapDevices(registeredDevices)
         PixelKit.fire(GeneralPixel.syncLogin)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
