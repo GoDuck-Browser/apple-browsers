@@ -18,12 +18,10 @@
 //
 
 import Foundation
-import DDGSync
 import BrowserServicesKit
-import Core
 
 @MainActor
-protocol SyncActivationControllerDelegate: AnyObject {
+public protocol SyncConnectionControllerDelegate: AnyObject {
     func controllerWillBeginTransmittingRecoveryKey() async
     func controllerDidFinishTransmittingRecoveryKey()
     
@@ -34,17 +32,16 @@ protocol SyncActivationControllerDelegate: AnyObject {
     func controllerDidCreateSyncAccount()
     func controllerDidCompleteAccountConnection(shouldShowSyncEnabled: Bool)
     
-    func controllerDidCompleteLogin(registeredDevices: [RegisteredDevice])
+    func controllerDidCompleteLogin(registeredDevices: [RegisteredDevice], isRecovery: Bool)
     
     func controllerDidFindTwoAccountsDuringRecovery(_ recoveryKey: SyncCode.RecoveryKey) async
     
-    func controllerDidError(_ error: SyncActivationError, underlyingError: Error?)
+    func controllerDidError(_ error: SyncConnectionError, underlyingError: Error?)
 }
 
-enum SyncActivationError: Error {
-    case unableToScanQRCode
+public enum SyncConnectionError: Error {
+    case unableToRecogniseCode
     
-    //unableToSyncWithDevice
     case failedToFetchPublicKey
     case failedToTransmitExchangeRecoveryKey
     case failedToFetchConnectRecoveryKey
@@ -59,14 +56,13 @@ enum SyncActivationError: Error {
     case foundExistingAccount
 }
 
-final class SyncActivationController {
+final public class SyncConnectionController {
     private let deviceName: String
     private let deviceType: String
-    private let source: String?
     private let syncService: DDGSyncing
-    private let featureFlagger: FeatureFlagger
+    private let dependencies: SyncDependencies
     
-    weak var delegate: SyncActivationControllerDelegate?
+    weak var delegate: SyncConnectionControllerDelegate?
     
     private var exchanger: RemoteKeyExchanging?
     private var connector: RemoteConnecting?
@@ -79,29 +75,28 @@ final class SyncActivationController {
         return code
     }
     
-    init(deviceName: String, deviceType: String, source: String?, syncService: DDGSyncing, featureFlagger: FeatureFlagger, delegate: SyncActivationControllerDelegate? = nil) {
+    init(deviceName: String, deviceType: String, delegate: SyncConnectionControllerDelegate? = nil, syncService: DDGSyncing, dependencies: SyncDependencies) {
         self.deviceName = deviceName
         self.deviceType = deviceType
-        self.source = source
         self.syncService = syncService
-        self.featureFlagger = featureFlagger
         self.delegate = delegate
+        self.dependencies = dependencies
     }
-    
-    func startExchangeMode() throws -> String {
-        let exchanger = try syncService.remoteExchange()
+
+    public func startExchangeMode() throws -> String {
+        let exchanger = try remoteExchange()
         self.exchanger = exchanger
         startExchangePolling()
         return exchanger.code
     }
     
-    func stopExchangeMode() {
+    public func stopExchangeMode() {
         exchanger?.stopPolling()
         exchanger = nil
     }
     
-    func startConnectMode() throws -> String {
-        let connector = try syncService.remoteConnect()
+    public func startConnectMode() throws -> String {
+        let connector = try remoteConnect()
         self.connector = connector
         self.startConnectPolling()
         
@@ -109,12 +104,13 @@ final class SyncActivationController {
         return connector.code
     }
     
-    func stopConnectMode() {
+    public func stopConnectMode() {
         self.connector?.stopPolling()
         self.connector = nil
     }
     
-    func syncCodeEntered(code: String) async -> Bool {
+    @discardableResult
+    public func syncCodeEntered(code: String) async -> Bool {
         // Step B
         let syncCode: SyncCode
         do {
@@ -129,7 +125,7 @@ final class SyncActivationController {
         if let exchangeKey = syncCode.exchangeKey {
             return await handleExchangeKey(exchangeKey)
         } else if let recoveryKey = syncCode.recovery {
-            return await handleRecoveryKey(recoveryKey)
+            return await handleRecoveryKey(recoveryKey, isRecovery: true)
         } else if let connectKey = syncCode.connect {
             return await handleConnectKey(connectKey)
         } else {
@@ -138,9 +134,17 @@ final class SyncActivationController {
         }
     }
     
-    func loginAndShowDeviceConnected(recoveryKey: SyncCode.RecoveryKey) async throws {
+    public func loginAndShowDeviceConnected(recoveryKey: SyncCode.RecoveryKey, isRecovery: Bool) async throws {
         let registeredDevices = try await syncService.login(recoveryKey, deviceName: deviceName, deviceType: deviceType)
-        await delegate?.controllerDidCompleteLogin(registeredDevices: registeredDevices)
+        await delegate?.controllerDidCompleteLogin(registeredDevices: registeredDevices, isRecovery: isRecovery)
+    }
+    
+    private func remoteConnect() throws -> RemoteConnecting {
+        try dependencies.createRemoteConnector()
+    }
+    
+    private func remoteExchange() throws -> RemoteKeyExchanging {
+        try dependencies.createRemoteKeyExchanger()
     }
     
     private func startExchangePolling() {
@@ -188,7 +192,7 @@ final class SyncActivationController {
             delegate?.controllerDidReceiveRecoveryKey()
             
             do {
-                try await loginAndShowDeviceConnected(recoveryKey: recoveryKey)
+                try await loginAndShowDeviceConnected(recoveryKey: recoveryKey, isRecovery: false)
             } catch {
                 delegate?.controllerDidError(.failedToLogIn, underlyingError: error)
             }
@@ -205,20 +209,24 @@ final class SyncActivationController {
         }
         
         do {
-            guard let recoveryKey = try await self.syncService.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
+            guard let recoveryKey = try await self.remoteExchangeAgain(exchangeInfo: exchangeInfo).pollForRecoveryKey() else {
                 // Polling likelly cancelled.
                 return false
             }
-            return await handleRecoveryKey(recoveryKey)
+            return await handleRecoveryKey(recoveryKey, isRecovery: false)
         } catch {
             await delegate?.controllerDidError(.failedToFetchExchangeRecoveryKey, underlyingError: error)
             return false
         }
     }
     
-    private func handleRecoveryKey(_ recoveryKey: SyncCode.RecoveryKey) async -> Bool {
+    private func remoteExchangeAgain(exchangeInfo: ExchangeInfo) throws -> RemoteExchangeRecovering {
+        return try dependencies.createRemoteExchangeRecoverer(exchangeInfo)
+    }
+    
+    private func handleRecoveryKey(_ recoveryKey: SyncCode.RecoveryKey, isRecovery: Bool) async -> Bool {
         do {
-            try await loginAndShowDeviceConnected(recoveryKey: recoveryKey)
+            try await loginAndShowDeviceConnected(recoveryKey: recoveryKey, isRecovery: isRecovery)
             return true
         } catch {
             await handleRecoveryCodeLoginError(recoveryKey: recoveryKey, error: error)
@@ -232,8 +240,6 @@ final class SyncActivationController {
         if syncService.account == nil {
             do {
                 try await syncService.createAccount(deviceName: deviceName, deviceType: deviceType)
-                let additionalParameters = source.map { ["source": $0] } ?? [:]
-                try await Pixel.fire(pixel: .syncSignupConnect, withAdditionalParameters: additionalParameters, includedParameters: [.appVersion])
                 await delegate?.controllerDidCreateSyncAccount()
                 shouldShowSyncEnabled = false
             } catch {
@@ -254,10 +260,8 @@ final class SyncActivationController {
     }
 
     private func handleRecoveryCodeLoginError(recoveryKey: SyncCode.RecoveryKey, error: Error) async {
-        if syncService.account != nil && featureFlagger.isFeatureOn(.syncSeamlessAccountSwitching) {
+        if syncService.account != nil {
             await delegate?.controllerDidFindTwoAccountsDuringRecovery(recoveryKey)
-        } else if syncService.account != nil {
-            await delegate?.controllerDidError(.foundExistingAccount, underlyingError: error)
         } else {
             await delegate?.controllerDidError(.failedToLogIn, underlyingError: error)
         }

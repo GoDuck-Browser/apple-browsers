@@ -119,14 +119,8 @@ public class DDGSync: DDGSyncing {
         }
     }
     
-    // Step A + C
-    public func remoteExchange() throws -> RemoteKeyExchanging {
-        return try dependencies.createRemoteKeyExchanger()
-    }
-    
-    // Step E Needs ExchangeInfo
-    public func remoteExchangeAgain(exchangeInfo: ExchangeInfo) throws -> RemoteExchangeRecovering {
-        return try dependencies.createRemoteExchangeRecoverer(exchangeInfo)
+    public func createConnectionController(deviceName: String, deviceType: String, delegate: SyncConnectionControllerDelegate) -> SyncConnectionController {
+        SyncConnectionController(deviceName: deviceName, deviceType: deviceType, delegate: delegate, syncService: self, dependencies: dependencies)
     }
     
     // Step B

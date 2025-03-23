@@ -212,7 +212,7 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
         }
 
         do {
-            try await activationController.loginAndShowDeviceConnected(recoveryKey: recoveryKey)
+            try await connectionController.loginAndShowDeviceConnected(recoveryKey: recoveryKey, isRecovery: false)
         } catch {
             Pixel.fire(pixel: .syncUserSwitchedLoginError)
         }
@@ -309,7 +309,7 @@ extension SyncSettingsViewController: SyncManagementViewModelDelegate {
 
     private func collectCode(showConnectMode: Bool) {
         do {
-            let code = isSyncEnabled ? try activationController.startExchangeMode() : try activationController.startConnectMode()
+            let code = isSyncEnabled ? try connectionController.startExchangeMode() : try connectionController.startConnectMode()
             let model = ScanOrPasteCodeViewModel(code: code)
             model.delegate = self
             

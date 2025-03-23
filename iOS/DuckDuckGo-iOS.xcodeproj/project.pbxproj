@@ -1288,7 +1288,6 @@
 		EE9D68D82AE15AD600B55EF4 /* UIApplicationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9D68D72AE15AD600B55EF4 /* UIApplicationExtension.swift */; };
 		EE9D68DC2AE16AE100B55EF4 /* NotificationsAuthorizationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9D68DB2AE16AE100B55EF4 /* NotificationsAuthorizationController.swift */; };
 		EE9D68DE2AE2A65600B55EF4 /* UserDefaults+NetworkProtection.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE9D68DD2AE2A65600B55EF4 /* UserDefaults+NetworkProtection.swift */; };
-		EEA4B58B2D89817200D26A25 /* SyncActivationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEA4B58A2D89814D00D26A25 /* SyncActivationController.swift */; };
 		EEC02C142B0519DE0045CE11 /* NetworkProtectionVPNLocationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC02C132B0519DE0045CE11 /* NetworkProtectionVPNLocationViewModel.swift */; };
 		EEC02C162B065BE00045CE11 /* NetworkProtectionVPNLocationViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEC02C152B065BE00045CE11 /* NetworkProtectionVPNLocationViewModelTests.swift */; };
 		EEDFE2DA2AC6ED4F00F0E19C /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = EEDFE2DC2AC6ED4F00F0E19C /* Localizable.strings */; };
@@ -3359,7 +3358,6 @@
 		EE9D68D72AE15AD600B55EF4 /* UIApplicationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIApplicationExtension.swift; sourceTree = "<group>"; };
 		EE9D68DB2AE16AE100B55EF4 /* NotificationsAuthorizationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsAuthorizationController.swift; sourceTree = "<group>"; };
 		EE9D68DD2AE2A65600B55EF4 /* UserDefaults+NetworkProtection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+NetworkProtection.swift"; sourceTree = "<group>"; };
-		EEA4B58A2D89814D00D26A25 /* SyncActivationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncActivationController.swift; sourceTree = "<group>"; };
 		EEB8FDB92A990AEE00EBEDCF /* Configuration-Alpha.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = "Configuration-Alpha.xcconfig"; path = "Configuration/Configuration-Alpha.xcconfig"; sourceTree = "<group>"; };
 		EEC02C132B0519DE0045CE11 /* NetworkProtectionVPNLocationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkProtectionVPNLocationViewModel.swift; sourceTree = "<group>"; };
 		EEC02C152B065BE00045CE11 /* NetworkProtectionVPNLocationViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkProtectionVPNLocationViewModelTests.swift; sourceTree = "<group>"; };
@@ -5355,7 +5353,6 @@
 		85DD44232976C7A8005CC388 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				EEA4B58A2D89814D00D26A25 /* SyncActivationController.swift */,
 				85582DFF29D7409700E9AE35 /* SyncSettingsViewController+PDFRendering.swift */,
 				85F98F91296F32BD00742F4A /* SyncSettingsViewController.swift */,
 				85047C762A0D5D3D00D2FF3F /* SyncSettingsViewController+SyncDelegate.swift */,
@@ -8934,7 +8931,6 @@
 				9FB027142C252E0C009EA190 /* OnboardingView+BrowsersComparisonContent.swift in Sources */,
 				CB3B4D4A2D5FA4A3006DAD63 /* AppConfiguration.swift in Sources */,
 				D664C7B62B289AA200CBFA76 /* SubscriptionFlowViewModel.swift in Sources */,
-				EEA4B58B2D89817200D26A25 /* SyncActivationController.swift in Sources */,
 				4BD96E0B2C4DCE55003BC32C /* VPNSnoozeLiveActivityManager.swift in Sources */,
 				9F9A92312C86AAE9001D036D /* OnboardingDebugView.swift in Sources */,
 				1EFDCBC127D2393C00916BC5 /* DownloadsDeleteHelper.swift in Sources */,
