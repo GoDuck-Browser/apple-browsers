@@ -126,10 +126,10 @@ public struct ExtractedLoginInfo {
     public let stretchedPrimaryKey: Data
 }
 
-public struct ConnectInfo {
-    public let deviceID: String
-    public let publicKey: Data
-    public let secretKey: Data
+struct ConnectInfo {
+    let deviceID: String
+    let publicKey: Data
+    let secretKey: Data
 }
 
 public struct ExchangeInfo {
