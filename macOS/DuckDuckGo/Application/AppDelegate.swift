@@ -410,7 +410,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Freemium DBP
         freemiumDBPFeature.subscribeToDependencyUpdates()
 
-        _=NSPopover.swizzleShowRelativeToRectOnce
+        _ = NSPopover.swizzleShowRelativeToRectOnce
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {

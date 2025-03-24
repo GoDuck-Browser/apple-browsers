@@ -598,7 +598,7 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
             settings.isAuthV2Enabled = false
         }
         PacketTunnelProvider.isAuthV2Enabled = settings.isAuthV2Enabled
-        Logger.networkProtection.log("Load isAuthV2Enabled: \(PacketTunnelProvider.isAuthV2Enabled, privacy: .public)")
+        Logger.networkProtection.log("Load isAuthV2Enabled: \(self.settings.isAuthV2Enabled, privacy: .public)")
     }
 
     private func loadAuthToken(from options: StartupOptions) async throws {

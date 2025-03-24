@@ -93,6 +93,7 @@ final class AppDependencyProvider: DependencyProvider {
     let serverInfoObserver: ConnectionServerInfoObserver = ConnectionServerInfoObserverThroughSession()
     let vpnSettings = VPNSettings(defaults: .networkProtectionGroupDefaults)
     let persistentPixel: PersistentPixelFiring = PersistentPixel()
+    let isAuthV2Enabled: Bool
 
     private init() {
         let featureFlaggerOverrides = FeatureFlagLocalOverrides(keyValueStore: UserDefaults(suiteName: FeatureFlag.localOverrideStoreName)!,
@@ -117,12 +118,9 @@ final class AppDependencyProvider: DependencyProvider {
         let tokenStorageV2 = SubscriptionTokenKeychainStorageV2(keychainType: .dataProtection(.named(subscriptionAppGroup))) { keychainType, error in
             Pixel.fire(.privacyProKeychainAccessError, withAdditionalParameters: ["type": keychainType.rawValue, "error": error.errorDescription])
         }
-
-        let isAUthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
-        vpnSettings.isAuthV2Enabled = isAUthV2Enabled
-        if !isAUthV2Enabled {
+        self.isAuthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
+        if !isAuthV2Enabled {
             // V1
-
             Logger.subscription.debug("Configuring Subscription V1")
             vpnSettings.alignTo(subscriptionEnvironment: subscriptionEnvironment)
 
@@ -248,6 +246,8 @@ final class AppDependencyProvider: DependencyProvider {
             authenticationStateProvider = subscriptionManager
             subscriptionAuthV1toV2Bridge = subscriptionManager
         }
+
+        vpnSettings.isAuthV2Enabled = isAuthV2Enabled
         vpnFeatureVisibility = DefaultNetworkProtectionVisibility(authenticationStateProvider: authenticationStateProvider)
         networkProtectionKeychainTokenStore = NetworkProtectionKeychainTokenStore(accessTokenProvider: accessTokenProvider)
         networkProtectionTunnelController = NetworkProtectionTunnelController(tokenHandler: tokenHandler,

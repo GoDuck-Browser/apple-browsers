@@ -169,7 +169,6 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         self.defaults = defaults
         self.accessTokenStorage = accessTokenStorage
         self.subscriptionManagerV2 = subscriptionManagerV2
-
         subscribeToSettingsChanges()
         subscribeToStatusChanges()
         subscribeToConfigurationChanges()
@@ -555,9 +554,8 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
             // started".  Meaning there's no error caught in this start attempt.  There are pixels
             // in the packet tunnel provider side that can be used to debug additional logic.
             //
-            PixelKit.fire(NetworkProtectionPixelEvent.networkProtectionControllerStartSuccess,
-                          frequency: .legacyDailyAndCount)
-            Logger.networkProtection.error("Controller start tunnel success")
+            PixelKit.fire(NetworkProtectionPixelEvent.networkProtectionControllerStartSuccess, frequency: .legacyDailyAndCount)
+            Logger.networkProtection.log("Controller start tunnel success")
         } catch {
             Logger.networkProtection.error("Controller start tunnel failure: \(error, privacy: .public)")
 
@@ -642,10 +640,8 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         var options = [String: NSObject]()
 
         options[NetworkProtectionOptionKey.activationAttemptId] = UUID().uuidString as NSString
-
-        let isAuthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
-        options[NetworkProtectionOptionKey.isAuthV2Enabled] = NSNumber(value: isAuthV2Enabled)
-        if !isAuthV2Enabled {
+        options[NetworkProtectionOptionKey.isAuthV2Enabled] = NSNumber(value: settings.isAuthV2Enabled)
+        if !settings.isAuthV2Enabled {
             Logger.networkProtection.log("Using Auth V1")
             let authToken = try fetchAuthToken()
             options[NetworkProtectionOptionKey.authToken] = authToken
