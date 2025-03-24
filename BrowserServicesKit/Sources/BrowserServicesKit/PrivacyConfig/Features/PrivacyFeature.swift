@@ -119,7 +119,7 @@ public enum DBPSubfeature: String, Equatable, PrivacySubfeature {
     case freemium
 }
 
-public enum ContentScopeExperimentsSubfeatures:  String, Equatable, PrivacySubfeature {
+public enum ContentScopeExperimentsSubfeatures: String, Equatable, PrivacySubfeature {
     public var parent: PrivacyFeature {
         .contentScopeExperiments
     }

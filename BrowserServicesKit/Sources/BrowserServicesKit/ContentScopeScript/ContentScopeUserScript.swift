@@ -148,7 +148,7 @@ public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessa
     public init(_ privacyConfigManager: PrivacyConfigurationManaging,
                 properties: ContentScopeProperties,
                 isIsolated: Bool = false,
-                privacyConfigurationJsonGenerator:  CustomisedPrivacyConfigurationJsonGenerating?
+                privacyConfigurationJsonGenerator: CustomisedPrivacyConfigurationJsonGenerating?
     ) {
         self.isIsolated = isIsolated
         let contextName = self.isIsolated ? "contentScopeScriptsIsolated" : "contentScopeScripts"
