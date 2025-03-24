@@ -55,14 +55,16 @@ struct SuggestionProcessing {
         let queryTokens = lowerQuery.tokenized()
         guard !lowerQuery.isEmpty else { return .empty }
 
-        // STEP 1: Get DDG suggestions that point to a website
-        let duckDuckGoDomainSuggestions = apiResult?.items.compactMap { suggestion -> ScoredSuggestion? in
-            guard suggestion.isNav == true, let phrase = suggestion.phrase,
-                  let url = URL(string: URL.NavigationalScheme.http.separated() + phrase), !isUrlIgnored(url) else { return nil }
-            return ScoredSuggestion(kind: .website, url: url, title: phrase)
-        } ?? []
+        // STEP 1: Get DDG suggestions from the Suggestions API result
+        let duckDuckGoSuggestions = duckDuckGoSuggestions(from: apiResult, isUrlIgnored: isUrlIgnored) ?? []
 
-        // STEP 2: Get best ordered matches from history, bookmarks, open tabs and internal pages (settings, bookmarks…)
+        // STEP 2: filter DDG suggestions that point to a website
+        let duckDuckGoDomainSuggestions = duckDuckGoSuggestions.compactMap { suggestion -> (suggestion: ScoredSuggestion, kinds: Set<ScoredSuggestion.Kind>)? in
+            guard case .website(let url) = suggestion else { return nil }
+            return (ScoredSuggestion(kind: .website, url: url, title: url.absoluteString), [.website])
+        }
+
+        // STEP 3: Get best ordered matches from history, bookmarks, open tabs and internal pages (Settings, Bookmarks…)
         let allHistoryAndBookmarkAndOpenTabSuggestions = [
             bookmarks.compactMap(ScoringService.scored(lowercasedQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
             openTabs.compactMap(ScoringService.scored(lowercasedQuery: lowerQuery, queryTokens: queryTokens, isUrlIgnored: isUrlIgnored)),
@@ -73,39 +75,39 @@ struct SuggestionProcessing {
             .sorted { $0.score > $1.score }
             .prefix(100) // limit max len optimization
 
-        // STEP 3: Combine all navigational suggestions
-        // All bookmark/favorite, history and duckDuckGoDomainSuggestions point directly to a URL browser can navigate to
-        let navigationalSuggestions = Array(allHistoryAndBookmarkAndOpenTabSuggestions) + duckDuckGoDomainSuggestions
-
         // STEP 4: Deduplicate the results by grouping on URL and get the "best" suggestion for each. We also receive
         // a list of SuggestionKind values for each URL to support better categorization below.
-        let dedupedSuggestionTuples = removeDuplicates(navigationalSuggestions)
-            .sorted { $0.suggestion.score > $1.suggestion.score }
+        let dedupedLocalSuggestionTuples = removeDuplicates(allHistoryAndBookmarkAndOpenTabSuggestions)
 
-        // STEP 5: Find Top Hits: normally Website or History suggestions.
-        // Top Hits won't contain Bookmarks unless it is also a Website or History suggestion
+        // STEP 5: Combine all navigational suggestions including the DDG website suggestions
+        // All bookmark/favorite, history and duckDuckGoDomainSuggestions point directly to a URL browser can navigate to
+        let dedupedNavigationalSuggestions = dedupedLocalSuggestionTuples
+            .sorted { $0.suggestion.score > $1.suggestion.score } + duckDuckGoDomainSuggestions
+
+        // STEP 6: Find Top Hits: Website, History Entry or Favorites suggestions.
+        // Top Hits won't contain non-favorite Bookmarks unless it is also a Website or History suggestion
         // at which point the suggestion needs to display that it's a bookmark.
-        let topHitsDeduped = dedupedSuggestionTuples
+        let topHitsDeduped = dedupedNavigationalSuggestions
             .filter { isTopHit($0.suggestion, $0.kinds) }
             .prefix(Self.maximumNumberOfTopHits)
 
-        // STEP 6: Handle special case for open tab suggestions
+        // STEP 7: Handle special case for open tab suggestions
         // If the top suggestion is open tab based and also a history entry, bookmark or favorite
         // we split the open tab/other suggestion into separate suggestions and prioritize
         // the non-open tab suggestion so it can be autocompleted.
         let finalTopHits = handleTopHitsOpenTabCase(topHitsDeduped)
 
-        // STEP 7: Prepare final Top Hits suggestions
+        // STEP 8: Prepare final Top Hits suggestions
         let topHits = finalTopHits.compactMap { Suggestion($0) }
 
-        // STEP 8: Calculate remaining count for history/bookmarks/open tabs section
+        // STEP 9: Calculate remaining count for history/bookmarks/open tabs section
         let countForHistoryAndBookmarksAndOpenTabs = min(
             Self.maximumNumberOfSuggestions - (topHits.count + Self.minimumNumberInSuggestionGroup),
             lowerQuery.count + 1 - topHits.count
         )
 
-        // STEP 9: Build history, bookmarks, and open tabs suggestions
-        let historyAndBookmarksAndOpenTabs = dedupedSuggestionTuples
+        // STEP 10: Build history, bookmarks, and open tabs suggestions
+        let historyAndBookmarksAndOpenTabs = dedupedNavigationalSuggestions
             .filter {
                 guard $0.kinds.intersects([.historyEntry, .bookmark, .favorite, .browserTab, .internalPage]),
                       let suggestion = Suggestion($0.suggestion),
@@ -115,25 +117,38 @@ struct SuggestionProcessing {
             .prefix(countForHistoryAndBookmarksAndOpenTabs)
             .compactMap { Suggestion($0.suggestion) }
 
-        // STEP 10: Build search phrase suggestions
-        let duckDuckGoPhrases = (apiResult?.items ?? [])
-            .compactMap { suggestion -> Suggestion? in
-                guard suggestion.isNav != true, let phrase = suggestion.phrase else { return nil }
-                return Suggestion.phrase(phrase: phrase)
-            }
+        // STEP 11: Filter out website suggestions already present in Top Hits
+        let duckDuckGoPhrasesAndDomainSuggestions = duckDuckGoSuggestions.filter {
+            !topHits.contains($0)
+        }
             .prefix(Self.maximumNumberOfSuggestions - (topHits.count + historyAndBookmarksAndOpenTabs.count))
 
-        // STEP 11: Return final ordered suggestions
+        // STEP 12: Return final ordered suggestions
         return SuggestionResult(
             topHits: topHits,
-            duckduckgoSuggestions: Array(duckDuckGoPhrases),
+            duckduckgoSuggestions: Array(duckDuckGoPhrasesAndDomainSuggestions),
             localSuggestions: historyAndBookmarksAndOpenTabs
         )
     }
 
+    /// Generates a list of phrase and website suggestions from the given API result filtering out the ignored URLs.
+    private func duckDuckGoSuggestions(from result: APIResult?, isUrlIgnored: (URL) -> Bool) -> [Suggestion]? {
+        return result?.items
+            .compactMap { suggestion in
+                guard let phrase = suggestion.phrase else { return nil }
+                if suggestion.isNav == true {
+                    guard let url = URL(string: URL.NavigationalScheme.http.separated() + phrase),
+                          !isUrlIgnored(url) else { return nil }
+                    return .website(url: url)
+                } else {
+                    return .phrase(phrase: phrase)
+                }
+            }
+    }
+
     /// Removes duplicate entries (based on the URL) from a list of suggestions.
     /// When duplicates are found, ones with more info (e.g. bookmarks) will take precedence.
-    private func removeDuplicates(_ suggestions: [ScoredSuggestion]) -> [(suggestion: ScoredSuggestion, kinds: Set<ScoredSuggestion.Kind>)] {
+    private func removeDuplicates(_ suggestions: some Sequence<ScoredSuggestion>) -> [(suggestion: ScoredSuggestion, kinds: Set<ScoredSuggestion.Kind>)] {
         // Group suggestions by normalized URL preserving the keys order
         var orderedKeys = [String]()
         var seenKeys = Set<String>()
