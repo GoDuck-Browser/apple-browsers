@@ -17,8 +17,8 @@
 //  limitations under the License.
 //
 
-import SwiftUI
 import DesignResourcesKit
+import SwiftUI
 
 /// A view that loads an image asynchronously with animation
 struct AnimatedAsyncImage: View {
@@ -106,15 +106,15 @@ struct DuckPlayerMiniPillView: View {
 
                         VStack(alignment: .leading) {
                             Text(UserText.duckPlayerNativeOpenInDuckPlayer)
-                                .daxHeadline()
+                                .daxBodyRegular()
                                 .foregroundColor(Color(designSystemColor: .textPrimary))
-                                .lineLimit(1)
+                                .lineLimit(2)
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
                             Text(viewModel.title)
-                                .daxFootnoteRegular()
-                                .foregroundColor(Color(designSystemColor: .textPrimary))
-                                .lineLimit(1)
+                                .daxBodyRegular()
+                                .foregroundColor(Color(designSystemColor: .textSecondary))
+                                .lineLimit(2)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .layoutPriority(1)
@@ -131,10 +131,13 @@ struct DuckPlayerMiniPillView: View {
                 }
                 .background(Color(designSystemColor: .surface))
                 .cornerRadius(Constants.Layout.cornerRadius)
-                .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
+                .shadow(
+                    color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius,
+                    x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height
+                )
                 .padding(.horizontal, Constants.Layout.regularPadding)
                 .padding(.vertical, Constants.Layout.regularPadding)
-                .padding(.bottom, Constants.Layout.bottomSpacer) // Add padding to cover border during animation                      
+                .padding(.bottom, Constants.Layout.bottomSpacer)  // Add padding to cover border during animation
             }
         }
     }
@@ -145,7 +148,10 @@ struct DuckPlayerMiniPillView: View {
             sheetContent
         }
         .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))
-        .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
+        .shadow(
+            color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width,
+            y: Constants.Layout.shadowOffset.height
+        )
         .offset(y: Constants.Layout.viewOffset)
     }
 }

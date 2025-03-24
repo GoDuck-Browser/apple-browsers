@@ -36,7 +36,7 @@ struct DuckPlayerEntryPillView: View {
             static let vStackSpacing: CGFloat = 4
             static let hStackSpacing: CGFloat = 10
             static let fontSize: CGFloat = 16
-            static let playButtonFont: CGFloat = 20
+            static let playButtonFont: CGFloat = 16
             static let cornerRadius: CGFloat = 12
             static let shadowOpacity: CGFloat = 0.2
             static let shadowRadius: CGFloat = 8
@@ -50,6 +50,15 @@ struct DuckPlayerEntryPillView: View {
         }
     }
 
+    private var playButton: some View {
+        Image(systemName: Constants.playImage)
+            .font(.system(size: Constants.Layout.playButtonFont))
+            .foregroundColor(Color(designSystemColor: .buttonsPrimaryText))
+            .frame(width: iconSize, height: iconSize)
+            .background(Color(designSystemColor: .buttonsPrimaryDefault))
+            .clipShape(Circle())
+    }
+    
     private var grabHandle: some View {
         Capsule()
             .fill(Color(designSystemColor: .textPrimary).opacity(0.3))
@@ -71,30 +80,29 @@ struct DuckPlayerEntryPillView: View {
 
                         VStack(alignment: .leading) {
                             Text(UserText.duckPlayerNativeOpenInDuckPlayer)
-                                .daxHeadline()
+                                .daxSubheadSemibold()
                                 .foregroundColor(Color(designSystemColor: .textPrimary))
-                                .lineLimit(1)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(2)
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
                             Text(UserText.duckPlayerTapToWatchWithoutAds)
-                                .daxFootnoteRegular()
-                                .foregroundColor(Color(designSystemColor: .textPrimary))
+                                .daxBodyRegular()
+                                .foregroundColor(Color(designSystemColor: .textSecondary))
                                 .multilineTextAlignment(.leading)
+                                .lineLimit(2)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .layoutPriority(1)
 
                         Spacer()
 
-                        Image(systemName: Constants.playImage)
-                            .font(.system(size: Constants.Layout.playButtonFont))
-                            .foregroundColor(.white)
-                            .frame(width: iconSize, height: iconSize)
-                            .background(Color.blue)
-                            .clipShape(Circle())
+                        playButton
                     }
                     .padding(Constants.Layout.regularPadding)
                 }
+                .background(Color(designSystemColor: .surface))
+                .environment(\.colorScheme, .dark)
                 .background(Color(designSystemColor: .surface))
                 .cornerRadius(Constants.Layout.cornerRadius)
                 .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)

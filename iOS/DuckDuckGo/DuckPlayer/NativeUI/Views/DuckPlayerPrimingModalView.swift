@@ -26,7 +26,7 @@ struct DuckPlayerPrimingModalView: View {
 
     private enum Constants {
         static let cornerRadius: CGFloat = 12
-        static let spacing: CGFloat = 16
+        static let spacing: CGFloat = 20
         static let buttonHeight: CGFloat = 50
         static let closeButtonSize: CGFloat = 14
         static let maxWidth: CGFloat = 500

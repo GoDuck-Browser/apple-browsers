@@ -1539,8 +1539,9 @@ Take back control of your personal information with the browser designed for dat
     // Duck Player Native UI
     static let duckPlayerNativeWatchOnYouTube = NSLocalizedString("duck-player.native-watch-on-youtube", value: "Watch in Youtube", comment: "Text for the button to watch a video on YouTube")
     static let duckPlayerNativeAutoplayVideos = NSLocalizedString("duck-player.native-autoplay-videos", value: "Autoplay Videos", comment: "Text for the toggle to autoplay videos")
-    static let duckPlayerNativeOpenInDuckPlayer = NSLocalizedString("duck-player.native-open-in-duckplayer", value: "Duck Player", comment: "Text for the button to watch a video on DuckPlayer")
-    public static let duckPlayerTapToWatchWithoutAds = NSLocalizedString("duckplayer.pill.watch.without.ads", value: "Tap to watch without targeted ads", comment: "Caption for Duck Player entry point")
+    static let duckPlayerNativeOpenInDuckPlayer = NSLocalizedString("duck-player.native-open-in-duckplayer", value: "Play this video in Duck Player", comment: "Text for the button to watch a video on DuckPlayer")
+    static let duckPlayerNativeResumeInDuckPlayer = NSLocalizedString("duck-player.native-resume-in-duckplayer", value: "Resume in Duck Player", comment: "Text for the button to resume watching a video on DuckPlayer")
+    public static let duckPlayerTapToWatchWithoutAds = NSLocalizedString("duckplayer.pill.watch.without.ads", value: "No targeted ads, always private", comment: "Caption for Duck Player entry point")
     public static let duckPlayerNativeUseOnSERPLabel = NSLocalizedString("duckPlayerNative.use.on.serp.label", value: "Use on Search Results", comment: "Label for the use DuckPlayer on SERP toggle")
     public static let duckPlayerNativeUseOnSERPFooter = NSLocalizedString("duckPlayerNative.use.on.serp.footer", value: "YouTube videos on DuckDuckGo search results will open in Duck Player.", comment: "Label for the use DuckPlayer on Youtube toggle footer")
     public static let duckPlayerNativeUseOnYoutubeLabel = NSLocalizedString("duckPlayerNative.use.on.youtube.label", value: "Use on Youtube.com", comment: "Label for the use DuckPlayer on Youtube toggle")
