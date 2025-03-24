@@ -73,14 +73,14 @@ final class ContentScopePrivacyConfigurationJsonGeneratorTests: XCTestCase {
             featureFlagger: mockFeatureFlagger,
             privacyConfigurationManager: mockPrivacyConfigurationManager
         )
-        
+
         // WHEN
         guard let data = generator.privacyConfiguration,
               let updatedConfig = try? PrivacyConfigurationData(data: data) else {
             XCTFail("Failed to generate configuration JSON")
             return
         }
-        
+
         // THEN
         XCTAssertEqual(updatedConfig.features["fingerprintingCanvas"]?.state, "enabled")
     }
@@ -113,19 +113,18 @@ final class MockFeatureFlagger: FeatureFlagger {
     var disabledFlags: [String] = []
     var cohort: (any FeatureFlagCohortDescribing)?
 
-
     var allActiveExperiments: Experiments {
         return [:]
     }
 
-    func isFeatureOn<Flag>(for featureFlag: Flag, allowOverride: Bool) -> Bool where Flag : FeatureFlagDescribing {
+    func isFeatureOn<Flag>(for featureFlag: Flag, allowOverride: Bool) -> Bool where Flag: FeatureFlagDescribing {
         if disabledFlags.contains(featureFlag.rawValue) {
             return false
         }
         return true
     }
 
-    func resolveCohort<Flag>(for featureFlag: Flag, allowOverride: Bool) -> (any FeatureFlagCohortDescribing)? where Flag : FeatureFlagDescribing {
+    func resolveCohort<Flag>(for featureFlag: Flag, allowOverride: Bool) -> (any FeatureFlagCohortDescribing)? where Flag: FeatureFlagDescribing {
         return cohort
     }
 

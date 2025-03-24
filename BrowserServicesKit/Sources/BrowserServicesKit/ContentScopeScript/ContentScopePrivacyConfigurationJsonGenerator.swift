@@ -32,7 +32,6 @@ public struct ContentScopePrivacyConfigurationJsonGenerator: CustomisedPrivacyCo
     let featureFlagger: FeatureFlagger
     let privacyConfigurationManager: PrivacyConfigurationManaging
 
-
     /// Initializes the generator with the required feature flagger and privacy configuration manager.
     ///
     /// - Parameters:
@@ -62,7 +61,7 @@ public struct ContentScopePrivacyConfigurationJsonGenerator: CustomisedPrivacyCo
     ///
     /// - Parameter config: A dictionary mapping feature names to their current privacy feature configuration.
     /// - Returns: A new dictionary with updated feature configurations.
-    private func updatedFeatureState(config: [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature]) ->  [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature] {
+    private func updatedFeatureState(config: [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature]) -> [PrivacyConfigurationData.FeatureName: PrivacyConfigurationData.PrivacyFeature] {
         var newConfig = config
         var configsToEnable = [ContentScopeExperimentsFeatureFlags]()
         for experiment in ContentScopeExperimentsFeatureFlags.allCases {
