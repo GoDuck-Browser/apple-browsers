@@ -56,8 +56,13 @@ public final class NetworkProtectionKeychainTokenStore: NetworkProtectionTokenSt
         static let tokenStoreName = "com.duckduckgo.networkprotection.token"
     }
 
-    /// - isSubscriptionEnabled: Controls whether the subscription access token is used to authenticate with the NetP backend
-    /// - accessTokenProvider: Defines how to actually retrieve the subscription access token
+    /// Class initialiser
+    /// - Parameters:
+    ///   - keychainType: The keychain type used for fetching and storing the token.
+    ///   - serviceName: The keychain service name used for fetching and storing the token.
+    ///   - errorEvents: A mapper for error events.
+    ///   - useAccessTokenProvider: if true the class will use the access token provider to fetch the token.
+    ///   - accessTokenProvider: Defines how to actually retrieve the subscription access token.
     public init(keychainType: KeychainType,
                 serviceName: String = Defaults.tokenStoreService,
                 errorEvents: EventMapping<NetworkProtectionError>?,
