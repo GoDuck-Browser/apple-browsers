@@ -46,6 +46,7 @@ public final class PreferencesSubscriptionModel: ObservableObject {
     let featureFlagger: FeatureFlagger
 
     private var subscriptionPlatform: PrivacyProSubscription.Platform?
+    var currentPurchasePlatform: SubscriptionEnvironment.PurchasePlatform { subscriptionManager.currentEnvironment.purchasePlatform }
 
     lazy var sheetModel = SubscriptionAccessViewModel(actionHandlers: sheetActionHandler,
                                                       purchasePlatform: subscriptionManager.currentEnvironment.purchasePlatform)
@@ -259,33 +260,47 @@ public final class PreferencesSubscriptionModel: ObservableObject {
     }
 
     @MainActor
-    func addEmailAction() {
-        handleEmailAction(type: .add)
+    func activationFlowAction() {
+        switch (subscriptionPlatform, hasEmail) {
+        case (.apple, _):
+            handleEmailAction(type: .activationFlow)
+        case (_, false):
+            handleEmailAction(type: .activationFlowAddEmailStep)
+        case (_, true):
+            handleEmailAction(type: .activationFlowLinkViaEmailStep)
+        }
     }
 
     @MainActor
     func editEmailAction() {
-        handleEmailAction(type: .edit)
+        handleEmailAction(type: .editEmail)
     }
 
     private enum SubscriptionEmailActionType {
-        case add, edit
+        case activationFlow, activationFlowAddEmailStep, activationFlowLinkViaEmailStep, editEmail
     }
+
     private func handleEmailAction(type: SubscriptionEmailActionType) {
         let eventType: UserEvent
         let url: URL
 
         switch type {
-        case .add:
+        case .activationFlow:
             eventType = .addDeviceEnterEmail
             url = subscriptionManager.url(for: .activationFlow)
-        case .edit:
+        case .activationFlowAddEmailStep:
+            eventType = .addDeviceEnterEmail
+            url = subscriptionManager.url(for: .activationFlowAddEmailStep)
+        case .activationFlowLinkViaEmailStep:
+            eventType = .addDeviceEnterEmail
+            url = subscriptionManager.url(for: .activationFlowLinkViaEmailStep)
+        case .editEmail:
             eventType = .postSubscriptionAddEmailClick
             url = subscriptionManager.url(for: .manageEmail)
         }
 
         Task {
-            if subscriptionManager.currentEnvironment.purchasePlatform == .appStore {
+            if subscriptionPlatform == .apple && currentPurchasePlatform == .appStore {
                 if #available(macOS 12.0, iOS 15.0, *) {
                     let appStoreAccountManagementFlow = DefaultAppStoreAccountManagementFlow(authEndpointService: subscriptionManager.authEndpointService,
                                                                                              storePurchaseManager: subscriptionManager.storePurchaseManager(),
@@ -359,7 +374,7 @@ public final class PreferencesSubscriptionModel: ObservableObject {
     private func currentStorefrontRegion() -> SubscriptionRegion {
         var region: SubscriptionRegion?
 
-        switch subscriptionManager.currentEnvironment.purchasePlatform {
+        switch currentPurchasePlatform {
         case .appStore:
             if #available(macOS 12.0, *) {
                 region = subscriptionManager.storePurchaseManager().currentStorefrontRegion
@@ -373,19 +388,11 @@ public final class PreferencesSubscriptionModel: ObservableObject {
 
     @MainActor
     private func updateAvailableSubscriptionFeatures() async {
-        let features = await currentSubscriptionFeatures()
+        let features = await subscriptionManager.currentSubscriptionFeatures()
 
         shouldShowVPN = features.contains(.networkProtection)
         shouldShowDBP = features.contains(.dataBrokerProtection)
         shouldShowITR = features.contains(.identityTheftRestoration) || features.contains(.identityTheftRestorationGlobal)
-    }
-
-    private func currentSubscriptionFeatures() async -> [Entitlement.ProductName] {
-        if subscriptionManager.currentEnvironment.purchasePlatform == .appStore {
-            return await subscriptionManager.currentSubscriptionFeatures()
-        } else {
-            return [.networkProtection, .dataBrokerProtection, .identityTheftRestoration]
-        }
     }
 
     @MainActor
@@ -502,6 +509,7 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
     let featureFlagger: FeatureFlagger
 
     private var subscriptionPlatform: PrivacyProSubscription.Platform?
+    var currentPurchasePlatform: SubscriptionEnvironment.PurchasePlatform { subscriptionManager.currentEnvironment.purchasePlatform }
 
     lazy var sheetModel = SubscriptionAccessViewModel(
         actionHandlers: sheetActionHandler,
@@ -726,33 +734,47 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
     }
 
     @MainActor
-    func addEmailAction() {
-        handleEmailAction(type: .add)
+    func activationFlowAction() {
+        switch (subscriptionPlatform, hasEmail) {
+        case (.apple, _):
+            handleEmailAction(type: .activationFlow)
+        case (_, false):
+            handleEmailAction(type: .activationFlowAddEmailStep)
+        case (_, true):
+            handleEmailAction(type: .activationFlowLinkViaEmailStep)
+        }
     }
 
     @MainActor
     func editEmailAction() {
-        handleEmailAction(type: .edit)
+        handleEmailAction(type: .editEmail)
     }
 
     private enum SubscriptionEmailActionType {
-        case add, edit
+        case activationFlow, activationFlowAddEmailStep, activationFlowLinkViaEmailStep, editEmail
     }
     private func handleEmailAction(type: SubscriptionEmailActionType) {
         let eventType: PreferencesSubscriptionModel.UserEvent
         let url: URL
 
         switch type {
-        case .add:
+        case .activationFlow:
             eventType = .addDeviceEnterEmail
             url = subscriptionManager.url(for: .activationFlow)
-        case .edit:
+        case .activationFlowAddEmailStep:
+            eventType = .addDeviceEnterEmail
+            url = subscriptionManager.url(for: .activationFlowAddEmailStep)
+        case .activationFlowLinkViaEmailStep:
+            eventType = .addDeviceEnterEmail
+            url = subscriptionManager.url(for: .activationFlowLinkViaEmailStep)
+        case .editEmail:
             eventType = .postSubscriptionAddEmailClick
             url = subscriptionManager.url(for: .manageEmail)
         }
 
         Task {
-            if subscriptionManager.currentEnvironment.purchasePlatform == .appStore {
+            if subscriptionPlatform == .apple && currentPurchasePlatform == .appStore {
+                // TODO Probably unnecessary, it was required in v1 to attempt authToken refresh
                 if #available(macOS 12.0, iOS 15.0, *) {
                     try await subscriptionManager.getTokenContainer(policy: .localValid)
                 }
@@ -822,7 +844,7 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
     private func currentStorefrontRegion() -> SubscriptionRegion {
         var region: SubscriptionRegion?
 
-        switch subscriptionManager.currentEnvironment.purchasePlatform {
+        switch currentPurchasePlatform {
         case .appStore:
             if #available(macOS 12.0, *) {
                 region = subscriptionManager.storePurchaseManager().currentStorefrontRegion

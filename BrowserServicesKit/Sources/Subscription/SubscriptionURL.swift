@@ -26,6 +26,8 @@ public enum SubscriptionURL {
     case purchase
     case faq
     case activationFlow
+    case activationFlowAddEmailStep
+    case activationFlowLinkViaEmailStep
     case activateViaEmail
     case addEmail
     case manageEmail
@@ -51,6 +53,10 @@ public enum SubscriptionURL {
                 StaticURLs.helpPagesURL
             case .activationFlow:
                 baseURL.appendingPathComponent("activation-flow")
+            case .activationFlowAddEmailStep:
+                baseURL.appendingPathComponent("activation-flow/another-device/add-email")
+            case .activationFlowLinkViaEmailStep:
+                baseURL.appendingPathComponent("activation-flow/another-device/email")
             case .activateViaEmail:
                 baseURL.appendingPathComponent("activate")
             case .addEmail:

@@ -251,24 +251,21 @@ public struct PreferencesSubscriptionViewV1: View {
     private var activateSection: some View {
         PreferencePaneSection {
             TextMenuItemHeader(UserText.activateSectionTitle, bottomPadding: 0)
+            Text(.init(UserText.activateSectionCaption(hasEmail: model.hasEmail, purchasePlatform: model.currentPurchasePlatform))) // required to parse markdown formatting
+                .onURLTap(onTap: { url in
+                    model.openLearnMore(url)
+                })
+                .foregroundColor(Color(.textSecondary))
+
             if model.hasEmail {
-                Text(.init(UserText.activateSectionWithEmailCaption)) // required to parse markdown formatting
-                    .onURLTap(onTap: { url in
-                        model.openLearnMore(url)
-                    })
-                    .foregroundColor(Color(.textSecondary))
-                    .padding(.bottom, 2)
-
                 emailView
-            } else {
-                Text(.init(UserText.activateSectionNoEmailCaption)) // required to parse markdown formatting
-                    .onURLTap(onTap: { url in
-                        model.openLearnMore(url)
-                    })
-                    .foregroundColor(Color(.textSecondary))
-                    .padding(.bottom, 8)
+                    .padding(.top, 2)
 
-                TextButton(UserText.addEmailButton, weight: .semibold) { model.addEmailAction() }
+                TextButton(UserText.addToDeviceLinkTitle, weight: .semibold) { model.activationFlowAction() }
+                    .padding(.top, 8)
+            } else {
+                Button(UserText.addToDeviceButtonTitle) { model.activationFlowAction() }
+                    .padding(.top, 4)
             }
         }
     }
@@ -612,24 +609,21 @@ public struct PreferencesSubscriptionViewV2: View {
     private var activateSection: some View {
         PreferencePaneSection {
             TextMenuItemHeader(UserText.activateSectionTitle, bottomPadding: 0)
+            Text(.init(UserText.activateSectionCaption(hasEmail: model.hasEmail, purchasePlatform: model.currentPurchasePlatform))) // required to parse markdown formatting
+                .onURLTap(onTap: { url in
+                    model.openLearnMore(url)
+                })
+                .foregroundColor(Color(.textSecondary))
+
             if model.hasEmail {
-                Text(.init(UserText.activateSectionWithEmailCaption)) // required to parse markdown formatting
-                    .onURLTap(onTap: { url in
-                        model.openLearnMore(url)
-                    })
-                    .foregroundColor(Color(.textSecondary))
-                    .padding(.bottom, 2)
-
                 emailView
-            } else {
-                Text(.init(UserText.activateSectionNoEmailCaption)) // required to parse markdown formatting
-                    .onURLTap(onTap: { url in
-                        model.openLearnMore(url)
-                    })
-                    .foregroundColor(Color(.textSecondary))
-                    .padding(.bottom, 8)
+                    .padding(.top, 2)
 
-                TextButton(UserText.addEmailButton, weight: .semibold) { model.addEmailAction() }
+                TextButton(UserText.addToDeviceLinkTitle, weight: .semibold) { model.activationFlowAction() }
+                    .padding(.top, 8)
+            } else {
+                Button(UserText.addToDeviceButtonTitle) { model.activationFlowAction() }
+                    .padding(.top, 4)
             }
         }
     }

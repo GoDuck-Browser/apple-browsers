@@ -3077,7 +3077,7 @@
     },
     "subscription.preferences.subscription.activate.add.email.button" : {
       "comment" : "Button for adding email address to subscription",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3197,7 +3197,7 @@
     },
     "subscription.preferences.subscription.activate.no.email.caption" : {
       "comment" : "Caption for the subscription preferences activate section when email is not added to subscription",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3257,7 +3257,7 @@
     },
     "subscription.preferences.subscription.activate.title" : {
       "comment" : "Title for the subscription preferences activate section",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -3321,55 +3321,55 @@
       "localizations" : {
         "de" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Verwende diese E-Mail-Adresse, um dein Abonnement in der DuckDuckGo-App unter Einstellungen > Privacy Pro auf deinen anderen Geräten zu aktivieren. [Mehr erfahren](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Use this email to activate your subscription in Settings > Privacy Pro in the DuckDuckGo app on your other devices. [Learn more](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
+            "value" : "Use this email to add your subscription to other devices. In the DuckDuckGo browser, go to Settings > Privacy Pro > I Have a Subscription. [Learn more](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
           }
         },
         "es" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Utiliza este correo electrónico para activar tu suscripción en Configuración > Privacy Pro en la aplicación DuckDuckGo en tus otros dispositivos. [Más información](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Utilisez cet e-mail pour activer votre abonnement dans Réglages > Privacy Pro dans l'application DuckDuckGo sur vos autres appareils. [En savoir plus](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
           }
         },
         "it" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Usa questa e-mail per attivare il tuo abbonamento in Impostazioni > Privacy Pro nell'app DuckDuckGo sugli altri tuoi dispositivi. [Scopri di più](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
           }
         },
         "nl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Gebruik deze e-mail om je abonnement te activeren in 'Instellingen' > 'Privacy Pro' in de DuckDuckGo-app op je andere apparaten. [Meer informatie](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
           }
         },
         "pl" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Użyj tego adresu e-mail, aby aktywować subskrypcję poprzez wybór opcji Ustawienia > Privacy Pro w aplikacji DuckDuckGo na innych urządzeniach. [Więcej informacji](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
           }
         },
         "pt" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Utiliza este e-mail para ativares a tua subscrição em Definições > Privacy Pro na aplicação DuckDuckGo nos teus restantes dispositivos. [Sabe mais](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
           }
         },
         "ru" : {
           "stringUnit" : {
-            "state" : "translated",
+            "state" : "needs_review",
             "value" : "Используйте этот адрес для активации подписки в разделе «Настройки > Privacy Pro» в приложении DuckDuckGo на других устройствах. [Подробнее...](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
           }
         }
@@ -3731,6 +3731,66 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ваша годовая подписка продлится %@."
+          }
+        }
+      }
+    },
+    "subscription.preferences.subscription.add.to.device.button.title" : {
+      "comment" : "Button for adding subscription to other devices",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add to Device..."
+          }
+        }
+      }
+    },
+    "subscription.preferences.subscription.add.to.device.link.title" : {
+      "comment" : "Button for adding subscription to other devices",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add to Device"
+          }
+        }
+      }
+    },
+    "subscription.preferences.subscription.add.to.device.no.email.app.store.caption" : {
+      "comment" : "Caption for the subscription preferences section for activating subscription on other devices while email is not yet added to subscription",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add Privacy Pro to your other devices via Apple Account or by linking an email. [Learn more](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
+          }
+        }
+      }
+    },
+    "subscription.preferences.subscription.add.to.device.no.email.stripe.caption" : {
+      "comment" : "Caption for the subscription preferences section for activating subscription on other devices while email is not yet added to subscription",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add Privacy Pro to your other devices by linking an email. [Learn more](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)"
+          }
+        }
+      }
+    },
+    "subscription.preferences.subscription.add.to.device.title" : {
+      "comment" : "Title for the subscription preferences section for adding subscription to other devices",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Add Privacy Pro to Other Devices"
           }
         }
       }
