@@ -113,12 +113,11 @@ final class FindInPageViewController: NSViewController {
     private func subscribeToModelChanges() {
         modelCancellables.forEach { $0.cancel() }
         modelCancellables.removeAll()
-        $model.receive(on: DispatchQueue.main).sink { [weak self] _ in
+        $model.receive(on: DispatchQueue.main).sink { [weak self, weak model] _ in
 
             self?.updateFieldStates()
 
-            guard let self = self,
-                  let model = self.model else { return }
+            guard let self, let model else { return }
 
             model.$text.receive(on: DispatchQueue.main).sink { [weak self] text in
                 self?.textField.stringValue = text
