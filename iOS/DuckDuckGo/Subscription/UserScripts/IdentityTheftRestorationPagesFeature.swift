@@ -39,6 +39,7 @@ final class IdentityTheftRestorationPagesFeature: Subfeature, ObservableObject {
 
     struct Handlers {
         static let getAccessToken = "getAccessToken"
+        static let getAuthAccessToken = "getAuthAccessToken"
     }
         
     private let subscriptionManager: any SubscriptionAuthV1toV2Bridge
@@ -63,6 +64,7 @@ final class IdentityTheftRestorationPagesFeature: Subfeature, ObservableObject {
     func handler(forMethodNamed methodName: String) -> Subfeature.Handler? {
         switch methodName {
         case Handlers.getAccessToken: return getAccessToken
+        case Handlers.getAuthAccessToken: return getAuthAccessToken
         default:
             return nil
         }
@@ -75,7 +77,16 @@ final class IdentityTheftRestorationPagesFeature: Subfeature, ObservableObject {
             return [String: String]()
         }
     }
-    
+
+    struct AccessTokenValue: Codable {
+        let accessToken: String
+    }
+
+    func getAuthAccessToken(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        let accessToken = try? await subscriptionManager.getAccessToken()
+        return AccessTokenValue(accessToken: accessToken ?? "")
+    }
+
     deinit {
         broker = nil
     }

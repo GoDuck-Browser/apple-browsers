@@ -97,6 +97,7 @@ final class IdentityTheftRestorationPagesFeature: Subfeature {
     func handler(forMethodNamed methodName: String) -> Subfeature.Handler? {
         switch methodName {
         case "getAccessToken": return getAccessToken
+        case "getAuthAccessToken": return getAuthAccessToken
         case "getFeatureConfig": return getFeatureConfig
         case "openSendFeedbackModal": return openSendFeedbackModal
         default:
@@ -110,6 +111,11 @@ final class IdentityTheftRestorationPagesFeature: Subfeature {
         } else {
             return [String: String]()
         }
+    }
+
+    func getAuthAccessToken(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        let accessToken = try? await subscriptionManager.getAccessToken()
+        return SubscriptionPagesUseSubscriptionFeatureV2.AccessTokenValue(accessToken: accessToken ?? "")
     }
 
     func getFeatureConfig(params: Any, original: WKScriptMessage) async throws -> Encodable? {

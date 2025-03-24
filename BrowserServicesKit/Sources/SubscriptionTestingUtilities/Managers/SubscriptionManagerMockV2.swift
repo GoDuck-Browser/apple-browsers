@@ -22,6 +22,7 @@ import Common
 @testable import Subscription
 
 public final class SubscriptionManagerMockV2: SubscriptionManagerV2 {
+    
     public var email: String?
 
     public init() {}
@@ -213,6 +214,16 @@ public final class SubscriptionManagerMockV2: SubscriptionManagerV2 {
             case .unknown:
                 return nil
             }
+        }
+    }
+
+    public var adoptResult: Result<Networking.TokenContainer, Error>?
+    public func adopt(accessToken: String, refreshToken: String) async throws {
+        switch adoptResult! {
+        case .success(let result):
+            self.resultTokenContainer = result
+        case .failure(let error):
+            throw error
         }
     }
 }

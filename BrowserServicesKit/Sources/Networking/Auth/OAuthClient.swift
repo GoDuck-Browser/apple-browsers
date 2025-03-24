@@ -101,6 +101,9 @@ public protocol OAuthClient {
     /// Use the TokenContainer provided
     func adopt(tokenContainer: TokenContainer)
 
+    // Creates a TokenContainer with the provided access token and refresh token, decodes them and returns the container
+    func decode(accessToken: String, refreshToken: String) async throws -> TokenContainer
+
     /// Activate the account with a platform signature
     /// - Parameter signature: The platform signature
     /// - Returns: A container of tokens
@@ -177,7 +180,8 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
 
     private var testingDecodedTokenContainer: TokenContainer?
 #endif
-    func decode(accessToken: String, refreshToken: String) async throws -> TokenContainer {
+
+    public func decode(accessToken: String, refreshToken: String) async throws -> TokenContainer {
         Logger.OAuthClient.log("Decoding tokens")
 
 #if DEBUG
