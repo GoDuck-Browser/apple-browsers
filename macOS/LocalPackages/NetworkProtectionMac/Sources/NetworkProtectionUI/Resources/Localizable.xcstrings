@@ -53,6 +53,18 @@
         }
       }
     },
+    "Don't Ask Again" : {
+
+    },
+    "Exclude a Website" : {
+
+    },
+    "Exclude an App" : {
+
+    },
+    "Is the VPN causing problems with a Website or App?" : {
+
+    },
     "network.protection.autoconnect.tip.enable" : {
       "comment" : "Action to enable auto-connect",
       "extractionState" : "extracted_with_value",
@@ -3718,6 +3730,12 @@
           }
         }
       }
+    },
+    "Turn off VPN" : {
+
+    },
+    "You can exclude websites and apps from the VPN without turning it off." : {
+
     }
   },
   "version" : "1.0"

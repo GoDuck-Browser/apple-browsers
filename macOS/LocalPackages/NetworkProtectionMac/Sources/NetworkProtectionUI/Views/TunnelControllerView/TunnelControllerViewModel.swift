@@ -21,6 +21,7 @@ import Foundation
 import NetworkProtection
 import NetworkProtectionProxy
 import SwiftUI
+import SwiftUIExtensions
 import TipKit
 
 @MainActor
@@ -270,6 +271,9 @@ public final class TunnelControllerViewModel: ObservableObject {
             if newValue {
                 self.startNetworkProtection()
             } else {
+                Task {
+                    await VPNExclusionSuggestionAlert().show()
+                }
                 self.stopNetworkProtection()
             }
         }
