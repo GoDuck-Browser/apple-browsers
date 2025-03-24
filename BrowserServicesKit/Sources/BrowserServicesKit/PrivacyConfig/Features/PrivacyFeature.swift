@@ -70,7 +70,6 @@ public enum PrivacyFeature: String {
     case webViewStateRestoration
     case experimentalBrowserTheming
     case setAsDefaultAndAddToDock
-    case onboarding
     case contentScopeExperiments
     case extendedOnboarding
 }

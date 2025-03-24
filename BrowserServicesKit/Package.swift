@@ -639,14 +639,6 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "ContentScopeTests",
-            dependencies: [
-                .product(name: "ContentScopeScripts", package: "content-scope-scripts"),
-                "BrowserServicesKitTestsUtils",
-                "BrowserServicesKit"
-            ]
-        ),
-        .testTarget(
             name: "SyncDataProvidersTests",
             dependencies: [
                 "BookmarksTestsUtils",
