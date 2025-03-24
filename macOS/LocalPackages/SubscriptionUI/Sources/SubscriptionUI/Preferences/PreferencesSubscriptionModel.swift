@@ -278,7 +278,7 @@ public final class PreferencesSubscriptionModel: ObservableObject {
         switch type {
         case .add:
             eventType = .addDeviceEnterEmail
-            url = subscriptionManager.url(for: .addEmail)
+            url = subscriptionManager.url(for: .activationFlow)
         case .edit:
             eventType = .postSubscriptionAddEmailClick
             url = subscriptionManager.url(for: .manageEmail)
@@ -745,7 +745,7 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
         switch type {
         case .add:
             eventType = .addDeviceEnterEmail
-            url = subscriptionManager.url(for: .addEmail)
+            url = subscriptionManager.url(for: .activationFlow)
         case .edit:
             eventType = .postSubscriptionAddEmailClick
             url = subscriptionManager.url(for: .manageEmail)
