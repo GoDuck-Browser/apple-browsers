@@ -176,23 +176,19 @@ final class MainViewController: NSViewController {
         showSetAsDefaultAndAddToDockIfNeeded()
     }
 
-    var bookmarkBarPromptObserver: Any?
+    private var bookmarkBarPromptCancellable: AnyCancellable?
     func registerForBookmarkBarPromptNotifications() {
         guard !bookmarksBarViewController.bookmarksBarPromptShown else { return }
-        bookmarkBarPromptObserver = NotificationCenter.default.addObserver(
-            forName: .bookmarkPromptShouldShow,
-            object: nil,
-            queue: .main) { [weak self] _ in
+        bookmarkBarPromptCancellable = NotificationCenter.default.publisher(for: .bookmarkPromptShouldShow)
+            .sink { [weak self] _ in
                 self?.showBookmarkPromptIfNeeded()
-        }
+            }
     }
 
     override func viewDidDisappear() {
         super.viewDidDisappear()
         mainView.setMouseAboveWebViewTrackingAreaEnabled(false)
-        if let bookmarkBarPromptObserver {
-            NotificationCenter.default.removeObserver(bookmarkBarPromptObserver)
-        }
+        bookmarkBarPromptCancellable?.cancel()
     }
 
     override func viewWillAppear() {
