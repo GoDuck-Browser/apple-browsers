@@ -44,7 +44,6 @@ public final class SubscriptionAccessViewModel {
 
     public func handleEmailAction() {
         actionHandlers.openActivateViaEmailURL()
-        actionHandlers.uiActionHandler(.activateAddEmailClick)
     }
 
     public func handleRestorePurchaseAction() {
