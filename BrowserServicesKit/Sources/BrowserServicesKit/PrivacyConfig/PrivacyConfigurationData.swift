@@ -414,7 +414,9 @@ extension PrivacyConfigurationData.PrivacyFeature {
         var dict: [String: Any] = [:]
         dict[CodingKeys.state.rawValue] = state
         dict[CodingKeys.exceptions.rawValue] = exceptions.map { $0.toJSONDictionary() }
-        dict[CodingKeys.settings.rawValue] = settings
+        if !settings.isEmpty {
+            dict[CodingKeys.settings.rawValue] = settings
+        }
 
         // Encode nested features if any.
         var featuresDict = [String: Any]()
@@ -423,7 +425,9 @@ extension PrivacyConfigurationData.PrivacyFeature {
                 featuresDict[key] = featureJSON
             }
         }
-        dict[CodingKeys.features.rawValue] = featuresDict
+        if !featuresDict.isEmpty {
+            dict[CodingKeys.features.rawValue] = featuresDict
+        }
 
         if let minVersion = minSupportedVersion {
             dict[CodingKeys.minSupportedVersion.rawValue] = minVersion
@@ -453,7 +457,13 @@ extension PrivacyConfigurationData.PrivacyFeature.Feature {
             dict[CodingKeys.targets.rawValue] = targets.map { $0.toJSONDictionary() }
         }
         if let settings = settings {
-            dict[CodingKeys.settings.rawValue] = settings
+            // Attempt to convert the settings JSON string back to an object
+            if let settingsData = settings.data(using: .utf8),
+               let settingsObject = try? JSONSerialization.jsonObject(with: settingsData, options: []) {
+                dict[CodingKeys.settings.rawValue] = settingsObject
+            } else {
+                dict[CodingKeys.settings.rawValue] = settings
+            }
         }
         return dict
     }
@@ -495,9 +505,9 @@ extension PrivacyConfigurationData.Cohort {
 }
 
 extension PrivacyConfigurationData.TrackerAllowlist {
-    // Encodes TrackerAllowlist
     func toTrackerAllowListJSONDictionary() -> [String: Any]? {
-        var trackerDict = [String: Any]()
+        guard var baseDict = self.toJSONDictionary() else { return nil }
+
         var allowlistedTrackers = [String: Any]()
         for (trackerDomain, entries) in entries {
             let rules = entries.map { entry -> [String: Any] in
@@ -505,7 +515,9 @@ extension PrivacyConfigurationData.TrackerAllowlist {
             }
             allowlistedTrackers[trackerDomain] = ["rules": rules]
         }
-        trackerDict["allowlistedTrackers"] = allowlistedTrackers
-        return trackerDict
+
+        // Insert the allowlistedTrackers into the base dictionary's settings.
+        baseDict[PrivacyConfigurationData.PrivacyFeature.CodingKeys.settings.rawValue] = ["allowlistedTrackers": allowlistedTrackers]
+        return baseDict
     }
 }
