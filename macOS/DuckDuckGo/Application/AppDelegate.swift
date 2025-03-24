@@ -148,7 +148,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let authManager = DataBrokerAuthenticationManagerBuilder.buildAuthenticationManager(subscriptionManager: subscriptionAuthV1toV2Bridge)
         return DataBrokerProtectionSubscriptionEventHandler(featureDisabler: DataBrokerProtectionFeatureDisabler(),
                                                             authenticationManager: authManager,
-                                                            pixelHandler: DataBrokerProtectionPixelsHandler())
+                                                            pixelHandler: DataBrokerProtectionMacOSPixelsHandler())
     }()
 
     private var didFinishLaunching = false
@@ -410,7 +410,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Freemium DBP
         freemiumDBPFeature.subscribeToDependencyUpdates()
 
-        _=NSPopover.swizzleShowRelativeToRectOnce
+        _ = NSPopover.swizzleShowRelativeToRectOnce
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {

@@ -169,7 +169,6 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         self.defaults = defaults
         self.accessTokenStorage = accessTokenStorage
         self.subscriptionManagerV2 = subscriptionManagerV2
-
         subscribeToSettingsChanges()
         subscribeToStatusChanges()
         subscribeToConfigurationChanges()
@@ -200,6 +199,8 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
             switch session.status {
             case .connected:
                 try await enableOnDemand(tunnelManager: manager)
+            case .invalid:
+                clearInternalManager()
             default:
                 break
             }
@@ -536,6 +537,8 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
 
     /// Starts the VPN connection
     ///
+    /// Handles all the top level error management logic.
+    ///
     func start() async {
         Logger.networkProtection.log("Start VPN")
         VPNOperationErrorRecorder().beginRecordingControllerStart()
@@ -544,49 +547,17 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         controllerErrorStore.lastErrorMessage = nil
 
         do {
-#if NETP_SYSTEM_EXTENSION
-            try await activateSystemExtension { [weak self] in
-                // If we're waiting for user approval we wanna make sure the
-                // onboarding step is set correctly.  This can be useful to
-                // help prevent the value from being de-synchronized.
-                self?.onboardingStatusRawValue = OnboardingStatus.isOnboarding(step: .userNeedsToAllowExtension).rawValue
-            }
-#endif
-
-            let tunnelManager: NETunnelProviderManager
-
-            do {
-                tunnelManager = try await loadOrMakeTunnelManager()
-            } catch {
-                if case NEVPNError.configurationReadWriteFailed = error {
-                    onboardingStatusRawValue = OnboardingStatus.isOnboarding(step: .userNeedsToAllowVPNConfiguration).rawValue
-
-                    throw StartError.cancelled
-                }
-
-                throw error
-            }
-            onboardingStatusRawValue = OnboardingStatus.completed.rawValue
-
-            switch tunnelManager.connection.status {
-            case .invalid:
-                throw StartError.connectionStatusInvalid
-            case .connected:
-                throw StartError.connectionAlreadyStarted
-            default:
-                try await start(tunnelManager)
-
-                // It's important to note that we've seen instances where the above call to start()
-                // doesn't throw any errors, yet the tunnel fails to start.  In any case this pixel
-                // should be interpreted as "the controller successfully requested the tunnel to be
-                // started".  Meaning there's no error caught in this start attempt.  There are pixels
-                // in the packet tunnel provider side that can be used to debug additional logic.
-                //
-                PixelKit.fire(NetworkProtectionPixelEvent.networkProtectionControllerStartSuccess,
-                              frequency: .legacyDailyAndCount)
-            }
+            try await start(isFirstAttempt: true)
+            // It's important to note that we've seen instances where the call to start() the VPN
+            // doesn't throw any errors, yet the tunnel fails to start.  In any case this pixel
+            // should be interpreted as "the controller successfully requested the tunnel to be
+            // started".  Meaning there's no error caught in this start attempt.  There are pixels
+            // in the packet tunnel provider side that can be used to debug additional logic.
+            //
+            PixelKit.fire(NetworkProtectionPixelEvent.networkProtectionControllerStartSuccess, frequency: .legacyDailyAndCount)
+            Logger.networkProtection.log("Controller start tunnel success")
         } catch {
-            Logger.networkProtection.error("Starting tunnel error: \(error, privacy: .public)")
+            Logger.networkProtection.error("Controller start tunnel failure: \(error, privacy: .public)")
 
             VPNOperationErrorRecorder().recordControllerStartFailure(error)
             knownFailureStore.lastKnownFailure = KnownFailure(error)
@@ -608,14 +579,69 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         }
     }
 
+    private func start(isFirstAttempt: Bool) async throws {
+#if NETP_SYSTEM_EXTENSION
+        try await activateSystemExtension { [weak self] in
+            // If we're waiting for user approval we wanna make sure the
+            // onboarding step is set correctly.  This can be useful to
+            // help prevent the value from being de-synchronized.
+            self?.onboardingStatusRawValue = OnboardingStatus.isOnboarding(step: .userNeedsToAllowExtension).rawValue
+        }
+
+        self.controllerErrorStore.lastErrorMessage = nil
+
+        // We'll only update to completed if we were showing the onboarding step to
+        // allow the system extension.  Otherwise we may override the allow-VPN
+        // onboarding step.
+        //
+        // Additionally if the onboarding step was allowing the system extension, we won't
+        // start the tunnel at once, and instead require that the user enables the toggle.
+        //
+        if onboardingStatusRawValue == OnboardingStatus.isOnboarding(step: .userNeedsToAllowExtension).rawValue {
+            onboardingStatusRawValue = OnboardingStatus.isOnboarding(step: .userNeedsToAllowVPNConfiguration).rawValue
+            return
+        }
+#endif
+
+        let tunnelManager: NETunnelProviderManager
+
+        do {
+            tunnelManager = try await loadOrMakeTunnelManager()
+        } catch {
+            if case NEVPNError.configurationReadWriteFailed = error {
+                onboardingStatusRawValue = OnboardingStatus.isOnboarding(step: .userNeedsToAllowVPNConfiguration).rawValue
+
+                throw StartError.cancelled
+            }
+
+            throw error
+        }
+        onboardingStatusRawValue = OnboardingStatus.completed.rawValue
+
+        switch tunnelManager.connection.status {
+        case .invalid:
+            // This means the VPN isn't configured, so let's drop our cached
+            // manager and try again
+
+            guard isFirstAttempt else {
+                throw StartError.connectionStatusInvalid
+            }
+
+            await clearInternalManager()
+            try await start(isFirstAttempt: false)
+        case .connected:
+            throw StartError.connectionAlreadyStarted
+        default:
+            try await start(tunnelManager)
+        }
+    }
+
     private func start(_ tunnelManager: NETunnelProviderManager) async throws {
         var options = [String: NSObject]()
 
         options[NetworkProtectionOptionKey.activationAttemptId] = UUID().uuidString as NSString
-
-        let isAuthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
-        options[NetworkProtectionOptionKey.isAuthV2Enabled] = NSNumber(value: isAuthV2Enabled)
-        if !isAuthV2Enabled {
+        options[NetworkProtectionOptionKey.isAuthV2Enabled] = NSNumber(value: settings.isAuthV2Enabled)
+        if !settings.isAuthV2Enabled {
             Logger.networkProtection.log("Using Auth V1")
             let authToken = try fetchAuthToken()
             options[NetworkProtectionOptionKey.authToken] = authToken
