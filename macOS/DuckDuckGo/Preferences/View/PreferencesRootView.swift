@@ -179,7 +179,7 @@ enum Preferences {
 
             let sheetActionHandler = SubscriptionAccessActionHandlers(
                 openActivateViaEmailURL: {
-                    let url = subscriptionManager.url(for: .activateViaEmail)
+                    let url = subscriptionManager.url(for: .activationFlow)
                     WindowControllersManager.shared.showTab(with: .subscription(url))
                 }, restorePurchases: {
                     if #available(macOS 12.0, *) {
@@ -342,7 +342,7 @@ enum Preferences {
 
             let sheetActionHandler = SubscriptionAccessActionHandlers(
                 openActivateViaEmailURL: {
-                    let url = subscriptionManager.url(for: .activateViaEmail)
+                    let url = subscriptionManager.url(for: .activationFlow)
                     WindowControllersManager.shared.showTab(with: .subscription(url))
                 }, restorePurchases: {
                     if #available(macOS 12.0, *) {

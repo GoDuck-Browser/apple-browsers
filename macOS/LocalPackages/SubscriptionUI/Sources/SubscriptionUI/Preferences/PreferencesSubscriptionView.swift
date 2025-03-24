@@ -131,7 +131,12 @@ public struct PreferencesSubscriptionViewV1: View {
             Button(UserText.purchaseButton) { model.purchaseAction() }
                 .buttonStyle(DefaultActionButtonStyle(enabled: true))
             Button(UserText.haveSubscriptionButton) {
-                showingActivateSubscriptionSheet.toggle()
+                if model.shouldDirectlyLaunchActivationFlow {
+                    model.sheetModel.handleEmailAction()
+                } else {
+                    showingActivateSubscriptionSheet.toggle()
+                }
+
                 model.userEventHandler(.iHaveASubscriptionClick)
             }
             .buttonStyle(DismissActionButtonStyle())

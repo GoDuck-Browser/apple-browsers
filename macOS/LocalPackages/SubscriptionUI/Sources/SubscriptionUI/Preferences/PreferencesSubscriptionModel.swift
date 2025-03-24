@@ -50,6 +50,10 @@ public final class PreferencesSubscriptionModel: ObservableObject {
     lazy var sheetModel = SubscriptionAccessViewModel(actionHandlers: sheetActionHandler,
                                                       purchasePlatform: subscriptionManager.currentEnvironment.purchasePlatform)
 
+    var shouldDirectlyLaunchActivationFlow: Bool {
+        !isUserAuthenticated && subscriptionManager.currentEnvironment.purchasePlatform == .stripe
+    }
+
     private let subscriptionManager: SubscriptionManager
     private var accountManager: AccountManager {
         subscriptionManager.accountManager
@@ -502,6 +506,10 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
     lazy var sheetModel = SubscriptionAccessViewModel(
         actionHandlers: sheetActionHandler,
         purchasePlatform: subscriptionManager.currentEnvironment.purchasePlatform)
+
+    var shouldDirectlyLaunchActivationFlow: Bool {
+        !isUserAuthenticated && subscriptionManager.currentEnvironment.purchasePlatform == .stripe
+    }
 
     private let subscriptionManager: SubscriptionManagerV2
     private let openURLHandler: (URL) -> Void
