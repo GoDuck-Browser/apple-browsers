@@ -478,12 +478,9 @@ final class BrowserTabViewController: NSViewController {
             return
         }
 
-        var onDismissAction: () -> Void = {}
-        if let webViewContainer {
-            onDismissAction = { [weak self] in
-                guard let self else { return }
-                self.removeChild(in: self.containerStackView, webViewContainer: webViewContainer)
-            }
+        let onDismissAction: () -> Void = { [weak self, weak webViewContainer] in
+            guard let self, let webViewContainer else { return }
+            self.removeChild(in: self.containerStackView, webViewContainer: webViewContainer)
         }
 
         let onGotItPressed = { [weak self] in
