@@ -477,24 +477,25 @@ final class Fire {
         return Set(accounts.compactMap { $0.domain })
     }
 
-    @MainActor
     private func burnFavicons(completion: @escaping () -> Void) {
-        let autofillDomains = autofillDomains()
-        self.faviconManagement.burnExcept(fireproofDomains: FireproofDomains.shared,
-                                          bookmarkManager: LocalBookmarkManager.shared,
-                                          savedLogins: autofillDomains,
-                                          completion: completion)
+        Task { @MainActor in
+            await self.faviconManagement.burn(except: FireproofDomains.shared,
+                                              bookmarkManager: LocalBookmarkManager.shared,
+                                              savedLogins: autofillDomains())
+            completion()
+        }
     }
 
     @MainActor
     private func burnFavicons(for baseDomains: Set<String>, completion: @escaping () -> Void) {
-        let autofillDomains = autofillDomains()
-        self.faviconManagement.burnDomains(baseDomains,
-                                           exceptBookmarks: LocalBookmarkManager.shared,
-                                           exceptSavedLogins: autofillDomains,
-                                           exceptExistingHistory: historyCoordinating.history ?? [],
-                                           tld: tld,
-                                           completion: completion)
+        Task { @MainActor in
+            await self.faviconManagement.burnDomains(baseDomains,
+                                                     exceptBookmarks: LocalBookmarkManager.shared,
+                                                     exceptSavedLogins: autofillDomains(),
+                                                     exceptExistingHistory: historyCoordinating.history ?? [],
+                                                     tld: tld)
+            completion()
+        }
     }
 
     // MARK: - Tabs

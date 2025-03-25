@@ -443,7 +443,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         LottieConfiguration.shared.renderingEngine = .mainThread
 
         if case .normal = AppVersion.runType {
-            FaviconManager.shared.loadFavicons()
+            Task {
+                try? await FaviconManager.shared.loadFavicons()
+            }
         }
         configurationManager.start()
         _ = DownloadListCoordinator.shared
