@@ -36,7 +36,7 @@ PRODUCT_MODULE_NAME = $(APP_STORE_PRODUCT_MODULE_NAME_OVERRIDE:default=$(DEFAULT
 PRODUCT_NAME_PREFIX[config=Debug][arch=*][sdk=*] = DuckDuckGo App Store
 PRODUCT_NAME_PREFIX[config=CI][arch=*][sdk=*] = DuckDuckGo App Store
 PRODUCT_NAME_PREFIX[config=Review][arch=*][sdk=*] = DuckDuckGo App Store
-PRODUCT_NAME_PREFIX[config=Release][arch=*][sdk=*] = DuckDuckGo App Store
+PRODUCT_NAME_PREFIX[config=Release][arch=*][sdk=*] = DuckDuckGo
 
 PRODUCT_NAME[config=Debug][arch=*][sdk=*] = $(PRODUCT_NAME_PREFIX)
 PRODUCT_NAME[config=CI][arch=*][sdk=*] = $(PRODUCT_NAME_PREFIX)
