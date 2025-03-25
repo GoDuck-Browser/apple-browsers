@@ -32,7 +32,11 @@ ENABLE_APP_SANDBOX = YES
 
 MACOSX_DEPLOYMENT_TARGET = 12.3
 
-PRODUCT_MODULE_NAME = $(APP_STORE_PRODUCT_MODULE_NAME_OVERRIDE:default=$(DEFAULT_PRODUCT_MODULE_NAME))
+PRODUCT_MODULE_NAME[config=Debug][arch=*][sdk=*] = DuckDuckGo_Privacy_Browser
+PRODUCT_MODULE_NAME[config=CI][arch=*][sdk=*] = DuckDuckGo_Privacy_Browser_App_Store
+PRODUCT_MODULE_NAME[config=Review][arch=*][sdk=*] = DuckDuckGo_Privacy_Browser
+PRODUCT_MODULE_NAME[config=Release][arch=*][sdk=*] = $(APP_STORE_PRODUCT_MODULE_NAME_OVERRIDE:default=$(DEFAULT_PRODUCT_MODULE_NAME))
+
 PRODUCT_NAME_PREFIX[config=Debug][arch=*][sdk=*] = DuckDuckGo App Store
 PRODUCT_NAME_PREFIX[config=CI][arch=*][sdk=*] = DuckDuckGo App Store
 PRODUCT_NAME_PREFIX[config=Review][arch=*][sdk=*] = DuckDuckGo App Store
