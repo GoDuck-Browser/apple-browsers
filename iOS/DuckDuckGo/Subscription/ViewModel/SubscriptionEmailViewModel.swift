@@ -57,7 +57,7 @@ final class SubscriptionEmailViewModel: ObservableObject {
         var selectedFeature: SelectedFeature = .none
         var shouldPopToSubscriptionSettings: Bool = false
         var shouldPopToAppSettings: Bool = false
-        var viewTitle:String = ""
+        var viewTitle: String = ""
     }
     
     // Read only View State - Should only be modified from the VM
@@ -168,6 +168,7 @@ final class SubscriptionEmailViewModel: ObservableObject {
         }
         
         subFeature.onBackToSettings = {
+            // TODO: Verify
 //            if self.state.currentFlow == .manageEmailFlow {
                 self.backToSubscriptionSettings()
 //            } else {

@@ -40,7 +40,7 @@ enum UserText {
     static let activateSectionTitle = NSLocalizedString("subscription.preferences.subscription.add.to.device.title", bundle: Bundle.module, value: "Add Privacy Pro to Other Devices", comment: "Title for the subscription preferences section for adding subscription to other devices")
     static func activateSectionCaption(hasEmail: Bool, purchasePlatform: SubscriptionEnvironment.PurchasePlatform) -> String {
         switch (hasEmail, purchasePlatform) {
-        case (true, _): 
+        case (true, _):
             return NSLocalizedString("subscription.preferences.subscription.activate.with.email.caption",
                                      bundle: Bundle.module,
                                      value: "Use this email to add your subscription to other devices. In the DuckDuckGo browser, go to Settings > Privacy Pro > I Have a Subscription. [Learn more](https://duckduckgo.com/duckduckgo-help-pages/privacy-pro/adding-email/)",

@@ -499,7 +499,7 @@ public struct PreferencesSubscriptionViewV2: View {
                 } else {
                     showingActivateSubscriptionSheet.toggle()
                 }
-                
+
                 model.userEventHandler(.iHaveASubscriptionClick)
             }
             .buttonStyle(DismissActionButtonStyle())

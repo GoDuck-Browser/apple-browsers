@@ -290,7 +290,8 @@ private struct RoundedCardView: View {
                         .daxButton()
                         .foregroundColor(Color(designSystemColor: .accent))
                 })
-            }}
+            }
+        }
         .padding(Constants.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color(designSystemColor: .surface))

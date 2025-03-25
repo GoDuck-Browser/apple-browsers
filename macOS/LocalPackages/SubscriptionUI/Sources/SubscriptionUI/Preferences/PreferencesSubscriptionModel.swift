@@ -669,7 +669,7 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
         switch subscriptionPlatform {
         case .apple:
             return .navigateToManageSubscription { [weak self] in
-                // TODO missing as in original implementation call to confirmIfSignedInToSameAccount()
+                // FIX: missing as in original implementation call to confirmIfSignedInToSameAccount()
                 self?.changePlanOrBilling(for: .appStore)
             }
         case .google:
