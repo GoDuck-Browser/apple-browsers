@@ -36,12 +36,12 @@ PRODUCT_MODULE_NAME = $(APP_STORE_PRODUCT_MODULE_NAME_OVERRIDE:default=$(DEFAULT
 PRODUCT_NAME_PREFIX[config=Debug][arch=*][sdk=*] = DuckDuckGo App Store
 PRODUCT_NAME_PREFIX[config=CI][arch=*][sdk=*] = DuckDuckGo App Store
 PRODUCT_NAME_PREFIX[config=Review][arch=*][sdk=*] = DuckDuckGo App Store
-PRODUCT_NAME[config=Release][arch=*][sdk=*] = $(RELEASE_PRODUCT_NAME_OVERRIDE:default=$(PRODUCT_NAME_PREFIX))
+PRODUCT_NAME_PREFIX[config=Release][arch=*][sdk=*] = DuckDuckGo App Store
 
 PRODUCT_NAME[config=Debug][arch=*][sdk=*] = $(PRODUCT_NAME_PREFIX)
 PRODUCT_NAME[config=CI][arch=*][sdk=*] = $(PRODUCT_NAME_PREFIX)
 PRODUCT_NAME[config=Review][arch=*][sdk=*] = $(PRODUCT_NAME_PREFIX)
-PRODUCT_NAME[config=Release][arch=*][sdk=*] = $(PRODUCT_NAME_PREFIX)
+PRODUCT_NAME[config=Release][arch=*][sdk=*] = $(RELEASE_PRODUCT_NAME_OVERRIDE:default=$(PRODUCT_NAME_PREFIX))
 
 PROVISIONING_PROFILE_SPECIFIER[config=Debug][sdk=macosx*] =
 PROVISIONING_PROFILE_SPECIFIER[config=CI][sdk=macosx*] = match Direct com.duckduckgo.mobile.ios.debug macos
