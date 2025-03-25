@@ -115,6 +115,7 @@ final class DuckPlayerNativeUIPresenter {
             name: DefaultOmniBarView.didLayoutNotification,
             object: nil
         )
+
     }
 
     /// Updates the UI based on Ombibar Notification
