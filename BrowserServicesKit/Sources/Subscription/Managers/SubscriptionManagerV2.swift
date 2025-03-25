@@ -257,7 +257,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
 
         await migrateAuthV1toAuthV2IfNeeded()
 
-        // Fetching fresh subscription
+        Logger.subscription.log("Fetching fresh subscription")
         do {
             _ = try await currentSubscriptionFeatures(forceRefresh: true)
             let subscription = try await getSubscription(cachePolicy: .returnCacheDataDontLoad)

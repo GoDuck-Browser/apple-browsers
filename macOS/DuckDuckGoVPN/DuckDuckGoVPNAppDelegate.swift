@@ -95,9 +95,9 @@ final class DuckDuckGoVPNApplication: NSApplication {
         }
 
         if tokenFound {
-            Logger.networkProtection.debug("🟢 VPN Agent found token")
+            Logger.networkProtection.debug("🟢 VPN Agent found \(Self.isAuthV2Enabled ? "Token Container (V2)" : "Token (V1)")")
         } else {
-            Logger.networkProtection.error("🔴 VPN Agent found no token")
+            Logger.networkProtection.error("🔴 VPN Agent found no \(Self.isAuthV2Enabled ? "Token Container (V2)" : "Token (V1)")")
         }
     }
 
