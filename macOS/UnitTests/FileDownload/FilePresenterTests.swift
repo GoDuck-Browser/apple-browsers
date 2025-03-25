@@ -27,9 +27,7 @@ final class FilePresenterTests: XCTestCase {
 
     let fm = FileManager()
     let testData = "test data".utf8data
-#if APPSTORE && !CI
     let helperApp = URL(fileURLWithPath: ProcessInfo().environment["__XCODE_BUILT_PRODUCTS_DIR_PATHS"]!).appendingPathComponent("sandbox-test-tool.app")
-#endif
     var runningApp: NSRunningApplication?
     var cancellables = Set<AnyCancellable>()
 
@@ -76,7 +74,6 @@ final class FilePresenterTests: XCTestCase {
         return fileURL
     }
 
-#if APPSTORE && !CI
     private func runHelperApp(opening url: URL? = nil, newInstance: Bool = true, helloExpectation: XCTestExpectation? = XCTestExpectation(description: "hello received")) async throws -> NSRunningApplication {
         var c: AnyCancellable?
         if let helloExpectation {
@@ -96,7 +93,6 @@ final class FilePresenterTests: XCTestCase {
 
         return app
     }
-#endif
 
     private func terminateApp(timeout: TimeInterval = 5, expectation: XCTestExpectation = XCTestExpectation(description: "terminated")) async {
         if runningApp == nil {
