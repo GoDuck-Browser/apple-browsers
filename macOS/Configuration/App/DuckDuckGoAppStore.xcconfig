@@ -34,7 +34,7 @@ MACOSX_DEPLOYMENT_TARGET = 12.3
 
 PRODUCT_MODULE_NAME = $(APP_STORE_PRODUCT_MODULE_NAME_OVERRIDE:default=$(DEFAULT_PRODUCT_MODULE_NAME))
 PRODUCT_NAME_PREFIX[config=Debug][arch=*][sdk=*] = DuckDuckGo App Store
-PRODUCT_NAME_PREFIX[config=CI][arch=*][sdk=*] = DuckDuckGo
+PRODUCT_NAME_PREFIX[config=CI][arch=*][sdk=*] = DuckDuckGo App Store
 PRODUCT_NAME_PREFIX[config=Review][arch=*][sdk=*] = DuckDuckGo App Store
 PRODUCT_NAME_PREFIX[config=Release][arch=*][sdk=*] = DuckDuckGo
 
