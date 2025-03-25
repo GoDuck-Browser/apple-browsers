@@ -66,39 +66,39 @@ struct DuckPlayerMiniPillView: View {
     struct Constants {
         static let playImage = "play.fill"
 
-        enum Layout {
-            static let thumbnailSize: (w: CGFloat, h: CGFloat) = (60, 33.7)
-            static let thumbnailCornerRadius: CGFloat = 8
-            static let vStackSpacing: CGFloat = 4
-            static let hStackSpacing: CGFloat = 10
-            static let fontSize: CGFloat = 16
-            static let playButtonFont: CGFloat = 20
-            static let cornerRadius: CGFloat = 12
-            static let shadowOpacity: CGFloat = 0.2
-            static let shadowRadius: CGFloat = 8
-            static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
-            static let viewOffset: CGFloat = 20
-            static let regularPadding: CGFloat = 16
-        }
+        // Layout
+        static let thumbnailSize: (w: CGFloat, h: CGFloat) = (60, 33.7)
+        static let thumbnailCornerRadius: CGFloat = 8
+        static let vStackSpacing: CGFloat = 4
+        static let hStackSpacing: CGFloat = 10
+        static let fontSize: CGFloat = 16
+        static let playButtonFont: CGFloat = 20
+        static let cornerRadius: CGFloat = 12
+        static let shadowOpacity: CGFloat = 0.2
+        static let shadowRadius: CGFloat = 8
+        static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
+        static let viewOffset: CGFloat = 20
+        static let regularPadding: CGFloat = 16
+       
     }
 
     private var sheetContent: some View {
         Button(
             action: { viewModel.openInDuckPlayer() },
             label: {
-                VStack(spacing: Constants.Layout.vStackSpacing) {
-                    HStack(spacing: Constants.Layout.hStackSpacing) {
+                VStack(spacing: Constants.vStackSpacing) {
+                    HStack(spacing: Constants.hStackSpacing) {
 
                         // YouTube thumbnail image
                         Group {
                             AnimatedAsyncImage(
                                 url: viewModel.thumbnailURL,
-                                width: Constants.Layout.thumbnailSize.w,
-                                height: Constants.Layout.thumbnailSize.h
+                                width: Constants.thumbnailSize.w,
+                                height: Constants.thumbnailSize.h
                             )
                         }
-                        .frame(width: Constants.Layout.thumbnailSize.w, height: Constants.Layout.thumbnailSize.h)
-                        .clipShape(RoundedRectangle(cornerRadius: Constants.Layout.thumbnailCornerRadius))
+                        .frame(width: Constants.thumbnailSize.w, height: Constants.thumbnailSize.h)
+                        .clipShape(RoundedRectangle(cornerRadius: Constants.thumbnailCornerRadius))
 
                         VStack(alignment: .leading) {
                             Text(UserText.duckPlayerNativeResumeInDuckPlayer)
@@ -118,16 +118,16 @@ struct DuckPlayerMiniPillView: View {
                         .layoutPriority(1)
 
                     }
-                    .padding(Constants.Layout.regularPadding)
+                    .padding(Constants.regularPadding)
                     .background(
                         Color(designSystemColor: colorScheme == .dark ? .container : .backgroundSheets)
                     )
 
                 }
-                .cornerRadius(Constants.Layout.cornerRadius)
+                .cornerRadius(Constants.cornerRadius)
                 .shadow(
-                    color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius,
-                    x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height
+                    color: Color.black.opacity(Constants.shadowOpacity), radius: Constants.shadowRadius,
+                    x: Constants.shadowOffset.width, y: Constants.shadowOffset.height
                 )
 
             })

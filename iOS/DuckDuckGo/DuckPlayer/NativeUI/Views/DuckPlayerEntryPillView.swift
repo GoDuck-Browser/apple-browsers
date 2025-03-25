@@ -33,23 +33,22 @@ struct DuckPlayerEntryPillView: View {
         static let daxLogo = "Home"
         static let playImage = "play.fill"
 
-        enum Layout {
-            static let iconSize: CGFloat = 40
-            static let vStackSpacing: CGFloat = 4
-            static let hStackSpacing: CGFloat = 10
-            static let fontSize: CGFloat = 16
-            static let playButtonFont: CGFloat = 16
-            static let cornerRadius: CGFloat = 12
-            static let shadowOpacity: CGFloat = 0.2
-            static let shadowRadius: CGFloat = 8
-            static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
-            static let regularPadding: CGFloat = 16
-        }
+        // Layout
+        static let iconSize: CGFloat = 40
+        static let vStackSpacing: CGFloat = 4
+        static let hStackSpacing: CGFloat = 10
+        static let fontSize: CGFloat = 16
+        static let playButtonFont: CGFloat = 16
+        static let cornerRadius: CGFloat = 12
+        static let shadowOpacity: CGFloat = 0.2
+        static let shadowRadius: CGFloat = 8
+        static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
+        static let regularPadding: CGFloat = 16
     }
 
     private var playButton: some View {
         Image(systemName: Constants.playImage)
-            .font(.system(size: Constants.Layout.playButtonFont))
+            .font(.system(size: Constants.playButtonFont))
             .foregroundColor(Color(designSystemColor: .buttonsPrimaryText))
             .frame(width: iconSize, height: iconSize)
             .background(Color(designSystemColor: .buttonsPrimaryDefault))
@@ -60,12 +59,12 @@ struct DuckPlayerEntryPillView: View {
         Button(
             action: { viewModel.openInDuckPlayer() },
             label: {
-                VStack(spacing: Constants.Layout.vStackSpacing) {
-                    HStack(spacing: Constants.Layout.hStackSpacing) {
+                VStack(spacing: Constants.vStackSpacing) {
+                    HStack(spacing: Constants.hStackSpacing) {
 
                         Image(Constants.daxLogo)
                             .resizable()
-                            .frame(width: Constants.Layout.iconSize, height: Constants.Layout.iconSize)
+                            .frame(width: Constants.iconSize, height: Constants.iconSize)
 
                         VStack(alignment: .leading) {
                             Text(UserText.duckPlayerNativeOpenInDuckPlayer)
@@ -88,16 +87,16 @@ struct DuckPlayerEntryPillView: View {
 
                         playButton
                     }
-                    .padding(Constants.Layout.regularPadding)
+                    .padding(Constants.regularPadding)
                     .background(
                         Color(designSystemColor: colorScheme == .dark ? .container : .backgroundSheets)
                     )
 
                 }
-                .cornerRadius(Constants.Layout.cornerRadius)
+                .cornerRadius(Constants.cornerRadius)
                 .shadow(
-                    color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius,
-                    x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height
+                    color: Color.black.opacity(Constants.shadowOpacity), radius: Constants.shadowRadius,
+                    x: Constants.shadowOffset.width, y: Constants.shadowOffset.height
                 )
 
             })

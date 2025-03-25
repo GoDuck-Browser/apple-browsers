@@ -24,20 +24,14 @@ private let sheetTopMargin = 44.0
 
 public enum DuckPlayerContainer {
 
-    public struct Constants {
-        enum Animation {
-            static let easeInOutDuration: Double = 0.3
-            static let shortDuration: Double = 0.2
-            static let springDuration: Double = 0.5
-            static let springBounce: Double = 0.2
-        }
-
-        enum Offset {            
-            static let initialValue: Double = 500.0
-            static let fixedContainerHeight: Double = 300.0
-        }
+    public struct AnimationConstants {
+        static let easeInOutDuration: Double = 0.3
+        static let shortDuration: Double = 0.2
+        static let springDuration: Double = 0.5
+        static let springBounce: Double = 0.2
+        static let initialValue: Double = 500.0
+        static let fixedContainerHeight: Double = 300.0
     }
-
     public struct PresentationMetrics {
         public let contentWidth: Double
     }
@@ -102,7 +96,7 @@ public enum DuckPlayerContainer {
                 }
 
                 // Use a fixed container height for offset calculations
-                sheet(containerHeight: DuckPlayerContainer.Constants.Offset.fixedContainerHeight)
+                sheet(containerHeight: DuckPlayerContainer.AnimationConstants.fixedContainerHeight)
                     .frame(alignment: .bottom)
             }
         }
@@ -144,7 +138,7 @@ private struct SheetView<Content: View>: View {
     @State private var sheetHeight: Double = 0
     @State private var sheetWidth: Double?
     @State private var opacity: Double = 0
-    @State private var sheetOffset = DuckPlayerContainer.Constants.Offset.initialValue
+    @State private var sheetOffset = DuckPlayerContainer.AnimationConstants.initialValue
 
     // Animate the sheet offset with a spring animation
     private func animateOffset(to visible: Bool) {
@@ -152,7 +146,7 @@ private struct SheetView<Content: View>: View {
         if #available(iOS 17.0, *) {
             withAnimation(
                 .spring(
-                    duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)
+                    duration: DuckPlayerContainer.AnimationConstants.springDuration, bounce: DuckPlayerContainer.AnimationConstants.springBounce)
             ) {
                 sheetOffset = calculateSheetOffset(for: visible, containerHeight: containerHeight)
             } completion: {
@@ -161,7 +155,7 @@ private struct SheetView<Content: View>: View {
         } else {
             withAnimation(
                 .spring(
-                    duration: DuckPlayerContainer.Constants.Animation.springDuration, bounce: DuckPlayerContainer.Constants.Animation.springBounce)
+                    duration: DuckPlayerContainer.AnimationConstants.springDuration, bounce: DuckPlayerContainer.AnimationConstants.springBounce)
             ) {
                 sheetOffset = calculateSheetOffset(for: visible, containerHeight: containerHeight)
             }
@@ -183,17 +177,17 @@ private struct SheetView<Content: View>: View {
         .onWidthChange { newWidth in
             sheetWidth = newWidth
         }
-        .padding(.bottom, 44) // Add some bottom padding to account for the grab handle
+        .padding(.bottom, 44)  // Add some bottom padding to account for the grab handle
         .background(Color(designSystemColor: .surface))
         .frame(maxWidth: .infinity)
         .offset(y: sheetOffset)
         .opacity(opacity)
-        .animation(.easeInOut(duration: DuckPlayerContainer.Constants.Animation.easeInOutDuration), value: opacity)
+        .animation(.easeInOut(duration: DuckPlayerContainer.AnimationConstants.easeInOutDuration), value: opacity)
 
         .onAppear {
 
             // Always start with the initial large offset value
-            sheetOffset = DuckPlayerContainer.Constants.Offset.initialValue
+            sheetOffset = DuckPlayerContainer.AnimationConstants.initialValue
             opacity = viewModel.sheetVisible ? 1 : 0
 
             // If the sheet should be visible, animate it into view after a tiny delay
