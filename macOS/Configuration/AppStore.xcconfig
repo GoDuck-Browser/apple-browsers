@@ -16,6 +16,9 @@
 
 #include "BuildNumber.xcconfig"
 
+// Make sure out build artifacts are separate between App Store and Sparkle builds
+CONFIGURATION_BUILD_DIR = $(BUILD_DIR)/AppStore/$(CONFIGURATION)
+
 MAIN_BUNDLE_IDENTIFIER_PREFIX = com.duckduckgo.mobile.ios
 
 MAIN_BUNDLE_IDENTIFIER[sdk=*] = $(MAIN_BUNDLE_IDENTIFIER_PREFIX)

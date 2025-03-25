@@ -3500,13 +3500,6 @@
 			remoteGlobalIDString = AA585D7D248FD31100E9A3E2;
 			remoteInfo = "DuckDuckGo Privacy Browser";
 		};
-		B6E6BA1C2BA2E049008AA7E1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = AA585D76248FD31100E9A3E2 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = B6E6B9F22BA1FD90008AA7E1;
-			remoteInfo = "sandbox-test-tool";
-		};
 		B6EC37F129B5DA8F001ACE79 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AA585D76248FD31100E9A3E2 /* Project object */;
@@ -10943,7 +10936,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				B6E6BA1D2BA2E049008AA7E1 /* PBXTargetDependency */,
 				B6CAC23D2B8F0EC6006CD402 /* PBXTargetDependency */,
 			);
 			name = "Unit Tests";
@@ -14948,11 +14940,6 @@
 			isa = PBXTargetDependency;
 			target = AA585D7D248FD31100E9A3E2 /* DuckDuckGo Privacy Browser */;
 			targetProxy = B6CAC23E2B8F0ECA006CD402 /* PBXContainerItemProxy */;
-		};
-		B6E6BA1D2BA2E049008AA7E1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = B6E6B9F22BA1FD90008AA7E1 /* sandbox-test-tool */;
-			targetProxy = B6E6BA1C2BA2E049008AA7E1 /* PBXContainerItemProxy */;
 		};
 		B6EC37F229B5DA8F001ACE79 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
