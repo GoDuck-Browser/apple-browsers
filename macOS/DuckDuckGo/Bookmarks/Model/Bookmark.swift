@@ -202,7 +202,7 @@ final class Bookmark: BaseBookmarkEntity {
         return url.isBookmarklet() ? url.toEncodedBookmarklet() : URL(string: url)
     }
 
-    let faviconManagement: FaviconManagement
+    let faviconManagement: () -> FaviconManagement
 
     func favicon(_ sizeCategory: Favicon.SizeCategory) -> NSImage? {
         if let duckPlayerFavicon = DuckPlayer.shared.image(for: self) {
@@ -210,16 +210,16 @@ final class Bookmark: BaseBookmarkEntity {
         }
 
         if let url = urlObject {
-            return faviconManagement.getCachedFavicon(for: url, sizeCategory: sizeCategory)?.image
+            return faviconManagement().getCachedFavicon(for: url, sizeCategory: sizeCategory)?.image
         } else {
-            return faviconManagement.getCachedFavicon(for: url, sizeCategory: sizeCategory)?.image
+            return faviconManagement().getCachedFavicon(for: url, sizeCategory: sizeCategory)?.image
         }
     }
 
-    init(id: String, url: String, title: String, isFavorite: Bool, parentFolderUUID: String? = nil, faviconManagement: FaviconManagement = NSApp.delegateTyped.faviconManager) {
+    init(id: String, url: String, title: String, isFavorite: Bool, parentFolderUUID: String? = nil, faviconManagement: (() -> FaviconManagement)? = nil) {
         self.url = url
         self.isFavorite = isFavorite
-        self.faviconManagement = faviconManagement
+        self.faviconManagement = faviconManagement ?? { NSApp.delegateTyped.faviconManager }
 
         super.init(id: id, title: title, isFolder: false, parentFolderUUID: parentFolderUUID)
     }

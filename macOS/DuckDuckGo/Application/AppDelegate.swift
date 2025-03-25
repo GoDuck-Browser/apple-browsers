@@ -449,11 +449,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // https://app.asana.com/0/1177771139624306/1207024603216659/f
         LottieConfiguration.shared.renderingEngine = .mainThread
 
-        if case .normal = AppVersion.runType {
-            Task {
-                try? await faviconManager.loadFavicons()
-            }
-        }
         configurationManager.start()
         _ = DownloadListCoordinator.shared
         _ = RecentlyClosedCoordinator.shared

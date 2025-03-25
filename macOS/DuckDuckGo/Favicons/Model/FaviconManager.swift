@@ -102,10 +102,8 @@ final class FaviconManager: FaviconManagement {
         self.imageCache = imageCache?(store) ?? FaviconImageCache(faviconStoring: store)
         self.referenceCache = referenceCache?(store) ?? FaviconReferenceCache(faviconStoring: store)
 
-        if case .inMemory = cacheType {
-            Task {
-                try? await loadFavicons()
-            }
+        Task {
+            try? await loadFavicons()
         }
     }
 
@@ -164,7 +162,7 @@ final class FaviconManager: FaviconManagement {
     @MainActor
     func handleFaviconsByDocumentUrl(_ faviconsByDocumentUrl: [URL: [Favicon]]) async {
         // Insert new favicons to cache
-        await imageCache.insert(faviconsByDocumentUrl.values.reduce([], +))
+        imageCache.insert(faviconsByDocumentUrl.values.reduce([], +))
 
         // Pick most suitable favicons
         for (documentUrl, newFavicons) in faviconsByDocumentUrl {
@@ -178,6 +176,7 @@ final class FaviconManager: FaviconManagement {
         }
     }
 
+    @MainActor
     @discardableResult private func handleFaviconReferenceCacheInsertion(documentURL: URL, cachedFavicons: [Favicon], newFavicons: [Favicon]) async -> Favicon? {
         let noFaviconPickedYet = referenceCache.getFaviconUrl(for: documentURL, sizeCategory: .small) == nil
         let newFaviconLoaded = !newFavicons.isEmpty
@@ -200,7 +199,7 @@ final class FaviconManager: FaviconManagement {
             let sortedCachedFavicons = cachedFavicons.sorted(by: { $0.longestSide < $1.longestSide })
             let mediumFavicon = FaviconSelector.getMostSuitableFavicon(for: .medium, favicons: sortedCachedFavicons)
             let smallFavicon = FaviconSelector.getMostSuitableFavicon(for: .small, favicons: sortedCachedFavicons)
-            await referenceCache.insert(faviconUrls: (smallFavicon?.url, mediumFavicon?.url), documentUrl: documentURL)
+            referenceCache.insert(faviconUrls: (smallFavicon?.url, mediumFavicon?.url), documentUrl: documentURL)
             return smallFavicon
         } else {
             guard let currentSmallFaviconUrl = currentSmallFaviconUrl,
@@ -346,10 +345,10 @@ final class FaviconManager: FaviconManagement {
         }
     }
 
-    @discardableResult
-    private func cacheFavicons(_ favicons: [Favicon], faviconURLs: [URL], for documentUrl: URL) async -> Favicon? {
+    @MainActor
+    @discardableResult private func cacheFavicons(_ favicons: [Favicon], faviconURLs: [URL], for documentUrl: URL) async -> Favicon? {
         // Insert new favicons to cache
-        await imageCache.insert(favicons)
+        imageCache.insert(favicons)
         // Pick most suitable favicons
         let cachedFavicons = imageCache.getFavicons(with: faviconURLs)?.filter { $0.dateCreated > Date.weekAgo }
 

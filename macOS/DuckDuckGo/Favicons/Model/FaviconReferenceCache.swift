@@ -37,6 +37,7 @@ protocol FaviconReferenceCaching {
     @MainActor
     func load() async throws
 
+    @MainActor
     func insert(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL)
 
     func getFaviconUrl(for documentURL: URL, sizeCategory: Favicon.SizeCategory) -> URL?
@@ -85,6 +86,7 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
         }
     }
 
+    @MainActor
     func insert(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL) {
         guard loaded else { return }
 

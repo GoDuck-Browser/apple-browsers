@@ -32,7 +32,7 @@ protocol FaviconImageCaching {
     func load() async throws
 
     @MainActor
-    func insert(_ favicons: [Favicon]) async
+    func insert(_ favicons: [Favicon])
 
     func get(faviconUrl: URL) -> Favicon?
 
@@ -82,7 +82,7 @@ final class FaviconImageCache: FaviconImageCaching {
     }
 
     @MainActor
-    func insert(_ favicons: [Favicon]) async {
+    func insert(_ favicons: [Favicon]) {
         guard !favicons.isEmpty, loaded else {
             return
         }
@@ -95,13 +95,15 @@ final class FaviconImageCache: FaviconImageCaching {
             entries[favicon.url] = favicon
         }
 
-        do {
-            await removeFaviconsFromStore(oldFavicons)
-            try await storing.save(favicons)
-            Logger.favicons.debug("Favicon saved successfully. URL: \(favicons.map(\.url.absoluteString).description)")
-            NotificationCenter.default.post(name: .faviconCacheUpdated, object: nil)
-        } catch {
-            Logger.favicons.error("Saving of favicon failed: \(error.localizedDescription)")
+        Task {
+            do {
+                await self.removeFaviconsFromStore(oldFavicons)
+                try await self.storing.save(favicons)
+                Logger.favicons.debug("Favicon saved successfully. URL: \(favicons.map(\.url.absoluteString).description)")
+                NotificationCenter.default.post(name: .faviconCacheUpdated, object: nil)
+            } catch {
+                Logger.favicons.error("Saving of favicon failed: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -150,10 +152,10 @@ final class FaviconImageCache: FaviconImageCaching {
 
     @MainActor
     func burnDomains(_ baseDomains: Set<String>,
-                                 exceptBookmarks bookmarkManager: BookmarkManager,
-                                 exceptSavedLogins logins: Set<String>,
-                                 exceptHistoryDomains history: Set<String>,
-                                 tld: TLD) async {
+                     exceptBookmarks bookmarkManager: BookmarkManager,
+                     exceptSavedLogins logins: Set<String>,
+                     exceptHistoryDomains history: Set<String>,
+                     tld: TLD) async {
         let bookmarkedHosts = bookmarkManager.allHosts()
         await removeFavicons { favicon in
             guard let host = favicon.documentUrl.host, let baseDomain = tld.eTLDplus1(host) else { return false }
