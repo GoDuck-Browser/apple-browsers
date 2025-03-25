@@ -29,6 +29,22 @@ import DataBrokerProtection
 import DataBrokerProtectionShared
 import Networking
 
+// https://app.asana.com/0/0/1209325145462549
+struct SubscriptionValuesV2: Decodable {
+    let accessToken: String
+    let refreshToken: String
+}
+
+public struct AccessTokenValue: Encodable {
+    let accessToken: String
+}
+
+// https://app.asana.com/0/1205842942115003/1209254337758531/f
+public struct GetFeatureValue: Encodable {
+    let useUnifiedFeedback: Bool = false
+    let useSubscriptionsAuthV2: Bool
+}
+
 /// Use Subscription sub-feature
 final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
 
@@ -45,19 +61,14 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
 
     let subscriptionManager: SubscriptionManagerV2
     var subscriptionPlatform: SubscriptionEnvironment.PurchasePlatform { subscriptionManager.currentEnvironment.purchasePlatform }
-
     let stripePurchaseFlow: any StripePurchaseFlowV2
     let subscriptionErrorReporter = DefaultSubscriptionErrorReporter()
     let subscriptionSuccessPixelHandler: SubscriptionAttributionPixelHandler
-
     let uiHandler: SubscriptionUIHandling
-
     let subscriptionFeatureAvailability: SubscriptionFeatureAvailability
-
     private var freemiumDBPUserStateManager: FreemiumDBPUserStateManager
     private let freemiumDBPPixelExperimentManager: FreemiumDBPPixelExperimentManaging
     private let notificationCenter: NotificationCenter
-
     /// The `FreemiumDBPExperimentPixelHandler` instance used to fire pixels
     private let freemiumDBPExperimentPixelHandler: EventMapping<FreemiumDBPExperimentPixel>
 
@@ -88,6 +99,7 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
     struct Handlers {
         static let setAuthTokens = "setAuthTokens"
         static let getAuthAccessToken = "getAuthAccessToken"
+        static let getFeatureConfig = "getFeatureConfig"
         static let backToSettings = "backToSettings"
         static let getSubscriptionOptions = "getSubscriptionOptions"
         static let subscriptionSelected = "subscriptionSelected"
@@ -109,6 +121,7 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         switch methodName {
         case Handlers.setAuthTokens: return setAuthTokens
         case Handlers.getAuthAccessToken: return getAuthAccessToken
+        case Handlers.getFeatureConfig: return getFeatureConfig
         case Handlers.backToSettings: return backToSettings
         case Handlers.getSubscriptionOptions: return getSubscriptionOptions
         case Handlers.subscriptionSelected: return subscriptionSelected
@@ -127,11 +140,7 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         }
     }
 
-    // https://app.asana.com/0/0/1209325145462549
-    struct SubscriptionValuesV2: Codable {
-        let accessToken: String
-        let refreshToken: String
-    }
+    // MARK: - Subscription + Auth
 
     func setAuthTokens(params: Any, original: WKScriptMessage) async throws -> Encodable? {
 
@@ -162,14 +171,16 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         return nil
     }
 
-    public struct AccessTokenValue: Codable {
-        let accessToken: String
-    }
-
     func getAuthAccessToken(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         let tokenContainer = try? await subscriptionManager.getTokenContainer(policy: .localValid)
         return AccessTokenValue(accessToken: tokenContainer?.accessToken ?? "")
     }
+
+    func getFeatureConfig(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        return GetFeatureValue(useSubscriptionsAuthV2: true)
+    }
+
+    // MARK: -
 
     func backToSettings(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         _ = try? await subscriptionManager.getTokenContainer(policy: .localForceRefresh)

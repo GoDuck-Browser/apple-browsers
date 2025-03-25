@@ -47,6 +47,7 @@ private struct Handlers {
     // Auth V2
     static let setAuthTokens = "setAuthTokens"
     static let getAuthAccessToken = "getAuthAccessToken"
+    static let getFeatureConfig = "getFeatureConfig"
     // ---
     static let backToSettings = "backToSettings"
     static let getSubscriptionOptions = "getSubscriptionOptions"
@@ -82,6 +83,16 @@ enum SubscriptionTransactionStatus: String {
     case idle, purchasing, restoring, polling
 }
 
+// https://app.asana.com/0/1205842942115003/1209254337758531/f
+public struct GetFeatureValue: Encodable {
+    let useUnifiedFeedback: Bool = false
+    let useSubscriptionsAuthV2: Bool
+}
+
+public struct AccessTokenValue: Codable {
+    let accessToken: String
+}
+
 protocol SubscriptionPagesUseSubscriptionFeature: Subfeature, ObservableObject {
     var transactionStatusPublisher: Published<SubscriptionTransactionStatus>.Publisher { get }
     var transactionStatus: SubscriptionTransactionStatus { get }
@@ -104,6 +115,8 @@ protocol SubscriptionPagesUseSubscriptionFeature: Subfeature, ObservableObject {
     // Auth V2
     func setAuthTokens(params: Any, original: WKScriptMessage) async throws -> Encodable?
     func getAuthAccessToken(params: Any, original: WKScriptMessage) async throws -> Encodable?
+    func getFeatureConfig(params: Any, original: WKScriptMessage) async throws -> Encodable?
+    // ---
     func activateSubscription(params: Any, original: WKScriptMessage) async -> Encodable?
     func featureSelected(params: Any, original: WKScriptMessage) async -> Encodable?
     func backToSettings(params: Any, original: WKScriptMessage) async -> Encodable?
@@ -399,6 +412,11 @@ final class DefaultSubscriptionPagesUseSubscriptionFeature: SubscriptionPagesUse
 
     func getAuthAccessToken(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         assertionFailure("SubscriptionPagesUserScript: getAuthAccessToken not implemented")
+        return nil
+    }
+
+    func getFeatureConfig(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        assertionFailure("SubscriptionPagesUserScript: getFeatureConfig not implemented")
         return nil
     }
 
@@ -711,6 +729,7 @@ final class DefaultSubscriptionPagesUseSubscriptionFeatureV2: SubscriptionPagesU
         switch methodName {
         case Handlers.setAuthTokens: return setAuthTokens
         case Handlers.getAuthAccessToken: return getAuthAccessToken
+        case Handlers.getFeatureConfig: return getFeatureConfig
         case Handlers.getSubscriptionOptions: return getSubscriptionOptions
         case Handlers.subscriptionSelected: return subscriptionSelected
         case Handlers.activateSubscription: return activateSubscription
@@ -791,13 +810,13 @@ final class DefaultSubscriptionPagesUseSubscriptionFeatureV2: SubscriptionPagesU
         return nil
     }
 
-    struct AccessTokenValue: Codable {
-        let accessToken: String
-    }
-
     func getAuthAccessToken(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         let tokenContainer = try? await subscriptionManager.getTokenContainer(policy: .localValid)
         return AccessTokenValue(accessToken: tokenContainer?.accessToken ?? "")
+    }
+
+    func getFeatureConfig(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        return GetFeatureValue(useSubscriptionsAuthV2: true)
     }
 
     // Auth V1 unused methods

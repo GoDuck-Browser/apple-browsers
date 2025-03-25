@@ -40,12 +40,15 @@ final class IdentityTheftRestorationPagesFeature: Subfeature, ObservableObject {
     struct Handlers {
         static let getAccessToken = "getAccessToken"
         static let getAuthAccessToken = "getAuthAccessToken"
+        static let getFeatureConfig = "getFeatureConfig"
     }
         
     private let subscriptionManager: any SubscriptionAuthV1toV2Bridge
+    private let isAuthV2Enabled: Bool
 
-    init(subscriptionManager: any SubscriptionAuthV1toV2Bridge) {
+    init(subscriptionManager: any SubscriptionAuthV1toV2Bridge, isAuthV2Enabled: Bool) {
         self.subscriptionManager = subscriptionManager
+        self.isAuthV2Enabled = isAuthV2Enabled
     }
 
     weak var broker: UserScriptMessageBroker?
@@ -65,6 +68,7 @@ final class IdentityTheftRestorationPagesFeature: Subfeature, ObservableObject {
         switch methodName {
         case Handlers.getAccessToken: return getAccessToken
         case Handlers.getAuthAccessToken: return getAuthAccessToken
+        case Handlers.getFeatureConfig: return getFeatureConfig
         default:
             return nil
         }
@@ -78,13 +82,13 @@ final class IdentityTheftRestorationPagesFeature: Subfeature, ObservableObject {
         }
     }
 
-    struct AccessTokenValue: Codable {
-        let accessToken: String
-    }
-
     func getAuthAccessToken(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         let accessToken = try? await subscriptionManager.getAccessToken()
         return AccessTokenValue(accessToken: accessToken ?? "")
+    }
+
+    func getFeatureConfig(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        return GetFeatureValue(useSubscriptionsAuthV2: isAuthV2Enabled)
     }
 
     deinit {

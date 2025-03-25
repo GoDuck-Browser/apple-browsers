@@ -78,6 +78,7 @@ final class IdentityTheftRestorationPagesFeature: Subfeature {
     weak var broker: UserScriptMessageBroker?
     private let subscriptionManager: any SubscriptionAuthV1toV2Bridge
     private let subscriptionFeatureAvailability: SubscriptionFeatureAvailability
+    private let isAuthV2Enabled: Bool
 
     let featureName = "useIdentityTheftRestoration"
     lazy var messageOriginPolicy: MessageOriginPolicy = .only(rules: [
@@ -85,9 +86,11 @@ final class IdentityTheftRestorationPagesFeature: Subfeature {
     ])
 
     init(subscriptionManager: any SubscriptionAuthV1toV2Bridge,
-         subscriptionFeatureAvailability: SubscriptionFeatureAvailability = DefaultSubscriptionFeatureAvailability()) {
+         subscriptionFeatureAvailability: SubscriptionFeatureAvailability = DefaultSubscriptionFeatureAvailability(),
+         isAuthV2Enabled: Bool) {
         self.subscriptionManager = subscriptionManager
         self.subscriptionFeatureAvailability = subscriptionFeatureAvailability
+        self.isAuthV2Enabled = isAuthV2Enabled
     }
 
     func with(broker: UserScriptMessageBroker) {
@@ -115,11 +118,11 @@ final class IdentityTheftRestorationPagesFeature: Subfeature {
 
     func getAuthAccessToken(params: Any, original: WKScriptMessage) async throws -> Encodable? {
         let accessToken = try? await subscriptionManager.getAccessToken()
-        return SubscriptionPagesUseSubscriptionFeatureV2.AccessTokenValue(accessToken: accessToken ?? "")
+        return AccessTokenValue(accessToken: accessToken ?? "")
     }
 
     func getFeatureConfig(params: Any, original: WKScriptMessage) async throws -> Encodable? {
-        [PrivacyProSubfeature.useUnifiedFeedback.rawValue: true]
+        return GetFeatureValue(useSubscriptionsAuthV2: isAuthV2Enabled)
     }
 
     func openSendFeedbackModal(params: Any, original: WKScriptMessage) async throws -> Encodable? {
