@@ -669,6 +669,7 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
         switch subscriptionPlatform {
         case .apple:
             return .navigateToManageSubscription { [weak self] in
+                // TODO missing as in original implementation call to confirmIfSignedInToSameAccount()
                 self?.changePlanOrBilling(for: .appStore)
             }
         case .google:
@@ -753,6 +754,7 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
     private enum SubscriptionEmailActionType {
         case activationFlow, activationFlowAddEmailStep, activationFlowLinkViaEmailStep, editEmail
     }
+
     private func handleEmailAction(type: SubscriptionEmailActionType) {
         let eventType: PreferencesSubscriptionModel.UserEvent
         let url: URL
@@ -772,18 +774,9 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
             url = subscriptionManager.url(for: .manageEmail)
         }
 
-        Task {
-            if subscriptionPlatform == .apple && currentPurchasePlatform == .appStore {
-                // TODO Probably unnecessary, it was required in v1 to attempt authToken refresh
-                if #available(macOS 12.0, iOS 15.0, *) {
-                    try await subscriptionManager.getTokenContainer(policy: .localValid)
-                }
-            }
-
-            Task { @MainActor in
-                userEventHandler(eventType)
-                openURLHandler(url)
-            }
+        Task { @MainActor in
+            userEventHandler(eventType)
+            openURLHandler(url)
         }
     }
 

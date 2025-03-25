@@ -95,13 +95,12 @@ struct SubscriptionSettingsView: View {
                     emailFlow: .manageEmailFlow,
                     onDisappear: {
                         Task {
-                            await viewModel.fetchAndUpdateAccountEmail(
-                                cachePolicy: .reloadIgnoringLocalCacheData)
+                            await viewModel.fetchAndUpdateAccountEmail(cachePolicy: .reloadIgnoringLocalCacheData)
                         }
                     }),
                                isActive: $isShowingManageEmailView) {
-                        SettingsCellView(label: UserText.subscriptionEditEmailButton,
-                                         subtitle: email)
+                    SettingsCellView(label: UserText.subscriptionEditEmailButton,
+                                     subtitle: email)
                 }.isDetailLink(false)
             }
 
@@ -113,8 +112,7 @@ struct SubscriptionSettingsView: View {
                 emailFlow: .activationFlow,
                 onDisappear: {
                     Task {
-                        await viewModel.fetchAndUpdateAccountEmail(
-                            cachePolicy: .reloadIgnoringLocalCacheData)
+                        await viewModel.fetchAndUpdateAccountEmail(cachePolicy: .reloadIgnoringLocalCacheData)
                     }
                 }),
                            isActive: $isShowingActivationView) {
@@ -430,7 +428,8 @@ struct SubscriptionSettingsViewV2: View {
     @State var isShowingRemovalNotice = false
     @State var isShowingFAQView = false
     @State var isShowingLearnMoreView = false
-    @State var isShowingEmailView = false
+    @State var isShowingActivationView = false
+    @State var isShowingManageEmailView = false
     @State var isShowingConnectionError = false
     @State var isShowingSubscriptionError = false
 
@@ -470,29 +469,41 @@ struct SubscriptionSettingsViewV2: View {
         Section(header: Text(UserText.subscriptionDevicesSectionHeader),
                 footer: devicesSectionFooter) {
 
-            if !viewModel.state.isLoadingEmailInfo {
+            if let email = viewModel.state.subscriptionEmail, !email.isEmpty {
                 NavigationLink(destination: SubscriptionContainerViewFactory.makeEmailFlowV2(
                     navigationCoordinator: subscriptionNavigationCoordinator,
                     subscriptionManager: AppDependencyProvider.shared.subscriptionManagerV2!,
                     subscriptionFeatureAvailability: settingsViewModel.subscriptionFeatureAvailability,
                     internalUserDecider: AppDependencyProvider.shared.internalUserDecider,
+                    emailFlow: .manageEmailFlow,
                     onDisappear: {
                         Task {
-                            await viewModel.fetchAndUpdateAccountEmail(
-                                cachePolicy: .reloadIgnoringLocalCacheData,
-                                loadingIndicator: false)
+                            await viewModel.fetchAndUpdateAccountEmail(cachePolicy: .reloadIgnoringLocalCacheData)
                         }
                     }),
-                               isActive: $isShowingEmailView) {
-                    if let email = viewModel.state.subscriptionEmail {
-                        SettingsCellView(label: UserText.subscriptionEditEmailButton,
-                                         subtitle: email)
-                    } else {
-                        SettingsCellView(label: UserText.subscriptionAddEmailButton)
-                    }
+                               isActive: $isShowingManageEmailView) {
+                    SettingsCellView(label: UserText.subscriptionEditEmailButton,
+                                     subtitle: email)
                 }.isDetailLink(false)
-            } else {
-                SwiftUI.ProgressView()
+
+                NavigationLink(destination: SubscriptionContainerViewFactory.makeEmailFlowV2(
+                    navigationCoordinator: subscriptionNavigationCoordinator,
+                    subscriptionManager: AppDependencyProvider.shared.subscriptionManagerV2!,
+                    subscriptionFeatureAvailability: settingsViewModel.subscriptionFeatureAvailability,
+                    internalUserDecider: AppDependencyProvider.shared.internalUserDecider,
+                    emailFlow: .activationFlow,
+                    onDisappear: {
+                        Task {
+                            await viewModel.fetchAndUpdateAccountEmail(cachePolicy: .reloadIgnoringLocalCacheData)
+                        }
+                    }),
+                               isActive: $isShowingActivationView) {
+                    SettingsCustomCell(content: {
+                        Text(UserText.subscriptionAddToDeviceButton)
+                            .daxBodyRegular()
+                        .foregroundColor(Color.init(designSystemColor: .accent)) },
+                                       disclosureIndicator: false)
+                }.isDetailLink(false)
             }
         }
     }
@@ -738,7 +749,7 @@ struct SubscriptionSettingsViewV2: View {
             viewModel.showConnectionError(value)
         }
 
-        .onChange(of: isShowingEmailView) { value in
+        .onChange(of: isShowingManageEmailView) { value in
             if value {
                 if let email = viewModel.state.subscriptionEmail, !email.isEmpty {
                     Pixel.fire(pixel: .privacyProSubscriptionManagementEmail, debounce: 1)
@@ -748,7 +759,8 @@ struct SubscriptionSettingsViewV2: View {
 
         .onReceive(subscriptionNavigationCoordinator.$shouldPopToSubscriptionSettings) { shouldDismiss in
             if shouldDismiss {
-                isShowingEmailView = false
+                isShowingActivationView = false
+                isShowingManageEmailView = false
             }
         }
 

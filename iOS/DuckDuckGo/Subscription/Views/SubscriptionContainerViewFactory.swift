@@ -204,6 +204,7 @@ enum SubscriptionContainerViewFactory {
                                 subscriptionManager: SubscriptionManagerV2,
                                 subscriptionFeatureAvailability: SubscriptionFeatureAvailability,
                                 internalUserDecider: InternalUserDecider,
+                                emailFlow: SubscriptionEmailViewModel.EmailViewFlow = .activationFlow,
                                 onDisappear: @escaping () -> Void) -> some View {
         let appStoreRestoreFlow: AppStoreRestoreFlowV2 = DefaultAppStoreRestoreFlowV2(subscriptionManager: subscriptionManager,
                                                                                       storePurchaseManager: subscriptionManager.storePurchaseManager())
@@ -220,6 +221,9 @@ enum SubscriptionContainerViewFactory {
                                                                          appStorePurchaseFlow: appStorePurchaseFlow,
                                                                          appStoreRestoreFlow: appStoreRestoreFlow)
         )
+
+        viewModel.email.setEmailFlowMode(emailFlow)
+        
         return SubscriptionContainerView(currentView: .email, viewModel: viewModel)
             .environmentObject(navigationCoordinator)
             .onDisappear(perform: { onDisappear() })
