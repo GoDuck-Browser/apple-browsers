@@ -540,7 +540,7 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
     /// Handles all the top level error management logic.
     ///
     func start() async {
-        Logger.networkProtection.log("Start VPN")
+        Logger.networkProtection.log("🚀 Start VPN")
         VPNOperationErrorRecorder().beginRecordingControllerStart()
         PixelKit.fire(NetworkProtectionPixelEvent.networkProtectionControllerStartAttempt,
                       frequency: .legacyDailyAndCount)

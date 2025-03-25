@@ -316,10 +316,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             subscriptionManagerV1 = nil
             subscriptionAuthV1toV2Bridge = subscriptionManager
         }
-        // --------
-
-        // MARK:
-
+        vpnSettings.isAuthV2Enabled = isAuthV2Enabled
+        
         if AppVersion.runType.requiresEnvironment {
             remoteMessagingClient = RemoteMessagingClient(
                 database: RemoteMessagingDatabase().db,

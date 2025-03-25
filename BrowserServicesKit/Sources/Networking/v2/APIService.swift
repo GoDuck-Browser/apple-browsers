@@ -80,10 +80,11 @@ public class DefaultAPIService: APIService {
         // It's a failure and the request must be retried
         if  let retryPolicy = request.retryPolicy,
             responseHTTPStatus.isFailure,
-            responseHTTPStatus != .unauthorized, // No retries needed is unuathorised
+            responseHTTPStatus != .unauthorized, // No retries needed is unauthorised
             failureRetryCount < retryPolicy.maxRetries {
 
             if retryPolicy.delay > 0 {
+                Logger.networking.debug("Retrying after \(retryPolicy.delay) seconds")
                 try? await Task.sleep(interval: retryPolicy.delay)
             }
 
