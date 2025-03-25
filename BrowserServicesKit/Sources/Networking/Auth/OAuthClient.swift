@@ -300,7 +300,8 @@ final public actor DefaultOAuthClient: @preconcurrency OAuthClient {
             return nil
         }
 
-        guard let legacyToken = legacyTokenStorage.token else {
+        guard let legacyToken = legacyTokenStorage.token,
+              !legacyToken.isEmpty else {
             Logger.OAuthClient.log("No V1 token available, migration not needed")
             return nil
         }
