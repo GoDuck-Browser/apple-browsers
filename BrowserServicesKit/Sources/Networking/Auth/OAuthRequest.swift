@@ -350,8 +350,7 @@ public struct OAuthRequest {
     // MARK: Exchange token
 
     static func exchangeToken(baseURL: URL, accessTokenV1: String, authSessionID: String) -> OAuthRequest? {
-        guard accessTokenV1.isEmpty == false,
-              authSessionID.isEmpty == false else { return nil }
+        guard !accessTokenV1.isEmpty, !authSessionID.isEmpty else { return nil }
 
         let path = "/api/auth/v2/exchange"
         guard let domain = baseURL.host,
