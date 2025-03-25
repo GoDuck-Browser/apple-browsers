@@ -32,8 +32,7 @@ public enum DuckPlayerContainer {
             static let springBounce: Double = 0.2
         }
 
-        enum Offset {
-            static let extraHeight: Double = 200.0
+        enum Offset {            
             static let initialValue: Double = 500.0
             static let fixedContainerHeight: Double = 300.0
         }
@@ -113,7 +112,26 @@ public enum DuckPlayerContainer {
 // MARK: - Private
 
 private func calculateSheetOffset(for visible: Bool, containerHeight: Double) -> Double {
-    visible ? 0 : containerHeight + DuckPlayerContainer.Constants.Offset.extraHeight
+    visible ? 25 : containerHeight
+}
+
+@MainActor
+private struct GrabHandle: View {
+
+    struct Constants {
+        static let grabHandleHeight: CGFloat = 4
+        static let grabHandleWidth: CGFloat = 36
+        static let grabHandleTopPadding: CGFloat = 4
+        static let grabHandleBottomPadding: CGFloat = 8
+    }
+
+    var body: some View {
+        Capsule()
+            .fill(Color(designSystemColor: .textPrimary).opacity(0.3))
+            .frame(width: Constants.grabHandleWidth, height: Constants.grabHandleHeight)
+            .padding(.top, Constants.grabHandleTopPadding)
+            .padding(.bottom, Constants.grabHandleBottomPadding)
+    }
 }
 
 @MainActor
@@ -154,14 +172,20 @@ private struct SheetView<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .center) {
-
             if let sheetWidth {
-                content(DuckPlayerContainer.PresentationMetrics(contentWidth: sheetWidth))
+                VStack {
+                    GrabHandle()
+                    content(DuckPlayerContainer.PresentationMetrics(contentWidth: sheetWidth))
+                }
+                .padding(.horizontal, 16)                
             }
         }
         .onWidthChange { newWidth in
             sheetWidth = newWidth
         }
+        .padding(.bottom, 40) // Add some bottom padding to account for the grab handle
+        .background(Color(designSystemColor: .surface))
+        .cornerRadius(16, corners: [.topLeft, .topRight])
         .frame(maxWidth: .infinity)
         .offset(y: sheetOffset)
         .opacity(opacity)
