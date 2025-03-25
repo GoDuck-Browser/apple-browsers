@@ -371,7 +371,7 @@
 "autofill.keep-enabled.alert.disable" = "Poista Käytöstä";
 
 /* A link that takes the user to the DuckDuckGo help pages explaining password managers */
-"autofill.learn.more.link.title" = "Lue lisää";
+"autofill.learn.more.link.title" = "[Lisätietoja](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "Näytä";
@@ -515,10 +515,7 @@
 "autofill.logins.list.search-placeholder" = "Etsi salasanoja";
 
 /* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
-"autofill.logins.list.settings.footer.fallback" = "Salasanat salataan. Kukaan muu kuin sinä ei näe niitä, emme edes me.";
-
-/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
-"autofill.logins.list.settings.footer.markdown" = "Salasanat salataan. Kukaan muu kuin sinä ei näe niitä, emme edes me. [Lisätietoja](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+"autofill.logins.list.settings.footer" = "Salasanat salataan. Kukaan muu kuin sinä ei näe niitä, emme edes me.";
 
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Ehdotettu";
@@ -653,6 +650,15 @@
 /* Confirm CTA displayed on modal asking for the user to save the password */
 "autofill.save-password.save.CTA" = "Tallenna salasana";
 
+/* Title for the toggle that enables autofill */
+"autofill.settings.ask-to-save-and-autofill" = "Pyydä tallentamaan ja täyttämään automaattisesti";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.import-passwords.section-header" = "Tuo salasanat";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.options.section-header" = "Valinnat";
+
 /* Title for the button to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.button.title" = "Ilmoita automaattisen täytön ongelmasta";
 
@@ -673,6 +679,9 @@
 
 /* Title for the row to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.title" = "Eikö automaattinen täyttö toimi?";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.view.section-header" = "Näytä";
 
 /* Accessibility title for a Show Password button displaying actial password instead of ***** */
 "autofill.show-password" = "Näytä salasana";
@@ -808,6 +817,9 @@
 
 /* No comment provided by engineer. */
 "Cancel is not allowed more than once" = "Peruutus on sallittu vain kerran";
+
+/* Close All Tabs */
+"close.all.tabs" = "Sulje kaikki välilehdet";
 
 /* No comment provided by engineer. */
 "Confirm" = "Vahvista";
@@ -1790,6 +1802,9 @@
 /* Title for the Mac Waitlist feature */
 "mac-waitlist.title" = "DuckDuckGo-sovellus Mac-laitteelle";
 
+/* Text explaining what happens when Malicious Site Protection is enabled */
+"malicious-site-protection-with-scam.settings.toggle.message" = "Varoita sivustoista, jotka on merkitty huijausten, tietojenkalastelun tai haittaohjelmien johdosta";
+
 /* Button that redirect the user to a web page explaining what Malicious Site Protection is */
 "malicious-site-protection.settings.footer.button.learn-more" = "Lue lisää";
 
@@ -2518,7 +2533,7 @@
 "settings.let.duckduckgo.manage.cookie.consent.popups" = "Anna DuckDuckGon hallinnoida evästeiden hallinnan ponnahdusikkunoita";
 
 /* Settings screen cell text for passwords */
-"settings.logins" = "Salasanat";
+"settings.logins" = "Salasanat ja automaattinen täyttö";
 
 /* The name of the settings section containing main settings */
 "settings.main.settings" = "Pääasetukset";
@@ -2998,8 +3013,17 @@
 /* Accesibility label: first string is website title, second is address */
 "tab.open.with.title.and.address" = "Avaa \"%1$@\" osoitteessa %2$@";
 
+/* Select all tabs */
+"tab.select.all" = "Valitse kaikki";
+
+/* Deselect all tabs */
+"tab.select.none" = "Poista kaikkien valinta";
+
 /* Tab Switcher Accessibility Label */
 "tab.switcher.accessibility.label" = "Välilehtien vaihtotyökalu";
+
+/* Bookmark all tabs menu item */
+"tab.switcher.bookmarkAll" = "Lisää kaikki välilehdet kirjanmerkkeihin";
 
 /* Description text for the text size adjustment setting */
 "textSize.description" = "Suurenna tai pienennä tekstin kokoa kaikilla sivustoilla.";
@@ -3094,8 +3118,8 @@
 /* Title for the VPN widget onboarding screen */
 "vpn.addWidget.settings.title" = "Etsi ja valitse **DuckDuckGo**, pyyhkäise sitten kohtaan **VPN** ja valitse **Lisää widget**.";
 
-/* Message for success when running the intent to enable the DuckDuckGo VPN */
-"vpn.control-widget.disable.vpn.intent.success" = "DuckDuckGo VPN on yhdistetty.";
+/* Message for success when running the intent to disable the DuckDuckGo VPN */
+"vpn.control-widget.disable.vpn.intent.success" = "DuckDuckGo VPN ‑yhteys on katkennut";
 
 /* No comment provided by engineer. */
 "vpn.control-widget.education.screen.description" = "Siri-pikakomentojen avulla voit muodostaa yhteyden VPN:ään nopealla äänikomennolla, kuten \"Siri, ota DuckDuckGo VPN käyttöön\". Se on nopea ja kätevä tapa käyttää VPN:ää ilman käsiä.";

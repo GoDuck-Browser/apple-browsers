@@ -56,6 +56,7 @@ protocol NewWindowPolicyDecisionMaker {
         var certificateTrustEvaluator: CertificateTrustEvaluating
         var tunnelController: NetworkProtectionIPCTunnelController?
         var maliciousSiteDetector: MaliciousSiteDetecting
+        var faviconManagement: FaviconManagement?
     }
 
     fileprivate weak var delegate: TabDelegate?
@@ -90,7 +91,8 @@ protocol NewWindowPolicyDecisionMaker {
     private(set) var specialPagesUserScript: SpecialPagesUserScript?
 
     @MainActor
-    convenience init(content: TabContent,
+    convenience init(id: String? = nil,
+                     content: TabContent,
                      faviconManagement: FaviconManagement? = nil,
                      webCacheManager: WebCacheManager = WebCacheManager.shared,
                      webViewConfiguration: WKWebViewConfiguration? = nil,
@@ -126,9 +128,9 @@ protocol NewWindowPolicyDecisionMaker {
     ) {
 
         let duckPlayer = duckPlayer
-            ?? (NSApp.runType.requiresEnvironment ? DuckPlayer.shared : DuckPlayer.mock(withMode: .enabled))
+            ?? (AppVersion.runType.requiresEnvironment ? DuckPlayer.shared : DuckPlayer.mock(withMode: .enabled))
         let statisticsLoader = statisticsLoader
-            ?? (NSApp.runType.requiresEnvironment ? StatisticsLoader.shared : nil)
+            ?? (AppVersion.runType.requiresEnvironment ? StatisticsLoader.shared : nil)
         let privacyFeatures = privacyFeatures ?? PrivacyFeatures
         let internalUserDecider = NSApp.delegateTyped.internalUserDecider
         var faviconManager = faviconManagement
@@ -136,7 +138,8 @@ protocol NewWindowPolicyDecisionMaker {
             faviconManager = FaviconManager(cacheType: .inMemory)
         }
 
-        self.init(content: content,
+        self.init(id: id,
+                  content: content,
                   faviconManagement: faviconManager ?? FaviconManager.shared,
                   webCacheManager: webCacheManager,
                   webViewConfiguration: webViewConfiguration,
@@ -173,7 +176,8 @@ protocol NewWindowPolicyDecisionMaker {
     }
 
     @MainActor
-    init(content: TabContent,
+    init(id: String? = nil,
+         content: TabContent,
          faviconManagement: FaviconManagement,
          webCacheManager: WebCacheManager,
          webViewConfiguration: WKWebViewConfiguration?,
@@ -208,9 +212,8 @@ protocol NewWindowPolicyDecisionMaker {
          onboardingPixelReporter: OnboardingAddressBarReporting,
          pageRefreshMonitor: PageRefreshMonitoring
     ) {
-
+        self._id = id
         self.content = content
-        self.faviconManagement = faviconManagement
         self.pinnedTabsManager = pinnedTabsManager
         self.featureFlagger = featureFlagger
         self.statisticsLoader = statisticsLoader
@@ -218,6 +221,7 @@ protocol NewWindowPolicyDecisionMaker {
         self.title = title
         self.favicon = favicon
         self.parentTab = parentTab
+        self.parentTabID = parentTab?.id
         self.securityOrigin = securityOrigin ?? .empty
         self.burnerMode = burnerMode
         self._canBeClosedWithBack = canBeClosedWithBack
@@ -281,7 +285,8 @@ protocol NewWindowPolicyDecisionMaker {
                                                        downloadManager: downloadManager,
                                                        certificateTrustEvaluator: certificateTrustEvaluator,
                                                        tunnelController: tunnelController,
-                                                       maliciousSiteDetector: maliciousSiteDetector))
+                                                       maliciousSiteDetector: maliciousSiteDetector,
+                                                       faviconManagement: faviconManagement))
 
         super.init()
         tabGetter = { [weak self] in self }
@@ -292,8 +297,9 @@ protocol NewWindowPolicyDecisionMaker {
         setupWebView(shouldLoadInBackground: shouldLoadInBackground)
         webViewPromise.fulfill(webView)
 
+        faviconCancellable = extensions.favicons?.faviconPublisher.assign(to: \.favicon, onWeaklyHeld: self)
         if favicon == nil {
-            handleFavicon()
+            extensions.favicons?.handleFavicon(oldValue: nil, error: error)
         }
 
         emailDidSignOutCancellable = NotificationCenter.default.publisher(for: .emailDidSignOut)
@@ -371,7 +377,7 @@ protocol NewWindowPolicyDecisionMaker {
 
             userContentController?.cleanUpBeforeClosing()
 #if DEBUG
-            if case .normal = NSApp.runType {
+            if case .normal = AppVersion.runType {
                 webView.assertObjectDeallocated(after: 4.0)
             }
 #endif
@@ -455,7 +461,9 @@ protocol NewWindowPolicyDecisionMaker {
             if !content.displaysContentInWebView && oldValue.displaysContentInWebView {
                 webView.stopAllMedia(shouldStopLoading: false)
             }
-            handleFavicon(oldValue: oldValue)
+            Task { @MainActor in
+                extensions.favicons?.handleFavicon(oldValue: oldValue, error: error)
+            }
             if navigationDelegate.currentNavigation == nil {
                 updateCanGoBackForward(withCurrentNavigation: nil)
             }
@@ -594,6 +602,7 @@ protocol NewWindowPolicyDecisionMaker {
     }
 
     weak private(set) var parentTab: Tab?
+    private(set) var parentTabID: String?
     private var _canBeClosedWithBack: Bool
     var canBeClosedWithBack: Bool {
         // Reset canBeClosedWithBack on any WebView navigation
@@ -640,6 +649,11 @@ protocol NewWindowPolicyDecisionMaker {
     }
 
     private let instrumentation = TabInstrumentation()
+
+    private let _id: String?
+    var id: String {
+        _id ?? String(instrumentation.currentTabIdentifier)
+    }
 
     @Published private(set) var canGoForward: Bool = false
     @Published private(set) var canGoBack: Bool = false
@@ -815,7 +829,7 @@ protocol NewWindowPolicyDecisionMaker {
         userInteractionDialog = nil
 
 #if DEBUG || REVIEW
-        if Application.runType == .uiTestsOnboarding {
+        if AppVersion.runType == .uiTestsOnboarding {
             setContent(.onboarding)
             return
         }
@@ -1008,6 +1022,7 @@ protocol NewWindowPolicyDecisionMaker {
 
     private var webViewCancellables = Set<AnyCancellable>()
     private var emailDidSignOutCancellable: AnyCancellable?
+    private var faviconCancellable: AnyCancellable?
 
     private func setupWebView(shouldLoadInBackground: Bool) {
         webView.navigationDelegate = navigationDelegate
@@ -1081,32 +1096,6 @@ protocol NewWindowPolicyDecisionMaker {
     // MARK: - Favicon
 
     @Published var favicon: NSImage?
-    let faviconManagement: FaviconManagement
-
-    @MainActor(unsafe)
-    private func handleFavicon(oldValue: TabContent? = nil) {
-        guard content.isUrl, let url = content.urlForWebView, error == nil else {
-            favicon = nil
-            return
-        }
-
-        if url.isDuckPlayer {
-            favicon = .duckPlayer
-            return
-        }
-
-        guard faviconManagement.areFaviconsLoaded else { return }
-
-        if let cachedFavicon = faviconManagement.getCachedFavicon(for: url, sizeCategory: .small)?.image {
-            if cachedFavicon != favicon {
-                favicon = cachedFavicon
-            }
-        } else if oldValue?.urlForWebView?.host != url.host {
-            // If the domain matches the previous value, just keep the same favicon
-            favicon = nil
-        }
-    }
-
 }
 
 extension Tab: UserContentControllerDelegate {
@@ -1117,7 +1106,6 @@ extension Tab: UserContentControllerDelegate {
         guard let userScripts = userScripts as? UserScripts else { fatalError("Unexpected UserScripts") }
 
         userScripts.debugScript.instrumentation = instrumentation
-        userScripts.faviconScript.delegate = self
         userScripts.pageObserverScript.delegate = self
         userScripts.printingUserScript.delegate = self
         specialPagesUserScript = nil
@@ -1129,23 +1117,6 @@ extension Tab: PageObserverUserScriptDelegate {
 
     func pageDOMLoaded() {
         self.delegate?.tabPageDOMLoaded(self)
-    }
-
-}
-
-extension Tab: FaviconUserScriptDelegate {
-
-    @MainActor(unsafe)
-    func faviconUserScript(_ faviconUserScript: FaviconUserScript,
-                           didFindFaviconLinks faviconLinks: [FaviconUserScript.FaviconLink],
-                           for documentUrl: URL) {
-        guard documentUrl != .error else { return }
-        faviconManagement.handleFaviconLinks(faviconLinks, documentUrl: documentUrl) { favicon in
-            guard documentUrl == self.content.urlForWebView, let favicon = favicon else {
-                return
-            }
-            self.favicon = favicon.image
-        }
     }
 
 }
@@ -1270,7 +1241,7 @@ extension Tab/*: NavigationResponder*/ { // to be moved to Tab+Navigation.swift
         invalidateInteractionStateData()
         statisticsLoader?.refreshRetentionAtb(isSearch: navigation.url.isDuckDuckGoSearch)
         if !navigation.url.isDuckDuckGoSearch {
-            onboardingPixelReporter.trackSiteVisited()
+            onboardingPixelReporter.measureSiteVisited()
         }
         navigationDidEndPublisher.send(self)
     }

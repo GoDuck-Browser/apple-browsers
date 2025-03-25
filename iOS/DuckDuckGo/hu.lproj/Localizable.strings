@@ -371,7 +371,7 @@
 "autofill.keep-enabled.alert.disable" = "Letilt";
 
 /* A link that takes the user to the DuckDuckGo help pages explaining password managers */
-"autofill.learn.more.link.title" = "További részletek";
+"autofill.learn.more.link.title" = "[További információk](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "Megtekintés";
@@ -515,10 +515,7 @@
 "autofill.logins.list.search-placeholder" = "Jelszavak keresése";
 
 /* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
-"autofill.logins.list.settings.footer.fallback" = "A jelszavak titkosítva vannak. Rajtad kívül senki sem láthatja őket, még mi sem.";
-
-/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
-"autofill.logins.list.settings.footer.markdown" = "A jelszavak titkosítva vannak. Rajtad kívül senki sem láthatja őket, még mi sem. [További információk](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+"autofill.logins.list.settings.footer" = "A jelszavak titkosítva vannak. Rajtad kívül senki sem láthatja őket, még mi sem.";
 
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Javasolt";
@@ -653,6 +650,15 @@
 /* Confirm CTA displayed on modal asking for the user to save the password */
 "autofill.save-password.save.CTA" = "Jelszó mentése";
 
+/* Title for the toggle that enables autofill */
+"autofill.settings.ask-to-save-and-autofill" = "Rákérdezés a mentésre és automatikus kitöltésre";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.import-passwords.section-header" = "Jelszavak importálása";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.options.section-header" = "Opciók";
+
 /* Title for the button to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.button.title" = "Automatikus kitöltéssel kapcsolatos probléma jelentése";
 
@@ -673,6 +679,9 @@
 
 /* Title for the row to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.title" = "Nem működik az automatikus kitöltés?";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.view.section-header" = "Megtekintés";
 
 /* Accessibility title for a Show Password button displaying actial password instead of ***** */
 "autofill.show-password" = "Jelszó megjelenítése";
@@ -808,6 +817,9 @@
 
 /* No comment provided by engineer. */
 "Cancel is not allowed more than once" = "A visszavonás egynél többször nem engedélyezett";
+
+/* Close All Tabs */
+"close.all.tabs" = "Összes lap bezárása";
 
 /* No comment provided by engineer. */
 "Confirm" = "Megerősítés";
@@ -1790,6 +1802,9 @@
 /* Title for the Mac Waitlist feature */
 "mac-waitlist.title" = "DuckDuckGo alkalmazás Machez";
 
+/* Text explaining what happens when Malicious Site Protection is enabled */
+"malicious-site-protection-with-scam.settings.toggle.message" = "Figyelmeztessen azokra az oldalakra, amelyeket csalás, adathalászat vagy rosszindulatú programok miatt jelöltek meg";
+
 /* Button that redirect the user to a web page explaining what Malicious Site Protection is */
 "malicious-site-protection.settings.footer.button.learn-more" = "További részletek";
 
@@ -2518,7 +2533,7 @@
 "settings.let.duckduckgo.manage.cookie.consent.popups" = "A DuckDuckGo kezelheti a sütik elfogadására szolgáló felugró ablakokat";
 
 /* Settings screen cell text for passwords */
-"settings.logins" = "Jelszavak";
+"settings.logins" = "Jelszavak és automatikus kitöltés";
 
 /* The name of the settings section containing main settings */
 "settings.main.settings" = "Főbeállítások";
@@ -2998,8 +3013,17 @@
 /* Accesibility label: first string is website title, second is address */
 "tab.open.with.title.and.address" = "\"%1$@\" megnyitása itt: %2$@";
 
+/* Select all tabs */
+"tab.select.all" = "Összes kijelölése";
+
+/* Deselect all tabs */
+"tab.select.none" = "Összes kijelölés törlése";
+
 /* Tab Switcher Accessibility Label */
 "tab.switcher.accessibility.label" = "Lapváltó";
+
+/* Bookmark all tabs menu item */
+"tab.switcher.bookmarkAll" = "Összes lap könyvjelzőzése";
 
 /* Description text for the text size adjustment setting */
 "textSize.description" = "Növeld vagy csökkentsd a szöveg méretét az összes webhelyen.";
@@ -3094,8 +3118,8 @@
 /* Title for the VPN widget onboarding screen */
 "vpn.addWidget.settings.title" = "Keresd meg, és jelöld ki a **DuckDuckGo** elemet, majd húzd az ujjad a **VPN** elemre, és válaszd a **Widget hozzáadása** lehetőséget";
 
-/* Message for success when running the intent to enable the DuckDuckGo VPN */
-"vpn.control-widget.disable.vpn.intent.success" = "A DuckDuckGo VPN csatlakoztatva van";
+/* Message for success when running the intent to disable the DuckDuckGo VPN */
+"vpn.control-widget.disable.vpn.intent.success" = "A DuckDuckGo VPN kapcsolata megszakítva";
 
 /* No comment provided by engineer. */
 "vpn.control-widget.education.screen.description" = "A Siri-parancsok lehetővé teszik, hogy gyors hangparanccsal csatlakozz a VPN-hez, például a „Siri, turn on DuckDuckGo VPN” („Siri, kapcsold be a DuckDuckGo VPN alkalmazást”) utasítás kimondásával. Ez egy gyors, kézhasználat nélküli módja a VPN működtetésének.";

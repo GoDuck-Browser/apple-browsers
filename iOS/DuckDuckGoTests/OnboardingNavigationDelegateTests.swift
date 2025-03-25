@@ -73,7 +73,7 @@ final class OnboardingNavigationDelegateTests: XCTestCase {
             syncService: MockDDGSyncing(authState: .active, isSyncInProgress: false),
             syncDataProviders: dataProviders,
             appSettings: AppSettingsMock(),
-            previewsSource: TabPreviewsSource(),
+            previewsSource: MockTabPreviewsSource(),
             tabsModel: tabsModel,
             syncPausedStateManager: CapturingSyncPausedStateManager(),
             privacyProDataReporter: MockPrivacyProDataReporter(),
@@ -176,25 +176,25 @@ final class OnboardingNavigationDelegateTests: XCTestCase {
     func testWhenPrivacyBarIconIsPressed_AndPrivacyIconIsHighlighted_ThenFireFirstTimePrivacyDashboardUsedPixel() {
         // GIVEN
         let isHighlighted = true
-        XCTAssertFalse(onboardingPixelReporter.didCallTrackPrivacyDashboardOpenedForFirstTime)
+        XCTAssertFalse(onboardingPixelReporter.didCallMeasurePrivacyDashboardOpenedForFirstTime)
 
         // WHEN
         mainVC.onPrivacyIconPressed(isHighlighted: isHighlighted)
 
         // THEN
-        XCTAssertTrue(onboardingPixelReporter.didCallTrackPrivacyDashboardOpenedForFirstTime)
+        XCTAssertTrue(onboardingPixelReporter.didCallMeasurePrivacyDashboardOpenedForFirstTime)
     }
 
     func testWhenPrivacyBarIconIsPressed_AndPrivacyIconIsNotHighlighted_ThenDoNotFireFirstTimePrivacyDashboardUsedPixel() {
         // GIVEN
         let isHighlighted = false
-        XCTAssertFalse(onboardingPixelReporter.didCallTrackPrivacyDashboardOpenedForFirstTime)
+        XCTAssertFalse(onboardingPixelReporter.didCallMeasurePrivacyDashboardOpenedForFirstTime)
 
         // WHEN
         mainVC.onPrivacyIconPressed(isHighlighted: isHighlighted)
 
         // THEN
-        XCTAssertFalse(onboardingPixelReporter.didCallTrackPrivacyDashboardOpenedForFirstTime)
+        XCTAssertFalse(onboardingPixelReporter.didCallMeasurePrivacyDashboardOpenedForFirstTime)
     }
 
 }

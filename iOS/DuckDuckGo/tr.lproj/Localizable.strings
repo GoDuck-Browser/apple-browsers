@@ -371,7 +371,7 @@
 "autofill.keep-enabled.alert.disable" = "Devre dışı bırak";
 
 /* A link that takes the user to the DuckDuckGo help pages explaining password managers */
-"autofill.learn.more.link.title" = "Daha Fazla Bilgi";
+"autofill.learn.more.link.title" = "[Daha Fazla Bilgi](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "Görüntüle";
@@ -515,10 +515,7 @@
 "autofill.logins.list.search-placeholder" = "Şifreleri ara";
 
 /* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
-"autofill.logins.list.settings.footer.fallback" = "Parolalar şifrelenir. Onları sizden başka kimse göremez. Biz bile.";
-
-/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
-"autofill.logins.list.settings.footer.markdown" = "Parolalar şifrelenir. Onları sizden başka kimse göremez. Biz bile. [Daha Fazla Bilgi](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+"autofill.logins.list.settings.footer" = "Parolalar şifrelenir. Onları sizden başka kimse göremez. Biz bile.";
 
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Önerilen";
@@ -653,6 +650,15 @@
 /* Confirm CTA displayed on modal asking for the user to save the password */
 "autofill.save-password.save.CTA" = "Şifre Kaydet";
 
+/* Title for the toggle that enables autofill */
+"autofill.settings.ask-to-save-and-autofill" = "Kaydetmek ve otomatik doldurmak için sor";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.import-passwords.section-header" = "Şifreleri İçe Aktar";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.options.section-header" = "Seçenekler";
+
 /* Title for the button to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.button.title" = "Otomatik Doldurmayla ilgili bir sorunu bildirin";
 
@@ -673,6 +679,9 @@
 
 /* Title for the row to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.title" = "Otomatik doldurma çalışmıyor mu?";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.view.section-header" = "Görüntüle";
 
 /* Accessibility title for a Show Password button displaying actial password instead of ***** */
 "autofill.show-password" = "Parolayı göster";
@@ -808,6 +817,9 @@
 
 /* No comment provided by engineer. */
 "Cancel is not allowed more than once" = "Bir kereden fazla iptal uygulanamaz";
+
+/* Close All Tabs */
+"close.all.tabs" = "Tüm Sekmeleri Kapat";
 
 /* No comment provided by engineer. */
 "Confirm" = "Onayla";
@@ -1790,6 +1802,9 @@
 /* Title for the Mac Waitlist feature */
 "mac-waitlist.title" = "Mac için DuckDuckGo Uygulaması";
 
+/* Text explaining what happens when Malicious Site Protection is enabled */
+"malicious-site-protection-with-scam.settings.toggle.message" = "Dolandırıcılık, kimlik avı veya kötü amaçlı yazılım için işaretlenen siteler olduğunda beni uyar";
+
 /* Button that redirect the user to a web page explaining what Malicious Site Protection is */
 "malicious-site-protection.settings.footer.button.learn-more" = "Daha Fazla Bilgi";
 
@@ -2518,7 +2533,7 @@
 "settings.let.duckduckgo.manage.cookie.consent.popups" = "DuckDuckGo'nun çerez izni açılır pencerelerini yönetmesine izin verin";
 
 /* Settings screen cell text for passwords */
-"settings.logins" = "Şifreler";
+"settings.logins" = "Şifreler ve Otomatik Doldurma";
 
 /* The name of the settings section containing main settings */
 "settings.main.settings" = "Ana Ayarlar";
@@ -2998,8 +3013,17 @@
 /* Accesibility label: first string is website title, second is address */
 "tab.open.with.title.and.address" = "%2$@ adresindeki \"%1$@\" sitesini aç";
 
+/* Select all tabs */
+"tab.select.all" = "Tümünü Seç";
+
+/* Deselect all tabs */
+"tab.select.none" = "Tümünün Seçimini Kaldır";
+
 /* Tab Switcher Accessibility Label */
 "tab.switcher.accessibility.label" = "Sekme Değiştirici";
+
+/* Bookmark all tabs menu item */
+"tab.switcher.bookmarkAll" = "Tüm Sekmelere Yer İşareti Ekle";
 
 /* Description text for the text size adjustment setting */
 "textSize.description" = "Tüm sitelerde metin boyutunu artırın veya azaltın.";
@@ -3094,8 +3118,8 @@
 /* Title for the VPN widget onboarding screen */
 "vpn.addWidget.settings.title" = "**DuckDuckGo**'yu bulup seçin, ardından **VPN**'e kaydırın ve **Widget Ekle**'yi seçin";
 
-/* Message for success when running the intent to enable the DuckDuckGo VPN */
-"vpn.control-widget.disable.vpn.intent.success" = "DuckDuckGo VPN bağlı";
+/* Message for success when running the intent to disable the DuckDuckGo VPN */
+"vpn.control-widget.disable.vpn.intent.success" = "DuckDuckGo VPN bağlantısı kesildi";
 
 /* No comment provided by engineer. */
 "vpn.control-widget.education.screen.description" = "Siri Kısayolları, \"Siri, DuckDuckGo VPN'i aç\" gibi hızlı bir sesli komutla VPN'e bağlanmanızı sağlar. Bu VPN kullanmanın hızlı ve eller serbest bir yoludur.";

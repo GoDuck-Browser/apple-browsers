@@ -86,6 +86,7 @@ struct SettingsState {
 
     // Logins properties
     var activeWebsiteAccount: SecureVaultModels.WebsiteAccount?
+    var autofillSource: AutofillSettingsSource?
 
     // About properties
     var version: String
@@ -112,8 +113,12 @@ struct SettingsState {
     var duckPlayerMode: DuckPlayerMode?
     var duckPlayerOpenInNewTab: Bool
     var duckPlayerOpenInNewTabEnabled: Bool
+    
+    // Duck Player Native UI
     var duckPlayerNativeUI: Bool
     var duckPlayerAutoplay: Bool
+    var duckPlayerNativeUISERPEnabled: Bool
+    var duckPlayerNativeYoutubeMode: NativeDuckPlayerYoutubeMode
 
     // AI Chat
     var aiChat: AIChat
@@ -137,6 +142,7 @@ struct SettingsState {
             longPressPreviews: true,
             allowUniversalLinks: true,
             activeWebsiteAccount: nil,
+            autofillSource: nil,
             version: "0.0.0.0",
             crashCollectionOptInStatus: .undetermined,
             debugModeEnabled: false,
@@ -163,6 +169,8 @@ struct SettingsState {
             duckPlayerOpenInNewTabEnabled: false,
             duckPlayerNativeUI: false,
             duckPlayerAutoplay: true,
+            duckPlayerNativeUISERPEnabled: true,
+            duckPlayerNativeYoutubeMode: .ask,
             aiChat: AIChat(enabled: false,
                            isAIChatBrowsingMenuFeatureFlagEnabled: false,
                            isAIChatAddressBarFeatureFlagEnabled: false,

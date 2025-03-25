@@ -371,7 +371,7 @@
 "autofill.keep-enabled.alert.disable" = "Inaktivera";
 
 /* A link that takes the user to the DuckDuckGo help pages explaining password managers */
-"autofill.learn.more.link.title" = "Läs mer";
+"autofill.learn.more.link.title" = "[Läs mer](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "Visa";
@@ -515,10 +515,7 @@
 "autofill.logins.list.search-placeholder" = "Sök lösenord";
 
 /* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
-"autofill.logins.list.settings.footer.fallback" = "Lösenorden är krypterade. Ingen annan än du kan se dem, inte ens vi.";
-
-/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
-"autofill.logins.list.settings.footer.markdown" = "Lösenorden är krypterade. Ingen annan än du kan se dem, inte ens vi. [Läs mer](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+"autofill.logins.list.settings.footer" = "Lösenorden är krypterade. Ingen annan än du kan se dem, inte ens vi.";
 
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Förslag";
@@ -653,6 +650,15 @@
 /* Confirm CTA displayed on modal asking for the user to save the password */
 "autofill.save-password.save.CTA" = "Spara lösenord";
 
+/* Title for the toggle that enables autofill */
+"autofill.settings.ask-to-save-and-autofill" = "Fråga om att spara och fylla i automatiskt";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.import-passwords.section-header" = "Importera lösenord";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.options.section-header" = "Alternativ";
+
 /* Title for the button to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.button.title" = "Rapportera ett problem med automatisk ifyllning";
 
@@ -673,6 +679,9 @@
 
 /* Title for the row to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.title" = "Automatisk ifyllning fungerar inte?";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.view.section-header" = "Visa";
 
 /* Accessibility title for a Show Password button displaying actial password instead of ***** */
 "autofill.show-password" = "Visa lösenord";
@@ -808,6 +817,9 @@
 
 /* No comment provided by engineer. */
 "Cancel is not allowed more than once" = "Det är inte tillåtet att avbryta mer än en gång";
+
+/* Close All Tabs */
+"close.all.tabs" = "Stäng alla flikar";
 
 /* No comment provided by engineer. */
 "Confirm" = "Bekräfta";
@@ -1790,6 +1802,9 @@
 /* Title for the Mac Waitlist feature */
 "mac-waitlist.title" = "DuckDuckGo-app för Mac";
 
+/* Text explaining what happens when Malicious Site Protection is enabled */
+"malicious-site-protection-with-scam.settings.toggle.message" = "Varna mig på webbplatser som har flaggats för bedrägerier, nätfiske eller skadlig programvara";
+
 /* Button that redirect the user to a web page explaining what Malicious Site Protection is */
 "malicious-site-protection.settings.footer.button.learn-more" = "Läs mer";
 
@@ -2518,7 +2533,7 @@
 "settings.let.duckduckgo.manage.cookie.consent.popups" = "Låt DuckDuckGo hantera popup-fönster för godkännande av cookies";
 
 /* Settings screen cell text for passwords */
-"settings.logins" = "Lösenord";
+"settings.logins" = "Lösenord och automatisk ifyllning";
 
 /* The name of the settings section containing main settings */
 "settings.main.settings" = "Huvudinställningar";
@@ -2998,8 +3013,17 @@
 /* Accesibility label: first string is website title, second is address */
 "tab.open.with.title.and.address" = "Öppna %1$@ på %2$@";
 
+/* Select all tabs */
+"tab.select.all" = "Välj alla";
+
+/* Deselect all tabs */
+"tab.select.none" = "Avmarkera alla";
+
 /* Tab Switcher Accessibility Label */
 "tab.switcher.accessibility.label" = "Flikväxlare";
+
+/* Bookmark all tabs menu item */
+"tab.switcher.bookmarkAll" = "Bokmärk alla flikar";
 
 /* Description text for the text size adjustment setting */
 "textSize.description" = "Öka eller minska textstorleken på alla webbplatser.";
@@ -3094,8 +3118,8 @@
 /* Title for the VPN widget onboarding screen */
 "vpn.addWidget.settings.title" = "Hitta och välj **DuckDuckGo**, svep sedan till **VPN** och välj **Lägg till widget**";
 
-/* Message for success when running the intent to enable the DuckDuckGo VPN */
-"vpn.control-widget.disable.vpn.intent.success" = "DuckDuckGo VPN är anslutet";
+/* Message for success when running the intent to disable the DuckDuckGo VPN */
+"vpn.control-widget.disable.vpn.intent.success" = "DuckDuckGo VPN är frånkopplad";
 
 /* No comment provided by engineer. */
 "vpn.control-widget.education.screen.description" = "Med Siri-genvägar kan du ansluta till ditt VPN med ett snabbt röstkommando, som ”Siri, sätt igång DuckDuckGo VPN”. Det är ett snabbt och handsfritt sätt att använda ditt VPN.";

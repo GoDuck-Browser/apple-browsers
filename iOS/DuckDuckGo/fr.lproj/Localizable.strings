@@ -371,7 +371,7 @@
 "autofill.keep-enabled.alert.disable" = "Désactiver";
 
 /* A link that takes the user to the DuckDuckGo help pages explaining password managers */
-"autofill.learn.more.link.title" = "En savoir plus";
+"autofill.learn.more.link.title" = "[En savoir plus](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "Voir";
@@ -515,10 +515,7 @@
 "autofill.logins.list.search-placeholder" = "Rechercher un mot de passe";
 
 /* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
-"autofill.logins.list.settings.footer.fallback" = "Les mots de passe sont cryptés. Personne d'autre que vous ne peut les voir, pas même nous.";
-
-/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
-"autofill.logins.list.settings.footer.markdown" = "Les mots de passe sont cryptés. Personne d'autre que vous ne peut les voir, pas même nous. [En savoir plus](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+"autofill.logins.list.settings.footer" = "Les mots de passe sont cryptés. Personne d'autre que vous ne peut les voir, pas même nous.";
 
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Suggéré";
@@ -653,6 +650,15 @@
 /* Confirm CTA displayed on modal asking for the user to save the password */
 "autofill.save-password.save.CTA" = "Enregistrer le mot de passe";
 
+/* Title for the toggle that enables autofill */
+"autofill.settings.ask-to-save-and-autofill" = "Demander l'enregistrement et la saisie automatique";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.import-passwords.section-header" = "Importer les mots de passe";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.options.section-header" = "Options";
+
 /* Title for the button to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.button.title" = "Signaler un problème de saisie automatique";
 
@@ -673,6 +679,9 @@
 
 /* Title for the row to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.title" = "La saisie automatique ne fonctionne pas ?";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.view.section-header" = "Voir";
 
 /* Accessibility title for a Show Password button displaying actial password instead of ***** */
 "autofill.show-password" = "Afficher le mot de passe";
@@ -808,6 +817,9 @@
 
 /* No comment provided by engineer. */
 "Cancel is not allowed more than once" = "L'annulation ne peut pas être effectuée plus d'une fois";
+
+/* Close All Tabs */
+"close.all.tabs" = "Fermer tous les onglets";
 
 /* No comment provided by engineer. */
 "Confirm" = "Confirmer";
@@ -1790,6 +1802,9 @@
 /* Title for the Mac Waitlist feature */
 "mac-waitlist.title" = "Application DuckDuckGo pour Mac";
 
+/* Text explaining what happens when Malicious Site Protection is enabled */
+"malicious-site-protection-with-scam.settings.toggle.message" = "Mettez-moi en garde contre les sites signalés pour escroqueries, pour hameçonnage ou comme étant des logiciels malveillants";
+
 /* Button that redirect the user to a web page explaining what Malicious Site Protection is */
 "malicious-site-protection.settings.footer.button.learn-more" = "En savoir plus";
 
@@ -2518,7 +2533,7 @@
 "settings.let.duckduckgo.manage.cookie.consent.popups" = "Autoriser DuckDuckGo à gérer les fenêtres contextuelles de consentement aux cookies";
 
 /* Settings screen cell text for passwords */
-"settings.logins" = "Mots de passe";
+"settings.logins" = "Mots de passe et saisie automatique";
 
 /* The name of the settings section containing main settings */
 "settings.main.settings" = "Réglages principaux";
@@ -2998,8 +3013,17 @@
 /* Accesibility label: first string is website title, second is address */
 "tab.open.with.title.and.address" = "Ouvrir « %1$@ » via %2$@";
 
+/* Select all tabs */
+"tab.select.all" = "Tout sélectionner";
+
+/* Deselect all tabs */
+"tab.select.none" = "Tout désélectionner";
+
 /* Tab Switcher Accessibility Label */
 "tab.switcher.accessibility.label" = "Outil de changement d'onglet";
+
+/* Bookmark all tabs menu item */
+"tab.switcher.bookmarkAll" = "Ajouter tous les onglets aux signets";
 
 /* Description text for the text size adjustment setting */
 "textSize.description" = "Augmentez ou diminuez la taille du texte sur tous les sites.";
@@ -3094,8 +3118,8 @@
 /* Title for the VPN widget onboarding screen */
 "vpn.addWidget.settings.title" = "Trouvez et sélectionnez **DuckDuckGo**, puis glissez vers **VPN** et sélectionnez **Ajouter un widget**";
 
-/* Message for success when running the intent to enable the DuckDuckGo VPN */
-"vpn.control-widget.disable.vpn.intent.success" = "Le VPN DuckDuckGo est connecté";
+/* Message for success when running the intent to disable the DuckDuckGo VPN */
+"vpn.control-widget.disable.vpn.intent.success" = "Le VPN DuckDuckGo est déconnecté";
 
 /* No comment provided by engineer. */
 "vpn.control-widget.education.screen.description" = "Les raccourcis Siri vous permettent de vous connecter à votre VPN grâce à une commande vocale rapide, comme « Siri, active le VPN DuckDuckGo ». C'est un moyen rapide et mains libres d'utiliser votre VPN.";

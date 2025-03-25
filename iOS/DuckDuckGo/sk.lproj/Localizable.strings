@@ -371,7 +371,7 @@
 "autofill.keep-enabled.alert.disable" = "Zakázať";
 
 /* A link that takes the user to the DuckDuckGo help pages explaining password managers */
-"autofill.learn.more.link.title" = "Zistite viac";
+"autofill.learn.more.link.title" = "[Viac informácií](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "Zobraziť";
@@ -515,10 +515,7 @@
 "autofill.logins.list.search-placeholder" = "Vyhľadávanie hesiel";
 
 /* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
-"autofill.logins.list.settings.footer.fallback" = "Heslá sú zašifrované. Nikto okrem vás ich nemôže vidieť, dokonca ani my.";
-
-/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
-"autofill.logins.list.settings.footer.markdown" = "Heslá sú zašifrované. Nikto okrem vás ich nemôže vidieť, dokonca ani my. [Viac informácií](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+"autofill.logins.list.settings.footer" = "Heslá sú zašifrované. Nikto okrem vás ich nemôže vidieť, dokonca ani my.";
 
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Navrhované";
@@ -653,6 +650,15 @@
 /* Confirm CTA displayed on modal asking for the user to save the password */
 "autofill.save-password.save.CTA" = "Uložiť heslo";
 
+/* Title for the toggle that enables autofill */
+"autofill.settings.ask-to-save-and-autofill" = "Opýtať sa na uloženie a automatické dopĺňanie";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.import-passwords.section-header" = "Importovať heslá";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.options.section-header" = "Možnosti";
+
 /* Title for the button to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.button.title" = "Nahlásenie problému s funkciou Automatické dopĺňanie";
 
@@ -673,6 +679,9 @@
 
 /* Title for the row to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.title" = "Nefunguje automatické dopĺňanie?";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.view.section-header" = "Zobraziť";
 
 /* Accessibility title for a Show Password button displaying actial password instead of ***** */
 "autofill.show-password" = "Zobraziť heslo";
@@ -808,6 +817,9 @@
 
 /* No comment provided by engineer. */
 "Cancel is not allowed more than once" = "Viac ako jedno zrušenie nie je povolené";
+
+/* Close All Tabs */
+"close.all.tabs" = "Zatvoriť všetky karty";
 
 /* No comment provided by engineer. */
 "Confirm" = "Potvrdiť";
@@ -1790,6 +1802,9 @@
 /* Title for the Mac Waitlist feature */
 "mac-waitlist.title" = "Aplikácia DuckDuckGo pre Mac";
 
+/* Text explaining what happens when Malicious Site Protection is enabled */
+"malicious-site-protection-with-scam.settings.toggle.message" = "Upozorni ma na stránkach označených ako podvod, phishing alebo malvér";
+
 /* Button that redirect the user to a web page explaining what Malicious Site Protection is */
 "malicious-site-protection.settings.footer.button.learn-more" = "Zistite viac";
 
@@ -2518,7 +2533,7 @@
 "settings.let.duckduckgo.manage.cookie.consent.popups" = "Nech DuckDuckGo spravuje kontextové okná týkajúce sa súhlasu so súbormi cookie";
 
 /* Settings screen cell text for passwords */
-"settings.logins" = "Heslo";
+"settings.logins" = "Heslá a automatické dopĺňanie";
 
 /* The name of the settings section containing main settings */
 "settings.main.settings" = "Hlavné nastavenia";
@@ -2998,8 +3013,17 @@
 /* Accesibility label: first string is website title, second is address */
 "tab.open.with.title.and.address" = "Otvoriť „%1$@“ na adrese %2$@";
 
+/* Select all tabs */
+"tab.select.all" = "Vybrať všetko";
+
+/* Deselect all tabs */
+"tab.select.none" = "Zrušiť výber všetkých";
+
 /* Tab Switcher Accessibility Label */
 "tab.switcher.accessibility.label" = "Prepínač kariet";
+
+/* Bookmark all tabs menu item */
+"tab.switcher.bookmarkAll" = "Uložiť všetky karty medzi záložky";
 
 /* Description text for the text size adjustment setting */
 "textSize.description" = "Zväčšite alebo zmenšite veľkosť textu na všetkých stránkach.";
@@ -3094,8 +3118,8 @@
 /* Title for the VPN widget onboarding screen */
 "vpn.addWidget.settings.title" = "Nájdi a vyber **DuckDuckGo**, potom potiahni prstom na položku **VPN**, a vyber položku **Pridať miniaplikáciu**.";
 
-/* Message for success when running the intent to enable the DuckDuckGo VPN */
-"vpn.control-widget.disable.vpn.intent.success" = "DuckDuckGo VPN je pripojené";
+/* Message for success when running the intent to disable the DuckDuckGo VPN */
+"vpn.control-widget.disable.vpn.intent.success" = "DuckDuckGo VPN je odpojená";
 
 /* No comment provided by engineer. */
 "vpn.control-widget.education.screen.description" = "Skratky Siri ti umožňujú pripojiť sa k VPN pomocou rýchleho hlasového príkazu, napríklad „Siri, zapni DuckDuckGo VPN“. Je to rýchly a bezdotykový spôsob, ako používať svoju VPN.";

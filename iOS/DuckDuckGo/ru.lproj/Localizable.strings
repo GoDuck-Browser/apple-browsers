@@ -371,7 +371,7 @@
 "autofill.keep-enabled.alert.disable" = "Выключить";
 
 /* A link that takes the user to the DuckDuckGo help pages explaining password managers */
-"autofill.learn.more.link.title" = "Узнать больше";
+"autofill.learn.more.link.title" = "[Подробнее...](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
 
 /* Button displayed after saving/updating an autofill login that takes the user to the saved login */
 "autofill.login-save-action-button.toast" = "Просмотр";
@@ -515,10 +515,7 @@
 "autofill.logins.list.search-placeholder" = "Найти пароль";
 
 /* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. */
-"autofill.logins.list.settings.footer.fallback" = "Пароли подвергаются шифрованию. Никто, кроме вас, их не увидит. Даже мы.";
-
-/* Subtext under Autofill Settings briefly explaining security to alleviate user concerns. Has a URL link by clicking Learn More. */
-"autofill.logins.list.settings.footer.markdown" = "Пароли подвергаются шифрованию. Никто, кроме вас, их не увидит. Даже мы. [Подробнее...](ddgQuickLink://duckduckgo.com/duckduckgo-help-pages/sync-and-backup/password-manager-security/)";
+"autofill.logins.list.settings.footer" = "Пароли подвергаются шифрованию. Никто, кроме вас, их не увидит. Даже мы.";
 
 /* Section title for group of suggested saved logins */
 "autofill.logins.list.suggested" = "Рекомендации";
@@ -653,6 +650,15 @@
 /* Confirm CTA displayed on modal asking for the user to save the password */
 "autofill.save-password.save.CTA" = "Сохранить пароль";
 
+/* Title for the toggle that enables autofill */
+"autofill.settings.ask-to-save-and-autofill" = "Предлагать сохранение и автозаполнение данных";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.import-passwords.section-header" = "Импорт паролей";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.options.section-header" = "Параметры";
+
 /* Title for the button to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.button.title" = "Сообщить о сбое автозаполнения";
 
@@ -673,6 +679,9 @@
 
 /* Title for the row to report that autofill is not working on a site in autofill settings */
 "autofill.settings.report.not.working.title" = "Не работает автозаполнение?";
+
+/* Section header for the autofill settings screen */
+"autofill.settings.view.section-header" = "Просмотр";
 
 /* Accessibility title for a Show Password button displaying actial password instead of ***** */
 "autofill.show-password" = "Показать пароль";
@@ -808,6 +817,9 @@
 
 /* No comment provided by engineer. */
 "Cancel is not allowed more than once" = "Отмена допускается только один раз";
+
+/* Close All Tabs */
+"close.all.tabs" = "Закрыть все вкладки";
 
 /* No comment provided by engineer. */
 "Confirm" = "Подтвердить";
@@ -1790,6 +1802,9 @@
 /* Title for the Mac Waitlist feature */
 "mac-waitlist.title" = "Приложение DuckDuckGo для Mac";
 
+/* Text explaining what happens when Malicious Site Protection is enabled */
+"malicious-site-protection-with-scam.settings.toggle.message" = "Предупреждать о мошеннических, фишинговых и вредоносных сайтах";
+
 /* Button that redirect the user to a web page explaining what Malicious Site Protection is */
 "malicious-site-protection.settings.footer.button.learn-more" = "Узнать больше";
 
@@ -2518,7 +2533,7 @@
 "settings.let.duckduckgo.manage.cookie.consent.popups" = "Разрешить DuckDuckGo управлять окнами выбора куки-файлов";
 
 /* Settings screen cell text for passwords */
-"settings.logins" = "Пароли";
+"settings.logins" = "Пароли и автозаполнение";
 
 /* The name of the settings section containing main settings */
 "settings.main.settings" = "Основные настройки";
@@ -2998,8 +3013,17 @@
 /* Accesibility label: first string is website title, second is address */
 "tab.open.with.title.and.address" = "Открыть сайт «%1$@» по адресу %2$@";
 
+/* Select all tabs */
+"tab.select.all" = "Выбрать все";
+
+/* Deselect all tabs */
+"tab.select.none" = "Снять выделение всех элементов";
+
 /* Tab Switcher Accessibility Label */
 "tab.switcher.accessibility.label" = "Переключатель вкладок";
+
+/* Bookmark all tabs menu item */
+"tab.switcher.bookmarkAll" = "Добавить все вкладки в закладки";
 
 /* Description text for the text size adjustment setting */
 "textSize.description" = "Масштаб текста любого сайта можно отрегулировать.";
@@ -3094,8 +3118,8 @@
 /* Title for the VPN widget onboarding screen */
 "vpn.addWidget.settings.title" = "Найдите и выберите **DuckDuckGo**, а затем с помощью свайпа перейдите к **VPN** и выберите вариант **Добавить виджет**.";
 
-/* Message for success when running the intent to enable the DuckDuckGo VPN */
-"vpn.control-widget.disable.vpn.intent.success" = "VPN DuckDuckGo подключен";
+/* Message for success when running the intent to disable the DuckDuckGo VPN */
+"vpn.control-widget.disable.vpn.intent.success" = "DuckDuckGo VPN отключен";
 
 /* No comment provided by engineer. */
 "vpn.control-widget.education.screen.description" = "Быстрые команды Siri позволяют оперативно подключиться к VPN с помощью голосового управления, например: «Siri, включи DuckDuckGo VPN». Это быстрый и удобный способ включить VPN, не занимая рук.";
