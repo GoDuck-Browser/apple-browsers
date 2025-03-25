@@ -69,7 +69,8 @@ struct DuckPlayerMiniPillView: View {
         enum Layout {
             static let thumbnailSize: (w: CGFloat, h: CGFloat) = (60, 33.7)
             static let thumbnailCornerRadius: CGFloat = 8
-            static let stackSpacing: CGFloat = 12
+            static let vStackSpacing: CGFloat = 4
+            static let hStackSpacing: CGFloat = 10
             static let fontSize: CGFloat = 16
             static let playButtonFont: CGFloat = 20
             static let cornerRadius: CGFloat = 12
@@ -78,27 +79,16 @@ struct DuckPlayerMiniPillView: View {
             static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
             static let viewOffset: CGFloat = 20
             static let regularPadding: CGFloat = 16
-            static let bottomSpacer: CGFloat = 25
-            static let grabHandleHeight: CGFloat = 4
-            static let grabHandleWidth: CGFloat = 36
-            static let grabHandleTopPadding: CGFloat = 8
         }
     }
 
-    private var grabHandle: some View {
-        Capsule()
-            .fill(Color(designSystemColor: .textPrimary).opacity(0.3))
-            .frame(width: Constants.Layout.grabHandleWidth, height: Constants.Layout.grabHandleHeight)
-            .padding(.top, Constants.Layout.grabHandleTopPadding)
-    }
-
     private var sheetContent: some View {
-        VStack(spacing: 0) {
-            grabHandle
+        Button(
+            action: { viewModel.openInDuckPlayer() },
+            label: {
+                VStack(spacing: Constants.Layout.vStackSpacing) {
+                    HStack(spacing: Constants.Layout.hStackSpacing) {
 
-            Button(action: { viewModel.openInDuckPlayer() }) {
-                VStack(spacing: Constants.Layout.stackSpacing) {
-                    HStack(spacing: Constants.Layout.stackSpacing) {
                         // YouTube thumbnail image
                         Group {
                             AnimatedAsyncImage(
@@ -122,27 +112,25 @@ struct DuckPlayerMiniPillView: View {
                                 .daxFootnoteRegular()
                                 .foregroundColor(Color(designSystemColor: .textSecondary))
                                 .multilineTextAlignment(.leading)
-                                .lineLimit(1)
+                                .lineLimit(2)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .layoutPriority(1)
+
                     }
                     .padding(Constants.Layout.regularPadding)
                     .background(
                         Color(designSystemColor: colorScheme == .dark ? .container : .backgroundSheets)
                     )
+
                 }
-                .background(Color(designSystemColor: .surface))
                 .cornerRadius(Constants.Layout.cornerRadius)
                 .shadow(
                     color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius,
                     x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height
                 )
-                .padding(.horizontal, Constants.Layout.regularPadding)
-                .padding(.vertical, Constants.Layout.regularPadding)
-                .padding(.bottom, Constants.Layout.bottomSpacer)  // Add padding to cover border during animation
-            }
-        }
+
+            })
     }
 
     var body: some View {
@@ -150,11 +138,5 @@ struct DuckPlayerMiniPillView: View {
             Color(designSystemColor: .panel)
             sheetContent
         }
-        .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))
-        .shadow(
-            color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width,
-            y: Constants.Layout.shadowOffset.height
-        )
-        .offset(y: Constants.Layout.viewOffset)
     }
 }

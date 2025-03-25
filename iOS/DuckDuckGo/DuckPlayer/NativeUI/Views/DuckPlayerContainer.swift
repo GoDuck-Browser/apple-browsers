@@ -177,15 +177,14 @@ private struct SheetView<Content: View>: View {
                     GrabHandle()
                     content(DuckPlayerContainer.PresentationMetrics(contentWidth: sheetWidth))
                 }
-                .padding(.horizontal, 16)                
+                .padding(.horizontal, 16)
             }
         }
         .onWidthChange { newWidth in
             sheetWidth = newWidth
         }
-        .padding(.bottom, 40) // Add some bottom padding to account for the grab handle
+        .padding(.bottom, 44) // Add some bottom padding to account for the grab handle
         .background(Color(designSystemColor: .surface))
-        .cornerRadius(16, corners: [.topLeft, .topRight])
         .frame(maxWidth: .infinity)
         .offset(y: sheetOffset)
         .opacity(opacity)

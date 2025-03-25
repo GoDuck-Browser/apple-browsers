@@ -108,10 +108,5 @@ struct DuckPlayerEntryPillView: View {
             Color(designSystemColor: .panel)
             sheetContent
         }
-        .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))
-        .shadow(
-            color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width,
-            y: Constants.Layout.shadowOffset.height
-        )
     }
 }
