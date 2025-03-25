@@ -27,10 +27,12 @@ final class CapturingFaviconImageCache: FaviconImageCaching {
 
     var loaded: Bool = false
 
+    @MainActor
     func load() async throws {
         loadCallsCount += 1
     }
 
+    @MainActor
     func insert(_ favicons: [Favicon]) {
         insertCalls.append(favicons)
     }
