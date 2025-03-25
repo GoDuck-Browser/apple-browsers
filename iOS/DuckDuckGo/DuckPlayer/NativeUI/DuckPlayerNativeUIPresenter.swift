@@ -112,7 +112,7 @@ final class DuckPlayerNativeUIPresenter {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(handleOmnibarDidLayout),
-            name: OmniBar.didLayoutNotification,
+            name: DefaultOmniBarView.didLayoutNotification,
             object: nil
         )
 
