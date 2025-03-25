@@ -41,7 +41,7 @@ public struct AccessTokenValue: Encodable {
 
 // https://app.asana.com/0/1205842942115003/1209254337758531/f
 public struct GetFeatureValue: Encodable {
-    let useUnifiedFeedback: Bool = false
+    let useUnifiedFeedback: Bool = true
     let useSubscriptionsAuthV2: Bool
 }
 
