@@ -65,7 +65,7 @@ public class DefaultAPIService: APIService {
                 // Try again
                 return try await fetch(request: request, authAlreadyRefreshed: authAlreadyRefreshed, failureRetryCount: failureRetryCount + 1)
             } else {
-                throw error
+                throw APIRequestV2.Error.urlSession(error)
             }
         }
 
