@@ -18,6 +18,7 @@
 
 import Foundation
 import CommonCrypto
+import os.log
 
 /// Helper that generates codes used in the OAuth2 authentication process
 struct OAuthCodesGenerator {
@@ -25,7 +26,14 @@ struct OAuthCodesGenerator {
     /// https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow-with-pkce/add-login-using-the-authorization-code-flow-with-pkce#create-code-verifier
     static var codeVerifier: String {
         var buffer = [UInt8](repeating: 0, count: 128)
-        _ = SecRandomCopyBytes(kSecRandomDefault, buffer.count, &buffer)
+        let status = SecRandomCopyBytes(kSecRandomDefault, buffer.count, &buffer)
+
+        if status == errSecSuccess { // Always test the status.
+            Logger.OAuth.debug("Generated code verifier")
+        } else {
+            Logger.OAuth.fault("Failed to generate code verifier: \(status, privacy: .public)")
+        }
+
         return Data(buffer).base64EncodedString().replacingInvalidCharacters()
     }
 
