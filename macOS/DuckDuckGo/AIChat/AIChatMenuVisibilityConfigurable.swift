@@ -50,21 +50,10 @@ protocol AIChatMenuVisibilityConfigurable {
     ///
     /// - Returns: A `PassthroughSubject` that emits `Void` when the values change.
     var valuesChangedPublisher: PassthroughSubject<Void, Never> { get }
-
-    /// A publisher that is triggered when it is validated that the onboarding should be displayed.
-    ///
-    /// This property listens to `AIChatOnboardingTabExtension` and triggers the publisher when a
-    /// notification `AIChatOpenedForReturningUser`  is posted.
-    ///
-    /// - Returns: A `PassthroughSubject` that emits `Void` when the onboarding popover should be displayed.
-    var shouldDisplayToolbarOnboardingPopover: PassthroughSubject<Void, Never> { get }
-
-    /// Marks the toolbar onboarding popover as shown, preventing it from being displayed more than once.
-    /// This method should be called after the onboarding popover has been presented to the user.
-    func markToolbarOnboardingPopoverAsShown()
 }
 
 final class AIChatMenuConfiguration: AIChatMenuVisibilityConfigurable {
+
     enum ShortcutType {
         case applicationMenu
         case toolbar
@@ -76,7 +65,6 @@ final class AIChatMenuConfiguration: AIChatMenuVisibilityConfigurable {
     private let remoteSettings: AIChatRemoteSettingsProvider
 
     var valuesChangedPublisher = PassthroughSubject<Void, Never>()
-    var shouldDisplayToolbarOnboardingPopover = PassthroughSubject<Void, Never>()
 
     var isFeatureEnabledForApplicationMenuShortcut: Bool {
         isFeatureEnabledFor(shortcutType: .applicationMenu)
@@ -94,10 +82,6 @@ final class AIChatMenuConfiguration: AIChatMenuVisibilityConfigurable {
         return isFeatureEnabledForApplicationMenuShortcut && storage.showShortcutInApplicationMenu
     }
 
-    func markToolbarOnboardingPopoverAsShown() {
-        storage.didDisplayAIChatToolbarOnboarding = true
-    }
-
     init(storage: AIChatPreferencesStorage = DefaultAIChatPreferencesStorage(),
          notificationCenter: NotificationCenter = .default,
          remoteSettings: AIChatRemoteSettingsProvider = AIChatRemoteSettings()) {
@@ -106,17 +90,6 @@ final class AIChatMenuConfiguration: AIChatMenuVisibilityConfigurable {
         self.remoteSettings = remoteSettings
 
         self.subscribeToValuesChanged()
-        self.subscribeToAIChatLoadedNotification()
-    }
-
-    private func subscribeToAIChatLoadedNotification() {
-        notificationCenter.publisher(for: .AIChatOpenedForReturningUser)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
-                if !self.storage.didDisplayAIChatToolbarOnboarding && !storage.shouldDisplayToolbarShortcut {
-                    self.shouldDisplayToolbarOnboardingPopover.send()
-                }
-            }.store(in: &cancellables)
     }
 
     private func subscribeToValuesChanged() {

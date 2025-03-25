@@ -288,9 +288,5 @@ private class DummyAIChatConfig: AIChatMenuVisibilityConfigurable {
         return PassthroughSubject<Void, Never>()
     }
 
-    var shouldDisplayToolbarOnboardingPopover: PassthroughSubject<Void, Never> {
-        return PassthroughSubject<Void, Never>()
-    }
-
     func markToolbarOnboardingPopoverAsShown() { }
 }

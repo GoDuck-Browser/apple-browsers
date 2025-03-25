@@ -212,8 +212,6 @@ final class NavigationBarViewController: NSViewController {
         addDebugNotificationListeners()
 #endif
 
-        subscribeToAIChatOnboarding()
-
 #if !APPSTORE
         if #available(macOS 15.3, *), !burnerMode.isBurner {
             WebExtensionManager.shared.toolbarButtons().enumerated().forEach { (index, button) in
@@ -1080,40 +1078,6 @@ final class NavigationBarViewController: NSViewController {
 
     // MARK: - AI Chat
 
-    private func subscribeToAIChatOnboarding() {
-        aiChatMenuConfig.shouldDisplayToolbarOnboardingPopover
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self]  in
-                guard let self = self else { return }
-                self.automaticallyShowAIChatOnboardingPopoverIfPossible()
-        }.store(in: &cancellables)
-    }
-
-    private func automaticallyShowAIChatOnboardingPopoverIfPossible() {
-        guard WindowControllersManager.shared.lastKeyMainWindowController?.window === aiChatButton.window else { return }
-
-        popovers.showAIChatOnboardingPopover(from: aiChatButton,
-                                             withDelegate: self,
-                                             ctaCallback: { [weak self] didAddShortcut in
-            guard let self = self else { return }
-            self.popovers.closeAIChatOnboardingPopover()
-
-            if didAddShortcut {
-                self.showAIChatOnboardingConfirmationPopover()
-            }
-        })
-
-        aiChatMenuConfig.markToolbarOnboardingPopoverAsShown()
-    }
-
-    private func showAIChatOnboardingConfirmationPopover() {
-        DispatchQueue.main.async {
-            let viewController = PopoverMessageViewController(message: UserText.aiChatOnboardingPopoverConfirmation,
-                                                              image: .successCheckmark)
-            viewController.show(onParent: self, relativeTo: self.aiChatButton)
-        }
-    }
-
     @IBAction func aiChatButtonAction(_ sender: NSButton) {
         AIChatTabOpener.openAIChatTab()
         PixelKit.fire(GeneralPixel.aichatToolbarClicked, includeAppVersionParameter: true)
@@ -1338,9 +1302,6 @@ extension NavigationBarViewController: NSPopoverDelegate {
         } else if let popover = popovers.savePaymentMethodPopover, notification.object as AnyObject? === popover {
             popovers.savePaymentMethodPopoverClosed()
             updatePasswordManagementButton()
-        } else if let popover = popovers.aiChatOnboardingPopover, notification.object as AnyObject? === popover {
-            popovers.aiChatOnboardingPopoverClosed()
-            updateAIChatButton()
         } else if let popover = popovers.autofillOnboardingPopover, notification.object as AnyObject? === popover {
             popovers.autofillOnboardingPopoverClosed()
             updatePasswordManagementButton()
