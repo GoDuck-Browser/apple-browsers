@@ -79,6 +79,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let crashReporter = CrashReporter()
 #endif
 
+    let faviconManager: FaviconManager
     let pinnedTabsManager = PinnedTabsManager()
     let pinnedTabsManagerProvider: PinnedTabsManagerProviding!
     private(set) var stateRestorationManager: AppStateRestorationManager!
@@ -388,6 +389,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         privacyStats = PrivacyStats(databaseProvider: PrivacyStatsDatabase())
 #endif
         PixelKit.configureExperimentKit(featureFlagger: featureFlagger, eventTracker: ExperimentEventTracker(store: UserDefaults.appConfiguration))
+
+#if DEBUG
+        faviconManager = FaviconManager(cacheType: AppVersion.runType == .normal ? .standard : .inMemory)
+#else
+        faviconManager = FaviconManager(cacheType: .standard)
+#endif
     }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
@@ -444,7 +451,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         if case .normal = AppVersion.runType {
             Task {
-                try? await FaviconManager.shared.loadFavicons()
+                try? await faviconManager.loadFavicons()
             }
         }
         configurationManager.start()

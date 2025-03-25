@@ -21,7 +21,7 @@ import SwiftUIExtensions
 
 struct FaviconView: View {
 
-    let faviconManagement: FaviconManagement = FaviconManager.shared
+    let faviconManagement: FaviconManagement = NSApp.delegateTyped.faviconManager
 
     let url: URL?
     let size: CGFloat
@@ -44,7 +44,6 @@ struct FaviconView: View {
         self.onFaviconMissing = onFaviconMissing
     }
 
-    @MainActor(unsafe)
     func refreshImage() {
         if let duckPlayerImage = DuckPlayer.shared.image(for: self) {
             image = duckPlayerImage

@@ -37,8 +37,7 @@ protocol FaviconReferenceCaching {
     @MainActor
     func load() async throws
 
-    @MainActor
-    func insert(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL) async
+    func insert(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL)
 
     func getFaviconUrl(for documentURL: URL, sizeCategory: Favicon.SizeCategory) -> URL?
     func getFaviconUrl(for host: String, sizeCategory: Favicon.SizeCategory) -> URL?
@@ -86,12 +85,11 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
         }
     }
 
-    @MainActor
-    func insert(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL) async {
+    func insert(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL) {
         guard loaded else { return }
 
         guard let host = documentUrl.host else {
-            await insertToUrlCache(faviconUrls: faviconUrls, documentUrl: documentUrl)
+            insertToUrlCache(faviconUrls: faviconUrls, documentUrl: documentUrl)
             return
         }
 
@@ -103,7 +101,7 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
 
                 // There is a possibility of old cache entry in urlReferences
                 if urlReferences[documentUrl] != nil {
-                    await invalidateUrlCache(for: host)
+                    invalidateUrlCache(for: host)
                 }
                 return
             }
@@ -112,19 +110,18 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
                 // Favicon was updated
 
                 // Exceptions may contain updated favicon if user visited a different documentUrl sooner
-                await invalidateUrlCache(for: host)
-                await insertToHostCache(faviconUrls: (faviconUrls.smallFaviconUrl, faviconUrls.mediumFaviconUrl), host: host, documentUrl: documentUrl)
+                invalidateUrlCache(for: host)
+                insertToHostCache(faviconUrls: (faviconUrls.smallFaviconUrl, faviconUrls.mediumFaviconUrl), host: host, documentUrl: documentUrl)
                 return
             } else {
                 // Exception
-                await insertToUrlCache(faviconUrls: (faviconUrls.smallFaviconUrl, faviconUrls.mediumFaviconUrl), documentUrl: documentUrl)
+                insertToUrlCache(faviconUrls: (faviconUrls.smallFaviconUrl, faviconUrls.mediumFaviconUrl), documentUrl: documentUrl)
 
                 return
             }
         } else {
             // Not cached. Add to cache
-            await insertToHostCache(faviconUrls: (faviconUrls.smallFaviconUrl, faviconUrls.mediumFaviconUrl), host: host, documentUrl: documentUrl)
-
+            insertToHostCache(faviconUrls: (faviconUrls.smallFaviconUrl, faviconUrls.mediumFaviconUrl), host: host, documentUrl: documentUrl)
             return
         }
     }
@@ -234,11 +231,12 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
 
     // MARK: - Private
 
-    @MainActor
-    private func insertToHostCache(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), host: String, documentUrl: URL) async {
+    private func insertToHostCache(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), host: String, documentUrl: URL) {
         // Remove existing
         if let oldReference = hostReferences[host] {
-            await self.removeHostReferencesFromStore([oldReference])
+            Task.detached {
+                await self.removeHostReferencesFromStore([oldReference])
+            }
         }
 
         // Create and save new references
@@ -250,19 +248,22 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
                                               dateCreated: Date())
         hostReferences[host] = hostReference
 
-        do {
-            try await self.storing.save(hostReference: hostReference)
-            Logger.favicons.debug("Host reference saved successfully. host: \(hostReference.host)")
-        } catch {
-            Logger.favicons.error("Saving of host reference failed: \(error.localizedDescription)")
+        Task.detached {
+            do {
+                try await self.storing.save(hostReference: hostReference)
+                Logger.favicons.debug("Host reference saved successfully. host: \(hostReference.host)")
+            } catch {
+                Logger.favicons.error("Saving of host reference failed: \(error.localizedDescription)")
+            }
         }
     }
 
-    @MainActor
-    private func insertToUrlCache(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL) async {
+    private func insertToUrlCache(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL) {
         // Remove existing
         if let oldReference = urlReferences[documentUrl] {
-            await self.removeUrlReferencesFromStore([oldReference])
+            Task.detached {
+                await self.removeUrlReferencesFromStore([oldReference])
+            }
         }
 
         // Create and save new references
@@ -274,17 +275,21 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
 
         urlReferences[documentUrl] = urlReference
 
-        do {
-            try await self.storing.save(urlReference: urlReference)
-            Logger.favicons.debug("URL reference saved successfully. document URL: \(urlReference.documentUrl.absoluteString)")
-        } catch {
-            Logger.favicons.error("Saving of URL reference failed: \(error.localizedDescription)")
+        Task.detached {
+            do {
+                try await self.storing.save(urlReference: urlReference)
+                Logger.favicons.debug("URL reference saved successfully. document URL: \(urlReference.documentUrl.absoluteString)")
+            } catch {
+                Logger.favicons.error("Saving of URL reference failed: \(error.localizedDescription)")
+            }
         }
     }
 
-    private func invalidateUrlCache(for host: String) async {
-        await removeUrlReferences { urlReference in
-            urlReference.documentUrl.host == host
+    private func invalidateUrlCache(for host: String) {
+        Task.detached {
+            await self.removeUrlReferences { urlReference in
+                urlReference.documentUrl.host == host
+            }
         }
     }
 

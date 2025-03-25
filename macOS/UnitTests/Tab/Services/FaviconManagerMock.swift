@@ -53,10 +53,9 @@ final class FaviconManagerMock: FaviconManagement {
         return nil
     }
 
-    func burnExcept(fireproofDomains: DuckDuckGo_Privacy_Browser.FireproofDomains, bookmarkManager: DuckDuckGo_Privacy_Browser.BookmarkManager, savedLogins: Set<String>) async {
+    func burn(except fireproofDomains: DuckDuckGo_Privacy_Browser.FireproofDomains, bookmarkManager: DuckDuckGo_Privacy_Browser.BookmarkManager, savedLogins: Set<String>) async {
     }
 
     func burnDomains(_ domains: Set<String>, exceptBookmarks bookmarkManager: any DuckDuckGo_Privacy_Browser.BookmarkManager, exceptSavedLogins: Set<String>, exceptExistingHistory history: History.BrowsingHistory, tld: Common.TLD) async {
-        completion()
     }
 }

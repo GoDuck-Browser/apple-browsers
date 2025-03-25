@@ -45,7 +45,7 @@ final class FaviconsTabExtension {
         contentPublisher: some Publisher<Tab.TabContent, Never>,
         faviconManagement: FaviconManagement? = nil
     ) {
-        self.faviconManagement = faviconManagement ?? FaviconManager.shared
+        self.faviconManagement = faviconManagement ?? NSApp.delegateTyped.faviconManager
 
         scriptsPublisher.sink { [weak self] scripts in
             Task { @MainActor in

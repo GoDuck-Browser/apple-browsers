@@ -33,7 +33,7 @@ final class DuckURLSchemeHandler: NSObject, WKURLSchemeHandler {
 
     init(
         featureFlagger: FeatureFlagger,
-        faviconManager: FaviconManagement = FaviconManager.shared,
+        faviconManager: FaviconManagement = NSApp.delegateTyped.faviconManager,
         isNTPSpecialPageSupported: Bool = false,
         isHistorySpecialPageSupported: Bool = false,
         userBackgroundImagesManager: UserBackgroundImagesManaging? = NSApp.delegateTyped.newTabPageCustomizationModel.customImagesManager

@@ -97,7 +97,7 @@ final class Fire {
          savedZoomLevelsCoordinating: SavedZoomLevelsCoordinating = AccessibilityPreferences.shared,
          downloadListCoordinator: DownloadListCoordinator = DownloadListCoordinator.shared,
          windowControllerManager: WindowControllersManager? = nil,
-         faviconManagement: FaviconManagement = FaviconManager.shared,
+         faviconManagement: FaviconManagement? = nil,
          autoconsentManagement: AutoconsentManagement? = nil,
          stateRestorationManager: AppStateRestorationManager? = nil,
          recentlyClosedCoordinator: RecentlyClosedCoordinating? = nil,
@@ -116,7 +116,7 @@ final class Fire {
         self.savedZoomLevelsCoordinating = savedZoomLevelsCoordinating
         self.downloadListCoordinator = downloadListCoordinator
         self.windowControllerManager = windowControllerManager ?? WindowControllersManager.shared
-        self.faviconManagement = faviconManagement
+        self.faviconManagement = faviconManagement ?? NSApp.delegateTyped.faviconManager
         self.recentlyClosedCoordinator = recentlyClosedCoordinator ?? RecentlyClosedCoordinator.shared
         self.pinnedTabsManagerProvider = pinnedTabsManagerProvider ?? Application.appDelegate.pinnedTabsManagerProvider
         self.bookmarkManager = bookmarkManager

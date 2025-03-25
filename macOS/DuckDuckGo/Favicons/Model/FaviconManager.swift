@@ -83,14 +83,6 @@ extension FaviconManagement {
 
 final class FaviconManager: FaviconManagement {
 
-    static let shared: FaviconManager = {
-#if DEBUG
-        return FaviconManager(cacheType: AppVersion.runType == .normal ? .standard : .inMemory)
-#else
-        return FaviconManager(cacheType: .standard)
-#endif
-    }()
-
     enum CacheType {
         case standard
         case inMemory

@@ -203,7 +203,7 @@ final class Bookmark: BaseBookmarkEntity {
     }
 
     let faviconManagement: FaviconManagement
-    @MainActor(unsafe)
+
     func favicon(_ sizeCategory: Favicon.SizeCategory) -> NSImage? {
         if let duckPlayerFavicon = DuckPlayer.shared.image(for: self) {
             return duckPlayerFavicon
@@ -216,7 +216,7 @@ final class Bookmark: BaseBookmarkEntity {
         }
     }
 
-    init(id: String, url: String, title: String, isFavorite: Bool, parentFolderUUID: String? = nil, faviconManagement: FaviconManagement = FaviconManager.shared) {
+    init(id: String, url: String, title: String, isFavorite: Bool, parentFolderUUID: String? = nil, faviconManagement: FaviconManagement = NSApp.delegateTyped.faviconManager) {
         self.url = url
         self.isFavorite = isFavorite
         self.faviconManagement = faviconManagement
