@@ -41,10 +41,14 @@ struct AnimatedAsyncImage: View {
             image
                 .resizable()
                 .aspectRatio(contentMode: .fill)
+                .frame(width: width, height: height)
+                .clipped()
+                .contentShape(Rectangle())
                 .transition(.opacity.combined(with: .scale))
         } placeholder: {
             placeholderView
         }
+        .frame(width: width, height: height)
         .animation(.easeInOut(duration: 0.3), value: url)
         .id(url?.absoluteString ?? "")
     }
@@ -57,11 +61,13 @@ struct DuckPlayerMiniPillView: View {
     @State private var viewHeight: CGFloat = 100
     @State private var iconSize: CGFloat = 40
 
+    @Environment(\.colorScheme) private var colorScheme
+
     struct Constants {
         static let playImage = "play.fill"
 
         enum Layout {
-            static let thumbnailSize: (w: CGFloat, h: CGFloat) = (60, 40)
+            static let thumbnailSize: (w: CGFloat, h: CGFloat) = (60, 33.7)
             static let thumbnailCornerRadius: CGFloat = 8
             static let stackSpacing: CGFloat = 12
             static let fontSize: CGFloat = 16
@@ -105,29 +111,26 @@ struct DuckPlayerMiniPillView: View {
                         .clipShape(RoundedRectangle(cornerRadius: Constants.Layout.thumbnailCornerRadius))
 
                         VStack(alignment: .leading) {
-                            Text(UserText.duckPlayerNativeOpenInDuckPlayer)
-                                .daxBodyRegular()
+                            Text(UserText.duckPlayerNativeResumeInDuckPlayer)
+                                .daxSubheadSemibold()
                                 .foregroundColor(Color(designSystemColor: .textPrimary))
+                                .multilineTextAlignment(.leading)
                                 .lineLimit(2)
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
                             Text(viewModel.title)
-                                .daxBodyRegular()
+                                .daxFootnoteRegular()
                                 .foregroundColor(Color(designSystemColor: .textSecondary))
-                                .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(1)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .layoutPriority(1)
-
-                        // Play button
-                        Image(systemName: Constants.playImage)
-                            .font(.system(size: Constants.Layout.playButtonFont))
-                            .foregroundColor(.white)
-                            .frame(width: iconSize, height: iconSize)
-                            .background(Color(designSystemColor: .accent))
-                            .clipShape(Circle())
                     }
                     .padding(Constants.Layout.regularPadding)
+                    .background(
+                        Color(designSystemColor: colorScheme == .dark ? .container : .backgroundSheets)
+                    )
                 }
                 .background(Color(designSystemColor: .surface))
                 .cornerRadius(Constants.Layout.cornerRadius)

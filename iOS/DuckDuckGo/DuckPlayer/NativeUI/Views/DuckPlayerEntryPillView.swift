@@ -17,8 +17,8 @@
 //  limitations under the License.
 //
 
-import SwiftUI
 import DesignResourcesKit
+import SwiftUI
 
 struct DuckPlayerEntryPillView: View {
     @ObservedObject var viewModel: DuckPlayerEntryPillViewModel
@@ -26,6 +26,8 @@ struct DuckPlayerEntryPillView: View {
     // Add state to track the height
     @State private var viewHeight: CGFloat = 100
     @State private var iconSize: CGFloat = 40
+
+    @Environment(\.colorScheme) private var colorScheme
 
     struct Constants {
         static let daxLogo = "Home"
@@ -58,7 +60,7 @@ struct DuckPlayerEntryPillView: View {
             .background(Color(designSystemColor: .buttonsPrimaryDefault))
             .clipShape(Circle())
     }
-    
+
     private var grabHandle: some View {
         Capsule()
             .fill(Color(designSystemColor: .textPrimary).opacity(0.3))
@@ -87,7 +89,7 @@ struct DuckPlayerEntryPillView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
 
                             Text(UserText.duckPlayerTapToWatchWithoutAds)
-                                .daxBodyRegular()
+                                .daxFootnoteRegular()
                                 .foregroundColor(Color(designSystemColor: .textSecondary))
                                 .multilineTextAlignment(.leading)
                                 .lineLimit(2)
@@ -100,15 +102,20 @@ struct DuckPlayerEntryPillView: View {
                         playButton
                     }
                     .padding(Constants.Layout.regularPadding)
+                    .background(
+                        Color(designSystemColor: colorScheme == .dark ? .container : .backgroundSheets)
+                    )
+
                 }
                 .background(Color(designSystemColor: .surface))
-                .environment(\.colorScheme, .dark)
-                .background(Color(designSystemColor: .surface))
                 .cornerRadius(Constants.Layout.cornerRadius)
-                .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
+                .shadow(
+                    color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius,
+                    x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height
+                )
                 .padding(.horizontal, Constants.Layout.regularPadding)
                 .padding(.vertical, Constants.Layout.regularPadding)
-                .padding(.bottom, Constants.Layout.bottomSpacer) // Add padding to cover border during animation                      
+                .padding(.bottom, Constants.Layout.bottomSpacer)  // Add padding to cover border during animation
             }
         }
     }
@@ -119,7 +126,10 @@ struct DuckPlayerEntryPillView: View {
             sheetContent
         }
         .clipShape(CustomRoundedCorners(radius: Constants.Layout.cornerRadius, corners: [.topLeft, .topRight]))
-        .shadow(color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width, y: Constants.Layout.shadowOffset.height)
+        .shadow(
+            color: Color.black.opacity(Constants.Layout.shadowOpacity), radius: Constants.Layout.shadowRadius, x: Constants.Layout.shadowOffset.width,
+            y: Constants.Layout.shadowOffset.height
+        )
         .offset(y: Constants.Layout.viewOffset)
     }
 }
