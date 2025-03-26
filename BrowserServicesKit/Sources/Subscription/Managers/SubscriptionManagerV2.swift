@@ -188,11 +188,6 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
                 break
             }
         }
-
-        Task {
-            await migrateAuthV1toAuthV2IfNeeded()
-
-        }
     }
 
     public var canPurchase: Bool {
@@ -235,7 +230,6 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
 
     // MARK: - Subscription
 
-    @MainActor
     func migrateAuthV1toAuthV2IfNeeded() async {
 
         guard v1MigrationNeeded else {
@@ -250,7 +244,6 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
 
                 // cleaning up old data
                 clearSubscriptionCache()
-                onOAuthV2Enabled?()
             }
         } catch {
             Logger.subscription.error("Failed to migrate V1 token: \(error, privacy: .public)")
