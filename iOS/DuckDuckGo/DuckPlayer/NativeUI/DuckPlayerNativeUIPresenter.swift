@@ -150,6 +150,16 @@ final class DuckPlayerNativeUIPresenter {
                 hasBackground: false,
                 onDismiss: { [weak self] in
                     self?.dismissPill()
+                },
+                onPresentDuckPlayer: { [weak self] in
+                    guard let self = self else { return }
+                    _ = self.presentDuckPlayer(
+                        videoID: videoID,
+                        source: .youtube,
+                        in: self.hostView!,
+                        title: nil,
+                        timestamp: timestamp
+                    )
                 }
             ) { _ in
                 AnyView(DuckPlayerEntryPillView(viewModel: pillViewModel))
@@ -169,6 +179,16 @@ final class DuckPlayerNativeUIPresenter {
                 hasBackground: false,
                 onDismiss: { [weak self] in
                     self?.dismissPill()
+                },
+                onPresentDuckPlayer: { [weak self] in
+                    guard let self = self else { return }
+                    _ = self.presentDuckPlayer(
+                        videoID: videoID,
+                        source: .youtube,
+                        in: self.hostView!,
+                        title: nil,
+                        timestamp: timestamp
+                    )
                 }
             ) { _ in
                 AnyView(DuckPlayerMiniPillView(viewModel: miniPillViewModel))
