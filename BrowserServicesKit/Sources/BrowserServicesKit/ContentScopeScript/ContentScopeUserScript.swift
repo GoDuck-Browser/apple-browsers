@@ -211,11 +211,13 @@ extension ContentScopeUserScript: WKScriptMessageHandlerWithReply {
     @MainActor
     public func userContentController(_ userContentController: WKUserContentController,
                                       didReceive message: WKScriptMessage) async -> (Any?, String?) {
-        if let messageDictionary = message.body as? [String: Any],
-           let parameters = messageDictionary["params"]  as? [String: String],
-           let flag = parameters["flag"] {
-            delegate?.contentScopeUserScript(self, didReceiveDebugFlag: flag)
+        if isIsolated {
+            return await handleIsolatedContextMessages(message)
         }
+        return handleNonIsolatedContextMessages(message)
+    }
+
+    private func handleIsolatedContextMessages(_ message: WKScriptMessage) async -> (Any?, String?) {
         let action = broker.messageHandlerFor(message)
         do {
             let json = try await broker.execute(action: action, original: message)
@@ -224,6 +226,15 @@ extension ContentScopeUserScript: WKScriptMessageHandlerWithReply {
             // forward uncaught errors to the client
             return (nil, error.localizedDescription)
         }
+    }
+
+    private func handleNonIsolatedContextMessages(_ message: WKScriptMessage) -> (Any?, String?) {
+        if let messageDictionary = message.body as? [String: Any],
+           let parameters = messageDictionary["params"]  as? [String: String],
+           let flag = parameters["flag"] {
+            delegate?.contentScopeUserScript(self, didReceiveDebugFlag: flag)
+        }
+        return (nil, nil)
     }
 }
 
