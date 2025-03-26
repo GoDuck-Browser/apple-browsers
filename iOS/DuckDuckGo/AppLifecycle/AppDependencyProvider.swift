@@ -224,6 +224,11 @@ final class AppDependencyProvider: DependencyProvider {
                 ContentBlocking.shared.privacyConfigurationManager.internalUserDecider.isInternalUser
             })
 
+            subscriptionManager.onOAuthV2Enabled {
+                // Let the VPN know it can start using OAuthV2 tokens
+                vpnSettings.isAuthV2Enabled = true
+            }
+
             let restoreFlow = DefaultAppStoreRestoreFlowV2(subscriptionManager: subscriptionManager, storePurchaseManager: storePurchaseManager)
             subscriptionManager.tokenRecoveryHandler = {
                 try await DeadTokenRecoverer.attemptRecoveryFromPastPurchase(subscriptionManager: subscriptionManager, restoreFlow: restoreFlow)
@@ -247,7 +252,6 @@ final class AppDependencyProvider: DependencyProvider {
             subscriptionAuthV1toV2Bridge = subscriptionManager
         }
 
-        vpnSettings.isAuthV2Enabled = isAuthV2Enabled
         vpnFeatureVisibility = DefaultNetworkProtectionVisibility(authenticationStateProvider: authenticationStateProvider)
         networkProtectionKeychainTokenStore = NetworkProtectionKeychainTokenStore(accessTokenProvider: accessTokenProvider)
         networkProtectionTunnelController = NetworkProtectionTunnelController(tokenHandler: tokenHandler,

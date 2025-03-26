@@ -155,8 +155,12 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     public var tokenRecoveryHandler: TokenRecoveryHandler?
     public let currentEnvironment: SubscriptionEnvironment
     private let isInternalUserEnabled: () -> Bool
-    private var v1MigrationNeeded: Bool = true
+
+    @MainActor
+    private var v1MigrationNeeded = true
+
     private let legacyAccountStorage: AccountKeychainStorage?
+    public var onOAuthV2Enabled: (() -> Void)?
 
     public init(storePurchaseManager: StorePurchaseManagerV2? = nil,
                 oAuthClient: any OAuthClient,
@@ -167,6 +171,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
                 initForPurchase: Bool = true,
                 legacyAccountStorage: AccountKeychainStorage? = nil,
                 isInternalUserEnabled: @escaping () -> Bool =  { false }) {
+
         self._storePurchaseManager = storePurchaseManager
         self.oAuthClient = oAuthClient
         self.subscriptionEndpointService = subscriptionEndpointService
@@ -186,6 +191,11 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
             case .stripe:
                 break
             }
+        }
+
+        Task {
+            await migrateAuthV1toAuthV2IfNeeded()
+
         }
     }
 
@@ -229,6 +239,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
 
     // MARK: - Subscription
 
+    @MainActor
     func migrateAuthV1toAuthV2IfNeeded() async {
 
         guard v1MigrationNeeded else {
@@ -243,6 +254,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
 
                 // cleaning up old data
                 clearSubscriptionCache()
+                onOAuthV2Enabled?()
             }
         } catch {
             Logger.subscription.error("Failed to migrate V1 token: \(error, privacy: .public)")
@@ -271,6 +283,9 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
 
     @discardableResult
     public func getSubscription(cachePolicy: SubscriptionCachePolicy) async throws -> PrivacyProSubscription {
+
+        await migrateAuthV1toAuthV2IfNeeded()
+
         guard isUserAuthenticated else {
             throw SubscriptionEndpointServiceError.noData
         }
@@ -343,6 +358,9 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     }
 
     public func getCustomerPortalURL() async throws -> URL {
+
+        await migrateAuthV1toAuthV2IfNeeded()
+
         guard isUserAuthenticated else {
             throw SubscriptionEndpointServiceError.noData
         }
@@ -465,6 +483,9 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     /// - Parameter forceRefresh: ignore subscription and token cache and re-download everything
     /// - Returns: An Array of SubscriptionFeature where each feature is enabled or disabled based on the user entitlements
     public func currentSubscriptionFeatures(forceRefresh: Bool) async throws -> [SubscriptionFeatureV2] {
+
+        await migrateAuthV1toAuthV2IfNeeded()
+
         guard isUserAuthenticated else { return [] }
 
         var userEntitlements: [SubscriptionEntitlement]
@@ -495,6 +516,9 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     }
 
     public func isFeatureAvailableForUser(_ entitlement: SubscriptionEntitlement) async throws -> Bool {
+
+        await migrateAuthV1toAuthV2IfNeeded()
+
         guard isUserAuthenticated else { return false }
 
         let currentFeatures = try await currentSubscriptionFeatures(forceRefresh: false)

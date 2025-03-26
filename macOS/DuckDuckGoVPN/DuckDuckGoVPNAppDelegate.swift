@@ -39,7 +39,6 @@ import VPNAppLauncher
 @objc(Application)
 final class DuckDuckGoVPNApplication: NSApplication {
 
-    static let isAuthV2Enabled = false
     public var accountManager: AccountManager
     public var subscriptionManagerV2: any SubscriptionManagerV2
     private let _delegate: DuckDuckGoVPNAppDelegate
@@ -88,7 +87,7 @@ final class DuckDuckGoVPNApplication: NSApplication {
         accountManager.delegate = _delegate
 
         var tokenFound: Bool
-        if !Self.isAuthV2Enabled {
+        if !VPNSettings(defaults: .netP).isAuthV2Enabled {
             tokenFound = accountManager.accessToken != nil
         } else {
             tokenFound = subscriptionManagerV2.isUserAuthenticated
@@ -525,26 +524,18 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
     private lazy var entitlementMonitor = NetworkProtectionEntitlementMonitor()
 
     private func setUpSubscriptionMonitoring() {
-
-        var isUserAuthenticated: Bool
-        let entitlementsCheck: () async -> Swift.Result<Bool, Error>
-        if !DuckDuckGoVPNApplication.isAuthV2Enabled {
-            isUserAuthenticated = accountManager.isUserAuthenticated
-            entitlementsCheck = {
-                await self.accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
+        let entitlementsCheck = { [tunnelSettings] in
+            guard tunnelSettings.isAuthV2Enabled else {
+                return await self.accountManager.hasEntitlement(forProductName: .networkProtection, cachePolicy: .reloadIgnoringLocalCacheData)
             }
-        } else {
-            isUserAuthenticated = subscriptionManagerV2.isUserAuthenticated
-            entitlementsCheck = {
-                do {
-                    let available = try await self.subscriptionManagerV2.isFeatureAvailableForUser(.networkProtection)
-                    return .success(available)
-                } catch {
-                    return .failure(error)
-                }
+
+            do {
+                let available = try await self.subscriptionManagerV2.isFeatureAvailableForUser(.networkProtection)
+                return .success(available)
+            } catch {
+                return .failure(error)
             }
         }
-        guard isUserAuthenticated else { return }
 
         Task {
             await entitlementMonitor.start(entitlementCheck: entitlementsCheck) { [weak self] result in

@@ -300,6 +300,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                                    canPerformAuthMigration: true,
                                                                    canHandlePixels: true)
 
+            subscriptionManager.onOAuthV2Enabled = { [vpnSettings] in
+                vpnSettings.isAuthV2Enabled = true
+            }
+
             // Expired refresh token recovery
             if #available(iOS 15.0, macOS 12.0, *) {
                 let restoreFlow = DefaultAppStoreRestoreFlowV2(subscriptionManager: subscriptionManager, storePurchaseManager: subscriptionManager.storePurchaseManager())
@@ -319,7 +323,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             subscriptionManagerV1 = nil
             subscriptionAuthV1toV2Bridge = subscriptionManager
         }
-        vpnSettings.isAuthV2Enabled = isAuthV2Enabled
 
         if AppVersion.runType.requiresEnvironment {
             remoteMessagingClient = RemoteMessagingClient(
