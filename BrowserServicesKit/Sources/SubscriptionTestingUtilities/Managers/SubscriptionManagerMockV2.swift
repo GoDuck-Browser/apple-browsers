@@ -22,6 +22,7 @@ import Common
 @testable import Subscription
 
 public final class SubscriptionManagerMockV2: SubscriptionManagerV2 {
+
     public var email: String?
 
     public init() {}
@@ -214,5 +215,9 @@ public final class SubscriptionManagerMockV2: SubscriptionManagerV2 {
                 return nil
             }
         }
+    }
+
+    public func isSubscriptionPresent() -> Bool {
+        resultSubscription != nil
     }
 }
