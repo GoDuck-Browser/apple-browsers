@@ -22,8 +22,10 @@ import UserScript
 final class AIChatUserScript: NSObject, Subfeature {
 
     enum MessageNames: String, CaseIterable {
-        case openSettings
+        case openAIChatSettings
         case getUserValues
+        case getAIChatNativeConfigValues
+        case closeAIChat
     }
 
     private let handler: AIChatUserScriptHandling
@@ -36,7 +38,9 @@ final class AIChatUserScript: NSObject, Subfeature {
         var rules = [HostnameMatchingRule]()
 
         /// Default rule for DuckDuckGo AI Chat
-        rules.append(.exact(hostname: URL.duckDuckGo.absoluteString))
+        if let ddgDomain = URL.duckDuckGo.host {
+            rules.append(.exact(hostname: ddgDomain))
+        }
 
         /// Check if a custom hostname is provided in the URL settings
         /// Custom hostnames are used for debugging purposes
@@ -50,8 +54,12 @@ final class AIChatUserScript: NSObject, Subfeature {
         switch MessageNames(rawValue: methodName) {
         case .getUserValues:
             return handler.handleGetUserValues
-        case .openSettings:
-            return handler.openSettings
+        case .openAIChatSettings:
+            return handler.openAIChatSettings
+        case .getAIChatNativeConfigValues:
+            return handler.getAIChatNativeConfigValues
+        case .closeAIChat:
+            return handler.closeAIChat
         default:
             return nil
         }

@@ -20,10 +20,16 @@ import UserScript
 
 protocol AIChatUserScriptHandling {
     func handleGetUserValues(params: Any, message: UserScriptMessage) -> Encodable?
-    func openSettings(params: Any, message: UserScriptMessage) async -> Encodable?
+    func openAIChatSettings(params: Any, message: UserScriptMessage) async -> Encodable?
+    func getAIChatNativeConfigValues(params: Any, message: UserScriptMessage) -> Encodable?
+    func closeAIChat(params: Any, message: UserScriptMessage) -> Encodable?
 }
 
 struct AIChatUserScriptHandler: AIChatUserScriptHandling {
+
+    private var platform: String {
+        "macOS"
+    }
 
     public struct UserValues: Codable {
         let isToolbarShortcutEnabled: Bool
@@ -36,13 +42,34 @@ struct AIChatUserScriptHandler: AIChatUserScriptHandling {
         self.storage = storage
     }
 
-    @MainActor public func openSettings(params: Any, message: UserScriptMessage) -> Encodable? {
+    @MainActor public func openAIChatSettings(params: Any, message: UserScriptMessage) -> Encodable? {
         WindowControllersManager.shared.showTab(with: .settings(pane: .aiChat))
         return nil
     }
 
     public func handleGetUserValues(params: Any, message: UserScriptMessage) -> Encodable? {
         UserValues(isToolbarShortcutEnabled: storage.shouldDisplayToolbarShortcut,
-                   platform: "macOS")
+                   platform: platform)
     }
+
+    public func getAIChatNativeConfigValues(params: Any, message: UserScriptMessage) -> Encodable? {
+        AIChatNativeConfigValues(isAIChatHandoffEnabled: false,
+                                 platform: platform,
+                                 supportsClosingAIChat: true,
+                                 supportsOpeningSettings: true)
+    }
+
+    func closeAIChat(params: Any, message: UserScriptMessage) -> Encodable? {
+        Task { @MainActor in
+            WindowControllersManager.shared.mainWindowController?.mainViewController.closeTab(nil)
+        }
+        return nil
+    }
+}
+
+ private struct AIChatNativeConfigValues: Codable {
+    let isAIChatHandoffEnabled: Bool
+    let platform: String
+    let supportsClosingAIChat: Bool
+    let supportsOpeningSettings: Bool
 }
