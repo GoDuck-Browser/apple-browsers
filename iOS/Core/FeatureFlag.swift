@@ -91,9 +91,14 @@ public enum FeatureFlag: String {
     /// https://app.asana.com/0/1206488453854252/1208706841336530
     case privacyProOnboardingCTAMarch25
 
+    /// https://app.asana.com/0/72649045549333/1207991044706236/f
+    case privacyProAuthV2
+
     /// https://app.asana.com/0/1206329551987282/1209130794450271
     case onboardingSetAsDefaultBrowser
 
+    /// https://app.asana.com/0/72649045549333/1209633877674689/f
+    case exchangeKeysToSyncWithAnotherDevice
 }
 
 extension FeatureFlag: FeatureFlagDescribing {
@@ -114,9 +119,15 @@ extension FeatureFlag: FeatureFlagDescribing {
 
     public var supportsLocalOverriding: Bool {
         switch self {
-        case .textZoom, .alternativeColorScheme, .experimentalBrowserTheming, .privacyProOnboardingCTAMarch25, .scamSiteProtection, .maliciousSiteProtection:
-            return true
-        case .networkProtectionRiskyDomainsProtection:
+        case .textZoom,
+                .alternativeColorScheme,
+                .experimentalBrowserTheming,
+                .privacyProOnboardingCTAMarch25,
+                .networkProtectionRiskyDomainsProtection,
+                .privacyProAuthV2,
+                .scamSiteProtection,
+                .maliciousSiteProtection,
+                .exchangeKeysToSyncWithAnotherDevice:
             return true
         case .onboardingSetAsDefaultBrowser:
             if #available(iOS 18.3, *) {
@@ -219,8 +230,14 @@ extension FeatureFlag: FeatureFlagDescribing {
             return .internalOnly()
         case .privacyProOnboardingCTAMarch25:
             return .remoteReleasable(.subfeature(PrivacyProSubfeature.privacyProOnboardingCTAMarch25))
+
+        case .privacyProAuthV2:
+            return .disabled // .remoteDevelopment(.subfeature(PrivacyProSubfeature.privacyProAuthV2))
+
         case .onboardingSetAsDefaultBrowser:
             return .remoteReleasable(.subfeature(OnboardingSubfeature.setAsDefaultBrowserExperiment))
+        case .exchangeKeysToSyncWithAnotherDevice:
+            return .remoteReleasable(.subfeature(SyncSubfeature.exchangeKeysToSyncWithAnotherDevice))
         }
     }
 }
@@ -229,7 +246,6 @@ extension FeatureFlagger {
     public func isFeatureOn(_ featureFlag: FeatureFlag) -> Bool {
         return isFeatureOn(for: featureFlag)
     }
-
 }
 
 public enum PrivacyProFreeTrialExperimentCohort: String, FeatureFlagCohortDescribing {

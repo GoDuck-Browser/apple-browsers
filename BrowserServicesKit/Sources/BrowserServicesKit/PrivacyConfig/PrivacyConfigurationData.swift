@@ -413,7 +413,6 @@ extension PrivacyConfigurationData.PrivacyFeature {
             dict[CodingKeys.settings.rawValue] = settings
         }
 
-        // Encode nested features if any.
         var featuresDict = [String: Any]()
         for (key, feature) in features {
             if let featureJSON = feature.toJSONDictionary() {

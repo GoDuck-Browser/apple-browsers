@@ -131,7 +131,8 @@ public struct BrokenSiteReport {
         jsPerformance: [Double]?,
         userRefreshCount: Int,
         locale: Locale = Locale.current,
-        cookieConsentInfo: CookieConsentInfo?
+        cookieConsentInfo: CookieConsentInfo?,
+        debugFlags: String
     ) {
         self.siteUrl = siteUrl
         self.category = category
@@ -156,6 +157,7 @@ public struct BrokenSiteReport {
         self.userRefreshCount = userRefreshCount
         self.locale = locale
         self.cookieConsentInfo = cookieConsentInfo
+        self.debugFlags = debugFlags
     }
 #endif
 

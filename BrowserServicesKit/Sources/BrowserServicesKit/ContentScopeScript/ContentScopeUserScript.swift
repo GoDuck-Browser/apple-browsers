@@ -27,6 +27,10 @@ public protocol ContentScopeUserScriptDelegate: AnyObject {
     func contentScopeUserScript(_ script: ContentScopeUserScript, didReceiveDebugFlag debugFlag: String)
 }
 
+public protocol UserScriptWithContentScope: UserScript {
+    var delegate: ContentScopeUserScriptDelegate? { get set }
+}
+
 public final class ContentScopeProperties: Encodable {
     public let globalPrivacyControlValue: Bool
     public let debug: Bool = false
@@ -143,7 +147,7 @@ public struct ContentScopePlatform: Encodable {
     #endif
 }
 
-public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessaging {
+public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessaging, UserScriptWithContentScope {
 
     public var broker: UserScriptMessageBroker
     public let isIsolated: Bool
@@ -160,7 +164,6 @@ public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessa
 
         broker = UserScriptMessageBroker(context: contextName)
 
-        // dont register any handlers at all if we're not in the isolated context
         messageNames = [contextName]
 
         source = ContentScopeUserScript.generateSource(
@@ -206,7 +209,6 @@ public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessa
     public var requiresRunInPageContentWorld: Bool { !self.isIsolated }
 }
 
-@available(macOS 11.0, iOS 14.0, *)
 extension ContentScopeUserScript: WKScriptMessageHandlerWithReply {
     @MainActor
     public func userContentController(_ userContentController: WKUserContentController,
@@ -238,7 +240,6 @@ extension ContentScopeUserScript: WKScriptMessageHandlerWithReply {
     }
 }
 
-// MARK: - Fallback for macOS 10.15
 extension ContentScopeUserScript: WKScriptMessageHandler {
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         // unsupported

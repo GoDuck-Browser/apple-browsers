@@ -41,7 +41,7 @@ final class ContentScopeUserScriptTests: XCTestCase {
         super.tearDown()
     }
 
-    func testPrivacyConfigurationJsonGeneratorIsUsed() {
+    func testPrivacyConfigurationJSONGeneratorIsUsed() {
         // GIVEN
         configGenerator.config = generatorConfig
 

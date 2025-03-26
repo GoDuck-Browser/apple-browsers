@@ -365,7 +365,8 @@ extension PrivacyDashboardViewController {
                                                vpnOn: currentTab.networkProtection?.tunnelController.isConnected ?? false,
                                                jsPerformance: webVitals,
                                                userRefreshCount: currentTab.brokenSiteInfo?.refreshCountSinceLoad ?? -1,
-                                               cookieConsentInfo: currentTab.privacyInfo?.cookieConsentManaged)
+                                               cookieConsentInfo: currentTab.privacyInfo?.cookieConsentManaged,
+                                               debugFlags: currentTab.privacyInfo?.debugFlags ?? "")
         return websiteBreakage
     }
 }
