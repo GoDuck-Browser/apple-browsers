@@ -476,7 +476,7 @@ public final class VPNSettings {
         get {
             defaults.networkProtectionSettingIsAuthV2Enabled
         }
-        
+
         set {
             defaults.networkProtectionSettingIsAuthV2Enabled = newValue
         }
