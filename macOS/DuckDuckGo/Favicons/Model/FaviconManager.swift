@@ -26,7 +26,8 @@ import CoreImage
 
 protocol FaviconManagement: AnyObject {
 
-    var areFaviconsLoaded: Bool { get }
+    @MainActor
+    var isFaviconsLoaded: Bool { get }
 
     var faviconsLoadedPublisher: Published<Bool>.Publisher { get }
 
@@ -119,7 +120,7 @@ final class FaviconManager: FaviconManagement {
 
     private let faviconURLSession = URLSession(configuration: .ephemeral)
 
-    @Published private(set) var faviconsLoaded = false
+    @Published private var faviconsLoaded = false
     var faviconsLoadedPublisher: Published<Bool>.Publisher { $faviconsLoaded }
 
     @MainActor
@@ -131,10 +132,12 @@ final class FaviconManager: FaviconManagement {
         faviconsLoaded = true
     }
 
-    var areFaviconsLoaded: Bool {
+    @MainActor
+    var isFaviconsLoaded: Bool {
         imageCache.loaded && referenceCache.loaded
     }
 
+    @MainActor
     private func awaitFaviconsLoaded() async {
         if faviconsLoaded { return }
         await withCheckedContinuation { continuation in

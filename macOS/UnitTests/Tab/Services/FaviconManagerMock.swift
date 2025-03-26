@@ -26,8 +26,8 @@ import History
 final class FaviconManagerMock: FaviconManagement {
 
     func loadFavicons() {}
-    @Published var areFaviconsLoaded = true
-    var faviconsLoadedPublisher: Published<Bool>.Publisher { $areFaviconsLoaded }
+    @Published var isFaviconsLoaded = true
+    var faviconsLoadedPublisher: Published<Bool>.Publisher { $isFaviconsLoaded }
 
     func handleFaviconLinks(_ faviconLinks: [FaviconUserScript.FaviconLink], documentUrl: URL) async -> Favicon? {
         nil
