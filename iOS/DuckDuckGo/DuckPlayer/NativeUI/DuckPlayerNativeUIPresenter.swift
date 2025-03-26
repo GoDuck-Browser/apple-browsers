@@ -243,12 +243,12 @@ final class DuckPlayerNativeUIPresenter {
     private func removePillContainer() {
         // First remove from superview
         containerViewController?.view.removeFromSuperview()
-        
+
         // Then clean up references
         containerViewController = nil
         containerViewModel = nil
         containerCancellables.removeAll()
-        
+
         // Finally ensure constraints are reset
         resetWebViewConstraint()
     }
@@ -398,7 +398,6 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
 
         // Store reference to the hosting controller
         containerViewController = hostingController
-        containerViewModel.show()
 
         // Subscribe to the sheet animation completed event
         containerViewModel.$sheetAnimationCompleted.sink { [weak self] completed in
@@ -415,6 +414,11 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
                 self?.updateWebViewConstraintForPillHeight()
             }
         }.store(in: &containerCancellables)
+
+        // Show the container view if it's not already visible
+        if !containerViewModel.sheetVisible {
+            containerViewModel.show()
+        }
     }
 
     /// Dismisses the currently presented entry pill
@@ -487,6 +491,7 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
                 guard let videoID = self.state.videoID, let hostView = self.hostView else { return }
                 self.state.timestamp = timestamp
                 self.presentPill(for: videoID, in: hostView, timestamp: timestamp)
+                self.containerViewModel?.show()
             }
             .store(in: &playerCancellables)
 

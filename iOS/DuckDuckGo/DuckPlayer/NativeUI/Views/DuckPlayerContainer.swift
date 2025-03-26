@@ -20,8 +20,6 @@
 import Combine
 import SwiftUI
 
-private let sheetTopMargin = 44.0
-
 public enum DuckPlayerContainer {
 
     public struct Constants {
@@ -29,7 +27,7 @@ public enum DuckPlayerContainer {
         static let shortDuration: Double = 0.2
         static let springDuration: Double = 0.5
         static let springBounce: Double = 0.2
-        static let initialOffsetValue: Double = 500.0        
+        static let initialOffsetValue: Double = 500.0
         static let dragThreshold: CGFloat = 10
         static let dragAreaHeight: CGFloat = 44
         static let contentTopPadding: CGFloat = 24
@@ -74,7 +72,10 @@ public enum DuckPlayerContainer {
         let onDismiss: () -> Void
         let onPresentDuckPlayer: () -> Void
 
-        public init(viewModel: ViewModel, hasBackground: Bool = true, onDismiss: @escaping () -> Void, onPresentDuckPlayer: @escaping () -> Void, @ViewBuilder content: @escaping (PresentationMetrics) -> Content) {
+        public init(
+            viewModel: ViewModel, hasBackground: Bool = true, onDismiss: @escaping () -> Void, onPresentDuckPlayer: @escaping () -> Void,
+            @ViewBuilder content: @escaping (PresentationMetrics) -> Content
+        ) {
             self.viewModel = viewModel
             self.hasBackground = hasBackground
             self.content = content
@@ -94,7 +95,7 @@ public enum DuckPlayerContainer {
         }
 
         public var body: some View {
-            VStack(spacing: 0) {                
+            VStack(spacing: 0) {
                 if hasBackground {
                     Color.black
                         .ignoresSafeArea()
@@ -180,10 +181,10 @@ private struct SheetView<Content: View>: View {
                 VStack(spacing: 0) {
                     ZStack(alignment: .top) {
                         GrabHandle()
-                        
+
                         content(DuckPlayerContainer.PresentationMetrics(contentWidth: sheetWidth))
                             .padding(.top, DuckPlayerContainer.Constants.contentTopPadding)
-                        
+
                         Rectangle()
                             .fill(Color.clear)
                             .frame(height: DuckPlayerContainer.Constants.dragAreaHeight)
@@ -198,7 +199,7 @@ private struct SheetView<Content: View>: View {
                                     }
                                     .onChanged { value in
                                         guard let dragStartOffset else { return }
-                                        
+
                                         let offsetY = value.translation.height
                                         if offsetY > 0 {
                                             withAnimation(.spring(duration: 0.3, bounce: 0.2)) {
@@ -207,22 +208,22 @@ private struct SheetView<Content: View>: View {
                                         } else if offsetY < 0 {
                                             let y = 1.0 / (1.0 + exp(-1 * (abs(offsetY) / 50.0))) - 0.5
                                             withAnimation(.spring(duration: 0.3, bounce: 0.2)) {
-                                                sheetOffset = dragStartOffset + y * max(offsetY, -150)
+                                                sheetOffset = dragStartOffset + y * max(offsetY, -50)
                                             }
                                         }
                                     }
                                     .onEnded { value in
                                         viewModel.setDragging(false)
                                         let offsetY = value.translation.height
-                                        
+
                                         if offsetY > DuckPlayerContainer.Constants.dragThreshold || value.velocity.height > 50 {
                                             onDismiss()
                                         } else if offsetY < -DuckPlayerContainer.Constants.dragThreshold || value.velocity.height < -50 {
                                             isAnimatingToTop = true
-                                            
+
                                             // Start presenting DuckPlayer immediately
                                             onPresentDuckPlayer()
-                                            
+
                                             // Animate the pill to top and fade out
                                             withAnimation(.easeOut(duration: 0.3)) {
                                                 opacity = 0
