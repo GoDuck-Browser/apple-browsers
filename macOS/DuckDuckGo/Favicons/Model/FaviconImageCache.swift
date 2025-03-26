@@ -101,7 +101,9 @@ final class FaviconImageCache: FaviconImageCaching {
                 await self.removeFaviconsFromStore(oldFavicons)
                 try await self.storing.save(favicons)
                 Logger.favicons.debug("Favicon saved successfully. URL: \(favicons.map(\.url.absoluteString).description)")
-                NotificationCenter.default.post(name: .faviconCacheUpdated, object: nil)
+                await MainActor.run {
+                    NotificationCenter.default.post(name: .faviconCacheUpdated, object: nil)
+                }
             } catch {
                 Logger.favicons.error("Saving of favicon failed: \(error.localizedDescription)")
             }
@@ -129,8 +131,8 @@ final class FaviconImageCache: FaviconImageCaching {
                 return false
             }
             return favicon.dateCreated < Date.monthAgo &&
-            !fireproofDomains.isFireproof(fireproofDomain: host) &&
-            !bookmarkedHosts.contains(host)
+                !fireproofDomains.isFireproof(fireproofDomain: host) &&
+                !bookmarkedHosts.contains(host)
         }
     }
 
