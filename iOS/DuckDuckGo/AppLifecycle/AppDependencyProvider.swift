@@ -223,11 +223,6 @@ final class AppDependencyProvider: DependencyProvider {
                                                                    isInternalUserEnabled: {
                 ContentBlocking.shared.privacyConfigurationManager.internalUserDecider.isInternalUser
             })
-/*
-            subscriptionManager.onOAuthV2Enabled {
-                // Let the VPN know it can start using OAuthV2 tokens
-                vpnSettings.isAuthV2Enabled = true
-            }*/
 
             let restoreFlow = DefaultAppStoreRestoreFlowV2(subscriptionManager: subscriptionManager, storePurchaseManager: storePurchaseManager)
             subscriptionManager.tokenRecoveryHandler = {

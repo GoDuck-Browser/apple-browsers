@@ -155,12 +155,8 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     public var tokenRecoveryHandler: TokenRecoveryHandler?
     public let currentEnvironment: SubscriptionEnvironment
     private let isInternalUserEnabled: () -> Bool
-
-    @MainActor
     private var v1MigrationNeeded = true
-
     private let legacyAccountStorage: AccountKeychainStorage?
-    public var onOAuthV2Enabled: (() -> Void)?
 
     public init(storePurchaseManager: StorePurchaseManagerV2? = nil,
                 oAuthClient: any OAuthClient,
