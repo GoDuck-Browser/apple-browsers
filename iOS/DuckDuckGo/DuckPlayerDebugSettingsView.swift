@@ -33,7 +33,7 @@ struct DuckPlayerDebugSettingsView: View {
     
     var body: some View {
         List {
-            Section(header: Text("UI Settings")) {
+            Section(header: Text("Priming Modal")) {
                 Button {
                     resetPrimingModalSettings()
                 } label: {
@@ -45,7 +45,7 @@ struct DuckPlayerDebugSettingsView: View {
     }
     
     private func resetPrimingModalSettings() {
-        appSettings.duckPlayerNativeUIPrimingModalPresentedCount = 0
+        appSettings.duckPlayerNativeUIPrimingModalPresentationEventCount = 0
         appSettings.duckPlayerNativeUIPrimingModalTimeSinceLastPresented = 0
     }
 }

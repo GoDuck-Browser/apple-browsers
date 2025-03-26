@@ -279,7 +279,7 @@ final class DuckPlayerSettingsDefault: DuckPlayerSettings {
     }
 
     /// Determines if the priming modal has been presented
-    var nativeUIPrimingModalPresentedCount: Int { return appSettings.duckPlayerNativeUIPrimingModalPresentedCount }
+    var nativeUIPrimingModalPresentedCount: Int { return appSettings.duckPlayerNativeUIPrimingModalPresentationEventCount }
 
     /// Determines the number of seconds since the last priming modal was presented
     var nativeUIPrimingModalTimeSinceLastPresented: Int { return appSettings.duckPlayerNativeUIPrimingModalTimeSinceLastPresented }

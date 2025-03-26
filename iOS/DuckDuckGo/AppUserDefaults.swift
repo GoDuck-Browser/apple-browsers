@@ -83,7 +83,7 @@ public class AppUserDefaults: AppSettings {
 
         static let duckPlayerNativeYoutubeMode = "com.duckduckgo.ios.duckPlayerNativeYoutubeMode"
         static let duckPlayerNativeUISERPEnabled = "com.duckduckgo.ios.duckPlayerNativeUISERPEnabled"
-        static let duckPlayerNativeUIPrimingModalPresentedCount = "com.duckduckgo.ios.duckPlayerNativeUIPrimingModalPresentedCount"
+        static let duckPlayerNativeUIPrimingModalPresentationEventCount = "com.duckduckgo.ios.duckPlayerNativeUIPrimingModalPresentationEventCount"
         static let nativeUIPrimingModalTimeSinceLastPresented = "com.duckduckgo.ios.duckPlayerNativeUIPrimingModalTimeSinceLastPresented"
     }
 
@@ -490,8 +490,8 @@ public class AppUserDefaults: AppSettings {
         }
     }
 
-    @UserDefaultsWrapper(key: .duckPlayerNativeUIPrimingModalPresentedCount, defaultValue: 0)
-    var duckPlayerNativeUIPrimingModalPresentedCount: Int
+    @UserDefaultsWrapper(key: .duckPlayerNativeUIPrimingModalPresentationEventCount, defaultValue: 0)
+    var duckPlayerNativeUIPrimingModalPresentationEventCount: Int
     
     @UserDefaultsWrapper(key: .duckPlayerNativeUIPrimingModalTimeSinceLastPresented, defaultValue: 0)
     var duckPlayerNativeUIPrimingModalTimeSinceLastPresented: Int
