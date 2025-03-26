@@ -261,6 +261,7 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
     /// The extension can also handle these changes so not everything needs to be handled here.
     ///
     private func handleSettingsChange(_ change: VPNSettings.Change) async throws {
+        Logger.networkProtection.log("VPN settings change: \(String(describing: change), privacy: .public)")
         switch change {
         case .setIncludeAllNetworks(let includeAllNetworks):
             try await handleSetIncludeAllNetworks(includeAllNetworks)
@@ -642,11 +643,11 @@ final class NetworkProtectionTunnelController: TunnelController, TunnelSessionPr
         options[NetworkProtectionOptionKey.activationAttemptId] = UUID().uuidString as NSString
         options[NetworkProtectionOptionKey.isAuthV2Enabled] = NSNumber(value: settings.isAuthV2Enabled)
         if !settings.isAuthV2Enabled {
-            Logger.networkProtection.log("Using Auth V1")
+            Logger.networkProtection.log("NetworkProtectionTunnelController - Using Auth V1")
             let authToken = try fetchAuthToken()
             options[NetworkProtectionOptionKey.authToken] = authToken
         } else {
-            Logger.networkProtection.log("Using Auth V2")
+            Logger.networkProtection.log("NetworkProtectionTunnelController - Using Auth V2")
             let tokenContainer = try await fetchTokenContainer()
             options[NetworkProtectionOptionKey.tokenContainer] = tokenContainer.data
 

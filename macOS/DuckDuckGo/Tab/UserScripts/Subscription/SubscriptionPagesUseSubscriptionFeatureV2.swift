@@ -97,6 +97,8 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
     }
 
     struct Handlers {
+        static let getSubscription = "getSubscription"
+        static let setSubscription = "setSubscription"
         static let setAuthTokens = "setAuthTokens"
         static let getAuthAccessToken = "getAuthAccessToken"
         static let getFeatureConfig = "getFeatureConfig"
@@ -119,6 +121,8 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         Logger.subscription.debug("WebView handler: \(methodName)")
 
         switch methodName {
+        case Handlers.getSubscription: return getSubscription
+        case Handlers.setSubscription: return setSubscription
         case Handlers.setAuthTokens: return setAuthTokens
         case Handlers.getAuthAccessToken: return getAuthAccessToken
         case Handlers.getFeatureConfig: return getFeatureConfig
@@ -136,11 +140,73 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         case Handlers.subscriptionsWelcomeFaqClicked: return subscriptionsWelcomeFaqClicked
         case Handlers.getAccessToken: return getAccessToken
         default:
+            Logger.subscription.debug("WebView handler: \(methodName) not found")
             return nil
         }
     }
 
     // MARK: - Subscription + Auth
+
+    /// Values that the Frontend can use to determine the current state.
+    struct SubscriptionValues: Codable {
+        enum CodingKeys: String, CodingKey {
+            case token
+        }
+        let token: String
+    }
+
+    // OLD V1
+
+    struct Subscription: Encodable {
+        let token: String
+    }
+
+    func getSubscription(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        guard subscriptionManager.isUserAuthenticated else { return Subscription(token: "") }
+
+        do {
+            let accessToken = try await subscriptionManager.getTokenContainer(policy: .localValid).accessToken
+            return Subscription(token: accessToken)
+        } catch {
+            Logger.subscription.debug("No subscription available: \(error)")
+            return Subscription(token: "")
+        }
+    }
+
+    func setSubscription(params: Any, original: WKScriptMessage) async throws -> Encodable? {
+        // Note: This is called by the web FE when a subscription is retrieved, `params` contains an auth token V1 that will need to be exchanged for a V2. This is a temporary workaround until the FE fully supports v2 auth.
+
+        PixelKit.fire(PrivacyProPixel.privacyProRestorePurchaseEmailSuccess, frequency: .legacyDailyAndCount)
+
+        guard let subscriptionValues: SubscriptionValues = CodableHelper.decode(from: params) else {
+            Logger.subscription.fault("SubscriptionPagesUserScript: expected JSON representation of SubscriptionValues")
+            PixelKit.fire(PrivacyProPixel.setSubscriptionInvalidSubscriptionValues)
+            assertionFailure("SubscriptionPagesUserScript: expected JSON representation of SubscriptionValues")
+            return nil
+        }
+
+        // Clear subscription Cache
+        subscriptionManager.clearSubscriptionCache()
+
+        guard !subscriptionValues.token.isEmpty else {
+            Logger.subscription.fault("Empty token provided, Failed to exchange v1 token for v2")
+            PixelKit.fire(PrivacyProPixel.setSubscriptionInvalidSubscriptionValues)
+            return nil
+        }
+
+        do {
+            _ = try await subscriptionManager.exchange(tokenV1: subscriptionValues.token)
+            Logger.subscription.log("v1 token exchanged for v2")
+            // forcing subscription refresh
+            try await subscriptionManager.getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
+            Logger.subscription.log("Subscription retrieved")
+        } catch {
+            Logger.subscription.error("Failed to exchange v1 token for v2 \(error, privacy: .public)")
+        }
+        return nil
+    }
+
+    // New V2
 
     func setAuthTokens(params: Any, original: WKScriptMessage) async throws -> Encodable? {
 

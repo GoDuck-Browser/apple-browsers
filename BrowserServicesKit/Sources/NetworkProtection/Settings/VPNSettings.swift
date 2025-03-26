@@ -215,7 +215,6 @@ public final class VPNSettings {
         defaults.resetNetworkProtectionSettingSelectedServer()
         defaults.resetDNSSettings()
         defaults.resetNetworkProtectionSettingShowInMenuBar()
-        defaults.resetNetworkProtectionSettingIsAuthV2Enabled()
     }
 
     // MARK: - Applying Changes
@@ -477,7 +476,7 @@ public final class VPNSettings {
         get {
             defaults.networkProtectionSettingIsAuthV2Enabled
         }
-
+        
         set {
             defaults.networkProtectionSettingIsAuthV2Enabled = newValue
         }
