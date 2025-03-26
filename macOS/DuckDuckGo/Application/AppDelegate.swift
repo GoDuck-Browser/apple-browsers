@@ -287,6 +287,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             subscriptionManagerV1 = subscriptionManager
             subscriptionManagerV2 = nil
             subscriptionAuthV1toV2Bridge = subscriptionManager
+            vpnSettings.isAuthV2Enabled = false
         } else {
             // MARK: V2
             Logger.general.log("Using Auth V2")

@@ -31,13 +31,14 @@ protocol VPNFeatureGatekeeper {
 
     func canStartVPN() async throws -> Bool
     func isVPNVisible() -> Bool
-    func shouldUninstallAutomatically() -> Bool
+    func shouldUninstallAutomatically() async -> Bool
     func disableIfUserHasNoAccess() async
 
     var onboardStatusPublisher: AnyPublisher<OnboardingStatus, Never> { get }
 }
 
 struct DefaultVPNFeatureGatekeeper: VPNFeatureGatekeeper {
+
     private static var subscriptionAuthTokenPrefix: String { "ddg:" }
     private let vpnUninstaller: VPNUninstalling
     private let defaults: UserDefaults
@@ -57,26 +58,26 @@ struct DefaultVPNFeatureGatekeeper: VPNFeatureGatekeeper {
 
     /// Whether the user can start the VPN.
     ///
-    /// For beta users this means they have an auth token.
-    /// For subscription users this means they have entitlements.
-    ///
     func canStartVPN() async throws -> Bool {
         try await subscriptionManager.isEnabled(feature: .networkProtection)
     }
 
-    /// Whether the user can see the VPN entry points in the UI.
-    ///
-    /// For beta users this means they have an auth token.
-    /// For subscription users this means they are authenticated.
+    /// Whether the VPN is installed for the user, regardless of entitlements.
     ///
     func isVPNVisible() -> Bool {
-        subscriptionManager.isUserAuthenticated
+        LoginItem.vpnMenu.status.isInstalled
     }
 
     /// Returns whether the VPN should be uninstalled automatically.
-    /// This is only true when the user is not an Easter Egg user, the waitlist test has ended, and the user is onboarded.
-    func shouldUninstallAutomatically() -> Bool {
-        !subscriptionManager.isUserAuthenticated && LoginItem.vpnMenu.status.isInstalled
+    ///
+    /// This is only `true` when we know the user has no permission to start the VPN
+    ///
+    func shouldUninstallAutomatically() async -> Bool {
+        guard let canStartVPN = try? await canStartVPN() else {
+            return false
+        }
+
+        return !canStartVPN && isVPNVisible()
     }
 
     /// Whether the user is fully onboarded
@@ -94,7 +95,7 @@ struct DefaultVPNFeatureGatekeeper: VPNFeatureGatekeeper {
     /// A method meant to be called safely from different places to disable the VPN if the user isn't meant to have access to it.
     ///
     func disableIfUserHasNoAccess() async {
-        guard shouldUninstallAutomatically() else {
+        guard await shouldUninstallAutomatically() else {
             return
         }
 

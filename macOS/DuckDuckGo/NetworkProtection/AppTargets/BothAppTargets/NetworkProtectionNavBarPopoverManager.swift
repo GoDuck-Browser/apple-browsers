@@ -27,7 +27,6 @@ import NetworkProtectionIPC
 import NetworkProtectionProxy
 import NetworkProtectionUI
 import os.log
-import Subscription
 import SwiftUI
 import VPNAppLauncher
 import BrowserServicesKit
