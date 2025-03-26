@@ -39,12 +39,16 @@ protocol FaviconManagement: AnyObject {
     @MainActor
     func handleFaviconsByDocumentUrl(_ faviconsByDocumentUrl: [URL: [Favicon]]) async
 
+    @MainActor
     func getCachedFaviconURL(for documentUrl: URL, sizeCategory: Favicon.SizeCategory, fallBackToSmaller: Bool) -> URL?
 
+    @MainActor
     func getCachedFavicon(for documentUrl: URL, sizeCategory: Favicon.SizeCategory, fallBackToSmaller: Bool) -> Favicon?
 
+    @MainActor
     func getCachedFavicon(for host: String, sizeCategory: Favicon.SizeCategory, fallBackToSmaller: Bool) -> Favicon?
 
+    @MainActor
     func getCachedFavicon(forDomainOrAnySubdomain domain: String, sizeCategory: Favicon.SizeCategory, fallBackToSmaller: Bool) -> Favicon?
 
     @MainActor
@@ -64,18 +68,22 @@ protocol FaviconManagement: AnyObject {
  * All functions in this extension call their more verbose equivalents with `fallBackToSmaller = false`.
  */
 extension FaviconManagement {
+    @MainActor
     func getCachedFaviconURL(for documentUrl: URL, sizeCategory: Favicon.SizeCategory) -> URL? {
         getCachedFaviconURL(for: documentUrl, sizeCategory: sizeCategory, fallBackToSmaller: false)
     }
 
+    @MainActor
     func getCachedFavicon(for documentUrl: URL, sizeCategory: Favicon.SizeCategory) -> Favicon? {
         getCachedFavicon(for: documentUrl, sizeCategory: sizeCategory, fallBackToSmaller: false)
     }
 
+    @MainActor
     func getCachedFavicon(for host: String, sizeCategory: Favicon.SizeCategory) -> Favicon? {
         getCachedFavicon(for: host, sizeCategory: sizeCategory, fallBackToSmaller: false)
     }
 
+    @MainActor
     func getCachedFavicon(forDomainOrAnySubdomain domain: String, sizeCategory: Favicon.SizeCategory) -> Favicon? {
         getCachedFavicon(forDomainOrAnySubdomain: domain, sizeCategory: sizeCategory, fallBackToSmaller: false)
     }
@@ -211,6 +219,7 @@ final class FaviconManager: FaviconManagement {
         }
     }
 
+    @MainActor
     func getCachedFaviconURL(for documentUrl: URL, sizeCategory: Favicon.SizeCategory, fallBackToSmaller: Bool) -> URL? {
         guard let faviconURL = referenceCache.getFaviconUrl(for: documentUrl, sizeCategory: sizeCategory) else {
             guard fallBackToSmaller, let smallerSizeCategory = sizeCategory.smaller else {
@@ -221,6 +230,7 @@ final class FaviconManager: FaviconManagement {
         return faviconURL
     }
 
+    @MainActor
     func getCachedFavicon(for documentUrl: URL, sizeCategory: Favicon.SizeCategory, fallBackToSmaller: Bool) -> Favicon? {
         guard let faviconURL = referenceCache.getFaviconUrl(for: documentUrl, sizeCategory: sizeCategory) else {
             guard fallBackToSmaller, let smallerSizeCategory = sizeCategory.smaller else {
@@ -232,6 +242,7 @@ final class FaviconManager: FaviconManagement {
         return imageCache.get(faviconUrl: faviconURL)
     }
 
+    @MainActor
     func getCachedFavicon(for host: String, sizeCategory: Favicon.SizeCategory, fallBackToSmaller: Bool) -> Favicon? {
         guard let faviconUrl = referenceCache.getFaviconUrl(for: host, sizeCategory: sizeCategory) else {
             guard fallBackToSmaller, let smallerSizeCategory = sizeCategory.smaller else {
@@ -243,6 +254,7 @@ final class FaviconManager: FaviconManagement {
         return imageCache.get(faviconUrl: faviconUrl)
     }
 
+    @MainActor
     func getCachedFavicon(forDomainOrAnySubdomain domain: String, sizeCategory: Favicon.SizeCategory, fallBackToSmaller: Bool) -> Favicon? {
         if let favicon = getCachedFavicon(for: domain, sizeCategory: sizeCategory, fallBackToSmaller: fallBackToSmaller) {
             return favicon
