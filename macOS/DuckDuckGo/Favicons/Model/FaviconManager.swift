@@ -125,7 +125,7 @@ final class FaviconManager: FaviconManagement {
 
     func loadFavicons() async throws {
         try await imageCache.load()
-        await imageCache.cleanOldExcept(fireproofDomains: FireproofDomains.shared, bookmarkManager: LocalBookmarkManager.shared)
+        await imageCache.cleanOld(except: FireproofDomains.shared, bookmarkManager: LocalBookmarkManager.shared)
         try await referenceCache.load()
         await referenceCache.cleanOld(except: FireproofDomains.shared, bookmarkManager: LocalBookmarkManager.shared)
         faviconsLoaded = true

@@ -48,7 +48,7 @@ final class CapturingFaviconImageCache: FaviconImageCaching {
     }
 
     @MainActor
-    func cleanOldExcept(fireproofDomains: FireproofDomains, bookmarkManager: any BookmarkManager) async {
+    func cleanOld(except fireproofDomains: FireproofDomains, bookmarkManager: any BookmarkManager) async {
         cleanCallsCount += 1
     }
 

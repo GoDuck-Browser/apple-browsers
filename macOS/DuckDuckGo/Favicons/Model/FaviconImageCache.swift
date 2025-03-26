@@ -42,7 +42,7 @@ protocol FaviconImageCaching {
     func getFavicons(with urls: some Sequence<URL>) -> [Favicon]?
 
     @MainActor
-    func cleanOldExcept(fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager) async
+    func cleanOld(except fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager) async
 
     @MainActor
     func burn(except fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager, savedLogins: Set<String>) async
@@ -122,7 +122,7 @@ final class FaviconImageCache: FaviconImageCaching {
 
     // MARK: - Clean
 
-    func cleanOldExcept(fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager) async {
+    func cleanOld(except fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager) async {
         let bookmarkedHosts = bookmarkManager.allHosts()
         await removeFavicons { favicon in
             guard let host = favicon.documentUrl.host else {
