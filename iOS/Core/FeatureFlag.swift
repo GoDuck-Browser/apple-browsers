@@ -125,7 +125,9 @@ extension FeatureFlag: FeatureFlagDescribing {
                 .networkProtectionRiskyDomainsProtection,
                 .privacyProAuthV2,
                 .scamSiteProtection,
-                .maliciousSiteProtection:
+                .maliciousSiteProtection,
+                .autofillCreditCards,
+                .autofillCreditCardsOnByDefault:
             return true
         case .onboardingSetAsDefaultBrowser:
             if #available(iOS 18.3, *) {
@@ -165,9 +167,9 @@ extension FeatureFlag: FeatureFlagDescribing {
         case .autofillPartialFormSaves:
             return .remoteReleasable(.subfeature(AutofillSubfeature.partialFormSaves))
         case .autofillCreditCards:
-            return .internalOnly()
+            return .disabled
         case .autofillCreditCardsOnByDefault:
-            return .internalOnly()
+            return .disabled
         case .incontextSignup:
             return .remoteReleasable(.feature(.incontextSignup))
         case .autoconsentOnByDefault:
