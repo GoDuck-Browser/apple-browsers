@@ -58,6 +58,7 @@ public struct BrokenSiteReport {
     }
 
     let cookieConsentInfo: CookieConsentInfo?
+    let debugFlags: String
 
 #if os(iOS)
     public enum SiteType: String {
@@ -186,7 +187,8 @@ public struct BrokenSiteReport {
         userRefreshCount: Int,
         variant: String,
         locale: Locale = Locale.current,
-        cookieConsentInfo: CookieConsentInfo?
+        cookieConsentInfo: CookieConsentInfo?,
+        debugFlags: String
     ) {
         self.siteUrl = siteUrl
         self.category = category
@@ -215,6 +217,7 @@ public struct BrokenSiteReport {
         self.variant = variant
         self.locale = locale
         self.cookieConsentInfo = cookieConsentInfo
+        self.debugFlags = debugFlags
     }
 #endif
 
@@ -241,7 +244,8 @@ public struct BrokenSiteReport {
             "locale": locale.localeIdentifierAsJsonFormat,
             "consentManaged": boolToStringValue(cookieConsentInfo?.consentManaged),
             "consentOptoutFailed": boolToStringValue(cookieConsentInfo?.optoutFailed),
-            "consentSelftestFailed": boolToStringValue(cookieConsentInfo?.selftestFailed)
+            "consentSelftestFailed": boolToStringValue(cookieConsentInfo?.selftestFailed),
+            "debugFlags": debugFlags
         ]
 
         if mode == .regular {

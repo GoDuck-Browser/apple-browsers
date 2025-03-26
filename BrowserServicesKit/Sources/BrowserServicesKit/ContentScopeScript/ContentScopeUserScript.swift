@@ -23,6 +23,10 @@ import ContentScopeScripts
 import UserScript
 import Common
 
+public protocol ContentScopeUserScriptDelegate: AnyObject {
+    func contentScopeUserScript(_ script: ContentScopeUserScript, didReceiveDebugFlag debugFlag: String)
+}
+
 public final class ContentScopeProperties: Encodable {
     public let globalPrivacyControlValue: Bool
     public let debug: Bool = false
@@ -144,11 +148,12 @@ public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessa
     public var broker: UserScriptMessageBroker
     public let isIsolated: Bool
     public var messageNames: [String] = []
+    public weak var delegate: ContentScopeUserScriptDelegate?
 
     public init(_ privacyConfigManager: PrivacyConfigurationManaging,
                 properties: ContentScopeProperties,
                 isIsolated: Bool = false,
-                privacyConfigurationJsonGenerator: CustomisedPrivacyConfigurationJsonGenerating?
+                privacyConfigurationJSONGenerator: CustomisedPrivacyConfigurationJSONGenerating?
     ) {
         self.isIsolated = isIsolated
         let contextName = self.isIsolated ? "contentScopeScriptsIsolated" : "contentScopeScripts"
@@ -156,14 +161,14 @@ public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessa
         broker = UserScriptMessageBroker(context: contextName)
 
         // dont register any handlers at all if we're not in the isolated context
-        messageNames = isIsolated ? [contextName] : []
+        messageNames = [contextName]
 
         source = ContentScopeUserScript.generateSource(
                 privacyConfigManager,
                 properties: properties,
                 isolated: isIsolated,
                 config: broker.messagingConfig(),
-                privacyConfigurationJsonGenerator: privacyConfigurationJsonGenerator
+                privacyConfigurationJSONGenerator: privacyConfigurationJSONGenerator
         )
     }
 
@@ -171,9 +176,9 @@ public final class ContentScopeUserScript: NSObject, UserScript, UserScriptMessa
                                       properties: ContentScopeProperties,
                                       isolated: Bool,
                                       config: WebkitMessagingConfig,
-                                      privacyConfigurationJsonGenerator: CustomisedPrivacyConfigurationJsonGenerating?
+                                      privacyConfigurationJSONGenerator: CustomisedPrivacyConfigurationJSONGenerating?
     ) -> String {
-        let privacyConfigJsonData = privacyConfigurationJsonGenerator?.privacyConfiguration ?? privacyConfigurationManager.currentConfig
+        let privacyConfigJsonData = privacyConfigurationJSONGenerator?.privacyConfiguration ?? privacyConfigurationManager.currentConfig
         guard let privacyConfigJson = String(data: privacyConfigJsonData, encoding: .utf8),
               let userUnprotectedDomains = try? JSONEncoder().encode(privacyConfigurationManager.privacyConfig.userUnprotectedDomains),
               let userUnprotectedDomainsString = String(data: userUnprotectedDomains, encoding: .utf8),
@@ -206,6 +211,11 @@ extension ContentScopeUserScript: WKScriptMessageHandlerWithReply {
     @MainActor
     public func userContentController(_ userContentController: WKUserContentController,
                                       didReceive message: WKScriptMessage) async -> (Any?, String?) {
+        if let messageDictionary = message.body as? [String: Any],
+           let parameters = messageDictionary["params"]  as? [String: String],
+           let flag = parameters["flag"] {
+            delegate?.contentScopeUserScript(self, didReceiveDebugFlag: flag)
+        }
         let action = broker.messageHandlerFor(message)
         do {
             let json = try await broker.execute(action: action, original: message)
