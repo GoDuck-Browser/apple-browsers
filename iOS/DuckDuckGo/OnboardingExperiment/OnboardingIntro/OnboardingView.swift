@@ -143,6 +143,7 @@ struct OnboardingView: View {
 
     private var addToDockPromoView: some View {
         AddToDockPromoContent(
+            isAnimating: $model.addToDockState.isAnimating,
             showTutorialAction: {
                 model.addtoDockShowTutorialAction()
             },

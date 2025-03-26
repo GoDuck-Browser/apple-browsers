@@ -36,6 +36,10 @@ final class OnboardingIntroViewModel: ObservableObject {
         var showContent = false
     }
 
+    struct AddToDockState {
+        var isAnimating = true
+    }
+
     @Published private(set) var state: OnboardingView.ViewState = .landing {
         didSet {
             measureScreenImpression()
@@ -51,6 +55,7 @@ final class OnboardingIntroViewModel: ObservableObject {
 
     @Published var appIconPickerContentState = AppIconPickerContentState()
     @Published var addressBarPositionContentState = AddressBarPositionContentState()
+    @Published var addToDockState = AddToDockState()
 
     let copy: Copy
     var onCompletingOnboardingIntro: (() -> Void)?
@@ -154,6 +159,7 @@ final class OnboardingIntroViewModel: ObservableObject {
     }
 
     func tapped() {
+        print("***", #function, state.intro?.type)
         switch state.intro?.type {
         case .startOnboardingDialog:
             showIntroButton = true
@@ -168,6 +174,8 @@ final class OnboardingIntroViewModel: ObservableObject {
         case .chooseAddressBarPositionDialog:
             addressBarPositionContentState.animateTitle = false
             addressBarPositionContentState.showContent = true
+        case .addToDockPromoDialog:
+            addToDockState.isAnimating = false
         default: break
         }
 

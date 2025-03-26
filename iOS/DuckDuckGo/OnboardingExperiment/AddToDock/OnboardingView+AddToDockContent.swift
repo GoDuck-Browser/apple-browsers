@@ -26,17 +26,21 @@ extension OnboardingView {
 
         @State private var showAddToDockTutorial = false
 
+        private let isAnimating: Binding<Bool>
         private let showTutorialAction: () -> Void
         private let dismissAction: (_ fromAddToDock: Bool) -> Void
 
         init(
+            isAnimating: Binding<Bool> = .constant(true),
             showTutorialAction: @escaping () -> Void,
             dismissAction: @escaping (_ fromAddToDock: Bool) -> Void
         ) {
+            self.isAnimating = isAnimating
             self.showTutorialAction = showTutorialAction
             self.dismissAction = dismissAction
         }
 
+        // TODO support animation binding
         var body: some View {
             if showAddToDockTutorial {
                 OnboardingAddToDockTutorialContent(cta: UserText.AddToDockOnboarding.Buttons.gotIt) {
@@ -55,7 +59,7 @@ extension OnboardingView {
         }
 
         private var addToDockPromoView: some View {
-            AddToDockPromoView()
+            AddToDockPromoView(isAnimating: isAnimating)
                 .aspectRatio(contentMode: .fit)
                 .padding(.vertical)
         }
