@@ -41,9 +41,37 @@ public enum DuckPlayerContainer {
         @Published public private(set) var sheetVisible = false
         @Published var sheetAnimationCompleted = false
         @Published var isDragging = false
-
+        @Published private(set) var isKeyboardVisible = false
+        
+        private var originalSheetState = false // Add this to store the original state
         private var subscriptions = Set<AnyCancellable>()
         private var shouldAnimate = true
+
+        public init() {
+            observeKeyboard()
+        }
+
+        private func observeKeyboard() {
+            NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)
+                .merge(with: NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification))
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] notification in
+                    guard let self = self else { return }
+                    let isVisible = notification.name == UIResponder.keyboardWillShowNotification
+                    
+                    if isVisible {
+                        self.originalSheetState = self.sheetVisible
+                        self.isKeyboardVisible = true
+                        self.dismiss()
+                    } else {
+                        self.isKeyboardVisible = false
+                        if self.originalSheetState {
+                            self.show()
+                        }
+                    }
+                }
+                .store(in: &subscriptions)
+        }
 
         public var springAnimation: Animation? {
             shouldAnimate ? .spring(duration: 0.4, bounce: 0.5, blendDuration: 1.0) : nil
@@ -99,13 +127,14 @@ public enum DuckPlayerContainer {
                 if hasBackground {
                     Color.black
                         .ignoresSafeArea()
-                        .opacity(viewModel.sheetVisible ? 1 : 0)
+                        .opacity(viewModel.sheetVisible && !viewModel.isKeyboardVisible ? 1 : 0)
                         .animation(viewModel.springAnimation, value: viewModel.sheetVisible)
                 }
 
                 // Use a fixed container height for offset calculations
                 sheet(containerHeight: Constants.initialOffsetValue)
                     .frame(alignment: .bottom)
+                    .opacity(viewModel.isKeyboardVisible ? 0 : 1)
             }
         }
     }
