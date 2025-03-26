@@ -55,6 +55,7 @@ class AutofillDebugViewController: UITableViewController {
     @UserDefaultsWrapper(key: .autofillFirstTimeUser, defaultValue: true)
     private var autofillFirstTimeUser: Bool
 
+    // swiftlint:disable:next cyclomatic_complexity
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
@@ -116,6 +117,7 @@ class AutofillDebugViewController: UITableViewController {
             }
         }
     }
+    // swiftlint:enable cyclomatic_complexity
 
     private func promptForNumberOfLoginsToAdd() {
         let alertController = UIAlertController(title: "Enter number of Logins to add for autofill.me", message: nil, preferredStyle: .alert)

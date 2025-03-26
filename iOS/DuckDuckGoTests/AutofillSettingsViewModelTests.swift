@@ -229,7 +229,10 @@ private class MockAutofillSettingsViewModelDelegate: AutofillSettingsViewModelDe
     
     var navigateToPasswordsCalled = false
     var navigateToPasswordsViewModel: AutofillSettingsViewModel?
-    
+
+    var navigateToCreditCardsCalled = false
+    var navigateToCreditCardsViewModel: AutofillSettingsViewModel?
+
     var navigateToFileImportCalled = false
     var navigateToFileImportViewModel: AutofillSettingsViewModel?
     
@@ -241,6 +244,11 @@ private class MockAutofillSettingsViewModelDelegate: AutofillSettingsViewModelDe
         navigateToPasswordsViewModel = viewModel
     }
     
+    func navigateToCreditCards(viewModel: DuckDuckGo.AutofillSettingsViewModel) {
+        navigateToCreditCardsCalled = true
+        navigateToCreditCardsViewModel = viewModel
+    }
+
     func navigateToFileImport(viewModel: AutofillSettingsViewModel) {
         navigateToFileImportCalled = true
         navigateToFileImportViewModel = viewModel
