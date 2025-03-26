@@ -318,7 +318,7 @@ final class FaviconManager: FaviconManagement {
             result[faviconLink.href] = faviconLink
         }
         let weekAgo = Date.weekAgo
-        let cachedFavicons = imageCache.getFavicons(with: urlsToLinks.keys)?
+        let cachedFavicons = await imageCache.getFavicons(with: urlsToLinks.keys)?
             .filter { favicon in
                 favicon.dateCreated > weekAgo
             } ?? []

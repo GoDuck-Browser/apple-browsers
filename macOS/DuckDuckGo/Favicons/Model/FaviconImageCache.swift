@@ -26,6 +26,7 @@ protocol FaviconImageCaching {
 
     init(faviconStoring: FaviconStoring)
 
+    @MainActor
     var loaded: Bool { get }
 
     @MainActor
@@ -34,8 +35,10 @@ protocol FaviconImageCaching {
     @MainActor
     func insert(_ favicons: [Favicon])
 
+    @MainActor
     func get(faviconUrl: URL) -> Favicon?
 
+    @MainActor
     func getFavicons(with urls: some Sequence<URL>) -> [Favicon]?
 
     @MainActor
@@ -62,6 +65,7 @@ final class FaviconImageCache: FaviconImageCaching {
         storing = faviconStoring
     }
 
+    @MainActor
     private(set) var loaded = false
 
     @MainActor
@@ -107,12 +111,14 @@ final class FaviconImageCache: FaviconImageCaching {
         }
     }
 
+    @MainActor
     func get(faviconUrl: URL) -> Favicon? {
         guard loaded else { return nil }
 
         return entries[faviconUrl]
     }
 
+    @MainActor
     func getFavicons(with urls: some Sequence<URL>) -> [Favicon]? {
         guard loaded else { return nil }
 
