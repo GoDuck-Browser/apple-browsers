@@ -25,6 +25,7 @@ import BrowserServicesKit
 
 protocol AutofillSettingsViewModelDelegate: AnyObject {
     func navigateToPasswords(viewModel: AutofillSettingsViewModel)
+    func navigateToCreditCards(viewModel: AutofillSettingsViewModel)
     func navigateToFileImport(viewModel: AutofillSettingsViewModel)
     func navigateToImportViaSync(viewModel: AutofillSettingsViewModel)
 }
@@ -32,11 +33,11 @@ protocol AutofillSettingsViewModelDelegate: AnyObject {
 final class AutofillSettingsViewModel: ObservableObject {
     
     weak var delegate: AutofillSettingsViewModelDelegate?
-    
+
+    var secureVault: (any AutofillSecureVault)?
     private let autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager
     private let appSettings: AppSettings
     private let keyValueStore: KeyValueStoringDictionaryRepresentable
-    private var secureVault: (any AutofillSecureVault)?
     private let source: AutofillSettingsSource
     private let featureFlagger: FeatureFlagger
     
@@ -61,7 +62,6 @@ final class AutofillSettingsViewModel: ObservableObject {
                 return UserText.autofillCreditCardListTitle
             }
         }
-     
     }
 
     @Published var passwordsCount: Int?
@@ -95,10 +95,6 @@ final class AutofillSettingsViewModel: ObservableObject {
         }
     }
 
-    lazy var autofillCreditCardListView: AutofillCreditCardListView = {
-        AutofillCreditCardListView(viewModel: AutofillCreditCardListViewModel(secureVault: secureVault))
-    }()
-    
     init(appSettings: AppSettings = AppDependencyProvider.shared.appSettings,
          keyValueStore: KeyValueStoringDictionaryRepresentable = UserDefaults.standard,
          autofillNeverPromptWebsitesManager: AutofillNeverPromptWebsitesManager = AppDependencyProvider.shared.autofillNeverPromptWebsitesManager,
@@ -180,7 +176,11 @@ final class AutofillSettingsViewModel: ObservableObject {
     func navigateToPasswords() {
         delegate?.navigateToPasswords(viewModel: self)
     }
-    
+
+    func navigateToCreditCards() {
+        delegate?.navigateToCreditCards(viewModel: self)
+    }
+
     func navigateToFileImport() {
         delegate?.navigateToFileImport(viewModel: self)
     }

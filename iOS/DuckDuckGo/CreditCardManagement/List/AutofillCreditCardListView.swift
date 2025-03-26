@@ -24,7 +24,6 @@ import BrowserServicesKit
 struct AutofillCreditCardListView: View {
     
     @ObservedObject var viewModel: AutofillCreditCardListViewModel
-    @State private var showingModal = false
     
     var body: some View {
         Group {
@@ -34,7 +33,9 @@ struct AutofillCreditCardListView: View {
                 List {
                     Section {
                         ForEach(viewModel.creditCards, id: \.self) { cardItem in
-                            NavigationLink(destination: EmptyView()) {
+                            Button {
+                                viewModel.cardSelected(cardItem)
+                            } label: {
                                 CreditCardRow(card: cardItem)
                             }
                         }
@@ -42,22 +43,6 @@ struct AutofillCreditCardListView: View {
                     .listRowBackground(Color(designSystemColor: .surface))
                 }
                 .applyInsetGroupedListStyle()
-            }
-        }
-        .navigationTitle(UserText.autofillCreditCardListTitle)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showingModal = true
-                } label: {
-                    Image(.add24)
-                        .foregroundStyle(Color(designSystemColor: .textPrimary))
-                }
-            }
-        }
-        .sheet(isPresented: $showingModal) {
-            NavigationView {
-                EmptyView()
             }
         }
     }
@@ -76,14 +61,13 @@ private struct EmptyStateView: View {
                     .daxTitle3()
                     .foregroundStyle(Color(designSystemColor: .textPrimary))
                     .padding(.top, 16)
-                    .multilineTextAlignment(.center)
 
                 Text(UserText.autofillCreditCardEmptyViewSubtitle)
                     .daxBodyRegular()
                     .foregroundStyle(Color.init(designSystemColor: .textSecondary))
-                    .multilineTextAlignment(.center)
                     .padding(.top, 8)
             }
+            .multilineTextAlignment(.center)
             .frame(maxWidth: 300)
             .lineLimit(nil)
         }
@@ -104,7 +88,7 @@ private struct CreditCardRow: View {
                 .padding(.trailing, 8)
                 
             VStack(alignment: .leading) {
-                Text(card.title)
+                Text(card.displayTitle)
                     .daxSubheadRegular()
                     .foregroundStyle(Color(designSystemColor: .textPrimary))
                     .lineLimit(1)
@@ -118,6 +102,10 @@ private struct CreditCardRow: View {
             .padding(.vertical, 4)
             
             Spacer()
+            
+            Image(systemName: "chevron.forward")
+                .font(Font.system(.footnote).weight(.bold))
+                .foregroundColor(Color(UIColor.tertiaryLabel))
         }
     }
 }

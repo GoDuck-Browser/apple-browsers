@@ -34,7 +34,9 @@ struct AutofillSettingsView: View {
                 }
                 
                 if viewModel.showCreditCards {
-                    NavigationLink(destination: viewModel.autofillCreditCardListView) {
+                    Button {
+                        viewModel.navigateToCreditCards()
+                    } label: {
                         CountRowView(viewModel: viewModel, autofillType: .creditCards)
                     }
                 }
@@ -141,11 +143,9 @@ struct AutofillSettingsView: View {
                         .foregroundColor(Color(designSystemColor: .textSecondary))
                 }
                 
-                if autofillType == .passwords {
-                    Image(systemName: "chevron.forward")
-                        .font(Font.system(.footnote).weight(.bold))
-                        .foregroundColor(Color(UIColor.tertiaryLabel))
-                }
+                Image(systemName: "chevron.forward")
+                    .font(Font.system(.footnote).weight(.bold))
+                    .foregroundColor(Color(UIColor.tertiaryLabel))
             }
         }
     }

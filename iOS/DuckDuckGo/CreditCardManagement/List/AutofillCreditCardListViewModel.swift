@@ -20,13 +20,22 @@
 import Foundation
 import BrowserServicesKit
 import SwiftUI
+import Core
+
+
+protocol AutofillCreditCardListViewModelDelegate: AnyObject {
+    func autofillCreditCardListViewModelDidSelectCard(_ viewModel: AutofillCreditCardListViewModel, card: SecureVaultModels.CreditCard)
+}
 
 final class AutofillCreditCardListViewModel: ObservableObject {
+
     @Published var creditCards: [CreditCardItem] = []
-    
+
+    weak var delegate: AutofillCreditCardListViewModelDelegate?
+
     private var secureVault: (any AutofillSecureVault)?
-    
-    static let dateFormatter: DateFormatter = {
+
+    static fileprivate let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "MM/yy"
         return dateFormatter
@@ -37,8 +46,18 @@ final class AutofillCreditCardListViewModel: ObservableObject {
         
         fetchCreditCards()
     }
-                                      
-    func fetchCreditCards() {
+            
+    func cardSelected(_ cardItem: CreditCardItem) {
+        delegate?.autofillCreditCardListViewModelDidSelectCard(self, card: cardItem.card)
+    }
+
+    func refreshData() {
+        fetchCreditCards()
+    }
+
+    // MARK: - Private methods
+    
+    private func fetchCreditCards() {
         do {
             let cards = try self.secureVault?.creditCards() ?? []
             creditCards = cards.asCardItems
@@ -60,7 +79,7 @@ struct CreditCardItem: Identifiable, Hashable {
         return CreditCardValidation.type(for: card.cardNumber)
     }
     
-    var title: String {
+    var displayTitle: String {
         return card.title.isEmpty ? type.displayName : card.title
     }
     
