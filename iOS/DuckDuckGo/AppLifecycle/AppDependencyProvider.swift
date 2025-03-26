@@ -56,6 +56,7 @@ protocol DependencyProvider {
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge { get }
     var subscriptionManager: (any SubscriptionManager)? { get }
     var subscriptionManagerV2: (any SubscriptionManagerV2)? { get }
+    var isAuthV2Enabled: Bool { get }
 }
 
 /// Provides dependencies for objects that are not directly instantiated
