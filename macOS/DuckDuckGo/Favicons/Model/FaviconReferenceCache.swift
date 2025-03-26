@@ -72,7 +72,6 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
 
     private(set) var loaded = false
 
-    @MainActor
     func load() async throws {
         do {
             let (hostReferences, urlReferences) = try await storing.loadFaviconReferences()
@@ -94,7 +93,6 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
         }
     }
 
-    @MainActor
     func insert(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL) {
         guard loaded else { return }
 
@@ -313,7 +311,6 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
         await removeHostReferencesFromStore(hostReferencesToRemove)
     }
 
-    @MainActor
     private func removeHostReferencesFromStore(_ hostReferences: [FaviconHostReference]) async {
         guard !hostReferences.isEmpty else { return }
 
@@ -333,7 +330,6 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
         await removeUrlReferencesFromStore(urlReferencesToRemove)
     }
 
-    @MainActor
     private func removeUrlReferencesFromStore(_ urlReferences: [FaviconUrlReference]) async {
         guard !urlReferences.isEmpty else { return }
 

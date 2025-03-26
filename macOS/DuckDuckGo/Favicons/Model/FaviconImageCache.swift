@@ -65,10 +65,8 @@ final class FaviconImageCache: FaviconImageCaching {
         storing = faviconStoring
     }
 
-    @MainActor
     private(set) var loaded = false
 
-    @MainActor
     func load() async throws {
         let favicons: [Favicon]
         do {
@@ -85,7 +83,6 @@ final class FaviconImageCache: FaviconImageCaching {
         loaded = true
     }
 
-    @MainActor
     func insert(_ favicons: [Favicon]) {
         guard !favicons.isEmpty, loaded else {
             return
@@ -111,14 +108,12 @@ final class FaviconImageCache: FaviconImageCaching {
         }
     }
 
-    @MainActor
     func get(faviconUrl: URL) -> Favicon? {
         guard loaded else { return nil }
 
         return entries[faviconUrl]
     }
 
-    @MainActor
     func getFavicons(with urls: some Sequence<URL>) -> [Favicon]? {
         guard loaded else { return nil }
 
@@ -127,7 +122,6 @@ final class FaviconImageCache: FaviconImageCaching {
 
     // MARK: - Clean
 
-    @MainActor
     func cleanOldExcept(fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager) async {
         let bookmarkedHosts = bookmarkManager.allHosts()
         await removeFavicons { favicon in
@@ -142,7 +136,6 @@ final class FaviconImageCache: FaviconImageCaching {
 
     // MARK: - Burning
 
-    @MainActor
     func burn(except fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager, savedLogins: Set<String>) async {
         let bookmarkedHosts = bookmarkManager.allHosts()
         await removeFavicons { favicon in
@@ -156,7 +149,6 @@ final class FaviconImageCache: FaviconImageCaching {
         }
     }
 
-    @MainActor
     func burnDomains(_ baseDomains: Set<String>,
                      exceptBookmarks bookmarkManager: BookmarkManager,
                      exceptSavedLogins logins: Set<String>,
@@ -182,7 +174,6 @@ final class FaviconImageCache: FaviconImageCaching {
         await removeFaviconsFromStore(faviconsToRemove)
     }
 
-    @MainActor
     private func removeFaviconsFromStore(_ favicons: [Favicon]) async {
         guard !favicons.isEmpty else { return }
 
@@ -193,5 +184,4 @@ final class FaviconImageCache: FaviconImageCaching {
             Logger.favicons.error("Removing of favicons failed: \(error.localizedDescription)")
         }
     }
-
 }
