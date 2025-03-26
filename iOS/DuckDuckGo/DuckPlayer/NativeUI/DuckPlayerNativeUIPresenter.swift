@@ -147,7 +147,10 @@ final class DuckPlayerNativeUIPresenter {
             // Create the container view with the pill view
             return DuckPlayerContainer.Container(
                 viewModel: containerViewModel,
-                hasBackground: false
+                hasBackground: false,
+                onDismiss: { [weak self] in
+                    self?.dismissPill()
+                }
             ) { _ in
                 AnyView(DuckPlayerEntryPillView(viewModel: pillViewModel))
             }
@@ -163,7 +166,10 @@ final class DuckPlayerNativeUIPresenter {
             // Create the container view with the mini pill view
             return DuckPlayerContainer.Container(
                 viewModel: containerViewModel,
-                hasBackground: false
+                hasBackground: false,
+                onDismiss: { [weak self] in
+                    self?.dismissPill()
+                }
             ) { _ in
                 AnyView(DuckPlayerMiniPillView(viewModel: miniPillViewModel))
             }
@@ -173,7 +179,6 @@ final class DuckPlayerNativeUIPresenter {
     /// Updates the webView constraint based on the current pill height
     @MainActor
     private func updateWebViewConstraintForPillHeight() {
-
         if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
             if self.appSettings.currentAddressBarPosition == .bottom {
                 let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
@@ -206,11 +211,9 @@ final class DuckPlayerNativeUIPresenter {
     @MainActor
     private func resetWebViewConstraint() {
         if let hostView = self.hostView, let webViewBottomConstraint = hostView.webViewBottomAnchorConstraint {
-
             // Reset to the default value based on address bar position
             let targetHeight = hostView.chromeDelegate?.barsMaxHeight ?? 0.0
             webViewBottomConstraint.constant = appSettings.currentAddressBarPosition == .bottom ? -targetHeight : 0
-
             hostView.view.layoutIfNeeded()
         }
     }
@@ -218,10 +221,16 @@ final class DuckPlayerNativeUIPresenter {
     /// Removes the pill controller
     @MainActor
     private func removePillContainer() {
+        // First remove from superview
         containerViewController?.view.removeFromSuperview()
+        
+        // Then clean up references
         containerViewController = nil
         containerViewModel = nil
         containerCancellables.removeAll()
+        
+        // Finally ensure constraints are reset
+        resetWebViewConstraint()
     }
 
     deinit {
@@ -304,7 +313,6 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
     ///   - timestamp: The timestamp of the video
     @MainActor
     func presentPill(for videoID: String, in hostViewController: TabViewController, timestamp: TimeInterval?) {
-
         // Store the videoID & Update State
         if state.videoID != videoID {
             state.hasBeenShown = false
@@ -379,13 +387,24 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
             }
         }.store(in: &containerCancellables)
 
+        // Subscribe to dragging state changes
+        containerViewModel.$isDragging.sink { [weak self] isDragging in
+            if isDragging {
+                self?.resetWebViewConstraint()
+            } else if containerViewModel.sheetVisible {
+                self?.updateWebViewConstraintForPillHeight()
+            }
+        }.store(in: &containerCancellables)
     }
 
     /// Dismisses the currently presented entry pill
     @MainActor
     func dismissPill(reset: Bool = false, animated: Bool = true) {
-        containerViewModel?.dismiss()
+        // First reset constraints immediately
         resetWebViewConstraint()
+        
+        // Then dismiss the view model
+        containerViewModel?.dismiss()
 
         if animated {
             // Remove the view after the animation completes

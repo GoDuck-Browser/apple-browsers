@@ -43,6 +43,7 @@ public enum DuckPlayerContainer {
     public final class ViewModel: ObservableObject {
         @Published public private(set) var sheetVisible = false
         @Published var sheetAnimationCompleted = false
+        @Published var isDragging = false
 
         private var subscriptions = Set<AnyCancellable>()
         private var shouldAnimate = true
@@ -61,20 +62,23 @@ public enum DuckPlayerContainer {
             sheetVisible = false
         }
 
+        public func setDragging(_ dragging: Bool) {
+            isDragging = dragging
+        }
     }
 
     public struct Container<Content: View>: View {
         @ObservedObject var viewModel: ViewModel
-
         @State private var sheetHeight = 0.0
-
         let hasBackground: Bool
         let content: (PresentationMetrics) -> Content
+        let onDismiss: () -> Void
 
-        public init(viewModel: ViewModel, hasBackground: Bool = true, @ViewBuilder content: @escaping (PresentationMetrics) -> Content) {
+        public init(viewModel: ViewModel, hasBackground: Bool = true, onDismiss: @escaping () -> Void, @ViewBuilder content: @escaping (PresentationMetrics) -> Content) {
             self.viewModel = viewModel
             self.hasBackground = hasBackground
             self.content = content
+            self.onDismiss = onDismiss
         }
 
         @ViewBuilder private func sheet(containerHeight: Double) -> some View {
@@ -82,7 +86,8 @@ public enum DuckPlayerContainer {
                 viewModel: viewModel,
                 containerHeight: containerHeight,
                 content: content,
-                onHeightChange: { sheetHeight = $0 }
+                onHeightChange: { sheetHeight = $0 },
+                onDismiss: onDismiss
             )
         }
 
@@ -136,12 +141,14 @@ private struct SheetView<Content: View>: View {
     let containerHeight: Double
     let content: (DuckPlayerContainer.PresentationMetrics) -> Content
     let onHeightChange: (Double) -> Void
+    let onDismiss: () -> Void
 
     @State private var sheetHeight: Double = 0
     @State private var sheetWidth: Double?
     @State private var opacity: Double = 0
     @State private var sheetOffset = DuckPlayerContainer.Constants.initialValue
     @GestureState private var dragStartOffset: Double?
+    @State private var isDragging = false
 
     // Animate the sheet offset with a spring animation
     private func animateOffset(to visible: Bool) {
@@ -187,6 +194,7 @@ private struct SheetView<Content: View>: View {
                                     .updating($dragStartOffset) { _, state, _ in
                                         if state == nil {
                                             state = sheetOffset
+                                            viewModel.setDragging(true)
                                         }
                                     }
                                     .onChanged { value in
@@ -207,8 +215,9 @@ private struct SheetView<Content: View>: View {
                                         }
                                     }
                                     .onEnded { value in
+                                        viewModel.setDragging(false)
                                         if value.translation.height > DuckPlayerContainer.Constants.dragThreshold || value.velocity.height > 50 {
-                                            viewModel.dismiss()
+                                            onDismiss()
                                         } else {
                                             withAnimation(.spring(duration: 0.2, bounce: 0.4)) {
                                                 sheetOffset = calculateSheetOffset(for: viewModel.sheetVisible, containerHeight: containerHeight)
