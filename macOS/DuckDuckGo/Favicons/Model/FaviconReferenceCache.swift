@@ -175,21 +175,21 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
     func cleanOld(except fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager) async {
         let bookmarkedHosts = bookmarkManager.allHosts()
         // Remove host references
-        await removeHostReferences { hostReference in
+        await removeHostReferences(filter: { hostReference in
             let host = hostReference.host
             return hostReference.dateCreated < Date.monthAgo &&
                 !fireproofDomains.isFireproof(fireproofDomain: host) &&
                 !bookmarkedHosts.contains(host)
-        }
+        }).value
         // Remove URL references
-        await removeUrlReferences { urlReference in
+        await removeUrlReferences(filter: { urlReference in
             guard let host = urlReference.documentUrl.host else {
                 return false
             }
             return urlReference.dateCreated < Date.monthAgo &&
                 !fireproofDomains.isFireproof(fireproofDomain: host) &&
                 !bookmarkedHosts.contains(host)
-        }
+        }).value
     }
 
     // MARK: - Burning
@@ -203,17 +203,17 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
         }
 
         // Remove host references
-        await removeHostReferences { hostReference in
+        await removeHostReferences(filter: { hostReference in
             let host = hostReference.host
             return !isHostApproved(host: host)
-        }
+        }).value
         // Remove URL references
-        await removeUrlReferences { urlReference in
+        await removeUrlReferences(filter: { urlReference in
             guard let host = urlReference.documentUrl.host else {
                 return false
             }
             return !isHostApproved(host: host)
-        }
+        }).value
     }
 
     func burnDomains(_ baseDomains: Set<String>,
@@ -223,18 +223,18 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
                      tld: TLD) async {
         // Remove host references
         let bookmarkedHosts = bookmarkManager.allHosts()
-        await removeHostReferences { hostReference in
+        await removeHostReferences(filter: { hostReference in
             let host = hostReference.host
             let baseDomain = tld.eTLDplus1(host) ?? ""
             return baseDomains.contains(baseDomain) && !bookmarkedHosts.contains(host) && !logins.contains(host) && !history.contains(host)
-        }
+        }).value
         // Remove URL references
-        await removeUrlReferences { urlReference in
+        await removeUrlReferences(filter: { urlReference in
             guard let host = urlReference.documentUrl.host else {
                 return false
             }
             return baseDomains.contains(host) && !bookmarkedHosts.contains(host) && !logins.contains(host) && !history.contains(host)
-        }
+        }).value
     }
 
     // MARK: - Private
@@ -271,7 +271,7 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
     private func insertToUrlCache(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL) {
         // Remove existing
         if let oldReference = urlReferences[documentUrl] {
-            Task.detached {
+            Task {
                 await self.removeUrlReferencesFromStore([oldReference])
             }
         }
@@ -285,7 +285,7 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
 
         urlReferences[documentUrl] = urlReference
 
-        Task.detached {
+        Task {
             do {
                 try await self.storing.save(urlReference: urlReference)
                 Logger.favicons.debug("URL reference saved successfully. document URL: \(urlReference.documentUrl.absoluteString)")
@@ -295,20 +295,21 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
         }
     }
 
+    @MainActor
     private func invalidateUrlCache(for host: String) {
-        Task.detached {
-            await self.removeUrlReferences { urlReference in
-                urlReference.documentUrl.host == host
-            }
+        _ = removeUrlReferences { urlReference in
+            urlReference.documentUrl.host == host
         }
     }
 
     @MainActor
-    private func removeHostReferences(filter isRemoved: (FaviconHostReference) -> Bool) async {
+    private func removeHostReferences(filter isRemoved: (FaviconHostReference) -> Bool) -> Task<Void, Never> {
         let hostReferencesToRemove = hostReferences.values.filter(isRemoved)
         hostReferencesToRemove.forEach { hostReferences[$0.host] = nil }
 
-        await removeHostReferencesFromStore(hostReferencesToRemove)
+        return Task.detached {
+            await self.removeHostReferencesFromStore(hostReferencesToRemove)
+        }
     }
 
     private func removeHostReferencesFromStore(_ hostReferences: [FaviconHostReference]) async {
@@ -323,11 +324,13 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
     }
 
     @MainActor
-    private func removeUrlReferences(filter isRemoved: (FaviconUrlReference) -> Bool) async {
+    private func removeUrlReferences(filter isRemoved: (FaviconUrlReference) -> Bool) -> Task<Void, Never> {
         let urlReferencesToRemove = urlReferences.values.filter(isRemoved)
         urlReferencesToRemove.forEach { urlReferences[$0.documentUrl] = nil }
 
-        await removeUrlReferencesFromStore(urlReferencesToRemove)
+        return Task.detached {
+            await self.removeUrlReferencesFromStore(urlReferencesToRemove)
+        }
     }
 
     private func removeUrlReferencesFromStore(_ urlReferences: [FaviconUrlReference]) async {
