@@ -247,7 +247,8 @@ private struct SheetView<Content: View>: View {
             sheetWidth = newWidth
         }
         .padding(.bottom, 44)
-        .background(Color(designSystemColor: .surface))
+        .background(Color(designSystemColor: .panel))
+        .border(Color(designSystemColor: .border), width: 0.5)
         .frame(maxWidth: .infinity)
         .offset(y: sheetOffset)
         .opacity(opacity)
