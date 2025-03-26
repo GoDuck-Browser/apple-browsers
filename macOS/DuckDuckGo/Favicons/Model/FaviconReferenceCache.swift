@@ -27,11 +27,14 @@ protocol FaviconReferenceCaching {
     init(faviconStoring: FaviconStoring)
 
     // References to favicon URLs for whole domains
+    @MainActor
     var hostReferences: [String: FaviconHostReference] { get }
 
     // References to favicon URLs for special URLs
+    @MainActor
     var urlReferences: [URL: FaviconUrlReference] { get }
 
+    @MainActor
     var loaded: Bool { get }
 
     @MainActor
@@ -40,11 +43,16 @@ protocol FaviconReferenceCaching {
     @MainActor
     func insert(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL)
 
+    @MainActor
     func getFaviconUrl(for documentURL: URL, sizeCategory: Favicon.SizeCategory) -> URL?
+    @MainActor
     func getFaviconUrl(for host: String, sizeCategory: Favicon.SizeCategory) -> URL?
 
+    @MainActor
     func cleanOld(except fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager) async
+    @MainActor
     func burn(except fireproofDomains: FireproofDomains, bookmarkManager: BookmarkManager, savedLogins: Set<String>) async
+    @MainActor
     func burnDomains(_ baseDomains: Set<String>, exceptBookmarks bookmarkManager: BookmarkManager, exceptSavedLogins logins: Set<String>, exceptHistoryDomains history: Set<String>, tld: TLD) async
 }
 
@@ -233,6 +241,7 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
 
     // MARK: - Private
 
+    @MainActor
     private func insertToHostCache(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), host: String, documentUrl: URL) {
         // Remove existing
         if let oldReference = hostReferences[host] {
@@ -260,6 +269,7 @@ final class FaviconReferenceCache: FaviconReferenceCaching {
         }
     }
 
+    @MainActor
     private func insertToUrlCache(faviconUrls: (smallFaviconUrl: URL?, mediumFaviconUrl: URL?), documentUrl: URL) {
         // Remove existing
         if let oldReference = urlReferences[documentUrl] {
