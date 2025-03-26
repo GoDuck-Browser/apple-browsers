@@ -40,7 +40,7 @@ final class SubscriptionEmailViewModel: ObservableObject {
     }
 
     enum EmailViewFlow {
-        case activationFlow, manageEmailFlow
+        case activationFlow, restoreFlow, manageEmailFlow
     }
 
     struct State {
@@ -52,7 +52,6 @@ final class SubscriptionEmailViewModel: ObservableObject {
         var canNavigateBack: Bool = false
         var shouldDismissView: Bool = false
         var subscriptionActive: Bool = false
-        var isWelcomePageVisible: Bool = false
         var backButtonTitle: String = UserText.backButtonTitle
         var selectedFeature: SelectedFeature = .none
         var shouldPopToSubscriptionSettings: Bool = false
@@ -71,16 +70,10 @@ final class SubscriptionEmailViewModel: ObservableObject {
 
     private var cancellables = Set<AnyCancellable>()
 
-    private var isWelcomePageOrSuccessPage: Bool {
-        let subscriptionActivateSuccessURL = subscriptionManager.url(for: .activateSuccess)
-        let subscriptionPurchaseURL = subscriptionManager.url(for: .purchase)
-        return webViewModel.url?.forComparison() == subscriptionActivateSuccessURL.forComparison() ||
-        webViewModel.url?.forComparison() == subscriptionPurchaseURL.forComparison()
-    }
-
-    private var isVerifySubscriptionPage: Bool {
-        let confirmSubscriptionURL = subscriptionManager.url(for: .baseURL).appendingPathComponent("confirm")
-        return webViewModel.url?.forComparison() == confirmSubscriptionURL.forComparison()
+    private func isCurrentURL(matching subscriptionURL: SubscriptionURL) -> Bool {
+        guard let currentURL = webViewModel.url else { return false }
+        let checkedURL = subscriptionManager.url(for: subscriptionURL)
+        return currentURL.forComparison() == checkedURL.forComparison()
     }
 
     init(isInternalUser: Bool = false,
@@ -109,13 +102,11 @@ final class SubscriptionEmailViewModel: ObservableObject {
         if state.canNavigateBack {
             await webViewModel.navigationCoordinator.goBack()
         } else {
-            // If not in the Welcome page, dismiss the view, otherwise, assume we
-            // came from Activation, so dismiss the entire stack
-            let subscriptionPurchaseURL = subscriptionManager.url(for: .purchase)
-            if webViewModel.url?.forComparison() != subscriptionPurchaseURL.forComparison() {
-                state.shouldDismissView = true
-            } else {
+            // If triggered from restoring subscription pop to main settings view
+            if state.currentFlow == .restoreFlow {
                 state.shouldPopToAppSettings = true
+            } else {
+                state.shouldDismissView = true
             }
         }
     }
@@ -141,7 +132,7 @@ final class SubscriptionEmailViewModel: ObservableObject {
         let url: URL
 
         switch state.currentFlow {
-        case .activationFlow:
+        case .activationFlow, .restoreFlow:
             url = subscriptionManager.url(for: .activationFlow)
             state.viewTitle = ""
         case .manageEmailFlow:
@@ -149,8 +140,8 @@ final class SubscriptionEmailViewModel: ObservableObject {
             state.viewTitle = UserText.subscriptionEditEmailTitle
         }
 
-        // Load the Email Management URL unless the user has activated a subscription or is on the welcome page
-        if !isWelcomePageOrSuccessPage {
+        // Load the URL unless the user has activated a subscription or is on the welcome page
+        if !isCurrentURL(matching: .welcome) && !isCurrentURL(matching: .activationFlowSuccess){
             self.webViewModel.navigationCoordinator.navigateTo(url: url)
         }
     }
@@ -168,12 +159,13 @@ final class SubscriptionEmailViewModel: ObservableObject {
         }
         
         subFeature.onBackToSettings = {
-            // TODO: Verify
-//            if self.state.currentFlow == .manageEmailFlow {
+
+            if self.state.currentFlow == .manageEmailFlow || self.state.currentFlow == .activationFlow {
                 self.backToSubscriptionSettings()
-//            } else {
-//                self.backToAppSettings()
-//            }
+            } else {
+            // after adding email or restore we should go back to main settings
+                self.backToAppSettings()
+            }
         }
         
         subFeature.onFeatureSelected = { feature in
@@ -192,7 +184,6 @@ final class SubscriptionEmailViewModel: ObservableObject {
                     break
                 }
             }
-            
         }
           
         subFeature.transactionErrorPublisher
@@ -220,7 +211,7 @@ final class SubscriptionEmailViewModel: ObservableObject {
         urlCancellable = webViewModel.$url
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                if self?.isWelcomePageOrSuccessPage ?? false {
+                if self?.isCurrentURL(matching: .welcome) ?? false {
                     self?.state.viewTitle = UserText.subscriptionTitle
                 }
             }
@@ -232,15 +223,13 @@ final class SubscriptionEmailViewModel: ObservableObject {
                 DispatchQueue.main.async {
                     strongSelf.state.shouldDisplaynavigationError = error != nil ? true : false
                 }
-                
             }
             .store(in: &cancellables)
     }
     
     private func updateBackButton(canNavigateBack: Bool) {
-        
         // If the view is not Activation Success, or Welcome page, allow WebView Back Navigation
-        if !isWelcomePageOrSuccessPage && !isVerifySubscriptionPage {
+        if !isCurrentURL(matching: .welcome) && !isCurrentURL(matching: .activationFlowSuccess){
             self.state.canNavigateBack = canNavigateBack
             self.state.backButtonTitle = UserText.backButtonTitle
         } else {

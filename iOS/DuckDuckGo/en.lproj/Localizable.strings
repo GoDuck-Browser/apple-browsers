@@ -2684,9 +2684,6 @@ Take back control of your personal information with the browser designed for dat
 /* No comment provided by engineer. */
 "siteFeedback.urlPlaceholder" = "Which website is broken?";
 
-/* Button for adding email address to subscription */
-"subscription.activate.add.email.button" = "Add Email";
-
 /* Button for adding this subscription to another device */
 "subscription.activate.add.to.device.button" = "Add to Device";
 

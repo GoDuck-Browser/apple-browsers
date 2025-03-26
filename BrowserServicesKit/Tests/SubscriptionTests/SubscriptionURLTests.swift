@@ -47,11 +47,12 @@ final class SubscriptionURLTests: XCTestCase {
     func testProductionURLs() throws {
         let allURLTypes: [SubscriptionURL] = [.baseURL,
                                               .purchase,
-                                              .activateViaEmail,
-                                              .addEmail,
+                                              .welcome,
+                                              .activationFlow,
+                                              .activationFlowAddEmailStep,
+                                              .activationFlowLinkViaEmailStep,
+                                              .activationFlowSuccess,
                                               .manageEmail,
-                                              .activateSuccess,
-                                              .addEmailToSubscriptionSuccess,
                                               .identityTheftRestoration]
 
         for urlType in allURLTypes {
@@ -67,11 +68,12 @@ final class SubscriptionURLTests: XCTestCase {
     func testStagingURLs() throws {
         let allURLTypes: [SubscriptionURL] = [.baseURL,
                                               .purchase,
-                                              .activateViaEmail,
-                                              .addEmail,
+                                              .welcome,
+                                              .activationFlow,
+                                              .activationFlowAddEmailStep,
+                                              .activationFlowLinkViaEmailStep,
+                                              .activationFlowSuccess,
                                               .manageEmail,
-                                              .activateSuccess,
-                                              .addEmailToSubscriptionSuccess,
                                               .identityTheftRestoration]
 
         for urlType in allURLTypes {
@@ -148,13 +150,13 @@ final class SubscriptionURLTests: XCTestCase {
         XCTAssertEqual(url, customBaseURL)
     }
 
-    func testCustomBaseSubscriptionURLForAddEmailURL() throws {
+    func testCustomBaseSubscriptionURLForActivationFlowURL() throws {
         // Given
         let customBaseURL = URL(string: "https://dax.duck.co/subscriptions")!
-        let expectedURL = customBaseURL.appendingPathComponent("add-email")
+        let expectedURL = customBaseURL.appendingPathComponent("activation-flow")
 
         // When
-        let url = SubscriptionURL.addEmail.subscriptionURL(withCustomBaseURL: customBaseURL, environment: .production)
+        let url = SubscriptionURL.activationFlow.subscriptionURL(withCustomBaseURL: customBaseURL, environment: .production)
 
         // Then
         XCTAssertEqual(url, expectedURL)
