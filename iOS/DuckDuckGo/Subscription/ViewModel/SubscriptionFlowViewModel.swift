@@ -241,7 +241,6 @@ final class SubscriptionFlowViewModel: ObservableObject {
             .sink { [weak self] _ in
                 guard let strongSelf = self else { return }
                 strongSelf.state.canNavigateBack = false
-                guard let currentURL = self?.webViewModel.url else { return }
                 Task { await strongSelf.setTransactionStatus(.idle) }
 
                 if strongSelf.isCurrentURLMatchingPostPurchaseAddEmailFlow() {
@@ -256,25 +255,26 @@ final class SubscriptionFlowViewModel: ObservableObject {
         !isCurrentURL(matching: .purchase) &&
         !isCurrentURL(matching: .welcome) &&
         !isCurrentURL(matching: .activationFlowSuccess) &&
-        !isCurrentURL(matching: .activationFlowAddEmailStep)
+        !isCurrentURL(matching: subscriptionManager.url(for: .baseURL).appendingPathComponent("add-email/success"))
     }
 
     private func isCurrentURLMatchingPostPurchaseAddEmailFlow() -> Bool {
-        guard let currentURL = webViewModel.url else { return false }
-
         // Not defined in SubscriptionURL as this flow is only triggered by FE as a part of post purchase flow. Only need for comparison.
         let baseURL = subscriptionManager.url(for: .baseURL)
         let addEmailURL = baseURL.appendingPathComponent("add-email")
         let addEmailSuccessURL = baseURL.appendingPathComponent("add-email/success")
 
-        return currentURL.forComparison() == addEmailURL.forComparison() ||
-        currentURL.forComparison() == addEmailSuccessURL.forComparison()
+        return isCurrentURL(matching: addEmailURL) || isCurrentURL(matching: addEmailSuccessURL)
     }
 
     private func isCurrentURL(matching subscriptionURL: SubscriptionURL) -> Bool {
+        let urlToCheck = subscriptionManager.url(for: subscriptionURL)
+        return isCurrentURL(matching: urlToCheck)
+    }
+
+    private func isCurrentURL(matching url: URL) -> Bool {
         guard let currentURL = webViewModel.url else { return false }
-        let checkedURL = subscriptionManager.url(for: subscriptionURL)
-        return currentURL.forComparison() == checkedURL.forComparison()
+        return currentURL.forComparison() == url.forComparison()
     }
 
     private func cleanUp() {
