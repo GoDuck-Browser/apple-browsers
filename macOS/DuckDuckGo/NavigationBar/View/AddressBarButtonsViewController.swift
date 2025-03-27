@@ -558,7 +558,6 @@ final class AddressBarButtonsViewController: NSViewController {
 
         privacyEntryPointButton.sendAction(on: .leftMouseUp)
 
-        imageButton.applyFaviconStyle()
         (imageButton.cell as? NSButtonCell)?.highlightsBy = NSCell.StyleMask(rawValue: 0)
 
         cameraButton.sendAction(on: .leftMouseDown)
@@ -604,7 +603,7 @@ final class AddressBarButtonsViewController: NSViewController {
 
             let newAnimationView: LottieAnimationView
             // For unknown reason, this caused infinite execution of various unit tests.
-            if NSApp.runType.requiresEnvironment {
+            if AppVersion.runType.requiresEnvironment {
                 newAnimationView = getAnimationView(for: animationName) ?? LottieAnimationView()
             } else {
                 newAnimationView = LottieAnimationView()
@@ -822,7 +821,7 @@ final class AddressBarButtonsViewController: NSViewController {
     }
 
     private func updatePrivacyEntryPointIcon() {
-        guard NSApp.runType.requiresEnvironment else { return }
+        guard AppVersion.runType.requiresEnvironment else { return }
         privacyEntryPointButton.image = nil
 
         guard let tabViewModel else { return }

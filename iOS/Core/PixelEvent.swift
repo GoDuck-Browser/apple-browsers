@@ -367,6 +367,8 @@ extension Pixel {
         case autofillExtensionToggledOn
         case autofillExtensionToggledOff
         case autofillLoginsStacked
+        
+        case autofillSettingsOpened
 
         case autofillManagementOpened
         case autofillManagementCopyUsername
@@ -1069,6 +1071,14 @@ extension Pixel {
         case openAIChatFromWidgetLockScreenComplication
         case openAIChatFromIconShortcut
 
+        case aiChatSettingsVoiceTurnedOff
+        case aiChatSettingsVoiceTurnedOn
+        case aiChatSettingsAddressBarTurnedOff
+        case aiChatSettingsAddressBarTurnedOn
+        case aiChatSettingsBrowserMenuTurnedOff
+        case aiChatSettingsBrowserMenuTurnedOn
+        case aiChatSettingsDisplayed
+
         // MARK: Lifecycle
         case appDidTransitionToUnexpectedState
 
@@ -1415,6 +1425,8 @@ extension Pixel.Event {
 
         case .autofillLoginsStacked: return "m_autofill_logins_stacked"
 
+        case .autofillSettingsOpened: return "autofill_settings_opened"
+            
         case .autofillManagementOpened:
             return "m_autofill_management_opened"
         case .autofillManagementCopyUsername:
@@ -2107,7 +2119,13 @@ extension Pixel.Event {
         case .browsingMenuAIChat: return "m_aichat_menu_tab_icon"
         case .browsingMenuListAIChat: return "m_browsing_menu_list_aichat"
         case .openAIChatFromIconShortcut: return "m_aichat-icon-shortcut"
-
+        case .aiChatSettingsVoiceTurnedOff: return "m_aichat_settings_voice_turned_off"
+        case .aiChatSettingsVoiceTurnedOn: return "m_aichat_settings_voice_turned_on"
+        case .aiChatSettingsAddressBarTurnedOff: return "m_aichat_settings_address_bar_turned_off"
+        case .aiChatSettingsAddressBarTurnedOn: return "m_aichat_settings_address_bar_turned_on"
+        case .aiChatSettingsBrowserMenuTurnedOff: return "m_aichat_settings_browser_menu_turned_off"
+        case .aiChatSettingsBrowserMenuTurnedOn: return "m_aichat_settings_browser_menu_turned_on"
+        case .aiChatSettingsDisplayed: return "m_aichat_settings_displayed"
 
         // MARK: Lifecycle
         case .appDidTransitionToUnexpectedState: return "m_debug_app-did-transition-to-unexpected-state-4"
