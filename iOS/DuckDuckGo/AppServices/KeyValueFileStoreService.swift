@@ -160,7 +160,7 @@ final class KeyValueFileStoreRetryService {
 
     convenience init() {
 
-        let eventHandling = EventMapping<Event>(mapping: { event, error, params, _ in
+        let eventHandling = EventMapping<Event>(mapping: { event, error, _, _ in
 
             switch event {
 
@@ -245,7 +245,7 @@ final class KeyValueFileStoreAsyncService {
 
     convenience init() {
 
-        let eventHandling = EventMapping<Event>(mapping: { event, error, params, _ in
+        let eventHandling = EventMapping<Event>(mapping: { event, error, _, _ in
 
             switch event {
 

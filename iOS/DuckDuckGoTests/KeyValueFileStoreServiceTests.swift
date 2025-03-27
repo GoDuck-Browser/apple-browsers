@@ -29,7 +29,7 @@ class KeyValueFileStoreTwoStepServiceTests: XCTestCase {
         case readError
     }
 
-    //MARK: - Regular Service
+    // MARK: - Regular Service
 
     private class MockKeyValueFileStore: ThrowingKeyValueStoring {
 
@@ -193,7 +193,7 @@ class KeyValueFileStoreTwoStepServiceTests: XCTestCase {
         waitForExpectations(timeout: 1)
     }
 
-    //MARK: - Async Service
+    // MARK: - Async Service
 
     func testAsyncWhenNilIsReturnedThenNoEventIsCalled() {
 
@@ -231,7 +231,7 @@ class KeyValueFileStoreTwoStepServiceTests: XCTestCase {
 
         let service = KeyValueFileStoreAsyncService(keyValueFilesStoreFactory: {
             try MockKeyValueFileStore()
-        }, eventHandling: .init(mapping: { event, error, params, _ in
+        }, eventHandling: .init(mapping: { event, error, _, _ in
             switch event {
             case .kvfsInitError, .appSupportDirAccessError:
                 XCTFail("Unexpected event")
@@ -245,7 +245,7 @@ class KeyValueFileStoreTwoStepServiceTests: XCTestCase {
         waitForExpectations(timeout: 1)
     }
 
-    //MARK: - Retry Service
+    // MARK: - Retry Service
 
     func testRetryWhenNilIsReturnedThenNoEventIsCalled() {
 
@@ -267,7 +267,7 @@ class KeyValueFileStoreTwoStepServiceTests: XCTestCase {
 
         let service = KeyValueFileStoreRetryService(keyValueFilesStoreFactory: {
             try MockKeyValueFileStore()
-        }, eventHandling: .init(mapping: { event, error, params, _ in
+        }, eventHandling: .init(mapping: { event, error, _, _ in
             switch event {
             case .kvfsInitError, .appSupportDirAccessError:
                 XCTFail("Unexpected event")
