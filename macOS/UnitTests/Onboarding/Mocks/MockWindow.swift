@@ -26,7 +26,7 @@ class MockWindow: NSWindow {
     }
 
     private var _isVisible: Bool = true
-    private var _isKeyWindow: Bool = true 
+    private var _isKeyWindow: Bool = true
     private var _isMainWindow: Bool = true
     private var _occlusionState: NSWindow.OcclusionState = .visible
 
