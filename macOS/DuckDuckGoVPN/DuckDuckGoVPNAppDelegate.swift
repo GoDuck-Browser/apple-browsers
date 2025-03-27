@@ -327,7 +327,7 @@ final class DuckDuckGoVPNAppDelegate: NSObject, NSApplicationDelegate {
 
     @MainActor
     private lazy var vpnAppEventsHandler = {
-        VPNAppEventsHandler(tunnelController: tunnelController)
+        VPNAppEventsHandler(tunnelController: tunnelController, appState: vpnAppState)
     }()
 
     @MainActor
