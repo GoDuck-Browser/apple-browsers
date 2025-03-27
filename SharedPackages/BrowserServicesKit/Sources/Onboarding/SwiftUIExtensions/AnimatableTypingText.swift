@@ -29,6 +29,7 @@ import Combine
 public struct AnimatableTypingText: View {
     private let text: NSAttributedString
     private var startAnimating: Binding<Bool>
+    private var skipAnimation: Binding<Bool>
     private var onTypingFinished: (() -> Void)?
 
     @StateObject private var model: AnimatableTypingTextModel
@@ -36,23 +37,27 @@ public struct AnimatableTypingText: View {
     public init(
         _ text: NSAttributedString,
         startAnimating: Binding<Bool> = .constant(true),
+        skipAnimation: Binding<Bool> = .constant(false),
         onTypingFinished: (() -> Void)? = nil
     ) {
         self.text = text
         _model = StateObject(wrappedValue: AnimatableTypingTextModel(text: text, onTypingFinished: onTypingFinished))
         self.startAnimating = startAnimating
+        self.skipAnimation = skipAnimation
         self.onTypingFinished = onTypingFinished
     }
 
     public init(
         _ text: String,
         startAnimating: Binding<Bool> = .constant(true),
+        skipAnimation: Binding<Bool> = .constant(false),
         onTypingFinished: (() -> Void)? = nil
     ) {
         let attributesText = NSAttributedString(string: text)
         self.text = attributesText
         _model = StateObject(wrappedValue: AnimatableTypingTextModel(text: attributesText, onTypingFinished: onTypingFinished))
         self.startAnimating = startAnimating
+        self.skipAnimation = skipAnimation
         self.onTypingFinished = onTypingFinished
     }
 
@@ -67,14 +72,29 @@ public struct AnimatableTypingText: View {
             }
         }
         .onChange(of: startAnimating.wrappedValue, perform: { shouldAnimate in
+            print("*** should animate", startAnimating.wrappedValue, skipAnimation.wrappedValue)
+
+            if skipAnimation.wrappedValue {
+                model.skip()
+                return
+            }
+
             if shouldAnimate {
                 model.startAnimating()
             } else {
-                model.stopAnimating()
+                model.stopAnimating(skipped: false)
+            }
+        })
+        .onChange(of: skipAnimation.wrappedValue, perform: { shouldSkip in
+            print("*** should skip", startAnimating.wrappedValue, skipAnimation.wrappedValue)
+            if shouldSkip {
+                model.skip()
             }
         })
         .onAppear {
-            if startAnimating.wrappedValue {
+            if skipAnimation.wrappedValue {
+                model.skip()
+            } else if startAnimating.wrappedValue {
                 model.startAnimating()
             }
         }
@@ -100,14 +120,23 @@ final class AnimatableTypingTextModel: ObservableObject {
         typedAttributedText = createAttributedString(original: text, visibleLength: 0)
     }
 
+    func skip() {
+        timer?.invalidate()
+        timer = nil
+
+        typedAttributedText = text
+        onTypingFinished?()
+    }
+
     func startAnimating() {
+        timer?.invalidate()
         timer = timerFactory.makeTimer(withTimeInterval: 0.02, repeats: true, block: { [weak self] timer in
             guard timer.isValid else { return }
             self?.handleTimerEvent()
         })
     }
 
-    func stopAnimating() {
+    func stopAnimating(skipped: Bool) {
         timer?.invalidate()
         timer = nil
 
@@ -122,7 +151,7 @@ final class AnimatableTypingTextModel: ObservableObject {
     private func handleTimerEvent() {
         if typingIndex >= text.length {
             onTypingFinished?()
-            stopAnimating()
+            stopAnimating(skipped: false)
             return
         }
 

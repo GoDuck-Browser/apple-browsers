@@ -65,7 +65,7 @@ struct OnboardingView: View {
                 DaxDialogView(
                     logoPosition: .top,
                     matchLogoAnimation: (Self.daxGeometryEffectID, animationNamespace),
-                    showDialogBox: $model.showDaxDialogBox,
+                    showDialogBox: $model.introState.showDaxDialogBox,
                     onTapGesture: {
                         withAnimation {
                             model.tapped()
@@ -94,8 +94,8 @@ struct OnboardingView: View {
             .offset(y: geometry.size.height * Metrics.dialogVerticalOffsetPercentage.build(v: verticalSizeClass, h: horizontalSizeClass))
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + Metrics.daxDialogVisibilityDelay) {
-                    model.showDaxDialogBox = true
-                    model.animateIntroText = true
+                    model.introState.showDaxDialogBox = true
+                    model.introState.animateIntroText = true
                 }
             }
         }
@@ -118,20 +118,22 @@ struct OnboardingView: View {
     private var introView: some View {
         IntroDialogContent(
             title: model.copy.introTitle,
-            animateText: $model.animateIntroText,
-            showCTA: $model.showIntroButton
+            animateText: $model.introState.animateIntroText,
+            showCTA: $model.introState.showIntroButton,
+            isSkipped: $model.isSkipped
         ) {
             animateBrowserComparisonViewState()
         }
         .onboardingDaxDialogStyle()
-        .visibility(model.showIntroViewContent ? .visible : .invisible)
+        .visibility(model.introState.showIntroViewContent ? .visible : .invisible)
     }
 
     private var browsersComparisonView: some View {
         BrowsersComparisonContent(
             title: model.copy.browserComparisonTitle,
-            animateText: $model.animateComparisonText,
-            showContent: $model.showComparisonButton,
+            animateText: $model.browserComparisonState.animateComparisonText,
+            showContent: $model.browserComparisonState.showComparisonButton,
+            isSkipped: $model.isSkipped,
             setAsDefaultBrowserAction: {
                 model.setDefaultBrowserAction()
             }, cancelAction: {
@@ -144,6 +146,7 @@ struct OnboardingView: View {
     private var addToDockPromoView: some View {
         AddToDockPromoContent(
             isAnimating: $model.addToDockState.isAnimating,
+            isSkipped: $model.isSkipped,
             showTutorialAction: {
                 model.addtoDockShowTutorialAction()
             },
@@ -158,6 +161,7 @@ struct OnboardingView: View {
             animateTitle: $model.appIconPickerContentState.animateTitle,
             animateMessage: $model.appIconPickerContentState.animateMessage,
             showContent: $model.appIconPickerContentState.showContent,
+            isSkipped: $model.isSkipped,
             action: model.appIconPickerContinueAction
         )
         .onboardingDaxDialogStyle()
@@ -167,6 +171,7 @@ struct OnboardingView: View {
         AddressBarPositionContent(
             animateTitle: $model.addressBarPositionContentState.animateTitle,
             showContent: $model.addressBarPositionContentState.showContent,
+            isSkipped: $model.isSkipped,
             action: model.selectAddressBarPositionAction
         )
         .onboardingDaxDialogStyle()
@@ -174,7 +179,7 @@ struct OnboardingView: View {
 
     private func animateBrowserComparisonViewState() {
         // Hide content of Intro dialog before animating
-        model.showIntroViewContent = false
+        model.introState.showIntroViewContent = false
 
         // Animation with small delay for a better effect when intro content disappear
         let animationDuration = Metrics.comparisonChartAnimationDuration
@@ -186,14 +191,14 @@ struct OnboardingView: View {
             withAnimation(animation) {
                 model.startOnboardingAction()
             } completion: {
-                model.animateComparisonText = true
+                model.browserComparisonState.animateComparisonText = true
             }
         } else {
             withAnimation(animation) {
                 model.startOnboardingAction()
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-                model.animateComparisonText = true
+                model.browserComparisonState.animateComparisonText = true
             }
         }
     }

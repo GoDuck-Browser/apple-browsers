@@ -25,32 +25,23 @@ struct AddToDockPromoView: View {
 
     private var model = AddToDockPromoViewModel()
 
-    private var isAnimating: Binding<Bool>
-
-    init(model: AddToDockPromoViewModel = AddToDockPromoViewModel(),
-         isAnimating: Binding<Bool> = .constant(true)) {
-        self.model = model
-        self.isAnimating = isAnimating
-    }
+    @State private var isAnimating = false
 
     var body: some View {
         LottieView(
             lottieFile: "add-to-dock-promo",
-            delay: 3.0, // TODO get this working!
-            isAnimating: isAnimating, // TODO this should also stop the animation if it changes
+            isAnimating: $isAnimating,
             animationImageProvider: model,
             valueProvider: .init(
                 provider: ColorValueProvider(model.color),
                 keypath: AnimationKeypath(keypath: Self.appIconFillKeyPath)
             )
         )
-
-        // Remove this is if not really needed
-//        .onFirstAppear {
-//            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-//                isAnimating.wrappedValue = true
-//            }
-//        }
+        .onFirstAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isAnimating = true
+            }
+        }
     }
 }
 

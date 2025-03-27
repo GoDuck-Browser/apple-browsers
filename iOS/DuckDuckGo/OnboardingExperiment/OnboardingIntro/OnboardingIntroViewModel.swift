@@ -25,6 +25,18 @@ import class UIKit.UIApplication
 @MainActor
 final class OnboardingIntroViewModel: ObservableObject {
 
+    struct IntroState {
+        var showDaxDialogBox = false
+        var showIntroViewContent = true
+        var showIntroButton = false
+        var animateIntroText = false
+    }
+
+    struct BrowserComparisonState {
+        var showComparisonButton = false
+        var animateComparisonText = false
+    }
+
     struct AppIconPickerContentState {
         var animateTitle = true
         var animateMessage = false
@@ -46,16 +58,14 @@ final class OnboardingIntroViewModel: ObservableObject {
         }
     }
 
-    @Published var showDaxDialogBox = false
-    @Published var showIntroViewContent = true
-    @Published var showIntroButton = false
-    @Published var animateIntroText = false
-    @Published var showComparisonButton = false
-    @Published var animateComparisonText = false
-
     @Published var appIconPickerContentState = AppIconPickerContentState()
     @Published var addressBarPositionContentState = AddressBarPositionContentState()
     @Published var addToDockState = AddToDockState()
+    @Published var browserComparisonState = BrowserComparisonState()
+    @Published var introState = IntroState()
+
+    /// Set to true when the view controller is tapped
+    @Published var isSkipped = false
 
     let copy: Copy
     var onCompletingOnboardingIntro: (() -> Void)?
@@ -159,14 +169,15 @@ final class OnboardingIntroViewModel: ObservableObject {
     }
 
     func tapped() {
-        print("***", #function, state.intro?.type)
+        isSkipped = true
+        // Do whatever you need to do here to support tapping to quickly show the full content of the dialog
         switch state.intro?.type {
         case .startOnboardingDialog:
-            showIntroButton = true
-            animateIntroText = false
+            introState.showIntroButton = true
+            introState.animateIntroText = false
         case .browsersComparisonDialog:
-            showComparisonButton = true
-            animateComparisonText = false
+            browserComparisonState.showComparisonButton = true
+            browserComparisonState.animateComparisonText = false
         case .chooseAppIconDialog:
             appIconPickerContentState.animateTitle = false
             appIconPickerContentState.animateMessage = false
@@ -176,7 +187,10 @@ final class OnboardingIntroViewModel: ObservableObject {
             addressBarPositionContentState.showContent = true
         case .addToDockPromoDialog:
             addToDockState.isAnimating = false
-        default: break
+
+        // Forces new cases.
+        case .none:
+            break
         }
 
     }
@@ -236,7 +250,9 @@ private extension OnboardingIntroViewModel {
             onCompletingOnboardingIntro?()
             return
         }
+
         // Otherwise advance to the next onboarding step
+        isSkipped = false
         currentIntroStep = nextIntroStep
         setViewState(introStep: currentIntroStep)
     }

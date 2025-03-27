@@ -27,15 +27,18 @@ extension OnboardingView {
         @State private var showAddToDockTutorial = false
 
         private let isAnimating: Binding<Bool>
+        private let isSkipped: Binding<Bool>
         private let showTutorialAction: () -> Void
         private let dismissAction: (_ fromAddToDock: Bool) -> Void
 
         init(
             isAnimating: Binding<Bool> = .constant(true),
+            isSkipped: Binding<Bool>,
             showTutorialAction: @escaping () -> Void,
             dismissAction: @escaping (_ fromAddToDock: Bool) -> Void
         ) {
             self.isAnimating = isAnimating
+            self.isSkipped = isSkipped
             self.showTutorialAction = showTutorialAction
             self.dismissAction = dismissAction
         }
@@ -53,13 +56,14 @@ extension OnboardingView {
                     message: NSAttributedString(string: UserText.AddToDockOnboarding.Promo.introMessage),
                     messageFont: Font.system(size: 16),
                     customView: AnyView(addToDockPromoView),
-                    customActionView: AnyView(customActionView)
+                    customActionView: AnyView(customActionView),
+                    skipAnimations: isSkipped
                 )
             }
         }
 
         private var addToDockPromoView: some View {
-            AddToDockPromoView(isAnimating: isAnimating)
+            AddToDockPromoView()
                 .aspectRatio(contentMode: .fit)
                 .padding(.vertical)
         }
