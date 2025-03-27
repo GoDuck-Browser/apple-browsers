@@ -447,6 +447,7 @@ public final class DefaultSubscriptionManagerV2: SubscriptionManagerV2 {
     public func adopt(accessToken: String, refreshToken: String) async throws {
         let tokenContainer = try await oAuthClient.decode(accessToken: accessToken, refreshToken: refreshToken)
         oAuthClient.adopt(tokenContainer: tokenContainer)
+        NotificationCenter.default.post(name: .accountDidSignIn, object: self, userInfo: nil)
     }
 
     public func adopt(tokenContainer: TokenContainer) {

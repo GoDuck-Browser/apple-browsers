@@ -136,6 +136,7 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
         case Handlers.subscriptionsWelcomeFaqClicked: return subscriptionsWelcomeFaqClicked
         case Handlers.getAccessToken: return getAccessToken
         default:
+            Logger.subscription.error("Unknown web message: \(methodName, privacy: .public)")
             return nil
         }
     }
@@ -164,6 +165,7 @@ final class SubscriptionPagesUseSubscriptionFeatureV2: Subfeature {
 
         do {
             try await subscriptionManager.adopt(accessToken: subscriptionValues.accessToken, refreshToken: subscriptionValues.refreshToken)
+            try await subscriptionManager.getSubscription(cachePolicy: .reloadIgnoringLocalCacheData)
             Logger.subscription.log("Subscription retrieved")
         } catch {
             Logger.subscription.error("Failed to adopt V2 tokens: \(error, privacy: .public)")
