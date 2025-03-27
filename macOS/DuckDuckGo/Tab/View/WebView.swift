@@ -18,6 +18,7 @@
 
 import Cocoa
 import WebKit
+import Carbon.HIToolbox
 
 protocol WebViewContextMenuDelegate: AnyObject {
     func webView(_ webView: WebView, willOpenContextMenu menu: NSMenu, with event: NSEvent)
@@ -40,10 +41,6 @@ protocol WebViewZoomLevelDelegate: AnyObject {
 
 @objc(DuckDuckGo_WebView)
 final class WebView: WKWebView {
-
-    struct KeyCode {
-        static let escape: UInt16 = 53
-    }
 
     weak var contextMenuDelegate: WebViewContextMenuDelegate?
     weak var interactionEventsDelegate: WebViewInteractionEventsDelegate?
@@ -182,7 +179,7 @@ final class WebView: WKWebView {
     }
 
     override func keyDown(with event: NSEvent) {
-        if event.keyCode == KeyCode.escape,
+        if Int(event.keyCode) == kVK_Escape,
            let window,
            window.styleMask.contains(.fullScreen),
            let fullscreenController = (window.windowController as? MainWindowController)?.fullscreenController {
