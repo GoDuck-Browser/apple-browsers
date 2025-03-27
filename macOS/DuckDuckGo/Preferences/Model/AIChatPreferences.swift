@@ -32,19 +32,9 @@ final class AIChatPreferences: ObservableObject {
         self.storage = storage
         self.configuration = configuration
 
-        showShortcutInToolbar = storage.shouldDisplayToolbarShortcut
         showShortcutInApplicationMenu = storage.showShortcutInApplicationMenu
 
-        subscribeToShowInToolbarSettingsChanges()
         subscribeToShowInApplicationMenuSettingsChanges()
-    }
-
-    func subscribeToShowInToolbarSettingsChanges() {
-        storage.shouldDisplayToolbarShortcutPublisher
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .assign(to: \.showShortcutInToolbar, onWeaklyHeld: self)
-            .store(in: &cancellables)
     }
 
     func subscribeToShowInApplicationMenuSettingsChanges() {
@@ -55,18 +45,9 @@ final class AIChatPreferences: ObservableObject {
             .store(in: &cancellables)
     }
 
-    var shouldShowToolBarShortcutOption: Bool {
-        self.configuration.isFeatureEnabledForToolbarShortcut
-    }
 
     var shouldShowApplicationMenuShortcutOption: Bool {
         self.configuration.isFeatureEnabledForApplicationMenuShortcut
-    }
-
-    @Published var showShortcutInToolbar: Bool {
-        didSet {
-            storage.shouldDisplayToolbarShortcut = showShortcutInToolbar
-        }
     }
 
     @Published var showShortcutInApplicationMenu: Bool {

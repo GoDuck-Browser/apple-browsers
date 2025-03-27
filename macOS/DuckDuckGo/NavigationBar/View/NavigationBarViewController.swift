@@ -55,7 +55,6 @@ final class NavigationBarViewController: NSViewController {
     @IBOutlet weak var addressBarStack: NSStackView!
     @IBOutlet weak var menuButtons: NSStackView!
 
-    @IBOutlet weak var aiChatButton: MouseOverButton!
     @IBOutlet var addressBarLeftToNavButtonsConstraint: NSLayoutConstraint!
     @IBOutlet var addressBarProportionalWidthConstraint: NSLayoutConstraint!
     @IBOutlet var navigationBarButtonsLeadingConstraint: NSLayoutConstraint!
@@ -199,7 +198,6 @@ final class NavigationBarViewController: NSViewController {
         downloadsButton.setAccessibilityIdentifier("NavigationBarViewController.downloadsButton")
         networkProtectionButton.sendAction(on: .leftMouseDown)
         passwordManagementButton.sendAction(on: .leftMouseDown)
-        aiChatButton.sendAction(on: .leftMouseDown)
 
         optionsButton.toolTip = UserText.applicationMenuTooltip
         optionsButton.setAccessibilityIdentifier("NavigationBarViewController.optionsButton")
@@ -234,7 +232,6 @@ final class NavigationBarViewController: NSViewController {
         updatePasswordManagementButton()
         updateBookmarksButton()
         updateHomeButton()
-        updateAIChatButton()
 
         if view.window?.isPopUpWindow == true {
             goBackButton.isHidden = true
@@ -455,8 +452,7 @@ final class NavigationBarViewController: NSViewController {
                     self.updateHomeButton()
                 case .networkProtection:
                     self.networkProtectionButtonModel.updateVisibility()
-                case .aiChat:
-                    self.updateAIChatButton()
+
                 }
             } else {
                 assertionFailure("Failed to get changed pinned view type")
@@ -1076,26 +1072,6 @@ final class NavigationBarViewController: NSViewController {
             .store(in: &navigationButtonsCancellables)
     }
 
-    // MARK: - AI Chat
-
-    @IBAction func aiChatButtonAction(_ sender: NSButton) {
-        AIChatTabOpener.openAIChatTab()
-        PixelKit.fire(GeneralPixel.aichatToolbarClicked, includeAppVersionParameter: true)
-    }
-
-    private func updateAIChatButton() {
-        let menu = NSMenu()
-        let title = LocalPinningManager.shared.shortcutTitle(for: .aiChat)
-        menu.addItem(withTitle: title, action: #selector(toggleAIChatPanelPinning(_:)), keyEquivalent: "")
-
-        aiChatButton.menu = menu
-        aiChatButton.toolTip = UserText.aiChat
-
-        let isFeatureEnabled = LocalPinningManager.shared.isPinned(.aiChat) && aiChatMenuConfig.isFeatureEnabledForToolbarShortcut
-        let isPopUpWindow = view.window?.isPopUpWindow ?? false
-
-        aiChatButton.isHidden = !isFeatureEnabled || isPopUpWindow
-    }
 }
 
 extension NavigationBarViewController: NSMenuDelegate {
@@ -1124,11 +1100,6 @@ extension NavigationBarViewController: NSMenuDelegate {
             let networkProtectionTitle = LocalPinningManager.shared.shortcutTitle(for: .networkProtection)
             menu.addItem(withTitle: networkProtectionTitle, action: #selector(toggleNetworkProtectionPanelPinning), keyEquivalent: "")
         }
-
-        if !isPopUpWindow && aiChatMenuConfig.isFeatureEnabledForToolbarShortcut {
-            let aiChatTitle = LocalPinningManager.shared.shortcutTitle(for: .aiChat)
-            menu.addItem(withTitle: aiChatTitle, action: #selector(toggleAIChatPanelPinning), keyEquivalent: "L")
-        }
     }
 
     @objc
@@ -1144,11 +1115,6 @@ extension NavigationBarViewController: NSMenuDelegate {
     @objc
     private func toggleDownloadsPanelPinning(_ sender: NSMenuItem) {
         LocalPinningManager.shared.togglePinning(for: .downloads)
-    }
-
-    @objc
-    private func toggleAIChatPanelPinning(_ sender: NSMenuItem) {
-        LocalPinningManager.shared.togglePinning(for: .aiChat)
     }
 
     @objc

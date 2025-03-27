@@ -49386,7 +49386,7 @@
     },
     "pinning.hide-duckai-shortcut" : {
       "comment" : "Menu item for hiding the AI Chat shortcut",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -49686,7 +49686,7 @@
     },
     "pinning.show-duckai-shortcut" : {
       "comment" : "Menu item for showing the AI Chat shortcut",
-      "extractionState" : "extracted_with_value",
+      "extractionState" : "stale",
       "localizations" : {
         "de" : {
           "stringUnit" : {

@@ -27,23 +27,13 @@ protocol AIChatMenuVisibilityConfigurable {
     /// - Returns: `true` if the application menu shortcut should be displayed; otherwise, `false`.
     var shouldDisplayApplicationMenuShortcut: Bool { get }
 
-    /// This property checks the relevant settings to decide if the toolbar shortcut is to be shown.
-    ///
-    /// - Returns: `true` if the toolbar shortcut should be displayed; otherwise, `false`.
-    var shouldDisplayToolbarShortcut: Bool { get }
-
     /// This property reflects the current state of the feature flag for the application menu shortcut.
     ///
     /// - Returns: `true` if the remote feature for the application menu shortcut is enabled; otherwise, `false`.
     var isFeatureEnabledForApplicationMenuShortcut: Bool { get }
 
-    /// This property reflects the current state of the feature flag for the toolbar shortcut.
-    ///
-    /// - Returns: `true` if the remote feature for the toolbar shortcut is enabled; otherwise, `false`.
-    var isFeatureEnabledForToolbarShortcut: Bool { get }
 
-    /// A publisher that emits a value when either the `shouldDisplayApplicationMenuShortcut` or
-    /// `shouldDisplayToolbarShortcut` settings, backed by storage, are changed.
+    /// A publisher that emits a value when either the `shouldDisplayApplicationMenuShortcut`  settings, backed by storage, are changed.
     ///
     /// This allows subscribers to react to changes in the visibility settings of the application menu
     /// and toolbar shortcuts.
@@ -70,14 +60,6 @@ final class AIChatMenuConfiguration: AIChatMenuVisibilityConfigurable {
         isFeatureEnabledFor(shortcutType: .applicationMenu)
     }
 
-    var isFeatureEnabledForToolbarShortcut: Bool {
-        isFeatureEnabledFor(shortcutType: .toolbar)
-    }
-
-    var shouldDisplayToolbarShortcut: Bool {
-        return isFeatureEnabledForToolbarShortcut && storage.shouldDisplayToolbarShortcut
-    }
-
     var shouldDisplayApplicationMenuShortcut: Bool {
         return isFeatureEnabledForApplicationMenuShortcut && storage.showShortcutInApplicationMenu
     }
@@ -93,12 +75,6 @@ final class AIChatMenuConfiguration: AIChatMenuVisibilityConfigurable {
     }
 
     private func subscribeToValuesChanged() {
-        storage.shouldDisplayToolbarShortcutPublisher
-            .removeDuplicates()
-            .sink { [weak self] _ in
-                self?.valuesChangedPublisher.send()
-            }.store(in: &cancellables)
-
         storage.showShortcutInApplicationMenuPublisher
             .removeDuplicates()
             .sink { [weak self] _ in

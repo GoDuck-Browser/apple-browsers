@@ -19,7 +19,6 @@
 import UserScript
 
 protocol AIChatUserScriptHandling {
-    func handleGetUserValues(params: Any, message: UserScriptMessage) -> Encodable?
     func openAIChatSettings(params: Any, message: UserScriptMessage) async -> Encodable?
     func getAIChatNativeConfigValues(params: Any, message: UserScriptMessage) -> Encodable?
     func closeAIChat(params: Any, message: UserScriptMessage) -> Encodable?
@@ -46,11 +45,6 @@ struct AIChatUserScriptHandler: AIChatUserScriptHandling {
     @MainActor public func openAIChatSettings(params: Any, message: UserScriptMessage) -> Encodable? {
         WindowControllersManager.shared.showTab(with: .settings(pane: .aiChat))
         return nil
-    }
-
-    public func handleGetUserValues(params: Any, message: UserScriptMessage) -> Encodable? {
-        UserValues(isToolbarShortcutEnabled: storage.shouldDisplayToolbarShortcut,
-                   platform: platform)
     }
 
     public func getAIChatNativeConfigValues(params: Any, message: UserScriptMessage) -> Encodable? {

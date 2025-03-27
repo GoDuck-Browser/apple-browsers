@@ -199,10 +199,6 @@ class MockAIChatPreferencesStorage: AIChatPreferencesStorage {
         showShortcutInApplicationMenuSubject.eraseToAnyPublisher()
     }
 
-    var shouldDisplayToolbarShortcutPublisher: AnyPublisher<Bool, Never> {
-        shouldDisplayToolbarShortcutSubject.eraseToAnyPublisher()
-    }
-
     func updateApplicationMenuShortcutDisplay(to value: Bool) {
         showShortcutInApplicationMenu = value
     }

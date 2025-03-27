@@ -20,11 +20,7 @@ import Combine
 
 protocol AIChatPreferencesStorage {
     var showShortcutInApplicationMenu: Bool { get set }
-    var shouldDisplayToolbarShortcut: Bool { get set }
-
     var showShortcutInApplicationMenuPublisher: AnyPublisher<Bool, Never> { get }
-    var shouldDisplayToolbarShortcutPublisher: AnyPublisher<Bool, Never> { get }
-
     func reset()
 }
 
@@ -37,39 +33,12 @@ struct DefaultAIChatPreferencesStorage: AIChatPreferencesStorage {
         userDefaults.showAIChatShortcutInApplicationMenuPublisher
     }
 
-    var shouldDisplayToolbarShortcutPublisher: AnyPublisher<Bool, Never> {
-        notificationCenter.publisher(for: .PinnedViewsChanged)
-            .compactMap { notification -> PinnableView? in
-                guard let userInfo = notification.userInfo as? [String: Any],
-                      let viewType = userInfo[LocalPinningManager.pinnedViewChangedNotificationViewTypeKey] as? String,
-                      let view = PinnableView(rawValue: viewType) else {
-                    return nil
-                }
-                return view == .aiChat ? view : nil
-            }
-            .flatMap { view -> AnyPublisher<Bool, Never> in
-                return Just(self.pinningManager.isPinned(view)).eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
-    }
-
     init(userDefaults: UserDefaults = .standard,
          pinningManager: PinningManager = LocalPinningManager.shared,
          notificationCenter: NotificationCenter = .default) {
         self.userDefaults = userDefaults
         self.pinningManager = pinningManager
         self.notificationCenter = notificationCenter
-    }
-
-    var shouldDisplayToolbarShortcut: Bool {
-        get { pinningManager.isPinned(.aiChat) }
-        set {
-            if newValue {
-                pinningManager.pin(.aiChat)
-            } else {
-                pinningManager.unpin(.aiChat)
-            }
-        }
     }
 
     var showShortcutInApplicationMenu: Bool {
@@ -79,7 +48,6 @@ struct DefaultAIChatPreferencesStorage: AIChatPreferencesStorage {
 
     func reset() {
         userDefaults.showAIChatShortcutInApplicationMenu = UserDefaults.showAIChatShortcutInApplicationMenuDefaultValue
-        pinningManager.unpin(.aiChat)
     }
 }
 
