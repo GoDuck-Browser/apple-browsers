@@ -1,5 +1,5 @@
 //
-//  KeyValueFileStoreService.swift
+//  KeyValueFileStoreTestService.swift
 //  DuckDuckGo
 //
 //  Copyright © 2025 DuckDuckGo. All rights reserved.
@@ -20,8 +20,25 @@
 import Persistence
 import Foundation
 import Common
+import Core
 
-final class KeyValueFileStoreService {
+final class KeyValueFileStoreTestService {
+
+    let twoStepTest = KeyValueFileStoreTwoStepService()
+    let asyncTest = KeyValueFileStoreAsyncService()
+    let retryTest = KeyValueFileStoreRetryService()
+
+    func onForeground() {
+        twoStepTest.onForeground()
+    }
+
+    func onBackground() {
+        twoStepTest.onBackground()
+    }
+
+}
+
+final class KeyValueFileStoreTwoStepService {
 
     enum Event: Equatable {
         case appSupportDirAccessError
@@ -46,8 +63,22 @@ final class KeyValueFileStoreService {
     convenience init() {
 
         let eventHandling = EventMapping<Event>(mapping: { event, error, params, _ in
+            switch event {
 
-            // ToDo
+            case .appSupportDirAccessError:
+                Pixel.fire(pixel: .keyValueFileStoreSupportDirAccessError)
+            case .kvfsInitError:
+                Pixel.fire(pixel: .keyValueFileStoreInitError, error: error)
+            case .kvfsFirstAccess(success: let success):
+                Pixel.fire(pixel: .keyValueFileStoreFirstAccess(success: success),
+                           error: error)
+            case .kvfsSecondAccess(firstAccessStatus: let firstAccessStatus, secondAccessStatus: let secondAccessStatus):
+                Pixel.fire(pixel: .keyValueFileStoreSecondAccess(firstAccessStatus: firstAccessStatus,
+                                                                 secondAccessStatus: secondAccessStatus),
+                           error: error,
+                           withAdditionalParameters: params ?? [:])
+            }
+
         })
 
         guard let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
@@ -131,7 +162,16 @@ final class KeyValueFileStoreRetryService {
 
         let eventHandling = EventMapping<Event>(mapping: { event, error, params, _ in
 
-            // ToDo
+            switch event {
+
+            case .appSupportDirAccessError:
+                Pixel.fire(pixel: .keyValueFileStoreRetryDirAccessError)
+            case .kvfsInitError:
+                Pixel.fire(pixel: .keyValueFileStoreRetryInitError, error: error)
+            case .kvfsAccess(success: let success, delay: let delay):
+                Pixel.fire(pixel: .keyValueFileStoreRetryAccess(success: success, delay: delay),
+                           error: error)
+            }
         })
 
         guard let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
@@ -207,7 +247,15 @@ final class KeyValueFileStoreAsyncService {
 
         let eventHandling = EventMapping<Event>(mapping: { event, error, params, _ in
 
-            // ToDo
+            switch event {
+
+            case .appSupportDirAccessError:
+                Pixel.fire(pixel: .keyValueFileStoreAsyncDirAccessError)
+            case .kvfsInitError:
+                Pixel.fire(pixel: .keyValueFileStoreAsyncInitError, error: error)
+            case .kvfsAccess(success: let success):
+                Pixel.fire(pixel: .keyValueFileStoreAsyncFirstAccess(success: success), error: error)
+            }
         })
 
         guard let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {

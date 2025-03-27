@@ -135,7 +135,7 @@ struct Launching: LaunchingHandling {
                                crashCollectionService: crashCollectionService,
                                maliciousSiteProtectionService: maliciousSiteProtectionService,
                                statisticsService: statisticsService,
-                               keyValueFileStoreService: KeyValueFileStoreService())
+                               keyValueFileStoreTestService: KeyValueFileStoreTestService())
 
         // MARK: - Final Configuration
         // Complete the configuration process and set up the main window

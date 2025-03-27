@@ -1,5 +1,5 @@
 //
-//  KeyValueFileStoreServiceTests.swift
+//  KeyValueFileStoreTwoStepServiceTests.swift
 //  DuckDuckGo
 //
 //  Copyright © 2025 DuckDuckGo. All rights reserved.
@@ -22,7 +22,7 @@ import Common
 import XCTest
 @testable import DuckDuckGo
 
-class KeyValueFileStoreServiceTests: XCTestCase {
+class KeyValueFileStoreTwoStepServiceTests: XCTestCase {
 
     private enum Error: Swift.Error {
         case initError
@@ -64,7 +64,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
 
     func testWhenNilIsReturnedThenNoEventIsCalled() {
 
-        let service = KeyValueFileStoreService(keyValueFilesStoreFactory: {
+        let service = KeyValueFileStoreTwoStepService(keyValueFilesStoreFactory: {
             nil
         }, eventHandling: .init(mapping: { event, _, _, _ in
             XCTFail("Event received: \(event)")
@@ -80,13 +80,13 @@ class KeyValueFileStoreServiceTests: XCTestCase {
 
         let e = expectation(description: "Error raised")
 
-        _ = KeyValueFileStoreService(keyValueFilesStoreFactory: {
+        _ = KeyValueFileStoreTwoStepService(keyValueFilesStoreFactory: {
             try MockKeyValueFileStore(throwOnInit: Error.initError)
         }, eventHandling: .init(mapping: { event, error, _, _ in
             e.fulfill()
 
             XCTAssertEqual(event, .kvfsInitError)
-            XCTAssertEqual(error as? KeyValueFileStoreServiceTests.Error, Error.initError)
+            XCTAssertEqual(error as? KeyValueFileStoreTwoStepServiceTests.Error, Error.initError)
         }))
 
         waitForExpectations(timeout: 1)
@@ -97,7 +97,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
         let firstEventFired = expectation(description: "1st Event Fired")
         let secondEventFired = expectation(description: "2nd Event Fired")
 
-        let service = KeyValueFileStoreService(keyValueFilesStoreFactory: {
+        let service = KeyValueFileStoreTwoStepService(keyValueFilesStoreFactory: {
             try MockKeyValueFileStore()
         }, eventHandling: .init(mapping: { event, error, params, _ in
             switch event {
@@ -112,7 +112,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
                 XCTAssertNil(error)
                 XCTAssertEqual(firstStatus, true)
                 XCTAssertEqual(secondStatus, true)
-                XCTAssertEqual(params?[KeyValueFileStoreService.Constants.pixelSourceParam], "foreground")
+                XCTAssertEqual(params?[KeyValueFileStoreTwoStepService.Constants.pixelSourceParam], "foreground")
             }
         }))
 
@@ -134,7 +134,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
         let firstEventFired = expectation(description: "1st Event Fired")
         let secondEventFired = expectation(description: "2nd Event Fired")
 
-        let service = KeyValueFileStoreService(keyValueFilesStoreFactory: {
+        let service = KeyValueFileStoreTwoStepService(keyValueFilesStoreFactory: {
             store
         }, eventHandling: .init(mapping: { event, error, params, _ in
             switch event {
@@ -142,14 +142,14 @@ class KeyValueFileStoreServiceTests: XCTestCase {
                 XCTFail("Unexpected event")
             case .kvfsFirstAccess(let status):
                 firstEventFired.fulfill()
-                XCTAssertEqual(error as? KeyValueFileStoreServiceTests.Error, Error.readError)
+                XCTAssertEqual(error as? KeyValueFileStoreTwoStepServiceTests.Error, Error.readError)
                 XCTAssertEqual(status, false)
             case .kvfsSecondAccess(let firstStatus, let secondStatus):
                 secondEventFired.fulfill()
                 XCTAssertNil(error)
                 XCTAssertEqual(firstStatus, false)
                 XCTAssertEqual(secondStatus, true)
-                XCTAssertEqual(params?[KeyValueFileStoreService.Constants.pixelSourceParam], "background")
+                XCTAssertEqual(params?[KeyValueFileStoreTwoStepService.Constants.pixelSourceParam], "background")
             }
         }))
 
@@ -170,7 +170,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
         let firstEventFired = expectation(description: "1st Event Fired")
         let secondEventFired = expectation(description: "2nd Event Fired")
 
-        let service = KeyValueFileStoreService(keyValueFilesStoreFactory: {
+        let service = KeyValueFileStoreTwoStepService(keyValueFilesStoreFactory: {
             store
         }, eventHandling: .init(mapping: { event, error, _, _ in
             switch event {
@@ -178,11 +178,11 @@ class KeyValueFileStoreServiceTests: XCTestCase {
                 XCTFail("Unexpected event")
             case .kvfsFirstAccess(let status):
                 firstEventFired.fulfill()
-                XCTAssertEqual(error as? KeyValueFileStoreServiceTests.Error, Error.readError)
+                XCTAssertEqual(error as? KeyValueFileStoreTwoStepServiceTests.Error, Error.readError)
                 XCTAssertEqual(status, false)
             case .kvfsSecondAccess(let firstStatus, let secondStatus):
                 secondEventFired.fulfill()
-                XCTAssertEqual(error as? KeyValueFileStoreServiceTests.Error, Error.readError)
+                XCTAssertEqual(error as? KeyValueFileStoreTwoStepServiceTests.Error, Error.readError)
                 XCTAssertEqual(firstStatus, false)
                 XCTAssertEqual(secondStatus, false)
             }
@@ -219,7 +219,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
             e.fulfill()
 
             XCTAssertEqual(event, .kvfsInitError)
-            XCTAssertEqual(error as? KeyValueFileStoreServiceTests.Error, Error.initError)
+            XCTAssertEqual(error as? KeyValueFileStoreTwoStepServiceTests.Error, Error.initError)
         }))
 
         waitForExpectations(timeout: 1)
@@ -292,7 +292,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
         upperLimit.isInverted = true
 
         let store = try MockKeyValueFileStore()
-        store.throwOnSet = KeyValueFileStoreServiceTests.Error.readError
+        store.throwOnSet = KeyValueFileStoreTwoStepServiceTests.Error.readError
 
         let service = KeyValueFileStoreRetryService(keyValueFilesStoreFactory: {
             store
@@ -306,7 +306,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
                 eventFired.fulfill()
 
                 if delay == 0 {
-                    XCTAssertEqual(error as? KeyValueFileStoreServiceTests.Error, Error.readError)
+                    XCTAssertEqual(error as? KeyValueFileStoreTwoStepServiceTests.Error, Error.readError)
                     XCTAssertEqual(status, false)
                     XCTAssertEqual(delay, 0)
 
@@ -334,7 +334,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
         upperLimit.isInverted = true
 
         let store = try MockKeyValueFileStore()
-        store.throwOnSet = KeyValueFileStoreServiceTests.Error.readError
+        store.throwOnSet = KeyValueFileStoreTwoStepServiceTests.Error.readError
 
         var expectedDelay = 0
 
@@ -348,7 +348,7 @@ class KeyValueFileStoreServiceTests: XCTestCase {
                 XCTFail("Unexpected event")
             case .kvfsAccess(let status, let delay):
                 eventFired.fulfill()
-                XCTAssertEqual(error as? KeyValueFileStoreServiceTests.Error, Error.readError)
+                XCTAssertEqual(error as? KeyValueFileStoreTwoStepServiceTests.Error, Error.readError)
                 XCTAssertEqual(status, false)
                 XCTAssertEqual(delay, expectedDelay)
 

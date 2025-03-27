@@ -108,7 +108,7 @@ struct Foreground: ForegroundHandling {
             }
         )
 
-        services.keyValueFileStoreService.onForeground()
+        services.keyValueFileStoreTestService.onForeground()
         services.vpnService.resume()
         services.configurationService.resume()
         services.reportingService.resume()

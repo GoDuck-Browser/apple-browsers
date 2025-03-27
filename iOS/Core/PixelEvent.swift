@@ -69,6 +69,10 @@ extension Pixel {
         case keyValueFileStoreFirstAccess(success: Bool)
         case keyValueFileStoreSecondAccess(firstAccessStatus: Bool, secondAccessStatus: Bool)
 
+        case keyValueFileStoreAsyncDirAccessError
+        case keyValueFileStoreAsyncInitError
+        case keyValueFileStoreAsyncFirstAccess(success: Bool)
+
         case keyValueFileStoreRetryDirAccessError
         case keyValueFileStoreRetryInitError
         case keyValueFileStoreRetryAccess(success: Bool, delay: Int)
@@ -1115,6 +1119,10 @@ extension Pixel.Event {
         case .keyValueFileStoreInitError: return "m_test_key_value_file_store_init_error"
         case .keyValueFileStoreFirstAccess(let success): return "m_test_key_value_file_store_first_acccess_\(success ? "success" : "failed")"
         case .keyValueFileStoreSecondAccess(let firstAccessStatus, let secondAccessStatus): return "m_test_key_value_file_store_first_acccess_\(firstAccessStatus ? "success" : "failed")_second_acccess_\(secondAccessStatus ? "success" : "failed")"
+
+        case .keyValueFileStoreAsyncDirAccessError: return "m_test_async_key_value_file_store_support_dir_access_error"
+        case .keyValueFileStoreAsyncInitError: return "m_test_async_key_value_file_store_init_error"
+        case .keyValueFileStoreAsyncFirstAccess(let success): return "m_test_async_key_value_file_store_first_acccess_\(success ? "success" : "failed")"
 
         case .keyValueFileStoreRetryDirAccessError: return "m_test_retry_key_value_file_store_support_dir_access_error"
         case .keyValueFileStoreRetryInitError: return "m_test_retry_key_value_file_store_init_error"
