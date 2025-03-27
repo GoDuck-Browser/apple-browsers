@@ -72,7 +72,7 @@ final class PinnedTabsManagerProviderTests: XCTestCase {
         tabsPreferences.pinnedTabsMode = .separate
         let tabCollectionViewModel = TabCollectionViewModel(tabCollection: TabCollection(), pinnedTabsManagerProvider: provider)
         _ = WindowsManager.openNewWindow(with: tabCollectionViewModel)
-        tabCollectionViewModel.pinnedTabsManager!.pin(Tab())
+        tabCollectionViewModel.pinnedTabsManager!.pin(Tab(content: .none))
 
         XCTAssertFalse(provider.arePinnedTabsEmpty)
     }
@@ -82,7 +82,7 @@ final class PinnedTabsManagerProviderTests: XCTestCase {
         tabsPreferences.pinnedTabsMode = .shared
         let tabCollectionViewModel = TabCollectionViewModel(tabCollection: TabCollection(), pinnedTabsManagerProvider: provider)
         _ = WindowsManager.openNewWindow(with: tabCollectionViewModel)
-        tabCollectionViewModel.pinnedTabsManager!.pin(Tab())
+        tabCollectionViewModel.pinnedTabsManager!.pin(Tab(content: .none))
 
         XCTAssertFalse(provider.arePinnedTabsEmpty)
     }

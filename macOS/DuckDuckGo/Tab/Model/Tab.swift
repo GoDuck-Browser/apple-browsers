@@ -963,7 +963,7 @@ protocol NewWindowPolicyDecisionMaker {
             case .newtab, .bookmarks, .settings:
 #if DEBUG
                 // prevent auto loading when running Unit Tests
-                guard NSApp.runType.requiresEnvironment else { return false }
+                guard AppVersion.runType.requiresEnvironment else { return false }
 #endif
                 return webView.url == nil // navigate to empty pages loaded for duck:// urls
             default:
@@ -1206,7 +1206,7 @@ extension Tab/*: NavigationResponder*/ { // to be moved to Tab+Navigation.swift
     func willStart(_ navigation: Navigation) {
 #if DEBUG
         // prevent real navigation actions when running Unit Tests
-        if NSApp.runType == .unitTests
+        if AppVersion.runType == .unitTests
             && !(navigation.url.isDuckURLScheme || self.webView.configuration.urlSchemeHandler(forURLScheme: "http") != nil) {
             fatalError("The Unit Test is causing a real navigation action")
         }
