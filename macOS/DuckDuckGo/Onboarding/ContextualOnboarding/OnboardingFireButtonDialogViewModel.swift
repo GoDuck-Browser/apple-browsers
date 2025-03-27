@@ -47,9 +47,4 @@ public class OnboardingFireButtonDialogViewModel: ObservableObject {
         onboardingPixelReporter.measureLastDialogShown()
     }
 
-    @MainActor
-    func tryFireButton() {
-        onFireButtonPressed()
-        onboardingPixelReporter.measureFireButtonTryIt()
-    }
 }

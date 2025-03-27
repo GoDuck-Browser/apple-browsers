@@ -199,26 +199,6 @@ final class ContextualDaxDialogsFactoryTests: XCTestCase {
         XCTAssertTrue(onGotItPressedRun)
     }
 
-    @MainActor
-    func testWhenMakeViewForTryFireButtonAndFireButtonIsPressedThenOnFireButtonPressedActionIsCalled() throws {
-        // GIVEN
-        var onFireButtonRun = false
-        let dialogType = ContextualDialogType.tryFireButton
-        let onFireButtonPressed = { onFireButtonRun = true }
-
-        // WHEN
-        let result = factory.makeView(for: dialogType, delegate: delegate, onDismiss: {}, onGotItPressed: {}, onFireButtonPressed: onFireButtonPressed)
-
-        // THEN
-        let view = try XCTUnwrap(find(OnboardingFireDialog.self, in: result))
-
-        // WHEN
-        view.viewModel.tryFireButton()
-
-        // THEN
-        XCTAssertTrue(onFireButtonRun)
-    }
-
     func testWhenMakeViewForTryFireButtonAndSkipButtonIsPressedThenmeasureFireButtonSkippedCalled() throws {
         // GIVEN
         let dialogType = ContextualDialogType.highFive

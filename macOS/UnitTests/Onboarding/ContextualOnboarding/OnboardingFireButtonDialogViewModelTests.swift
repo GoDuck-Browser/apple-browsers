@@ -64,12 +64,4 @@ final class OnboardingFireButtonDialogViewModelTests: XCTestCase {
         XCTAssertTrue(onGotItPressedCalled)
     }
 
-    @MainActor
-    func testWhenTryFireButtonThenOnFireButtonPressedCalledAndPixelSent() throws {
-        viewModel.tryFireButton()
-
-        XCTAssertTrue(onFireButtonPressedCalled)
-        XCTAssertTrue(reporter.measureFireButtonTryItCalled)
-    }
-
 }
