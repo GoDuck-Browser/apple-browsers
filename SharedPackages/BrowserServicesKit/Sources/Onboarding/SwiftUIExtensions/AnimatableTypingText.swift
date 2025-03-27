@@ -72,8 +72,6 @@ public struct AnimatableTypingText: View {
             }
         }
         .onChange(of: startAnimating.wrappedValue, perform: { shouldAnimate in
-            print("*** should animate", startAnimating.wrappedValue, skipAnimation.wrappedValue)
-
             if skipAnimation.wrappedValue {
                 model.skip()
                 return
@@ -86,7 +84,6 @@ public struct AnimatableTypingText: View {
             }
         })
         .onChange(of: skipAnimation.wrappedValue, perform: { shouldSkip in
-            print("*** should skip", startAnimating.wrappedValue, skipAnimation.wrappedValue)
             if shouldSkip {
                 model.skip()
             }
