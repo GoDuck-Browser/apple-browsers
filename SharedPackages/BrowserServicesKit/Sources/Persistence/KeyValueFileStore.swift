@@ -31,19 +31,6 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
         case writeFailure(Swift.Error)
         case wrongFormat
         case fileAlreadyInUse
-
-        var code: Int {
-            switch self {
-            case .readFailure:
-                return 0
-            case .writeFailure:
-                return 1
-            case .wrongFormat:
-                return 2
-            case .fileAlreadyInUse:
-                return 3
-            }
-        }
     }
 
     private let location: URL
@@ -161,5 +148,38 @@ public class KeyValueFileStore: ThrowingKeyValueStoring {
         }
 
         openedFiles.remove(fileURL)
+    }
+}
+
+extension KeyValueFileStore.Error: CustomNSError {
+
+    public static var errorDomain: String {
+        "Persistence"
+    }
+
+    /// The error code within the given domain.
+    var errorCode: Int {
+        switch self {
+        case .readFailure:
+            return 0
+        case .writeFailure:
+            return 1
+        case .wrongFormat:
+            return 2
+        case .fileAlreadyInUse:
+            return 3
+        }
+    }
+
+    /// The user-info dictionary.
+    var errorUserInfo: [String: Any] {
+        switch self {
+        case .readFailure(let error):
+            return [NSUnderlyingErrorKey: error]
+        case .writeFailure(let error):
+            return [NSUnderlyingErrorKey: error]
+        case .wrongFormat, .fileAlreadyInUse:
+            return [:]
+        }
     }
 }
