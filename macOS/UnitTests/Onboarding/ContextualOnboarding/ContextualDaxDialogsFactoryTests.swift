@@ -199,12 +199,37 @@ final class ContextualDaxDialogsFactoryTests: XCTestCase {
         XCTAssertTrue(onGotItPressedRun)
     }
 
+    @MainActor
+    func testWhenMakeViewForTryFireButtonAndFireButtonIsPressedThenOnFireButtonPressedActionIsCalled() throws {
+        // GIVEN
+        var onFireButtonRun = false
+        let dialogType = ContextualDialogType.tryFireButton
+        let onFireButtonPressed = { onFireButtonRun = true }
+
+        let mainViewController = MainViewController(tabCollectionViewModel: TabCollectionViewModel(tabCollection: TabCollection(tabs: [])), autofillPopoverPresenter: DefaultAutofillPopoverPresenter())
+        let mainWindowController = MainWindowController(mainViewController: mainViewController, popUp: false)
+        mainWindowController.window = MockWindow()
+        WindowControllersManager.shared.lastKeyMainWindowController = mainWindowController
+
+        // WHEN
+        let result = factory.makeView(for: dialogType, delegate: delegate, onDismiss: {}, onGotItPressed: {}, onFireButtonPressed: onFireButtonPressed)
+
+        // THEN
+        let view = try XCTUnwrap(find(OnboardingFireDialog.self, in: result))
+
+        // WHEN
+        view.viewModel.tryFireButton()
+
+        // THEN
+        XCTAssertTrue(onFireButtonRun)
+    }
+
     func testWhenMakeViewForTryFireButtonAndSkipButtonIsPressedThenmeasureFireButtonSkippedCalled() throws {
         // GIVEN
         let dialogType = ContextualDialogType.highFive
 
         // WHEN
-        let result = factory.makeView(for: dialogType, delegate: delegate, onDismiss: {}, onGotItPressed: {}, onFireButtonPressed: {})
+        _=factory.makeView(for: dialogType, delegate: delegate, onDismiss: {}, onGotItPressed: {}, onFireButtonPressed: {})
 
         // THEN
         XCTAssertTrue(reporter.measureLastDialogShownCalled)
