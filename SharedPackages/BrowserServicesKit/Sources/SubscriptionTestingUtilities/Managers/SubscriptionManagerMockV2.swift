@@ -20,6 +20,7 @@ import Foundation
 import Common
 @testable import Networking
 @testable import Subscription
+import NetworkingTestingUtils
 
 public final class SubscriptionManagerMockV2: SubscriptionManagerV2 {
 
@@ -225,6 +226,7 @@ public final class SubscriptionManagerMockV2: SubscriptionManagerV2 {
         case .failure(let error):
             throw error
         }
+    }
 
     public func isSubscriptionPresent() -> Bool {
         resultSubscription != nil
