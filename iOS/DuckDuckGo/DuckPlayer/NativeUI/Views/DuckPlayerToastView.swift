@@ -129,10 +129,10 @@ struct DuckPlayerToastView: View {
     private var yPosition: CGFloat {
         switch position {
         case .top:
-            let basePosition = Constants.bottomPadding
+            let basePosition = Constants.verticalPadding
             return offset.map { basePosition + $0 } ?? basePosition
         case .bottom:
-            let baseOffset = -Constants.bottomPadding
+            let baseOffset = -Constants.verticalPadding
             return offset.map { baseOffset + $0 } ?? baseOffset
         }
     }
