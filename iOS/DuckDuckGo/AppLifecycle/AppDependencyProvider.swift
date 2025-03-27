@@ -83,7 +83,8 @@ final class AppDependencyProvider: DependencyProvider {
     let subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
     var subscriptionManager: (any SubscriptionManager)?
     var subscriptionManagerV2: (any SubscriptionManagerV2)?
-
+    let isAuthV2Enabled: Bool
+    
     let vpnFeatureVisibility: DefaultNetworkProtectionVisibility
     let networkProtectionKeychainTokenStore: NetworkProtectionKeychainTokenStore
     let networkProtectionTunnelController: NetworkProtectionTunnelController
@@ -94,7 +95,6 @@ final class AppDependencyProvider: DependencyProvider {
     let serverInfoObserver: ConnectionServerInfoObserver = ConnectionServerInfoObserverThroughSession()
     let vpnSettings = VPNSettings(defaults: .networkProtectionGroupDefaults)
     let persistentPixel: PersistentPixelFiring = PersistentPixel()
-    let isAuthV2Enabled: Bool
 
     private init() {
         let featureFlaggerOverrides = FeatureFlagLocalOverrides(keyValueStore: UserDefaults(suiteName: FeatureFlag.localOverrideStoreName)!,
