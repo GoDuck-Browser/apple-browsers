@@ -45,7 +45,7 @@ final class OnboardingNavigationDelegateTests: XCTestCase {
             return .ok(.html(Self.testHtml))
         }]
 
-        tab = Tab(content: .none)
+        tab = Tab(content: .none, webViewConfiguration: webViewConfiguration)
     }
 
     override func tearDownWithError() throws {
