@@ -97,11 +97,11 @@ public enum DuckPlayerContainer {
         @State private var sheetHeight = 0.0
         let hasBackground: Bool
         let content: (PresentationMetrics) -> Content
-        let onDismiss: () -> Void
+        let onDismiss: (Bool) -> Void
         let onPresentDuckPlayer: () -> Void
 
         public init(
-            viewModel: ViewModel, hasBackground: Bool = true, onDismiss: @escaping () -> Void, onPresentDuckPlayer: @escaping () -> Void,
+            viewModel: ViewModel, hasBackground: Bool = true, onDismiss: @escaping (Bool) -> Void, onPresentDuckPlayer: @escaping () -> Void,
             @ViewBuilder content: @escaping (PresentationMetrics) -> Content
         ) {
             self.viewModel = viewModel
@@ -170,7 +170,7 @@ private struct SheetView<Content: View>: View {
     let containerHeight: Double
     let content: (DuckPlayerContainer.PresentationMetrics) -> Content
     let onHeightChange: (Double) -> Void
-    let onDismiss: () -> Void
+    let onDismiss: (Bool) -> Void
     let onPresentDuckPlayer: () -> Void
 
     @State private var sheetHeight: Double = 0
@@ -246,7 +246,7 @@ private struct SheetView<Content: View>: View {
                                         let offsetY = value.translation.height
 
                                         if offsetY > DuckPlayerContainer.Constants.dragThreshold || value.velocity.height > 50 {
-                                            onDismiss()
+                                            onDismiss(false) // User dismissed the pill
                                         } else if offsetY < -DuckPlayerContainer.Constants.dragThreshold || value.velocity.height < -50 {
                                             isAnimatingToTop = true
 

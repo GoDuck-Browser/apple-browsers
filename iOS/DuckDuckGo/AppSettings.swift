@@ -93,6 +93,7 @@ protocol AppSettings: AnyObject, AppDebugSettings {
     var duckPlayerNativeYoutubeMode: NativeDuckPlayerYoutubeMode { get set }
     var duckPlayerNativeUIPrimingModalPresentationEventCount: Int { get set }
     var duckPlayerNativeUIPrimingModalTimeSinceLastPresented: Int { get set }
+    var duckPlayerPillDismissCount: Int { get set }
 }
 
 protocol AppDebugSettings {

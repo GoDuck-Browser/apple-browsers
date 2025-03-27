@@ -27,7 +27,7 @@ protocol DuckPlayerNativeUIPresenting {
     var videoPlaybackRequest: PassthroughSubject<(videoID: String, timestamp: TimeInterval?), Never> { get }
 
     @MainActor func presentPill(for videoID: String, in hostViewController: TabViewController, timestamp: TimeInterval?)
-    @MainActor func dismissPill(reset: Bool, animated: Bool)
+    @MainActor func dismissPill(reset: Bool, animated: Bool, programatic: Bool)
     @MainActor func presentDuckPlayer(
         videoID: String, source: DuckPlayer.VideoNavigationSource, in hostViewController: TabViewController, title: String?, timestamp: TimeInterval?
     ) -> (navigation: PassthroughSubject<URL, Never>, settings: PassthroughSubject<Void, Never>)
@@ -58,6 +58,11 @@ final class DuckPlayerNativeUIPresenter {
 
         // This defines the logic for how often long the modal can be shown (once per day)
         static let primingModalTimeSinceLastPresentedThreshold: Int = 86400  // 24h
+
+        static let bottomPadding: CGFloat = 100
+        static let height: CGFloat = 50
+        static let fadeAnimationDuration: TimeInterval = 0.2
+        static let visibleDuration: TimeInterval = 3.0
     }
 
     /// The container view model for the entry pill
@@ -153,8 +158,8 @@ final class DuckPlayerNativeUIPresenter {
             return DuckPlayerContainer.Container(
                 viewModel: containerViewModel,
                 hasBackground: false,
-                onDismiss: { [weak self] in
-                    self?.dismissPill()
+                onDismiss: { [weak self] programatic in
+                    self?.dismissPill(programatic: programatic)
                 },
                 onPresentDuckPlayer: { [weak self] in
                     guard let self = self else { return }
@@ -182,8 +187,8 @@ final class DuckPlayerNativeUIPresenter {
             return DuckPlayerContainer.Container(
                 viewModel: containerViewModel,
                 hasBackground: false,
-                onDismiss: { [weak self] in
-                    self?.dismissPill()
+                onDismiss: { [weak self] programatic in
+                    self?.dismissPill(programatic: programatic)
                 },
                 onPresentDuckPlayer: { [weak self] in
                     guard let self = self else { return }
@@ -327,6 +332,31 @@ final class DuckPlayerNativeUIPresenter {
             .store(in: &playerCancellables)
     }
 
+    @MainActor
+    private func displayToast(with message: AttributedString, buttonTitle: String, onButtonTapped: (() -> Void)?) {
+        DuckPlayerToastView.present(
+            message: message,
+            buttonTitle: buttonTitle,
+            onButtonTapped: onButtonTapped
+        )
+    }
+    
+    @MainActor
+    func presentDismissCountToast() {
+        var message = AttributedString(UserText.duckPlayerNativePillDismissCountToastMessage)
+        message.foregroundColor = Color(designSystemColor: .textPrimary)
+        displayToast(
+            with: message,
+            buttonTitle: UserText.duckPlayerNativePillDismissCountToastMessageButton
+        ) {
+            NotificationCenter.default.post(
+                name: .settingsDeepLinkNotification,
+                object: SettingsViewModel.SettingsDeepLinkSection.duckPlayer,
+                userInfo: nil
+            )
+        }
+    }
+
 }
 
 extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
@@ -428,10 +458,20 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
 
     /// Dismisses the currently presented entry pill
     @MainActor
-    func dismissPill(reset: Bool = false, animated: Bool = true) {
+    func dismissPill(reset: Bool = false, animated: Bool = true, programatic: Bool = true) {
         // First reset constraints immediately
         resetWebViewConstraint()
-        
+
+        // If was dismissed by the user, increment the dismiss count
+        if !programatic {
+            appSettings.duckPlayerPillDismissCount += 1
+
+            if appSettings.duckPlayerPillDismissCount >= 3 {
+                // Present toast reminding the user that they can disable DuckPlayer in settings
+                presentDismissCountToast()
+            }
+        }
+
         // Then dismiss the view model
         containerViewModel?.dismiss()
 
@@ -456,6 +496,9 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
 
         // Increase the presentation event count
         appSettings.duckPlayerNativeUIPrimingModalPresentationEventCount += 1
+
+        // Reset the dismiss count
+        appSettings.duckPlayerPillDismissCount = 0
 
         let navigationRequest = PassthroughSubject<URL, Never>()
         let settingsRequest = PassthroughSubject<Void, Never>()

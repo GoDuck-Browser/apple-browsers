@@ -496,6 +496,9 @@ public class AppUserDefaults: AppSettings {
     @UserDefaultsWrapper(key: .duckPlayerNativeUIPrimingModalTimeSinceLastPresented, defaultValue: 0)
     var duckPlayerNativeUIPrimingModalTimeSinceLastPresented: Int
 
+    @UserDefaultsWrapper(key: .duckPlayerPillDismissCount, defaultValue: 0)
+    var duckPlayerPillDismissCount: Int
+
     @UserDefaultsWrapper(key: .debugOnboardingHighlightsEnabledKey, defaultValue: false)
     var onboardingHighlightsEnabled: Bool
 
