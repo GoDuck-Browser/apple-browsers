@@ -32,18 +32,19 @@ final class FullscreenController {
         guard let window = window, window.styleMask.contains(.fullScreen) else {
             return
         }
-        shouldPreventFullscreenExit = false
 
         // Exit full screen
         window.toggleFullScreen(nil)
     }
 
-    func handleFullscreenExitDecision(tagName: String?, window: NSWindow?) {
-        if let tag = tagName, ["INPUT", "TEXTAREA", "DIV"].contains(tag) {
-            // Website is likely handling ESC. Staying in full-screen
+    func handleEscapePress(handledByWebsite: Bool, window: NSWindow?) {
+        if handledByWebsite {
+            // Website is handling ESC. Stay in fullscreen.
         } else {
-            // Website is not handling ESC. Exiting full-screen manually
             manuallyExitFullscreen(window: window)
+
+            // Reset the flag
+            shouldPreventFullscreenExit = false
         }
     }
 }

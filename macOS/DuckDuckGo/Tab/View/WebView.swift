@@ -186,13 +186,15 @@ final class WebView: WKWebView {
            let window,
            window.styleMask.contains(.fullScreen),
            let fullscreenController = (window.windowController as? MainWindowController)?.fullscreenController {
+
             fullscreenController.setShouldPreventFullscreenExit(true)
-            self.evaluateJavaScript("document.activeElement && document.activeElement.tagName",
-                                    completionHandler: { [weak self] (result, error) in
-                guard let self = self else { return }
-                let tagName = result as? String
-                fullscreenController.handleFullscreenExitDecision(tagName: tagName, window: self.window)
-            })
+
+            evaluateIfWebsiteHandlesEscape { [weak self] handledByWebsite in
+                guard let self = self,
+                      let fullscreenController = (self.window?.windowController as? MainWindowController)?.fullscreenController else { return }
+
+                fullscreenController.handleEscapePress(handledByWebsite: handledByWebsite, window: self.window)
+            }
         }
 
         super.keyDown(with: event)
@@ -400,6 +402,25 @@ extension WebView /* _WKFindDelegate */ {
         if let findInPageCompletionHandler {
             self.findInPageCompletionHandler = nil
             findInPageCompletionHandler(.notFound)
+        }
+    }
+
+}
+
+// MARK: - Escape Handling
+
+extension WebView {
+
+    func evaluateIfWebsiteHandlesEscape(completion: @escaping (_ handledByWebsite: Bool) -> Void) {
+        self.evaluateJavaScript("document.activeElement && document.activeElement.tagName") { result, error in
+            guard let tag = result as? String else {
+                // No active element = not handled
+                completion(false)
+                return
+            }
+
+            let handled = ["INPUT", "TEXTAREA", "DIV"].contains(tag)
+            completion(handled)
         }
     }
 
