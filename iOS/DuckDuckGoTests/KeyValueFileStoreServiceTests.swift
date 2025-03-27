@@ -1,5 +1,5 @@
 //
-//  KeyValueFileStoreTwoStepServiceTests.swift
+//  KeyValueFileStoreServiceTests.swift
 //  DuckDuckGo
 //
 //  Copyright © 2025 DuckDuckGo. All rights reserved.
@@ -124,9 +124,9 @@ class KeyValueFileStoreTwoStepServiceTests: XCTestCase {
         waitForExpectations(timeout: 1)
     }
 
-    func testWhenInitialFetchFailsEventIsRaisedAndSecondSuccessfulCheckReportsIt() {
+    func testWhenInitialFetchFailsEventIsRaisedAndSecondSuccessfulCheckReportsIt() throws {
 
-        let store = try! MockKeyValueFileStore()
+        let store = try MockKeyValueFileStore()
 
         // Throw on first read
         store.throwOnSet = Error.readError
@@ -160,9 +160,9 @@ class KeyValueFileStoreTwoStepServiceTests: XCTestCase {
         waitForExpectations(timeout: 1)
     }
 
-    func testWhenInitialAndSecondFetchFailEventsAreRaised() {
+    func testWhenInitialAndSecondFetchFailEventsAreRaised() throws {
 
-        let store = try! MockKeyValueFileStore()
+        let store = try MockKeyValueFileStore()
 
         // Throw on first read
         store.throwOnSet = Error.readError
@@ -355,7 +355,7 @@ class KeyValueFileStoreTwoStepServiceTests: XCTestCase {
                 if delay == 0 {
                     expectedDelay = 1
                 } else {
-                    expectedDelay = expectedDelay * 2
+                    expectedDelay *= 2
                 }
             }
 
