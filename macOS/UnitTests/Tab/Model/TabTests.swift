@@ -34,6 +34,7 @@ final class TabTests: XCTestCase {
     }
     let urls = URLs()
 
+    var tab: Tab!
     var contentBlockingMock: ContentBlockingMock!
     var privacyFeaturesMock: AnyPrivacyFeatures!
     var privacyConfiguration: MockPrivacyConfiguration {
@@ -62,6 +63,7 @@ final class TabTests: XCTestCase {
     }
 
     override func tearDown() {
+        tab = nil
         TestTabExtensionsBuilder.shared = .default
         contentBlockingMock = nil
         privacyFeaturesMock = nil
@@ -74,7 +76,7 @@ final class TabTests: XCTestCase {
     // MARK: - Tab Content
 
     @MainActor func testWhenSettingURLThenTabTypeChangesToStandard() {
-        let tab = Tab(content: .settings(pane: .autofill))
+        tab = Tab(content: .settings(pane: .autofill), webViewConfiguration: webViewConfiguration)
         XCTAssertEqual(tab.content, .settings(pane: .autofill))
 
         tab.url = URL.duckDuckGo
@@ -84,16 +86,16 @@ final class TabTests: XCTestCase {
     // MARK: - Equality
 
     @MainActor func testWhenTabsAreIdenticalThenTheyAreEqual() {
-        let tab = Tab()
+        tab = Tab(content: .none, webViewConfiguration: webViewConfiguration)
         let tab2 = tab
 
         XCTAssert(tab == tab2)
     }
 
     @MainActor func testWhenTabsArentIdenticalThenTheyArentEqual() {
-        let tab = Tab()
+        tab = Tab(content: .none, webViewConfiguration: webViewConfiguration)
         tab.url = URL.duckDuckGo
-        let tab2 = Tab()
+        let tab2 = Tab(content: .none, webViewConfiguration: webViewConfiguration)
         tab2.url = URL.duckDuckGo
 
         XCTAssert(tab != tab2)
@@ -102,7 +104,7 @@ final class TabTests: XCTestCase {
     // MARK: - Dialogs
 
     @MainActor func testWhenAlertDialogIsShowingChangingURLClearsDialog() {
-        let tab = Tab()
+        tab = Tab(content: .none, webViewConfiguration: webViewConfiguration)
         tab.url = .duckDuckGo
         let webViewMock = WebViewMock()
         let frameInfo = WKFrameInfoMock(webView: webViewMock, securityOrigin: WKSecurityOriginMock.new(url: .duckDuckGo), request: URLRequest(url: .duckDuckGo), isMainFrame: true)
@@ -114,7 +116,7 @@ final class TabTests: XCTestCase {
 
     @MainActor func testWhenDownloadDialogIsShowingChangingURLDoesNOTClearDialog() {
         // GIVEN
-        let tab = Tab(content: .none, extensionsBuilder: TestTabExtensionsBuilder(load: [DownloadsTabExtension.self]))
+        tab = Tab(content: .none, webViewConfiguration: webViewConfiguration, extensionsBuilder: TestTabExtensionsBuilder(load: [DownloadsTabExtension.self]))
         tab.url = .duckDuckGo
         DownloadsPreferences(persistor: DownloadsPreferencesUserDefaultsPersistor()).alwaysRequestDownloadLocation = true
         tab.webView(WebViewMock(), saveDataToFile: Data(), suggestedFilename: "anything", mimeType: "application/pdf", originatingURL: .duckDuckGo)
@@ -139,7 +141,7 @@ final class TabTests: XCTestCase {
 
     @MainActor
     func testCanGoBack() throws {
-        let tab = Tab(content: .none, webViewConfiguration: webViewConfiguration, privacyFeatures: privacyFeaturesMock)
+        tab = Tab(content: .none, webViewConfiguration: webViewConfiguration, privacyFeatures: privacyFeaturesMock)
 
         var eCantGoBack = expectation(description: "canGoBack: false")
         var eCanGoBack: XCTestExpectation!
@@ -222,7 +224,7 @@ final class TabTests: XCTestCase {
             }
         }}
 
-        let tab = Tab(content: .none, webViewConfiguration: webViewConfiguration, privacyFeatures: privacyFeaturesMock, extensionsBuilder: extensionsBuilder)
+        tab = Tab(content: .none, webViewConfiguration: webViewConfiguration, privacyFeatures: privacyFeaturesMock, extensionsBuilder: extensionsBuilder)
 
         schemeHandler.middleware = [{ [urls] request in
             guard request.url!.path == urls.url1.path else { return nil }
@@ -298,7 +300,7 @@ final class TabTests: XCTestCase {
             }
         }}
 
-        let tab = Tab(content: .none, webViewConfiguration: webViewConfiguration, privacyFeatures: privacyFeaturesMock, extensionsBuilder: extensionsBuilder)
+        tab = Tab(content: .none, webViewConfiguration: webViewConfiguration, privacyFeatures: privacyFeaturesMock, extensionsBuilder: extensionsBuilder)
 
         schemeHandler.middleware = [{ [urls] request in
             guard request.url!.path == urls.url1.path else { return nil }
@@ -363,11 +365,11 @@ final class TabTests: XCTestCase {
         }
         builder.buildCalls = []
 
-        let tab = Tab(content: .newtab)
+        tab = Tab(content: .newtab, webViewConfiguration: webViewConfiguration)
         let faviconManagement = try XCTUnwrap(builder.buildCalls[safe: 0]?.1.faviconManagement)
         XCTAssertTrue(faviconManagement === FaviconManager.shared)
 
-        let burnerTab = Tab(content: .newtab, burnerMode: BurnerMode(isBurner: true))
+        _=Tab(content: .newtab, webViewConfiguration: webViewConfiguration, burnerMode: BurnerMode(isBurner: true))
         let burnerFaviconManagement = try XCTUnwrap(builder.buildCalls[safe: 1]?.1.faviconManagement)
         XCTAssertTrue(burnerFaviconManagement !== FaviconManager.shared)
     }
@@ -375,13 +377,13 @@ final class TabTests: XCTestCase {
     // MARK: - Control Center Media Session enabled
 
     @MainActor func testWhenRegularWindow_mediaSessionEnabled() {
-        let tab = Tab(content: .url(.empty, source: .ui), burnerMode: .regular)
+        tab = Tab(content: .url(.empty, source: .ui), webViewConfiguration: webViewConfiguration, burnerMode: .regular)
 
         XCTAssertTrue(tab.webView.configuration.preferences[.mediaSessionEnabled])
     }
 
     @MainActor func testWhenFireWindow_mediaSessionDisabled() {
-        let tab = Tab(content: .url(.empty, source: .ui), burnerMode: BurnerMode(isBurner: true))
+        tab = Tab(content: .url(.empty, source: .ui), webViewConfiguration: webViewConfiguration, burnerMode: BurnerMode(isBurner: true))
 
         XCTAssertFalse(tab.webView.configuration.preferences[.mediaSessionEnabled])
     }
@@ -389,10 +391,6 @@ final class TabTests: XCTestCase {
 }
 
 private extension Tab {
-    @MainActor
-    @nonobjc convenience override init() {
-        self.init(content: .none)
-    }
 
     var url: URL? {
         get {

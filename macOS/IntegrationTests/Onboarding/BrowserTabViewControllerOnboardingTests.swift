@@ -24,20 +24,6 @@ import struct SwiftUI.AnyView
 import XCTest
 @testable import DuckDuckGo_Privacy_Browser
 
-extension UserContentController {
-    private static let testNameKey = UnsafeRawPointer(bitPattern: "testNameKey".hashValue)!
-    @objc public var testName: String? {
-        get {
-            dispatchPrecondition(condition: .onQueue(.main))
-            return objc_getAssociatedObject(self, Self.testNameKey) as? String
-        }
-        set {
-            dispatchPrecondition(condition: .onQueue(.main))
-            objc_setAssociatedObject(self, Self.testNameKey, newValue, .OBJC_ASSOCIATION_RETAIN)
-        }
-    }
-
-}
 @available(macOS 12.0, *)
 final class BrowserTabViewControllerOnboardingTests: XCTestCase {
 
@@ -72,7 +58,6 @@ final class BrowserTabViewControllerOnboardingTests: XCTestCase {
         NSError.disableSwizzledDescription = true
 
         tab = Tab(content: .url(URL.duckDuckGo, credential: nil, source: .appOpenUrl), webViewConfiguration: webViewConfiguration)
-        (webViewConfiguration.userContentController as! UserContentController).testName = name
         let tabViewModel = TabViewModel(tab: tab)
         viewController = BrowserTabViewController(tabCollectionViewModel: tabCollectionViewModel, onboardingDialogTypeProvider: dialogProvider, onboardingDialogFactory: factory, featureFlagger: featureFlagger)
         viewController.tabViewModel = tabViewModel
