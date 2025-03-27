@@ -76,6 +76,9 @@ public enum FeatureFlag: String {
     /// https://app.asana.com/0/1206329551987282/1207149365636877/f
     case maliciousSiteProtection
 
+    /// https://app.asana.com/0/1204186595873227/1209164066387913
+    case scamSiteProtection
+
     /// https://app.asana.com/0/1204186595873227/1206489252288889
     case networkProtectionRiskyDomainsProtection
 
@@ -83,10 +86,17 @@ public enum FeatureFlag: String {
     /// https://app.asana.com/0/1206226850447395/1209291055975934
     case experimentalBrowserTheming
 
-    case alternativeColorScheme
-
     /// https://app.asana.com/0/1206488453854252/1208706841336530
     case privacyProOnboardingCTAMarch25
+
+    /// https://app.asana.com/0/72649045549333/1207991044706236/f
+    case privacyProAuthV2
+
+    /// https://app.asana.com/0/1206329551987282/1209130794450271
+    case onboardingSetAsDefaultBrowser
+
+    /// https://app.asana.com/0/72649045549333/1209633877674689/f
+    case exchangeKeysToSyncWithAnotherDevice
 }
 
 extension FeatureFlag: FeatureFlagDescribing {
@@ -96,6 +106,8 @@ extension FeatureFlag: FeatureFlagDescribing {
             PrivacyProFreeTrialExperimentCohort.self
         case .privacyProOnboardingCTAMarch25:
             PrivacyProOnboardingCTAMarch25Cohort.self
+        case .onboardingSetAsDefaultBrowser:
+            OnboardingSetAsDefaultBrowserCohort.self
         default:
             nil
         }
@@ -105,10 +117,21 @@ extension FeatureFlag: FeatureFlagDescribing {
 
     public var supportsLocalOverriding: Bool {
         switch self {
-        case .textZoom, .alternativeColorScheme, .experimentalBrowserTheming, .privacyProOnboardingCTAMarch25:
+        case .textZoom,
+                .experimentalBrowserTheming,
+                .privacyProOnboardingCTAMarch25,
+                .networkProtectionRiskyDomainsProtection,
+                .privacyProAuthV2,
+                .scamSiteProtection,
+                .maliciousSiteProtection,
+                .exchangeKeysToSyncWithAnotherDevice:
             return true
-        case .networkProtectionRiskyDomainsProtection:
-            return true
+        case .onboardingSetAsDefaultBrowser:
+            if #available(iOS 18.3, *) {
+                return true
+            } else {
+                return false
+            }
         default:
             return false
         }
@@ -179,7 +202,7 @@ extension FeatureFlag: FeatureFlagDescribing {
         case .aiChatDeepLink:
             return .remoteReleasable(.subfeature(AIChatSubfeature.deepLink))
         case .tabManagerMultiSelection:
-            return .internalOnly()
+            return .remoteReleasable(.subfeature(TabManagerSubfeature.multiSelection))
         case .webViewStateRestoration:
             return .remoteReleasable(.feature(.webViewStateRestoration))
         case .syncSeamlessAccountSwitching:
@@ -194,14 +217,22 @@ extension FeatureFlag: FeatureFlagDescribing {
             return .remoteReleasable(.subfeature(AIChatSubfeature.addressBarShortcut))
         case .maliciousSiteProtection:
             return .remoteReleasable(.subfeature(MaliciousSiteProtectionSubfeature.onByDefault))
+        case .scamSiteProtection:
+            return .remoteReleasable(.subfeature(MaliciousSiteProtectionSubfeature.scamProtection))
         case .networkProtectionRiskyDomainsProtection:
             return  .remoteReleasable(.subfeature(NetworkProtectionSubfeature.riskyDomainsProtection))
         case .experimentalBrowserTheming:
             return .remoteDevelopment(.feature(.experimentalBrowserTheming))
-        case .alternativeColorScheme:
-            return .internalOnly()
         case .privacyProOnboardingCTAMarch25:
             return .remoteReleasable(.subfeature(PrivacyProSubfeature.privacyProOnboardingCTAMarch25))
+
+        case .privacyProAuthV2:
+            return .disabled // .remoteDevelopment(.subfeature(PrivacyProSubfeature.privacyProAuthV2))
+
+        case .onboardingSetAsDefaultBrowser:
+            return .remoteReleasable(.subfeature(OnboardingSubfeature.setAsDefaultBrowserExperiment))
+        case .exchangeKeysToSyncWithAnotherDevice:
+            return .remoteReleasable(.subfeature(SyncSubfeature.exchangeKeysToSyncWithAnotherDevice))
         }
     }
 }
@@ -210,7 +241,6 @@ extension FeatureFlagger {
     public func isFeatureOn(_ featureFlag: FeatureFlag) -> Bool {
         return isFeatureOn(for: featureFlag)
     }
-
 }
 
 public enum PrivacyProFreeTrialExperimentCohort: String, FeatureFlagCohortDescribing {
@@ -221,6 +251,13 @@ public enum PrivacyProFreeTrialExperimentCohort: String, FeatureFlagCohortDescri
 }
 
 public enum PrivacyProOnboardingCTAMarch25Cohort: String, FeatureFlagCohortDescribing {
+    /// Control cohort with no changes applied.
+    case control
+    /// Treatment cohort where the experiment modifications are applied.
+    case treatment
+}
+
+public enum OnboardingSetAsDefaultBrowserCohort: String, FeatureFlagCohortDescribing {
     /// Control cohort with no changes applied.
     case control
     /// Treatment cohort where the experiment modifications are applied.

@@ -47,7 +47,7 @@ class AppSettingsMock: AppSettings {
 
     var autocomplete: Bool = true
 
-    var currentThemeName: DuckDuckGo.ThemeName = .systemDefault
+    var currentThemeStyle: DuckDuckGo.ThemeStyle = .systemDefault
 
     var autoClearAction: DuckDuckGo.AutoClearSettingsModel.Action = .clearData
 
@@ -101,5 +101,10 @@ class AppSettingsMock: AppSettings {
 
     var onboardingHighlightsEnabled: Bool = false
     var onboardingAddToDockState: OnboardingAddToDockState = .disabled
+    
+    var duckPlayerNativeUISERPEnabled: Bool = true
+    var duckPlayerNativeYoutubeMode: DuckDuckGo.NativeDuckPlayerYoutubeMode = .allCases.first!
+    var duckPlayerNativeUIPrimingModalPresentedCount: Int = 0
+    var duckPlayerNativeUIPrimingModalTimeSinceLastPresented: Int = 0
 
 }

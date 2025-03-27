@@ -249,6 +249,10 @@ class TabManager {
         return model.tabs.first(where: { $0.link == nil })
     }
 
+    func first(withId id: String) -> Tab? {
+        return model.tabs.first { $0.uid == id }
+    }
+
     func first(withUrl url: URL) -> Tab? {
         return model.tabs.first(where: {
             guard let linkUrl = $0.link?.url else { return false }
@@ -326,7 +330,9 @@ class TabManager {
     func replaceTab(at index: Int, withNewTab newTab: Tab) {
         // Removing a Tab automatically inserts a new one if tabs are empty. Hence add a new one only if needed
         if model.tabs.count == 1 {
-            model.remove(at: index)
+            // Since we're not re-inserting we should use the proper removal to ensure
+            //  things are cleaned up properly.
+            remove(at: index)
         } else {
             model.remove(at: index)
             model.insert(tab: newTab, at: index)
@@ -438,7 +444,9 @@ extension TabManager {
             Pixel.fire(pixel: .cachedTabPreviewsExceedsTabCount, withAdditionalParameters: [
                 PixelParameters.tabPreviewCountDelta: "\(storedPreviews - totalTabs)"
             ])
-            TabPreviewsCleanup.shared.startCleanup(with: model, source: previewsSource)
+            Task(priority: .utility) {
+                await previewsSource.removePreviewsWithIdNotIn(Set(model.tabs.map { $0.uid }))
+            }
         }
     }
 

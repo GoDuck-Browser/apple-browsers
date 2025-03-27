@@ -38,13 +38,9 @@ final class SubscriptionDebugViewController: UITableViewController {
     private var featureFlagger: FeatureFlagger {
         AppDependencyProvider.shared.featureFlagger
     }
-
+    private let isAuthV2Enabled: Bool = AppDependencyProvider.shared.vpnSettings.isAuthV2Enabled
     var currentEnvironment: SubscriptionEnvironment {
-        if !AppDependencyProvider.shared.isAuthV2Enabled {
-            return subscriptionManagerV1.currentEnvironment
-        } else {
-            return subscriptionManagerV2.currentEnvironment
-        }
+        AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge.currentEnvironment
     }
 
     // swiftlint:disable:next force_cast
@@ -130,7 +126,7 @@ final class SubscriptionDebugViewController: UITableViewController {
     }
 
     var serviceEnvironment: SubscriptionEnvironment.ServiceEnvironment {
-        if !AppDependencyProvider.shared.isAuthV2Enabled {
+        if !isAuthV2Enabled {
             return subscriptionManagerV1.currentEnvironment.serviceEnvironment
         } else {
             return subscriptionManagerV2.currentEnvironment.serviceEnvironment
@@ -326,14 +322,16 @@ final class SubscriptionDebugViewController: UITableViewController {
                                                 message: message,
                                                 preferredStyle: .actionSheet)
         alertController.addAction(UIAlertAction(title: "Yes", style: .destructive) { [weak self] _ in
-            switch envRows {
-            case .staging:
-                self?.setEnvironment(.staging)
-            case .production:
-                self?.setEnvironment(.production)
+            Task {
+                switch envRows {
+                case .staging:
+                    await self?.setEnvironment(.staging)
+                case .production:
+                    await self?.setEnvironment(.production)
+                }
+                // Close the app
+                exit(0)
             }
-            // Close the app
-            exit(0)
         })
         let okAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         alertController.addAction(okAction)
@@ -372,7 +370,7 @@ final class SubscriptionDebugViewController: UITableViewController {
     }
 
     private func clearAuthData() {
-        if !AppDependencyProvider.shared.isAuthV2Enabled {
+        if !isAuthV2Enabled {
             clearAuthDataV1()
         } else {
             clearAuthDataV2()
@@ -394,7 +392,7 @@ final class SubscriptionDebugViewController: UITableViewController {
     }
 
     private func showAccountDetails() {
-        if !AppDependencyProvider.shared.isAuthV2Enabled {
+        if !isAuthV2Enabled {
             showAccountDetailsV1()
         } else {
             showAccountDetailsV2()
@@ -457,7 +455,7 @@ final class SubscriptionDebugViewController: UITableViewController {
     }
 
     private func syncAppleIDAccount() {
-        if !AppDependencyProvider.shared.isAuthV2Enabled {
+        if !isAuthV2Enabled {
             syncAppleIDAccountV1()
         } else {
             syncAppleIDAccountV2()
@@ -491,7 +489,7 @@ final class SubscriptionDebugViewController: UITableViewController {
     }
 
     private func validateToken() {
-        if !AppDependencyProvider.shared.isAuthV2Enabled {
+        if !isAuthV2Enabled {
             validateTokenV1()
         } else {
             validateTokenV2()
@@ -527,7 +525,7 @@ final class SubscriptionDebugViewController: UITableViewController {
     }
 
     private func getSubscriptionDetails() {
-        if !AppDependencyProvider.shared.isAuthV2Enabled {
+        if !isAuthV2Enabled {
             getSubscriptionDetailsV1()
         } else {
             getSubscriptionDetailsV2()
@@ -562,7 +560,7 @@ final class SubscriptionDebugViewController: UITableViewController {
     }
 
     private func checkEntitlements() {
-        if !AppDependencyProvider.shared.isAuthV2Enabled {
+        if !isAuthV2Enabled {
             checkEntitlementsV1()
         } else {
             checkEntitlementsV2()
@@ -605,7 +603,7 @@ final class SubscriptionDebugViewController: UITableViewController {
         }
     }
 
-    private func setEnvironment(_ environment: SubscriptionEnvironment.ServiceEnvironment) {
+    private func setEnvironment(_ environment: SubscriptionEnvironment.ServiceEnvironment) async {
 
         let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
         let currentSubscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
@@ -613,22 +611,20 @@ final class SubscriptionDebugViewController: UITableViewController {
         newSubscriptionEnvironment.serviceEnvironment = environment
 
         if newSubscriptionEnvironment.serviceEnvironment != currentSubscriptionEnvironment.serviceEnvironment {
-            Task {
-                await AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge.signOut(notifyUI: true)
+            await AppDependencyProvider.shared.subscriptionAuthV1toV2Bridge.signOut(notifyUI: true)
 
-                // Save Subscription environment
-                DefaultSubscriptionManager.save(subscriptionEnvironment: newSubscriptionEnvironment, userDefaults: subscriptionUserDefaults)
+            // Save Subscription environment
+            DefaultSubscriptionManager.save(subscriptionEnvironment: newSubscriptionEnvironment, userDefaults: subscriptionUserDefaults)
 
-                // The VPN environment is forced to match the subscription environment
-                let settings = AppDependencyProvider.shared.vpnSettings
-                switch newSubscriptionEnvironment.serviceEnvironment {
-                case .production:
-                    settings.selectedEnvironment = .production
-                case .staging:
-                    settings.selectedEnvironment = .staging
-                }
-                NetworkProtectionLocationListCompositeRepository.clearCache()
+            // The VPN environment is forced to match the subscription environment
+            let settings = AppDependencyProvider.shared.vpnSettings
+            switch newSubscriptionEnvironment.serviceEnvironment {
+            case .production:
+                settings.selectedEnvironment = .production
+            case .staging:
+                settings.selectedEnvironment = .staging
             }
+            NetworkProtectionLocationListCompositeRepository.clearCache()
         }
     }
 

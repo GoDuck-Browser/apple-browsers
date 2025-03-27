@@ -29,7 +29,7 @@ let package = Package(
             targets: ["DataBrokerProtection"])
     ],
     dependencies: [
-        .package(path: "../../BrowserServicesKit"),
+        .package(path: "../../SharedPackages/BrowserServicesKit"),
         .package(path: "../DataBrokerProtectionShared"),
         .package(path: "../SwiftUIExtensions"),
         .package(path: "../AppKitExtensions"),
@@ -54,7 +54,6 @@ let package = Package(
                 .product(name: "NetworkProtectionIPC", package: "NetworkProtectionMac"),
                 .product(name: "NetworkProtectionProxy", package: "NetworkProtectionMac"),
             ],
-            resources: [.copy("Resources")],
             swiftSettings: [
                 .define("DEBUG", .when(configuration: .debug))
             ]
@@ -63,13 +62,12 @@ let package = Package(
             name: "DataBrokerProtectionTests",
             dependencies: [
                 "DataBrokerProtection",
+                "DataBrokerProtectionShared",
+                .product(name: "DataBrokerProtectionSharedTestsUtils", package: "DataBrokerProtectionShared"),
                 "BrowserServicesKit",
                 "Freemium",
                 .product(name: "PersistenceTestingUtils", package: "BrowserServicesKit"),
                 .product(name: "SubscriptionTestingUtilities", package: "BrowserServicesKit"),
-            ],
-            resources: [
-                .copy("Resources")
             ]
         )
     ]

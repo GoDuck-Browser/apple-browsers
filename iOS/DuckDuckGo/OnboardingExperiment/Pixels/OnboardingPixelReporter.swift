@@ -21,6 +21,7 @@ import Foundation
 import Core
 import BrowserServicesKit
 import Onboarding
+import PixelKit
 
 // MARK: - Pixel Fire Interface
 
@@ -43,38 +44,44 @@ extension UniquePixel: OnboardingPixelFiring {
 // MARK: - OnboardingPixelReporter
 
 protocol OnboardingIntroImpressionReporting {
-    func trackOnboardingIntroImpression()
+    func measureOnboardingIntroImpression()
 }
 
 protocol OnboardingIntroPixelReporting: OnboardingIntroImpressionReporting {
-    func trackBrowserComparisonImpression()
-    func trackChooseBrowserCTAAction()
-    func trackChooseAppIconImpression()
-    func trackChooseCustomAppIconColor()
-    func trackAddressBarPositionSelectionImpression()
-    func trackChooseBottomAddressBarPosition()
+    func measureBrowserComparisonImpression()
+    func measureChooseBrowserCTAAction()
+    func measureChooseAppIconImpression()
+    func measureChooseCustomAppIconColor()
+    func measureAddressBarPositionSelectionImpression()
+    func measureChooseBottomAddressBarPosition()
 }
 
 protocol OnboardingCustomInteractionPixelReporting {
-    func trackCustomSearch()
-    func trackCustomSite()
-    func trackSecondSiteVisit()
-    func trackPrivacyDashboardOpenedForFirstTime()
+    func measureCustomSearch()
+    func measureCustomSite()
+    func measureSecondSiteVisit()
+    func measurePrivacyDashboardOpenedForFirstTime()
 }
 
 protocol OnboardingDaxDialogsReporting {
-    func trackScreenImpression(event: Pixel.Event)
-    func trackEndOfJourneyDialogCTAAction()
+    func measureScreenImpression(event: Pixel.Event)
+    func measureEndOfJourneyDialogCTAAction()
 }
 
 protocol OnboardingAddToDockReporting {
-    func trackAddToDockPromoImpression()
-    func trackAddToDockPromoShowTutorialCTAAction()
-    func trackAddToDockPromoDismissCTAAction()
-    func trackAddToDockTutorialDismissCTAAction()
+    func measureAddToDockPromoImpression()
+    func measureAddToDockPromoShowTutorialCTAAction()
+    func measureAddToDockPromoDismissCTAAction()
+    func measureAddToDockTutorialDismissCTAAction()
 }
 
-typealias OnboardingPixelReporting = OnboardingIntroImpressionReporting & OnboardingIntroPixelReporting & OnboardingSearchSuggestionsPixelReporting & OnboardingSiteSuggestionsPixelReporting & OnboardingCustomInteractionPixelReporting & OnboardingDaxDialogsReporting & OnboardingAddToDockReporting
+protocol OnboardingSetAsDefaultBrowserExperimentReporting {
+    func measureDidSetDDGAsDefaultBrowser()
+    func measureDidNotSetDDGAsDefaultBrowser()
+}
+
+typealias LinearOnboardingPixelReporting = OnboardingIntroPixelReporting & OnboardingAddToDockReporting & OnboardingSetAsDefaultBrowserExperimentReporting
+typealias OnboardingPixelReporting = LinearOnboardingPixelReporting & OnboardingSearchSuggestionsPixelReporting & OnboardingSiteSuggestionsPixelReporting & OnboardingCustomInteractionPixelReporting & OnboardingDaxDialogsReporting
 
 // MARK: - Implementation
 
@@ -82,6 +89,7 @@ final class OnboardingPixelReporter {
     private let pixel: OnboardingPixelFiring.Type
     private let uniquePixel: OnboardingPixelFiring.Type
     private let statisticsStore: StatisticsStore
+    private let experimentPixel: ExperimentPixelFiring.Type
     private let calendar: Calendar
     private let dateProvider: () -> Date
     private let userDefaults: UserDefaults
@@ -92,6 +100,7 @@ final class OnboardingPixelReporter {
     init(
         pixel: OnboardingPixelFiring.Type = Pixel.self,
         uniquePixel: OnboardingPixelFiring.Type = UniquePixel.self,
+        experimentPixel: ExperimentPixelFiring.Type = PixelKit.self,
         statisticsStore: StatisticsStore = StatisticsUserDefaults(),
         calendar: Calendar = .current,
         dateProvider: @escaping () -> Date = Date.init,
@@ -99,13 +108,14 @@ final class OnboardingPixelReporter {
     ) {
         self.pixel = pixel
         self.uniquePixel = uniquePixel
+        self.experimentPixel = experimentPixel
         self.statisticsStore = statisticsStore
         self.calendar = calendar
         self.dateProvider = dateProvider
         self.userDefaults = userDefaults
     }
 
-    private func fire(event: Pixel.Event, unique: Bool, additionalParameters: [String: String] = [:], includedParameters: [Pixel.QueryParameters] = [.appVersion, .atb]) {
+    private func fire(event: Pixel.Event, unique: Bool, additionalParameters: [String: String] = [:], includedParameters: [Pixel.QueryParameters] = [.appVersion]) {
         
         func enqueue(event: Pixel.Event, unique: Bool, additionalParameters: [String: String], includedParameters: [Pixel.QueryParameters]) {
             enqueuedPixels.append(.init(event: event, unique: unique, additionalParameters: additionalParameters, includedParameters: includedParameters))
@@ -146,32 +156,32 @@ extension OnboardingPixelReporter {
 
 extension OnboardingPixelReporter: OnboardingIntroPixelReporting {
 
-    func trackOnboardingIntroImpression() {
+    func measureOnboardingIntroImpression() {
         fire(event: .onboardingIntroShownUnique, unique: true)
     }
 
-    func trackBrowserComparisonImpression() {
+    func measureBrowserComparisonImpression() {
         fire(event: .onboardingIntroComparisonChartShownUnique, unique: true)
     }
 
-    func trackChooseBrowserCTAAction() {
+    func measureChooseBrowserCTAAction() {
         fire(event: .onboardingIntroChooseBrowserCTAPressed, unique: false)
     }
 
-    func trackChooseAppIconImpression() {
-        fire(event: .onboardingIntroChooseAppIconImpressionUnique, unique: true, includedParameters: [.appVersion])
+    func measureChooseAppIconImpression() {
+        fire(event: .onboardingIntroChooseAppIconImpressionUnique, unique: true)
     }
 
-    func trackChooseCustomAppIconColor() {
-        fire(event: .onboardingIntroChooseCustomAppIconColorCTAPressed, unique: false, includedParameters: [.appVersion])
+    func measureChooseCustomAppIconColor() {
+        fire(event: .onboardingIntroChooseCustomAppIconColorCTAPressed, unique: false)
     }
 
-    func trackAddressBarPositionSelectionImpression() {
-        fire(event: .onboardingIntroChooseAddressBarImpressionUnique, unique: true, includedParameters: [.appVersion])
+    func measureAddressBarPositionSelectionImpression() {
+        fire(event: .onboardingIntroChooseAddressBarImpressionUnique, unique: true)
     }
 
-    func trackChooseBottomAddressBarPosition() {
-        fire(event: .onboardingIntroBottomAddressBarSelected, unique: false, includedParameters: [.appVersion])
+    func measureChooseBottomAddressBarPosition() {
+        fire(event: .onboardingIntroBottomAddressBarSelected, unique: false)
     }
 
 }
@@ -180,7 +190,7 @@ extension OnboardingPixelReporter: OnboardingIntroPixelReporting {
 
 extension OnboardingPixelReporter: OnboardingSearchSuggestionsPixelReporting {
     
-    func trackSearchSuggetionOptionTapped() {
+    func measureSearchSuggetionOptionTapped() {
         // Left empty on purpose. These were temporary pixels in iOS. macOS will still use them.
     }
 
@@ -188,7 +198,7 @@ extension OnboardingPixelReporter: OnboardingSearchSuggestionsPixelReporting {
 
 extension OnboardingPixelReporter: OnboardingSiteSuggestionsPixelReporting {
     
-    func trackSiteSuggetionOptionTapped() {
+    func measureSiteSuggetionOptionTapped() {
         // Left empty on purpose. These were temporary pixels in iOS. macOS will still use them.
     }
 
@@ -198,15 +208,15 @@ extension OnboardingPixelReporter: OnboardingSiteSuggestionsPixelReporting {
 
 extension OnboardingPixelReporter: OnboardingCustomInteractionPixelReporting {
 
-    func trackCustomSearch() {
+    func measureCustomSearch() {
         fire(event: .onboardingContextualSearchCustomUnique, unique: true)
     }
     
-    func trackCustomSite() {
+    func measureCustomSite() {
         fire(event: .onboardingContextualSiteCustomUnique, unique: true)
     }
     
-    func trackSecondSiteVisit() {
+    func measureSecondSiteVisit() {
         if userDefaults.bool(forKey: siteVisitedUserDefaultsKey) {
             fire(event: .onboardingContextualSecondSiteVisitUnique, unique: true)
         } else {
@@ -214,7 +224,7 @@ extension OnboardingPixelReporter: OnboardingCustomInteractionPixelReporting {
         }
     }
 
-    func trackPrivacyDashboardOpenedForFirstTime() {
+    func measurePrivacyDashboardOpenedForFirstTime() {
         let daysSinceInstall = statisticsStore.installDate.flatMap { calendar.numberOfDaysBetween($0, and: dateProvider()) }
         let additionalParameters = [
             PixelParameters.fromOnboarding: "true",
@@ -229,11 +239,11 @@ extension OnboardingPixelReporter: OnboardingCustomInteractionPixelReporting {
 
 extension OnboardingPixelReporter: OnboardingDaxDialogsReporting {
     
-    func trackScreenImpression(event: Pixel.Event) {
+    func measureScreenImpression(event: Pixel.Event) {
         fire(event: event, unique: true)
     }
 
-    func trackEndOfJourneyDialogCTAAction() {
+    func measureEndOfJourneyDialogCTAAction() {
         fire(event: .daxDialogsEndOfJourneyDismissed, unique: false)
     }
 
@@ -243,22 +253,58 @@ extension OnboardingPixelReporter: OnboardingDaxDialogsReporting {
 
 extension OnboardingPixelReporter: OnboardingAddToDockReporting {
    
-    func trackAddToDockPromoImpression() {
+    func measureAddToDockPromoImpression() {
         fire(event: .onboardingAddToDockPromoImpressionsUnique, unique: true)
     }
     
-    func trackAddToDockPromoShowTutorialCTAAction() {
+    func measureAddToDockPromoShowTutorialCTAAction() {
         fire(event: .onboardingAddToDockPromoShowTutorialCTATapped, unique: false)
     }
     
-    func trackAddToDockPromoDismissCTAAction() {
+    func measureAddToDockPromoDismissCTAAction() {
         fire(event: .onboardingAddToDockPromoDismissCTATapped, unique: false)
     }
     
-    func trackAddToDockTutorialDismissCTAAction() {
+    func measureAddToDockTutorialDismissCTAAction() {
         fire(event: .onboardingAddToDockTutorialDismissCTATapped, unique: false)
     }
 
+}
+
+// MARK: - OnboardingPixelReporter + Set As Default Experiment
+
+extension OnboardingPixelReporter: OnboardingSetAsDefaultBrowserExperimentReporting {
+
+    enum SetAsDefaultExperimentMetrics {
+        /// Unique identifier for the subfeature being tested.
+        static let subfeatureIdentifier = OnboardingSubfeature.setAsDefaultBrowserExperiment.rawValue
+
+        /// Metric identifiers for various user actions during the experiment.
+        static let metricDefaultBrowserSet = "setAsDefaultBrowser"
+        static let metricDefaultBrowserNotSet = "rejectSetAsDefaultBrowser"
+
+        /// Conversion window in days for tracking user actions.
+        static let conversionWindowDays = 0...0
+    }
+
+    func measureDidSetDDGAsDefaultBrowser() {
+        experimentPixel.fireExperimentPixel(
+            for: SetAsDefaultExperimentMetrics.subfeatureIdentifier,
+            metric: SetAsDefaultExperimentMetrics.metricDefaultBrowserSet,
+            conversionWindowDays: SetAsDefaultExperimentMetrics.conversionWindowDays,
+            value: "1"
+        )
+    }
+
+    func measureDidNotSetDDGAsDefaultBrowser() {
+        experimentPixel.fireExperimentPixel(
+            for: SetAsDefaultExperimentMetrics.subfeatureIdentifier,
+            metric: SetAsDefaultExperimentMetrics.metricDefaultBrowserNotSet,
+            conversionWindowDays: SetAsDefaultExperimentMetrics.conversionWindowDays,
+            value: "1"
+        )
+    }
+    
 }
 
 struct EnqueuedPixel {
@@ -267,3 +313,13 @@ struct EnqueuedPixel {
     let additionalParameters: [String: String]
     let includedParameters: [Pixel.QueryParameters]
 }
+
+#if canImport(XCTest) || DEBUG
+extension OnboardingPixelReporter {
+
+    func fireTestPixelWithATB(event: Pixel.Event) {
+        fire(event: event, unique: true, includedParameters: [.appVersion, .atb])
+    }
+
+}
+#endif

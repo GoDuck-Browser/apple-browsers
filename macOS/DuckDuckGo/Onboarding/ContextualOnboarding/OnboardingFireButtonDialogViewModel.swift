@@ -43,13 +43,13 @@ public class OnboardingFireButtonDialogViewModel: ObservableObject {
 
     func skip() {
         onGotItPressed()
-        onboardingPixelReporter.trackFireButtonSkipped()
-        onboardingPixelReporter.trackLastDialogShown()
+        onboardingPixelReporter.measureFireButtonSkipped()
+        onboardingPixelReporter.measureLastDialogShown()
     }
 
     @MainActor
     func tryFireButton() {
         onFireButtonPressed()
-        onboardingPixelReporter.trackFireButtonTryIt()
+        onboardingPixelReporter.measureFireButtonTryIt()
     }
 }

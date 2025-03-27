@@ -22,99 +22,113 @@ import Core
 import Onboarding
 import class UIKit.UIApplication
 
+@MainActor
 final class OnboardingIntroViewModel: ObservableObject {
-    @Published private(set) var state: OnboardingView.ViewState = .landing
+    @Published private(set) var state: OnboardingView.ViewState = .landing {
+        didSet {
+            measureScreenImpression()
+        }
+    }
 
     let copy: Copy
     var onCompletingOnboardingIntro: (() -> Void)?
-    private var introSteps: [OnboardingIntroStep]
+    private let introSteps: [OnboardingIntroStep]
+    private var currentIntroStep: OnboardingIntroStep
 
-    private let pixelReporter: OnboardingIntroPixelReporting & OnboardingAddToDockReporting
-    private let onboardingManager: OnboardingAddToDockManaging
-    private let isIpad: Bool
+    private let defaultBrowserManager: DefaultBrowserManaging
+    private let pixelReporter: LinearOnboardingPixelReporting
+    private let onboardingManager: OnboardingManaging
     private let urlOpener: URLOpener
     private let appIconProvider: () -> AppIcon
     private let addressBarPositionProvider: () -> AddressBarPosition
 
+    convenience init(pixelReporter: LinearOnboardingPixelReporting) {
+        let onboardingManager = OnboardingManager()
+        self.init(
+            defaultBrowserManager: DefaultBrowserManager(),
+            pixelReporter: pixelReporter,
+            onboardingManager: onboardingManager,
+            urlOpener: UIApplication.shared,
+            currentOnboardingStep: onboardingManager.onboardingSteps.first ?? .introDialog,
+            appIconProvider: { AppIconManager.shared.appIcon },
+            addressBarPositionProvider: { AppUserDefaults().currentAddressBarPosition }
+        )
+    }
+
     init(
-        pixelReporter: OnboardingIntroPixelReporting & OnboardingAddToDockReporting,
-        onboardingManager: OnboardingAddToDockManaging = OnboardingManager(),
-        isIpad: Bool = UIDevice.current.userInterfaceIdiom == .pad,
-        urlOpener: URLOpener = UIApplication.shared,
-        appIconProvider: @escaping () -> AppIcon = { AppIconManager.shared.appIcon },
-        addressBarPositionProvider: @escaping () -> AddressBarPosition = { AppUserDefaults().currentAddressBarPosition }
+        defaultBrowserManager: DefaultBrowserManaging,
+        pixelReporter: LinearOnboardingPixelReporting,
+        onboardingManager: OnboardingManaging,
+        urlOpener: URLOpener,
+        currentOnboardingStep: OnboardingIntroStep,
+        appIconProvider: @escaping () -> AppIcon,
+        addressBarPositionProvider: @escaping () -> AddressBarPosition
     ) {
+        self.defaultBrowserManager = defaultBrowserManager
         self.pixelReporter = pixelReporter
         self.onboardingManager = onboardingManager
-        self.isIpad = isIpad
         self.urlOpener = urlOpener
         self.appIconProvider = appIconProvider
         self.addressBarPositionProvider = addressBarPositionProvider
 
-        // Add to Dock experiment assigned only to iPhone users
-        introSteps = if onboardingManager.addToDockEnabledState == .intro {
-            OnboardingIntroStep.addToDockIphoneFlow
-        } else {
-            isIpad ? OnboardingIntroStep.defaultIPadFlow : OnboardingIntroStep.defaultIPhoneFlow
-        }
-
+        introSteps = onboardingManager.onboardingSteps
+        currentIntroStep = currentOnboardingStep
         copy = .default
     }
 
     func onAppear() {
-        state = makeViewState(for: .introDialog)
-        pixelReporter.trackOnboardingIntroImpression()
+        makeInitialViewState()
     }
 
     func startOnboardingAction() {
-        state = makeViewState(for: .browserComparison)
-        pixelReporter.trackBrowserComparisonImpression()
+        makeNextViewState()
     }
 
     func setDefaultBrowserAction() {
-        if let url = URL(string: UIApplication.openSettingsURLString) {
+        let urlPath = onboardingManager.settingsURLPath
+
+        if let url = URL(string: urlPath) {
             urlOpener.open(url)
         }
-        pixelReporter.trackChooseBrowserCTAAction()
+        pixelReporter.measureChooseBrowserCTAAction()
 
-        handleSetDefaultBrowserAction()
+        makeNextViewState()
     }
 
     func cancelSetDefaultBrowserAction() {
-        handleSetDefaultBrowserAction()
+        makeNextViewState()
     }
 
     func addToDockContinueAction(isShowingAddToDockTutorial: Bool) {
-        state = makeViewState(for: .appIconSelection)
+        makeNextViewState()
+
         if isShowingAddToDockTutorial {
-            pixelReporter.trackAddToDockTutorialDismissCTAAction()
+            pixelReporter.measureAddToDockTutorialDismissCTAAction()
         } else {
-            pixelReporter.trackAddToDockPromoDismissCTAAction()
+            pixelReporter.measureAddToDockPromoDismissCTAAction()
         }
     }
 
     func addtoDockShowTutorialAction() {
-        pixelReporter.trackAddToDockPromoShowTutorialCTAAction()
+        pixelReporter.measureAddToDockPromoShowTutorialCTAAction()
     }
 
     func appIconPickerContinueAction() {
+        // Check if user set DDG as default browser.
+        measureDDGDefaultBrowserIfNeeded()
+
         if appIconProvider() != .defaultAppIcon {
-            pixelReporter.trackChooseCustomAppIconColor()
+            pixelReporter.measureChooseCustomAppIconColor()
         }
 
-        if isIpad {
-            onCompletingOnboardingIntro?()
-        } else {
-            state = makeViewState(for: .addressBarPositionSelection)
-            pixelReporter.trackAddressBarPositionSelectionImpression()
-        }
+        makeNextViewState()
     }
 
     func selectAddressBarPositionAction() {
         if addressBarPositionProvider() == .bottom {
-            pixelReporter.trackChooseBottomAddressBarPosition()
+            pixelReporter.measureChooseBottomAddressBarPosition()
         }
-        onCompletingOnboardingIntro?()
+        makeNextViewState()
     }
 
 #if DEBUG || ALPHA
@@ -128,6 +142,54 @@ final class OnboardingIntroViewModel: ObservableObject {
 // MARK: - Private
 
 private extension OnboardingIntroViewModel {
+
+    func makeInitialViewState() {
+        setViewState(introStep: currentIntroStep)
+    }
+
+    func setViewState(introStep: OnboardingIntroStep) {
+        func stepInfo() -> OnboardingView.ViewState.Intro.StepInfo {
+            guard let currentStepIndex = introSteps.firstIndex(of: introStep) else { return .hidden }
+
+            // Remove startOnboardingDialog from the count of total steps since we don't show the progress for that step.
+            return OnboardingView.ViewState.Intro.StepInfo(currentStep: currentStepIndex, totalSteps: introSteps.count - 1)
+        }
+
+        let viewState = switch introStep {
+        case .introDialog:
+            OnboardingView.ViewState.onboarding(.init(type: .startOnboardingDialog, step: .hidden))
+        case .browserComparison:
+            OnboardingView.ViewState.onboarding(.init(type: .browsersComparisonDialog, step: stepInfo()))
+        case .addToDockPromo:
+            OnboardingView.ViewState.onboarding(.init(type: .addToDockPromoDialog, step: stepInfo()))
+        case .appIconSelection:
+            OnboardingView.ViewState.onboarding(.init(type: .chooseAppIconDialog, step: stepInfo()))
+        case .addressBarPositionSelection:
+            OnboardingView.ViewState.onboarding(.init(type: .chooseAddressBarPositionDialog, step: stepInfo()))
+        }
+
+        state = viewState
+    }
+
+    func makeNextViewState() {
+        guard let currentStepIndex = introSteps.firstIndex(of: currentIntroStep) else {
+            assertionFailure("Onboarding Step index not found.")
+            onCompletingOnboardingIntro?()
+            return
+        }
+
+        // Get next onboarding step index
+        let nextStepIndex = currentStepIndex + 1
+
+        // If the flow does not have any step remaining dismiss it
+        guard let nextIntroStep = introSteps[safe: nextStepIndex] else {
+            onCompletingOnboardingIntro?()
+            return
+        }
+        // Otherwise advance to the next onboarding step
+        currentIntroStep = nextIntroStep
+        setViewState(introStep: currentIntroStep)
+    }
 
     func makeViewState(for introStep: OnboardingIntroStep) -> OnboardingView.ViewState {
         
@@ -154,28 +216,33 @@ private extension OnboardingIntroViewModel {
         return viewState
     }
 
-    func handleSetDefaultBrowserAction() {
-        if onboardingManager.addToDockEnabledState == .intro {
-            state = makeViewState(for: .addToDockPromo)
-            pixelReporter.trackAddToDockPromoImpression()
-        } else {
-            state = makeViewState(for: .appIconSelection)
-            pixelReporter.trackChooseAppIconImpression()
+    func measureDDGDefaultBrowserIfNeeded() {
+        guard onboardingManager.isEnrolledInSetAsDefaultBrowserExperiment else { return }
+
+        defaultBrowserManager.defaultBrowserInfo()
+            .onNewValue { newInfo in
+                if newInfo.isDefaultBrowser {
+                    pixelReporter.measureDidSetDDGAsDefaultBrowser()
+                } else {
+                    pixelReporter.measureDidNotSetDDGAsDefaultBrowser()
+                }
+            }
+    }
+
+    func measureScreenImpression() {
+        guard let intro = state.intro else { return }
+        switch intro.type {
+        case .startOnboardingDialog:
+            pixelReporter.measureOnboardingIntroImpression()
+        case .browsersComparisonDialog:
+            pixelReporter.measureBrowserComparisonImpression()
+        case .addToDockPromoDialog:
+            pixelReporter.measureAddToDockPromoImpression()
+        case .chooseAppIconDialog:
+            pixelReporter.measureChooseAppIconImpression()
+        case .chooseAddressBarPositionDialog:
+            pixelReporter.measureAddressBarPositionSelectionImpression()
         }
     }
 
-}
-
-// MARK: - OnboardingIntroStep
-
-private enum OnboardingIntroStep {
-    case introDialog
-    case browserComparison
-    case appIconSelection
-    case addressBarPositionSelection
-    case addToDockPromo
-
-    static let defaultIPhoneFlow: [OnboardingIntroStep] = [.introDialog, .browserComparison, .appIconSelection, .addressBarPositionSelection]
-    static let defaultIPadFlow: [OnboardingIntroStep] = [.introDialog, .browserComparison, .appIconSelection]
-    static let addToDockIphoneFlow: [OnboardingIntroStep] = [.introDialog, .browserComparison, .addToDockPromo, .appIconSelection, .addressBarPositionSelection]
 }

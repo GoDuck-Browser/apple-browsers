@@ -48,14 +48,14 @@ final class ExperimentContextualDaxDialogsFactory: ContextualDaxDialogsFactory {
     private let contextualOnboardingSettings: ContextualOnboardingSettings
     private let contextualOnboardingPixelReporter: OnboardingPixelReporting
     private let contextualOnboardingSiteSuggestionsProvider: OnboardingSuggestionsItemsProviding
-    private let onboardingManager: OnboardingAddToDockManaging
+    private let onboardingManager: OnboardingManaging
 
     init(
         contextualOnboardingLogic: ContextualOnboardingLogic,
         contextualOnboardingSettings: ContextualOnboardingSettings = DefaultDaxDialogsSettings(),
         contextualOnboardingPixelReporter: OnboardingPixelReporting,
         contextualOnboardingSiteSuggestionsProvider: OnboardingSuggestionsItemsProviding = OnboardingSuggestedSitesProvider(surpriseItemTitle: UserText.Onboarding.ContextualOnboarding.tryASearchOptionSurpriseMeTitle),
-        onboardingManager: OnboardingAddToDockManaging = OnboardingManager()
+        onboardingManager: OnboardingManaging = OnboardingManager()
     ) {
         self.contextualOnboardingSettings = contextualOnboardingSettings
         self.contextualOnboardingLogic = contextualOnboardingLogic
@@ -70,7 +70,7 @@ final class ExperimentContextualDaxDialogsFactory: ContextualDaxDialogsFactory {
         case .afterSearch:
             rootView = AnyView(
                 afterSearchDialog(
-                    shouldFollowUpToWebsiteSearch: !contextualOnboardingSettings.userHasSeenTrackersDialog,
+                    shouldFollowUpToWebsiteSearch: !contextualOnboardingSettings.userHasSeenTrackersDialog && !contextualOnboardingSettings.userHasSeenTryVisitSiteDialog,
                     delegate: delegate,
                     afterSearchPixelEvent: spec.pixelName,
                     onSizeUpdate: onSizeUpdate
@@ -124,7 +124,8 @@ final class ExperimentContextualDaxDialogsFactory: ContextualDaxDialogsFactory {
             { [weak delegate, weak self] in
                 onSizeUpdate()
                 delegate?.didAcknowledgeContextualOnboardingSearch()
-                self?.contextualOnboardingPixelReporter.trackScreenImpression(event: .onboardingContextualTryVisitSiteUnique)
+                self?.contextualOnboardingLogic.setTryVisitSiteMessageSeen()
+                self?.contextualOnboardingPixelReporter.measureScreenImpression(event: .onboardingContextualTryVisitSiteUnique)
             }
         } else {
             { [weak delegate] in
@@ -134,7 +135,7 @@ final class ExperimentContextualDaxDialogsFactory: ContextualDaxDialogsFactory {
 
         return OnboardingFirstSearchDoneDialog(message: dialogMessage(), shouldFollowUp: shouldFollowUpToWebsiteSearch, viewModel: viewModel, gotItAction: gotItAction)
             .onFirstAppear { [weak self] in
-                self?.contextualOnboardingPixelReporter.trackScreenImpression(event: afterSearchPixelEvent)
+                self?.contextualOnboardingPixelReporter.measureScreenImpression(event: afterSearchPixelEvent)
             }
     }
 
@@ -142,7 +143,8 @@ final class ExperimentContextualDaxDialogsFactory: ContextualDaxDialogsFactory {
         let viewModel = OnboardingSiteSuggestionsViewModel(title: UserText.Onboarding.ContextualOnboarding.onboardingTryASiteTitle, suggestedSitesProvider: contextualOnboardingSiteSuggestionsProvider, delegate: delegate, pixelReporter: contextualOnboardingPixelReporter)
         return OnboardingTryVisitingSiteDialog(logoPosition: .left, viewModel: viewModel)
             .onFirstAppear { [weak self] in
-                self?.contextualOnboardingPixelReporter.trackScreenImpression(event: .onboardingContextualTryVisitSiteUnique)
+                self?.contextualOnboardingLogic.setTryVisitSiteMessageSeen()
+                self?.contextualOnboardingPixelReporter.measureScreenImpression(event: .onboardingContextualTryVisitSiteUnique)
             }
     }
 
@@ -155,66 +157,39 @@ final class ExperimentContextualDaxDialogsFactory: ContextualDaxDialogsFactory {
             } else {
                 onSizeUpdate()
                 delegate?.didAcknowledgeContextualOnboardingTrackersDialog()
-                self?.contextualOnboardingPixelReporter.trackScreenImpression(event: .daxDialogsFireEducationShownUnique)
+                self?.contextualOnboardingPixelReporter.measureScreenImpression(event: .daxDialogsFireEducationShownUnique)
             }
         })
         .onAppear { [weak delegate] in
             delegate?.didShowContextualOnboardingTrackersDialog()
         }
         .onFirstAppear { [weak self] in
-            self?.contextualOnboardingPixelReporter.trackScreenImpression(event: spec.pixelName)
+            self?.contextualOnboardingPixelReporter.measureScreenImpression(event: spec.pixelName)
         }
     }
 
     private func fireDialog(pixelName: Pixel.Event) -> some View {
         OnboardingFireDialog()
             .onFirstAppear { [weak self] in
-                self?.contextualOnboardingPixelReporter.trackScreenImpression(event: pixelName)
+                self?.contextualOnboardingPixelReporter.measureScreenImpression(event: pixelName)
             }
     }
 
     private func endOfJourneyDialog(delegate: ContextualOnboardingDelegate, pixelName: Pixel.Event) -> some View {
-        let shouldShowAddToDock = onboardingManager.addToDockEnabledState == .contextual
-
-        let (message, cta) = if shouldShowAddToDock {
-            (UserText.AddToDockOnboarding.Promo.contextualMessage, UserText.AddToDockOnboarding.Buttons.startBrowsing)
-        } else {
-            (
-                UserText.Onboarding.ContextualOnboarding.onboardingFinalScreenMessage,
-                UserText.Onboarding.ContextualOnboarding.onboardingFinalScreenButton
-            )
-        }
-
-        let showAddToDockTutorialAction: () -> Void = { [weak self] in
-            self?.contextualOnboardingPixelReporter.trackAddToDockPromoShowTutorialCTAAction()
-        }
-
-        let dismissAction = { [weak delegate, weak self] isDismissedFromAddToDockTutorial in
+        let dismissAction = { [weak delegate, weak self] in
             delegate?.didTapDismissContextualOnboardingAction()
-            if isDismissedFromAddToDockTutorial {
-                self?.contextualOnboardingPixelReporter.trackAddToDockTutorialDismissCTAAction()
-            } else {
-                self?.contextualOnboardingPixelReporter.trackEndOfJourneyDialogCTAAction()
-                if shouldShowAddToDock {
-                    self?.contextualOnboardingPixelReporter.trackAddToDockPromoDismissCTAAction()
-                }
-            }
+            self?.contextualOnboardingPixelReporter.measureEndOfJourneyDialogCTAAction()
         }
 
         return OnboardingFinalDialog(
             logoPosition: .left,
-            message: message,
-            cta: cta,
-            canShowAddToDockTutorial: shouldShowAddToDock,
-            showAddToDockTutorialAction: showAddToDockTutorialAction,
+            message: UserText.Onboarding.ContextualOnboarding.onboardingFinalScreenMessage,
+            cta: UserText.Onboarding.ContextualOnboarding.onboardingFinalScreenButton,
             dismissAction: dismissAction
         )
         .onFirstAppear { [weak self] in
             self?.contextualOnboardingLogic.setFinalOnboardingDialogSeen()
-            self?.contextualOnboardingPixelReporter.trackScreenImpression(event: pixelName)
-            if shouldShowAddToDock {
-                self?.contextualOnboardingPixelReporter.trackAddToDockPromoImpression()
-            }
+            self?.contextualOnboardingPixelReporter.measureScreenImpression(event: pixelName)
         }
     }
 
@@ -225,6 +200,7 @@ final class ExperimentContextualDaxDialogsFactory: ContextualDaxDialogsFactory {
 protocol ContextualOnboardingSettings {
     var userHasSeenTrackersDialog: Bool { get }
     var userHasSeenFireDialog: Bool { get }
+    var userHasSeenTryVisitSiteDialog: Bool { get }
 }
 
 extension DefaultDaxDialogsSettings: ContextualOnboardingSettings {
@@ -237,6 +213,10 @@ extension DefaultDaxDialogsSettings: ContextualOnboardingSettings {
     
     var userHasSeenFireDialog: Bool {
         fireMessageExperimentShown
+    }
+
+    var userHasSeenTryVisitSiteDialog: Bool {
+        tryVisitASiteShown
     }
 
 }

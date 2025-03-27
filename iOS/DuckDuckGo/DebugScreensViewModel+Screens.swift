@@ -67,6 +67,9 @@ extension DebugScreensViewModel {
             .view(title: "Crashes", { _ in
                 CrashDebugScreen()
             }),
+            .view(title: "DuckPlayer", { _ in
+                DuckPlayerDebugSettingsView()
+            }),
             .view(title: "New Tab Page", { _ in
                 NewTabPageSectionsDebugView()
             }),
@@ -99,6 +102,9 @@ extension DebugScreensViewModel {
             }),
             .view(title: "Alert Playground", { _ in
                 AlertPlaygroundView()
+            }),
+            .view(title: "Tab Generator", { d in
+                BulkGeneratorView(factory: BulkTabFactory(tabManager: d.tabManager))
             }),
 
             // MARK: Controllers

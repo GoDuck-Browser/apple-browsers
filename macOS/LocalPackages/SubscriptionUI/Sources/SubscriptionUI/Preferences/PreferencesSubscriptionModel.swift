@@ -62,6 +62,7 @@ public final class PreferencesSubscriptionModel: ObservableObject {
 
     private var signInObserver: Any?
     private var signOutObserver: Any?
+    private var entitlementsObserver: Any?
     private var subscriptionChangeObserver: Any?
 
     public enum UserEvent {
@@ -138,6 +139,11 @@ public final class PreferencesSubscriptionModel: ObservableObject {
         subscriptionChangeObserver = NotificationCenter.default.addObserver(forName: .subscriptionDidChange, object: nil, queue: .main) { _ in
             Task { [weak self] in
                 await self?.updateSubscription(cachePolicy: .returnCacheDataDontLoad)
+            }
+        }
+
+        entitlementsObserver = NotificationCenter.default.addObserver(forName: .entitlementsDidChange, object: nil, queue: .main) { [weak self] _ in
+            Task { [weak self] in
                 await self?.updateAvailableSubscriptionFeatures()
             }
         }
@@ -154,6 +160,10 @@ public final class PreferencesSubscriptionModel: ObservableObject {
 
         if let subscriptionChangeObserver {
             NotificationCenter.default.removeObserver(subscriptionChangeObserver)
+        }
+
+        if let entitlementsObserver {
+            NotificationCenter.default.removeObserver(entitlementsObserver)
         }
     }
 
@@ -829,22 +839,26 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
     }
 
     private func updateAvailableSubscriptionFeatures() async {
-        let features = await subscriptionManager.currentSubscriptionFeatures(forceRefresh: false)
-        let vpnFeature = features.first { $0.entitlement == .networkProtection }
-        let dbpFeature = features.first { $0.entitlement == .dataBrokerProtection }
-        let itrFeature = features.first { $0.entitlement == .identityTheftRestoration }
-        let itrgFeature = features.first { $0.entitlement == .identityTheftRestorationGlobal }
+        do {
+            let features = try await subscriptionManager.currentSubscriptionFeatures(forceRefresh: false)
+            let vpnFeature = features.first { $0.entitlement == .networkProtection }
+            let dbpFeature = features.first { $0.entitlement == .dataBrokerProtection }
+            let itrFeature = features.first { $0.entitlement == .identityTheftRestoration }
+            let itrgFeature = features.first { $0.entitlement == .identityTheftRestorationGlobal }
 
-        Task { @MainActor in
-            // Should show
-            shouldShowVPN = vpnFeature != nil
-            shouldShowDBP = dbpFeature != nil
-            shouldShowITR = itrFeature != nil || itrgFeature != nil
+            Task { @MainActor in
+                // Should show
+                shouldShowVPN = vpnFeature != nil
+                shouldShowDBP = dbpFeature != nil
+                shouldShowITR = itrFeature != nil || itrgFeature != nil
 
-            // is active/enabled
-            hasAccessToVPN = vpnFeature?.isAvailableForUser ?? false
-            hasAccessToDBP = dbpFeature?.isAvailableForUser ?? false
-            hasAccessToITR = itrFeature?.isAvailableForUser ?? false || itrgFeature?.isAvailableForUser ?? false
+                // is active/enabled
+                hasAccessToVPN = vpnFeature?.isAvailableForUser ?? false
+                hasAccessToDBP = dbpFeature?.isAvailableForUser ?? false
+                hasAccessToITR = itrFeature?.isAvailableForUser ?? false || itrgFeature?.isAvailableForUser ?? false
+            }
+        } catch {
+            Logger.subscription.log("Error getting current subscription features: \(error, privacy: .public)")
         }
     }
 
@@ -865,6 +879,7 @@ public final class PreferencesSubscriptionModelV2: ObservableObject {
                     subscriptionStatus = subscription.status
                 }
             } catch {
+                Logger.subscription.error("Error getting subscription: \(error, privacy: .public)")
                 Task { @MainActor in
                     subscriptionPlatform = .unknown
                     subscriptionStatus = .unknown

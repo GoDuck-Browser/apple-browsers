@@ -20,24 +20,41 @@
 import XCTest
 @testable import DuckDuckGo
 
+@MainActor
 final class OnboardingIntroViewModelTests: XCTestCase {
-    private var onboardingManager: OnboardingManagerMock!
+    private var defaultBrowserManagerMock: DefaultBrowserManagerMock!
+    private var pixelReporterMock: OnboardingPixelReporterMock!
+    private var onboardingManagerMock: OnboardingManagerMock!
+    private var urlOpenerMock: MockURLOpener!
+    private var appIconProvider: (() -> AppIcon)!
+    private var addressBarPositionProvider: (() -> AddressBarPosition)!
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        onboardingManager = OnboardingManagerMock()
+    override func setUp() {
+        super.setUp()
+        defaultBrowserManagerMock = DefaultBrowserManagerMock()
+        pixelReporterMock = OnboardingPixelReporterMock()
+        onboardingManagerMock = OnboardingManagerMock()
+        urlOpenerMock = MockURLOpener()
+        appIconProvider = { .defaultAppIcon }
+        addressBarPositionProvider = { .top }
     }
 
-    override func tearDownWithError() throws {
-        onboardingManager = nil
-        try super.tearDownWithError()
+    override func tearDown() {
+        defaultBrowserManagerMock = nil
+        pixelReporterMock = nil
+        onboardingManagerMock = nil
+        urlOpenerMock = nil
+        appIconProvider = nil
+        addressBarPositionProvider = nil
+        super.tearDown()
     }
+
 
     // MARK: - State + Actions
 
     func testWhenSubscribeToViewStateThenShouldSendLanding() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, urlOpener: MockURLOpener())
+        let sut = makeSUT()
 
         // WHEN
         let result = sut.state
@@ -48,7 +65,7 @@ final class OnboardingIntroViewModelTests: XCTestCase {
 
     func testWhenOnAppearIsCalledThenViewStateChangesToStartOnboardingDialog() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, urlOpener: MockURLOpener())
+        let sut = makeSUT()
         XCTAssertEqual(sut.state, .landing)
 
         // WHEN
@@ -58,10 +75,11 @@ final class OnboardingIntroViewModelTests: XCTestCase {
         XCTAssertEqual(sut.state, .onboarding(.init(type: .startOnboardingDialog, step: .hidden)))
     }
 
-    func testWhenSetDefaultBrowserActionIsCalledThenURLOpenerOpensSettingsURL() {
+    func testWhenSetDefaultBrowserActionIsCalledThenURLOpenerOpensURL() {
         // GIVEN
-        let urlOpenerMock = MockURLOpener()
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, urlOpener: urlOpenerMock)
+        let urlPath = UIApplication.openSettingsURLString
+        onboardingManagerMock.settingsURLPath = urlPath
+        let sut = makeSUT()
         XCTAssertFalse(urlOpenerMock.didCallOpenURL)
         XCTAssertNil(urlOpenerMock.capturedURL)
 
@@ -69,15 +87,17 @@ final class OnboardingIntroViewModelTests: XCTestCase {
         sut.setDefaultBrowserAction()
 
         // THEN
+        XCTAssertTrue(onboardingManagerMock.didCallSettingsURLPath)
         XCTAssertTrue(urlOpenerMock.didCallOpenURL)
-        XCTAssertEqual(urlOpenerMock.capturedURL?.absoluteString, UIApplication.openSettingsURLString)
+        XCTAssertEqual(urlOpenerMock.capturedURL?.absoluteString, urlPath)
     }
 
     // MARK: iPhone Flow
 
     func testWhenSubscribeToViewStateAndIsIphoneFlowThenShouldSendLanding() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: false, urlOpener: MockURLOpener())
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPhoneFlow
+        let sut = makeSUT()
 
         // WHEN
         let result = sut.state
@@ -88,7 +108,8 @@ final class OnboardingIntroViewModelTests: XCTestCase {
 
     func testWhenOnAppearIsCalledAndAndIsIphoneFlowThenViewStateChangesToStartOnboardingDialogAndProgressIsHidden() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: false, urlOpener: MockURLOpener())
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPhoneFlow
+        let sut = makeSUT()
         XCTAssertEqual(sut.state, .landing)
 
         // WHEN
@@ -99,46 +120,59 @@ final class OnboardingIntroViewModelTests: XCTestCase {
     }
 
 
-    func testWhenSetDefaultBrowserActionIsCalledAndIsIphoneFlowThenViewStateChangesToChooseAppIconDialogAndProgressIs2Of3() {
+    func testWhenSetDefaultBrowserActionIsCalledAndIsIphoneFlowThenViewStateChangesToAddToDockPromoDialogAndProgressIs2Of4() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: false, urlOpener: MockURLOpener())
-        XCTAssertEqual(sut.state, .landing)
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPhoneFlow
+        let sut = makeSUT(currentOnboardingStep: .browserComparison)
 
         // WHEN
         sut.setDefaultBrowserAction()
 
         // THEN
-        XCTAssertEqual(sut.state, .onboarding(.init(type: .chooseAppIconDialog, step: .init(currentStep: 2, totalSteps: 3))))
+        XCTAssertEqual(sut.state, .onboarding(.init(type: .addToDockPromoDialog, step: .init(currentStep: 2, totalSteps: 4))))
     }
 
-    func testWhenCancelSetDefaultBrowserActionIsCalledAndIsIphoneFlowThenViewStateChangesToChooseAppIconDialogAndProgressIs2Of3() {
+    func testWhenCancelSetDefaultBrowserActionIsCalledAndIsIphoneFlowThenViewStateChangesToAddToDockPromoDialogAndProgressIs2Of4() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: false, urlOpener: MockURLOpener())
-        XCTAssertEqual(sut.state, .landing)
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPhoneFlow
+        let sut = makeSUT(currentOnboardingStep: .browserComparison)
 
         // WHEN
         sut.cancelSetDefaultBrowserAction()
 
         // THEN
-        XCTAssertEqual(sut.state, .onboarding(.init(type: .chooseAppIconDialog, step: .init(currentStep: 2, totalSteps: 3))))
+        XCTAssertEqual(sut.state, .onboarding(.init(type: .addToDockPromoDialog, step: .init(currentStep: 2, totalSteps: 4))))
     }
 
-    func testWhenAppIconPickerContinueActionIsCalledAndIsIphoneFlowThenViewStateChangesToChooseAddressBarPositionDialogAndProgressIs3Of3() {
+    func testWhenAddtoDockContinueActionIsCalledAndIsIphoneFlowThenThenViewStateChangesToChooseAppIconAndProgressIs3of4() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: false)
-        XCTAssertEqual(sut.state, .landing)
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPhoneFlow
+        let sut = makeSUT(currentOnboardingStep: .addToDockPromo)
+
+        // WHEN
+        sut.addToDockContinueAction(isShowingAddToDockTutorial: false)
+
+        // THEN
+        XCTAssertEqual(sut.state, .onboarding(.init(type: .chooseAppIconDialog, step: .init(currentStep: 3, totalSteps: 4))))
+    }
+
+    func testWhenAppIconPickerContinueActionIsCalledAndIsIphoneFlowThenViewStateChangesToChooseAddressBarPositionDialogAndProgressIs4Of4() {
+        // GIVEN
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPhoneFlow
+        let sut = makeSUT(currentOnboardingStep: .appIconSelection)
 
         // WHEN
         sut.appIconPickerContinueAction()
 
         // THEN
-        XCTAssertEqual(sut.state, .onboarding(.init(type: .chooseAddressBarPositionDialog, step: .init(currentStep: 3, totalSteps: 3))))
+        XCTAssertEqual(sut.state, .onboarding(.init(type: .chooseAddressBarPositionDialog, step: .init(currentStep: 4, totalSteps: 4))))
     }
 
     func testWhenSelectAddressBarPositionActionIsCalledAndIsIphoneFlowThenOnCompletingOnboardingIntroIsCalled() {
         // GIVEN
         var didCallOnCompletingOnboardingIntro = false
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: false, urlOpener: MockURLOpener())
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPhoneFlow
+        let sut = makeSUT(currentOnboardingStep: .addressBarPositionSelection)
         sut.onCompletingOnboardingIntro = {
             didCallOnCompletingOnboardingIntro = true
         }
@@ -155,7 +189,8 @@ final class OnboardingIntroViewModelTests: XCTestCase {
 
     func testWhenSubscribeToViewStateAndIsIpadFlowThenShouldSendLanding() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: true, urlOpener: MockURLOpener())
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPadFlow
+        let sut = makeSUT()
 
         // WHEN
         let result = sut.state
@@ -166,7 +201,8 @@ final class OnboardingIntroViewModelTests: XCTestCase {
 
     func testWhenOnAppearIsCalledAndAndIsIpadFlowThenViewStateChangesToStartOnboardingDialogAndProgressIsHidden() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: true, urlOpener: MockURLOpener())
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPadFlow
+        let sut = makeSUT()
         XCTAssertEqual(sut.state, .landing)
 
         // WHEN
@@ -178,7 +214,8 @@ final class OnboardingIntroViewModelTests: XCTestCase {
 
     func testWhenStartOnboardingActionIsCalledAndIsIpadFlowThenViewStateChangesToBrowsersComparisonDialogAndProgressIs1Of3() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: true)
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPadFlow
+        let sut = makeSUT()
         XCTAssertEqual(sut.state, .landing)
 
         // WHEN
@@ -190,8 +227,8 @@ final class OnboardingIntroViewModelTests: XCTestCase {
 
     func testWhenSetDefaultBrowserActionIsCalledAndIsIpadFlowThenViewStateChangesToChooseAppIconDialogAndProgressIs2Of3() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: true, urlOpener: MockURLOpener())
-        XCTAssertEqual(sut.state, .landing)
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPadFlow
+        let sut = makeSUT(currentOnboardingStep: .browserComparison)
 
         // WHEN
         sut.setDefaultBrowserAction()
@@ -202,8 +239,8 @@ final class OnboardingIntroViewModelTests: XCTestCase {
 
     func testWhenCancelSetDefaultBrowserActionIsCalledAndIsIpadFlowThenViewStateChangesToChooseAppIconDialogAndProgressIs2Of3() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: true, urlOpener: MockURLOpener())
-        XCTAssertEqual(sut.state, .landing)
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPadFlow
+        let sut = makeSUT(currentOnboardingStep: .browserComparison)
 
         // WHEN
         sut.cancelSetDefaultBrowserAction()
@@ -215,7 +252,8 @@ final class OnboardingIntroViewModelTests: XCTestCase {
     func testWhenAppIconPickerContinueActionIsCalledAndIsIphoneFlowThenOnCompletingOnboardingIntroIsCalled() {
         // GIVEN
         var didCallOnCompletingOnboardingIntro = false
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: true, urlOpener: MockURLOpener())
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPadFlow
+        let sut = makeSUT(currentOnboardingStep: .appIconSelection)
         sut.onCompletingOnboardingIntro = {
             didCallOnCompletingOnboardingIntro = true
         }
@@ -232,126 +270,123 @@ final class OnboardingIntroViewModelTests: XCTestCase {
 
     func testWhenOnAppearIsCalledThenPixelReporterTrackOnboardingIntroImpression() {
         // GIVEN
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener())
-        XCTAssertFalse(pixelReporterMock.didCallTrackOnboardingIntroImpression)
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureOnboardingIntroImpression)
 
         // WHEN
         sut.onAppear()
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackOnboardingIntroImpression)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureOnboardingIntroImpression)
     }
 
     func testWhenStartOnboardingActionIsCalledThenPixelReporterTrackBrowserComparisonImpression() {
         // GIVEN
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener())
-        XCTAssertFalse(pixelReporterMock.didCallTrackBrowserComparisonImpression)
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureBrowserComparisonImpression)
 
         // WHEN
         sut.startOnboardingAction()
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackBrowserComparisonImpression)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureBrowserComparisonImpression)
     }
 
     func testWhenChooseBrowserIsCalledThenPixelReporterTrackChooseBrowserCTAAction() {
         // GIVEN
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener())
-        XCTAssertFalse(pixelReporterMock.didCallTrackChooseBrowserCTAAction)
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureChooseBrowserCTAAction)
 
         // WHEN
         sut.setDefaultBrowserAction()
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackChooseBrowserCTAAction)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureChooseBrowserCTAAction)
     }
 
-    func testWhenStateChangesToChooseAppIconThenPixelReporterTrackAppIconImpression() {
+    func testWhenAppIconScreenPresentedThenPixelReporterTrackAppIconImpression() {
         // GIVEN
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener())
-        XCTAssertFalse(pixelReporterMock.didCallTrackBrowserComparisonImpression)
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPadFlow
+        let sut = makeSUT(currentOnboardingStep: .browserComparison)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureBrowserComparisonImpression)
 
         // WHEN
         sut.setDefaultBrowserAction()
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackChooseAppIconImpression)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureChooseAppIconImpression)
     }
 
     func testWhenAppIconPickerContinueActionIsCalledAndIconIsCustomColorThenPixelReporterTrackCustomAppIconColor() {
         // GIVEN
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener(), appIconProvider: { .purple })
-        XCTAssertFalse(pixelReporterMock.didCallTrackChooseCustomAppIconColor)
+        appIconProvider = { .purple }
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureChooseCustomAppIconColor)
 
         // WHEN
         sut.appIconPickerContinueAction()
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackChooseCustomAppIconColor)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureChooseCustomAppIconColor)
     }
 
     func testWhenAppIconPickerContinueActionIsCalledAndIconIsDefaultColorThenPixelReporterDoNotTrackCustomAppIconColor() {
         // GIVEN
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener(), appIconProvider: { .defaultAppIcon })
-        XCTAssertFalse(pixelReporterMock.didCallTrackChooseCustomAppIconColor)
+        appIconProvider = { .defaultAppIcon }
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureChooseCustomAppIconColor)
 
         // WHEN
         sut.appIconPickerContinueAction()
 
         // THEN
-        XCTAssertFalse(pixelReporterMock.didCallTrackChooseCustomAppIconColor)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureChooseCustomAppIconColor)
     }
 
     func testWhenStateChangesToChooseAddressBarPositionThenPixelReporterTrackAddressBarSelectionImpression() {
         // GIVEN
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, isIpad: false, urlOpener: MockURLOpener())
-        XCTAssertFalse(pixelReporterMock.didCallTrackAddressBarPositionSelectionImpression)
+        onboardingManagerMock.onboardingSteps = OnboardingIntroStep.defaultIPhoneFlow
+        let sut = makeSUT(currentOnboardingStep: .appIconSelection)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureAddressBarPositionSelectionImpression)
 
         // WHEN
         sut.appIconPickerContinueAction()
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackAddressBarPositionSelectionImpression)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureAddressBarPositionSelectionImpression)
     }
 
     func testWhenSelectAddressBarPositionActionIsCalledAndAddressBarPositionIsBottomThenPixelReporterTrackChooseBottomAddressBarPosition() {
         // GIVEN
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener(), addressBarPositionProvider: { .bottom })
-        XCTAssertFalse(pixelReporterMock.didCallTrackChooseBottomAddressBarPosition)
+        addressBarPositionProvider = { .bottom }
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureChooseBottomAddressBarPosition)
 
         // WHEN
         sut.selectAddressBarPositionAction()
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackChooseBottomAddressBarPosition)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureChooseBottomAddressBarPosition)
     }
 
     func testWhenSelectAddressBarPositionActionIsCalledAndAddressBarPositionIsTopThenPixelReporterDoNotTrackChooseBottomAddressBarPosition() {
         // GIVEN
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener(), addressBarPositionProvider: { .top })
-        XCTAssertFalse(pixelReporterMock.didCallTrackChooseBottomAddressBarPosition)
+        addressBarPositionProvider = { .top }
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureChooseBottomAddressBarPosition)
 
         // WHEN
         sut.selectAddressBarPositionAction()
 
         // THEN
-        XCTAssertFalse(pixelReporterMock.didCallTrackChooseBottomAddressBarPosition)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureChooseBottomAddressBarPosition)
     }
 
     // MARK: - Copy
 
     func testIntroTitleIsCorrect() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, urlOpener: MockURLOpener())
+        let sut = makeSUT()
 
         // WHEN
         let result = sut.copy.introTitle
@@ -362,7 +397,7 @@ final class OnboardingIntroViewModelTests: XCTestCase {
 
     func testBrowserComparisonTitleIsCorrect() {
         // GIVEN
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, urlOpener: MockURLOpener())
+        let sut = makeSUT()
 
         // WHEN
         let result = sut.copy.browserComparisonTitle
@@ -371,90 +406,178 @@ final class OnboardingIntroViewModelTests: XCTestCase {
         XCTAssertEqual(result, UserText.Onboarding.BrowsersComparison.title)
     }
 
-    // MARK: - Add To Dock
-
-    func testWhenSetDefaultBrowserActionIsCalledAndIsIphoneFlowThenViewStateChangesToAddToDockPromoDialogAndProgressIs2Of4() {
-        // GIVEN
-        onboardingManager.addToDockEnabledState = .intro
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: false, urlOpener: MockURLOpener())
-        XCTAssertEqual(sut.state, .landing)
-
-        // WHEN
-        sut.setDefaultBrowserAction()
-
-        // THEN
-        XCTAssertEqual(sut.state, .onboarding(.init(type: .addToDockPromoDialog, step: .init(currentStep: 2, totalSteps: 4))))
-    }
-
-    func testWhenAddtoDockContinueActionIsCalledAndIsIphoneFlowThenThenViewStateChangesToChooseAppIconAndProgressIs3of4() {
-        // GIVEN
-        onboardingManager.addToDockEnabledState = .intro
-        let sut = OnboardingIntroViewModel(pixelReporter: OnboardingPixelReporterMock(), onboardingManager: onboardingManager, isIpad: false)
-        XCTAssertEqual(sut.state, .landing)
-
-        // WHEN
-        sut.addToDockContinueAction(isShowingAddToDockTutorial: false)
-
-        // THEN
-        XCTAssertEqual(sut.state, .onboarding(.init(type: .chooseAppIconDialog, step: .init(currentStep: 3, totalSteps: 4))))
-    }
-
     // MARK: - Pixel Add To Dock
 
     func testWhenStateChangesToAddToDockPromoThenPixelReporterTrackAddToDockPromoImpression() {
         // GIVEN
-        onboardingManager.addToDockEnabledState = .intro
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener())
-        XCTAssertFalse(pixelReporterMock.didCallTrackAddToDockPromoImpression)
+        let sut = makeSUT(currentOnboardingStep: .browserComparison)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureAddToDockPromoImpression)
 
         // WHEN
         sut.setDefaultBrowserAction()
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackAddToDockPromoImpression)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureAddToDockPromoImpression)
     }
 
     func testWhenAddToDockShowTutorialActionIsCalledThenPixelReporterTrackAddToDockPromoShowTutorialCTA() {
         // GIVEN
-        onboardingManager.addToDockEnabledState = .intro
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener())
-        XCTAssertFalse(pixelReporterMock.didCallTrackAddToDockPromoShowTutorialCTAAction)
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureAddToDockPromoShowTutorialCTAAction)
 
         // WHEN
         sut.addtoDockShowTutorialAction()
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackAddToDockPromoShowTutorialCTAAction)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureAddToDockPromoShowTutorialCTAAction)
     }
 
     func testWhenAddToDockContinueActionIsCalledAndIsShowingFromAddToDockTutorialIsTrueThenPixelReporterTrackAddToDockTutorialDismissCTA() {
         // GIVEN
-        onboardingManager.addToDockEnabledState = .intro
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener())
-        XCTAssertFalse(pixelReporterMock.didCallTrackAddToDockTutorialDismissCTAAction)
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureAddToDockTutorialDismissCTAAction)
 
         // WHEN
         sut.addToDockContinueAction(isShowingAddToDockTutorial: true)
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackAddToDockTutorialDismissCTAAction)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureAddToDockTutorialDismissCTAAction)
     }
 
     func testWhenAddToDockContinueActionIsCalledAndIsShowingFromAddToDockTutorialIsFalseThenPixelReporterTrackAddToDockTutorialDismissCTA() {
         // GIVEN
-        onboardingManager.addToDockEnabledState = .intro
-        let pixelReporterMock = OnboardingPixelReporterMock()
-        let sut = OnboardingIntroViewModel(pixelReporter: pixelReporterMock, onboardingManager: onboardingManager, urlOpener: MockURLOpener())
-        XCTAssertFalse(pixelReporterMock.didCallTrackAddToDockPromoDismissCTAAction)
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureAddToDockPromoDismissCTAAction)
 
         // WHEN
         sut.addToDockContinueAction(isShowingAddToDockTutorial: false)
 
         // THEN
-        XCTAssertTrue(pixelReporterMock.didCallTrackAddToDockPromoDismissCTAAction)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureAddToDockPromoDismissCTAAction)
     }
 
+    // MARK: - Set As Default Experiment
+
+    func testWhenAppIconPickerContinueActionIsCalledAndSetAsDefaultBrowserEnabledThenCheckIfBrowserIsDefault() {
+        // GIVEN
+        onboardingManagerMock.isEnrolledInSetAsDefaultBrowserExperiment = true
+        let sut = makeSUT()
+        XCTAssertFalse(defaultBrowserManagerMock.didCallDefaultBrowserInfo)
+
+        // WHEN
+        sut.appIconPickerContinueAction()
+
+        // THEN
+        XCTAssertTrue(defaultBrowserManagerMock.didCallDefaultBrowserInfo)
+    }
+
+    func testWhenAppIconPickerContinueActionIsCalledAndSetAsDefaultBrowserDisabledThenDoNotCheckIfBrowserIsDefault() {
+        // GIVEN
+        onboardingManagerMock.isEnrolledInSetAsDefaultBrowserExperiment = false
+        let sut = makeSUT()
+        XCTAssertFalse(defaultBrowserManagerMock.didCallDefaultBrowserInfo)
+
+        // WHEN
+        sut.appIconPickerContinueAction()
+
+        // THEN
+        XCTAssertFalse(defaultBrowserManagerMock.didCallDefaultBrowserInfo)
+    }
+
+    func testWhenDefaultBrowserInfoIsSuccessfulResult_AndIsDefaultBrowserIsTrue_ThenFireDidSetDefaultBrowserPixel() {
+        // GIVEN
+        onboardingManagerMock.isEnrolledInSetAsDefaultBrowserExperiment = true
+        defaultBrowserManagerMock.resultToReturn = .successful(isDefaultBrowser: true)
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+
+        // WHEN
+        sut.appIconPickerContinueAction()
+
+        // THEN
+        XCTAssertTrue(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+    }
+
+    func testWhenDefaultBrowserInfoIsSuccessfulResult_AndIsDefaultBrowserIsFalse_ThenFireDidNotSetDefaultBrowserPixel() {
+        // GIVEN
+        onboardingManagerMock.isEnrolledInSetAsDefaultBrowserExperiment = true
+        defaultBrowserManagerMock.resultToReturn = .successful(isDefaultBrowser: false)
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+
+        // WHEN
+        sut.appIconPickerContinueAction()
+
+        // THEN
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertTrue(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+    }
+
+    func testWhenDefaultBrowserInfoIsFailureResult_AndFailureIsRateLimited_ThenDoNotFireSetDefaultBrowserPixels() {
+        // GIVEN
+        onboardingManagerMock.isEnrolledInSetAsDefaultBrowserExperiment = true
+        defaultBrowserManagerMock.resultToReturn = .failed(reason: .rateLimitReached(updatedStoredInfo: nil))
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+
+        // WHEN
+        sut.appIconPickerContinueAction()
+
+        // THEN
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+    }
+
+    func testWhenDefaultBrowserInfoIsFailureResult_AndFailureIsUnkownError_ThenDoNotFireSetDefaultBrowserPixels() {
+        // GIVEN
+        onboardingManagerMock.isEnrolledInSetAsDefaultBrowserExperiment = true
+        defaultBrowserManagerMock.resultToReturn = .failed(reason: .unknownError(NSError(domain: #function, code: 0)))
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+
+        // WHEN
+        sut.appIconPickerContinueAction()
+
+        // THEN
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+    }
+
+    func testWhenDefaultBrowserInfoIsFailureResult_AndFailureIsNotSupportedOnCurrentOSVersion_ThenDoNotFireSetDefaultBrowserPixels() {
+        // GIVEN
+        onboardingManagerMock.isEnrolledInSetAsDefaultBrowserExperiment = true
+        defaultBrowserManagerMock.resultToReturn = .failed(reason: .notSupportedOnCurrentOSVersion)
+        let sut = makeSUT()
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+
+        // WHEN
+        sut.appIconPickerContinueAction()
+
+        // THEN
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidSetDDGAsDefaultBrowser)
+        XCTAssertFalse(pixelReporterMock.didCallMeasureDidNotSetDDGAsDefaultBrowser)
+    }
+
+}
+
+extension OnboardingIntroViewModelTests {
+
+    func makeSUT(currentOnboardingStep: OnboardingIntroStep = .introDialog) -> OnboardingIntroViewModel {
+        OnboardingIntroViewModel(
+            defaultBrowserManager: defaultBrowserManagerMock,
+            pixelReporter: pixelReporterMock,
+            onboardingManager: onboardingManagerMock,
+            urlOpener: urlOpenerMock,
+            currentOnboardingStep: currentOnboardingStep,
+            appIconProvider: appIconProvider,
+            addressBarPositionProvider: addressBarPositionProvider
+        )
+    }
+    
 }

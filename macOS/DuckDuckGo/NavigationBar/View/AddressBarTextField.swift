@@ -28,29 +28,6 @@ import os.log
 
 final class AddressBarTextField: NSTextField {
 
-    /**
-     * This property controls address bar mode and influences view styling.
-     *
-     * If set to `false` (default), the view is styled for displaying as the regular address bar
-     * in the navigation bar. If set to `true`, it's styled for displaying as a standalone view
-     * on the New Tab Page.
-     */
-    var isSearchBox: Bool = false
-
-    /**
-     * This property keeps the preferred appearance (color scheme) of the New Tab Page.
-     *
-     * It's non-nil when a custom NTP background is in use. Its value is used to properly
-     * style the suggestion window when it's shown.
-     */
-    var homePagePreferredAppearance: NSAppearance? {
-        didSet {
-            if suggestionWindowController != nil {
-                suggestionViewController.view.appearance = homePagePreferredAppearance
-            }
-        }
-    }
-
     var tabCollectionViewModel: TabCollectionViewModel! {
         didSet {
             subscribeToSelectedTabViewModel()
@@ -321,44 +298,22 @@ final class AddressBarTextField: NSTextField {
     }
 
     private func navigate(suggestion: Suggestion?) {
-        let ntpExperiment = NewTabPageSearchBoxExperiment()
-        let ntpExperimentCohort: NewTabPageSearchBoxExperiment.Cohort? = ntpExperiment.isActive ? ntpExperiment.cohort : nil
-        let source: NewTabPageSearchBoxExperiment.SearchSource? = {
-            guard ntpExperiment.isActive else {
-                return nil
-            }
-            let isNewTab = tabCollectionViewModel.selectedTabViewModel?.tab.content == .newtab
-            guard isNewTab else {
-                return .addressBar
-            }
-            return isSearchBox ? .ntpSearchBox : .ntpAddressBar
-        }()
-
-        switch suggestion {
-        case .phrase, .none:
-            if let source {
-                ntpExperiment.recordSearch(from: source)
-            }
-        default:
-            break
-        }
-
         let autocompletePixel: GeneralPixel? = {
             switch suggestion {
             case .phrase:
-                return .autocompleteClickPhrase(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
+                return .autocompleteClickPhrase
             case .website:
-                return .autocompleteClickWebsite(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
+                return .autocompleteClickWebsite
             case .bookmark(_, _, let isFavorite, _):
                 if isFavorite {
-                    return .autocompleteClickFavorite(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
+                    return .autocompleteClickFavorite
                 } else {
-                    return .autocompleteClickBookmark(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
+                    return .autocompleteClickBookmark
                 }
             case .historyEntry:
-                return .autocompleteClickHistory(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
+                return .autocompleteClickHistory
             case .openTab:
-                return .autocompleteClickOpenTab(from: source, cohort: ntpExperimentCohort, onboardingCohort: ntpExperiment.onboardingCohort)
+                return .autocompleteClickOpenTab
             default:
                 return nil
             }
@@ -371,9 +326,9 @@ final class AddressBarTextField: NSTextField {
         if case .internalPage(title: let title, url: let url) = suggestion,
            url == .bookmarks || url.isSettingsURL {
             // when choosing an internal page suggestion prefer already open tab
-            switchTo(OpenTab(title: title, url: url))
-        } else if case .openTab(let title, url: let url) = suggestion {
-            switchTo(OpenTab(title: title, url: url))
+            switchTo(OpenTab(tabId: nil, title: title, url: url))
+        } else if case .openTab(let title, url: let url, tabId: let tabId) = suggestion {
+            switchTo(OpenTab(tabId: tabId, title: title, url: url))
         } else if NSApp.isCommandPressed {
             openNew(NSApp.isOptionPressed ? .window : .tab, selected: NSApp.isShiftPressed, suggestion: suggestion)
         } else {
@@ -492,7 +447,7 @@ final class AddressBarTextField: NSTextField {
     private func switchTo(_ tab: OpenTab) {
         // reset value so it‘s not restored next time we come back to the tab
         value = .text("", userTyped: false)
-        WindowControllersManager.shared.show(url: tab.url, source: .switchToOpenTab, newTab: true /* in case not found */)
+        WindowControllersManager.shared.show(url: tab.url, tabId: tab.tabId, source: .switchToOpenTab, newTab: true /* in case not found */)
     }
 
     private func makeUrl(suggestion: Suggestion?, stringValueWithoutSuffix: String, completion: @escaping (URL?, String, Bool) -> Void) {
@@ -503,7 +458,7 @@ final class AddressBarTextField: NSTextField {
              .historyEntry(title: _, url: let url, allowedInTopHits: _),
              .website(url: let url),
              .internalPage(title: _, url: let url),
-             .openTab(title: _, url: let url):
+             .openTab(title: _, url: let url, _):
             finalUrl = url
             userEnteredValue = url.absoluteString
         case .phrase(phrase: let phrase),
@@ -639,20 +594,6 @@ final class AddressBarTextField: NSTextField {
         guard let window = window, let suggestionWindow = suggestionWindowController?.window else {
             Logger.general.error("AddressBarTextField: Window not available")
             return
-        }
-
-        if isSearchBox {
-            suggestionViewController.innerBorderViewTopConstraint.constant = 0
-            suggestionViewController.innerBorderViewBottomConstraint.constant = 0
-            suggestionViewController.innerBorderViewLeadingConstraint.constant = 0
-            suggestionViewController.innerBorderViewTrailingConstraint.constant = 0
-            suggestionViewController.backgroundView.borderWidth = 0
-
-            suggestionViewController.view.appearance = homePagePreferredAppearance
-            suggestionViewController.view.effectiveAppearance.performAsCurrentDrawingAppearance {
-                suggestionViewController.backgroundView.backgroundColor = .homePageAddressBarBackground
-                suggestionViewController.innerBorderView.borderColor = .homePageAddressBarBorder
-            }
         }
 
         guard !suggestionWindow.isVisible, isFirstResponder else { return }
@@ -909,7 +850,7 @@ extension AddressBarTextField {
                 } else {
                     self = .url(url)
                 }
-            case .openTab(title: _, url: let url):
+            case .openTab(title: _, url: let url, _):
                 self = .openTab(url)
             case .unknown:
                 self = Suffix.search
@@ -975,7 +916,7 @@ extension AddressBarTextField: NSTextFieldDelegate {
 
     func controlTextDidChange(_ obj: Notification) {
         handleTextDidChange()
-        onboardingDelegate?.trackAddressBarTypedIn()
+        onboardingDelegate?.measureAddressBarTypedIn()
     }
 
     private func handleTextDidChange() {

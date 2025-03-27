@@ -43,6 +43,7 @@ import PrivacyStats
 import Subscription
 import NetworkProtectionIPC
 import DataBrokerProtection
+import DataBrokerProtectionShared
 import RemoteMessaging
 import os.log
 import Freemium
@@ -79,11 +80,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 #endif
 
     let pinnedTabsManager = PinnedTabsManager()
+    let pinnedTabsManagerProvider: PinnedTabsManagerProviding!
     private(set) var stateRestorationManager: AppStateRestorationManager!
     private var grammarFeaturesManager = GrammarFeaturesManager()
     let internalUserDecider: InternalUserDecider
     private var isInternalUserSharingCancellable: AnyCancellable?
     let featureFlagger: FeatureFlagger
+    let featureFlagOverridesPublishingHandler = FeatureFlagOverridesPublishingHandler<FeatureFlag>()
     private var appIconChanger: AppIconChanger!
     private var autoClearHandler: AutoClearHandler!
     private(set) var autofillPixelReporter: AutofillPixelReporter?
@@ -97,9 +100,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let bookmarksManager = LocalBookmarkManager.shared
     var privacyDashboardWindow: NSWindow?
 
+    private var updateProgressCancellable: AnyCancellable?
+
     private(set) lazy var newTabPageCoordinator: NewTabPageCoordinator = NewTabPageCoordinator(
         appearancePreferences: .shared,
-        settingsModel: homePageSettingsModel,
+        customizationModel: newTabPageCustomizationModel,
         activeRemoteMessageModel: activeRemoteMessageModel,
         historyCoordinator: HistoryCoordinator.shared,
         privacyStats: privacyStats,
@@ -107,12 +112,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     )
     let privacyStats: PrivacyStatsCollecting
     let activeRemoteMessageModel: ActiveRemoteMessageModel
-    let homePageSettingsModel = HomePage.Models.SettingsModel()
+    let newTabPageCustomizationModel = NewTabPageCustomizationModel()
     let remoteMessagingClient: RemoteMessagingClient!
     let onboardingStateMachine: ContextualOnboardingStateMachine & ContextualOnboardingStateUpdater
     let defaultBrowserAndDockPromptPresenter: DefaultBrowserAndDockPromptPresenter
 
-    let isAuthV2Enabled = false
+    let isAuthV2Enabled: Bool
     var subscriptionAuthV1toV2Bridge: any SubscriptionAuthV1toV2Bridge
     let subscriptionManagerV1: (any SubscriptionManager)?
     let subscriptionManagerV2: (any SubscriptionManagerV2)?
@@ -133,6 +138,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     public let vpnSettings = VPNSettings(defaults: .netP)
 
+    private lazy var vpnAppEventsHandler = VPNAppEventsHandler(
+        featureGatekeeper: DefaultVPNFeatureGatekeeper(subscriptionManager: subscriptionAuthV1toV2Bridge),
+        featureFlagOverridesPublishingHandler: featureFlagOverridesPublishingHandler,
+        defaults: .netP)
     private var networkProtectionSubscriptionEventHandler: NetworkProtectionSubscriptionEventHandler?
 
     private var vpnXPCClient: VPNControllerXPCClient {
@@ -145,7 +154,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let authManager = DataBrokerAuthenticationManagerBuilder.buildAuthenticationManager(subscriptionManager: subscriptionAuthV1toV2Bridge)
         return DataBrokerProtectionSubscriptionEventHandler(featureDisabler: DataBrokerProtectionFeatureDisabler(),
                                                             authenticationManager: authManager,
-                                                            pixelHandler: DataBrokerProtectionPixelsHandler())
+                                                            pixelHandler: DataBrokerProtectionMacOSPixelsHandler())
     }()
 
     private var didFinishLaunching = false
@@ -174,7 +183,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // will not add crash handlers and will fire pixel on applicationDidFinishLaunching if didCrashDuringCrashHandlersSetUp == true
         let didCrashDuringCrashHandlersSetUp = UserDefaultsWrapper(key: .didCrashDuringCrashHandlersSetUp, defaultValue: false)
         _didCrashDuringCrashHandlersSetUp = didCrashDuringCrashHandlersSetUp
-        if case .normal = NSApplication.runType,
+        if case .normal = AppVersion.runType,
            !didCrashDuringCrashHandlersSetUp.wrappedValue {
 
             didCrashDuringCrashHandlersSetUp.wrappedValue = true
@@ -183,7 +192,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         do {
-            let encryptionKey = NSApplication.runType.requiresEnvironment ? try keyStore.readKey() : nil
+            let encryptionKey = AppVersion.runType.requiresEnvironment ? try keyStore.readKey() : nil
             fileStore = EncryptedFileStore(encryptionKey: encryptionKey)
         } catch {
             Logger.general.error("App Encryption Key could not be read: \(error.localizedDescription)")
@@ -193,7 +202,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let internalUserDeciderStore = InternalUserDeciderStore(fileStore: fileStore)
         internalUserDecider = DefaultInternalUserDecider(store: internalUserDeciderStore)
 
-        if NSApplication.runType.requiresEnvironment {
+        if AppVersion.runType.requiresEnvironment {
             Self.configurePixelKit()
 
             Database.shared.loadStore { _, error in
@@ -238,13 +247,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
 #if DEBUG
-        AppPrivacyFeatures.shared = NSApplication.runType.requiresEnvironment
+        AppPrivacyFeatures.shared = AppVersion.runType.requiresEnvironment
         // runtime mock-replacement for Unit Tests, to be redone when we‘ll be doing Dependency Injection
         ? AppPrivacyFeatures(contentBlocking: AppContentBlocking(internalUserDecider: internalUserDecider, configurationStore: configurationStore), database: Database.shared)
         : AppPrivacyFeatures(contentBlocking: ContentBlockingMock(), httpsUpgradeStore: HTTPSUpgradeStoreMock())
 #else
         AppPrivacyFeatures.shared = AppPrivacyFeatures(contentBlocking: AppContentBlocking(internalUserDecider: internalUserDecider, configurationStore: configurationStore), database: Database.shared)
 #endif
+
+        pinnedTabsManagerProvider = PinnedTabsManagerProvider()
 
         configurationManager = ConfigurationManager(store: configurationStore)
 
@@ -253,7 +264,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             privacyConfigManager: AppPrivacyFeatures.shared.contentBlocking.privacyConfigurationManager,
             localOverrides: FeatureFlagLocalOverrides(
                 keyValueStore: UserDefaults.appConfiguration,
-                actionHandler: FeatureFlagOverridesPublishingHandler<FeatureFlag>()
+                actionHandler: featureFlagOverridesPublishingHandler
             ),
             experimentManager: ExperimentCohortsManager(store: ExperimentsDataStore(), fireCohortAssigned: PixelKit.fireExperimentEnrollmentPixel(subfeatureID:experiment:)),
             for: FeatureFlag.self
@@ -270,8 +281,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return WindowControllersManager.shared
         })
 
+        self.isAuthV2Enabled = featureFlagger.isFeatureOn(.privacyProAuthV2)
         if !isAuthV2Enabled {
             // MARK: V1
+            Logger.general.log("Using Auth V1")
             let subscriptionManager = DefaultSubscriptionManager(featureFlagger: featureFlagger)
             subscriptionCookieManager = SubscriptionCookieManager(tokenProvider: subscriptionManager, currentCookieStore: {
                 WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
@@ -281,6 +294,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             subscriptionAuthV1toV2Bridge = subscriptionManager
         } else {
             // MARK: V2
+            Logger.general.log("Using Auth V2")
             let subscriptionAppGroup = Bundle.main.appGroup(bundle: .subs)
             let subscriptionUserDefaults = UserDefaults(suiteName: subscriptionAppGroup)!
             let subscriptionEnvironment = DefaultSubscriptionManager.getSavedOrDefaultEnvironment(userDefaults: subscriptionUserDefaults)
@@ -291,6 +305,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                                    canPerformAuthMigration: true,
                                                                    canHandlePixels: true)
 
+            // Expired refresh token recovery
+            if #available(iOS 15.0, macOS 12.0, *) {
+                let restoreFlow = DefaultAppStoreRestoreFlowV2(subscriptionManager: subscriptionManager, storePurchaseManager: subscriptionManager.storePurchaseManager())
+                subscriptionManager.tokenRecoveryHandler = {
+                    try await DeadTokenRecoverer.attemptRecoveryFromPastPurchase(subscriptionManager: subscriptionManager, restoreFlow: restoreFlow)
+                }
+            } else {
+                subscriptionManager.tokenRecoveryHandler = {
+                    try await DeadTokenRecoverer.reportDeadRefreshToken()
+                }
+            }
+
             subscriptionCookieManager = SubscriptionCookieManagerV2(subscriptionManager: subscriptionManager, currentCookieStore: {
                 WKHTTPCookieStoreWrapper(store: WKWebsiteDataStore.default().httpCookieStore)
             }, eventMapping: SubscriptionCookieManageEventPixelMapping())
@@ -298,16 +324,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             subscriptionManagerV1 = nil
             subscriptionAuthV1toV2Bridge = subscriptionManager
         }
-        // --------
+        vpnSettings.isAuthV2Enabled = isAuthV2Enabled
 
-        // MARK:
-
-        if NSApplication.runType.requiresEnvironment {
+        if AppVersion.runType.requiresEnvironment {
             remoteMessagingClient = RemoteMessagingClient(
                 database: RemoteMessagingDatabase().db,
                 bookmarksDatabase: BookmarkDatabase.shared.db,
                 appearancePreferences: .shared,
-                pinnedTabsManager: pinnedTabsManager,
+                pinnedTabsManagerProvider: pinnedTabsManagerProvider,
                 internalUserDecider: internalUserDecider,
                 configurationStore: configurationStore,
                 remoteMessagingAvailabilityProvider: PrivacyConfigurationRemoteMessagingAvailabilityProvider(
@@ -334,8 +358,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         vpnSettings.alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
 
         // Update DBP environment and match the Subscription environment
-        let dbpSettings = DataBrokerProtectionSettings()
-        DataBrokerProtectionSettings().alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
+        let dbpSettings = DataBrokerProtectionSettings(defaults: .dbp)
+        dbpSettings.alignTo(subscriptionEnvironment: subscriptionAuthV1toV2Bridge.currentEnvironment)
+        dbpSettings.isAuthV2Enabled = isAuthV2Enabled
 
         // Also update the stored run type so the login item knows if tests are running
         dbpSettings.updateStoredRunType()
@@ -354,7 +379,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                                                                                   freemiumDBPFeature: freemiumDBPFeature)
 
 #if DEBUG
-        if NSApplication.runType.requiresEnvironment {
+        if AppVersion.runType.requiresEnvironment {
             privacyStats = PrivacyStats(databaseProvider: PrivacyStatsDatabase(), errorEvents: PrivacyStatsErrorHandler())
         } else {
             privacyStats = MockPrivacyStats()
@@ -372,7 +397,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         stateRestorationManager = AppStateRestorationManager(fileStore: fileStore)
 
 #if SPARKLE
-        if NSApp.runType != .uiTests {
+        if AppVersion.runType != .uiTests {
             updateController = UpdateController(internalUserDecider: internalUserDecider)
             stateRestorationManager.subscribeToAutomaticAppRelaunching(using: updateController.willRelaunchAppPublisher)
         }
@@ -391,14 +416,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Freemium DBP
         freemiumDBPFeature.subscribeToDependencyUpdates()
 
-        _=NSPopover.swizzleShowRelativeToRectOnce
+        _ = NSPopover.swizzleShowRelativeToRectOnce
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
     func applicationDidFinishLaunching(_ notification: Notification) {
-        guard NSApp.runType.requiresEnvironment else { return }
+        guard AppVersion.runType.requiresEnvironment else { return }
         defer {
             didFinishLaunching = true
+        }
+
+        Task {
+            await subscriptionManagerV1?.loadInitialData()
+            await subscriptionManagerV2?.loadInitialData()
+
+            vpnAppEventsHandler.applicationDidFinishLaunching()
         }
 
         HistoryCoordinator.shared.loadHistory {
@@ -413,7 +444,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // https://app.asana.com/0/1177771139624306/1207024603216659/f
         LottieConfiguration.shared.renderingEngine = .mainThread
 
-        if case .normal = NSApp.runType {
+        if case .normal = AppVersion.runType {
             FaviconManager.shared.loadFavicons()
         }
         configurationManager.start()
@@ -434,12 +465,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         dockCustomization = DockCustomizer()
         #endif
 
-        let statisticsLoader = NSApp.runType.requiresEnvironment ? StatisticsLoader.shared : nil
+        let statisticsLoader = AppVersion.runType.requiresEnvironment ? StatisticsLoader.shared : nil
         statisticsLoader?.load()
 
         startupSync()
-
-        subscriptionManagerV1?.loadInitialData()
 
         let privacyConfigurationManager = ContentBlocking.shared.privacyConfigurationManager
 
@@ -464,14 +493,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
 
-        if [.normal, .uiTests].contains(NSApp.runType) {
+        if [.normal, .uiTests].contains(AppVersion.runType) {
             stateRestorationManager.applicationDidFinishLaunching()
         }
 
         BWManager.shared.initCommunication()
 
         if WindowsManager.windows.first(where: { $0 is MainWindow }) == nil,
-           case .normal = NSApp.runType {
+           case .normal = AppVersion.runType {
             WindowsManager.openNewWindow(lazyLoadTabs: true)
         }
 
@@ -502,6 +531,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         subscribeToEmailProtectionStatusNotifications()
         subscribeToDataImportCompleteNotification()
         subscribeToInternalUserChanges()
+        subscribeToUpdateControllerChanges()
 
         fireFailedCompilationsPixelIfNeeded()
 
@@ -509,7 +539,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         networkProtectionSubscriptionEventHandler?.registerForSubscriptionAccountManagerEvents()
 
-        NetworkProtectionAppEvents(featureGatekeeper: DefaultVPNFeatureGatekeeper(subscriptionManager: subscriptionAuthV1toV2Bridge)).applicationDidFinishLaunching()
         UNUserNotificationCenter.current().delegate = self
 
         dataBrokerProtectionSubscriptionEventHandler.registerForSubscriptionAccountManagerEvents()
@@ -525,12 +554,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setUpAutoClearHandler()
 
         setUpAutofillPixelReporter()
-
-#if SPARKLE
-        if NSApp.runType != .uiTests {
-            updateController.checkNewApplicationVersion()
-        }
-#endif
 
         remoteMessagingClient?.startRefreshingRemoteMessages()
 
@@ -573,7 +596,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         PixelExperiment.fireOnboardingTestPixels()
         initializeSync()
 
-        NetworkProtectionAppEvents(featureGatekeeper: DefaultVPNFeatureGatekeeper(subscriptionManager: subscriptionAuthV1toV2Bridge)).applicationDidBecomeActive()
+        vpnAppEventsHandler.applicationDidBecomeActive()
 
         let freemiumDBPUserStateManager = DefaultFreemiumDBPUserStateManager(userDefaults: .dbp)
         let pirGatekeeper = DefaultDataBrokerProtectionFeatureGatekeeper(subscriptionManager: subscriptionAuthV1toV2Bridge,
@@ -581,9 +604,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         DataBrokerProtectionAppEvents(featureGatekeeper: pirGatekeeper).applicationDidBecomeActive()
 
-        subscriptionManagerV1?.refreshCachedSubscriptionAndEntitlements { isSubscriptionActive in
+        subscriptionManagerV1?.refreshCachedSubscriptionAndEntitlements { [weak self] isSubscriptionActive in
             if isSubscriptionActive {
                 PixelKit.fire(PrivacyProPixel.privacyProSubscriptionActive, frequency: .daily)
+
+                // Temporary experiment pixel - https://app.asana.com/0/1206488453854252/1209643339074944
+                guard let self else { return }
+                let experimentManager = FreemiumDBPPixelExperimentManager(subscriptionManager: self.subscriptionAuthV1toV2Bridge)
+                experimentManager.sendOneTimeCohortSubscriptionStatusPixel()
+                // ----
             }
         }
 
@@ -641,7 +670,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if WindowControllersManager.shared.mainWindowControllers.isEmpty,
-           case .normal = sender.runType {
+           case .normal = AppVersion.runType {
             WindowsManager.openNewWindow()
             return true
         }
@@ -831,6 +860,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         isInternalUserSharingCancellable = internalUserDecider.isInternalUserPublisher
             .assign(to: \.isInternalUser, onWeaklyHeld: UserDefaults.appConfiguration)
+    }
+
+    private func subscribeToUpdateControllerChanges() {
+#if SPARKLE
+        guard AppVersion.runType != .uiTests else { return }
+
+        updateProgressCancellable = updateController.updateProgressPublisher
+            .sink { [weak self] progress in
+                self?.updateController.checkNewApplicationVersionIfNeeded(updateProgress: progress)
+            }
+#endif
     }
 
     private func emailDidSignInNotification(_ notification: Notification) {

@@ -40,8 +40,9 @@ protocol ContextualOnboardingLogic {
     var shouldShowPrivacyButtonPulse: Bool { get }
     var isShowingSearchSuggestions: Bool { get }
     var isShowingSitesSuggestions: Bool { get }
-    var isShowingAddToDockDialog: Bool { get }
 
+    func setTryAnonymousSearchMessageSeen()
+    func setTryVisitSiteMessageSeen()
     func setSearchMessageSeen()
     func setFireEducationMessageSeen()
     func clearedBrowserData()
@@ -53,6 +54,10 @@ protocol ContextualOnboardingLogic {
 }
 
 protocol PrivacyProPromotionCoordinating {
+    /// Indicates whether the Privacy Pro promotion dialog is currently being displayed
+    var isShowingPrivacyProPromotion: Bool { get }
+    
+    /// Indicates whether the user has seen the Privacy Pro promotion dialog
     var privacyProPromotionDialogSeen: Bool { get set }
 }
 
@@ -215,7 +220,6 @@ final class DaxDialogs: NewTabDialogSpecProvider, ContextualOnboardingLogic {
     private var settings: DaxDialogsSettings
     private var entityProviding: EntityProviding
     private let variantManager: VariantManager
-    private let addToDockManager: OnboardingAddToDockManaging
     private let launchOptionsHandler: LaunchOptionsHandler
 
     private var nextHomeScreenMessageOverride: HomeScreenSpec?
@@ -231,14 +235,12 @@ final class DaxDialogs: NewTabDialogSpecProvider, ContextualOnboardingLogic {
     init(settings: DaxDialogsSettings = DefaultDaxDialogsSettings(),
          entityProviding: EntityProviding,
          variantManager: VariantManager = DefaultVariantManager(),
-         onboardingManager: OnboardingAddToDockManaging = OnboardingManager(),
          launchOptionsHandler: LaunchOptionsHandler = LaunchOptionsHandler(),
          onboardingPrivacyProPromoExperiment: OnboardingPrivacyProPromoExperimenting = OnboardingPrivacyProPromoExperiment()
     ) {
         self.settings = settings
         self.entityProviding = entityProviding
         self.variantManager = variantManager
-        self.addToDockManager = onboardingManager
         self.launchOptionsHandler = launchOptionsHandler
         self.onboardingPrivacyProPromoExperiment = onboardingPrivacyProPromoExperiment
     }
@@ -283,10 +285,6 @@ final class DaxDialogs: NewTabDialogSpecProvider, ContextualOnboardingLogic {
 
     var isShowingSitesSuggestions: Bool {
         return lastShownDaxDialogType.flatMap(BrowsingSpec.SpecType.init(rawValue:)) == .visitWebsite || currentHomeSpec == .subsequent
-    }
-
-    var isShowingAddToDockDialog: Bool {
-        return currentHomeSpec == .final && addToDockManager.addToDockEnabledState == .contextual
     }
 
     var isEnabled: Bool {
@@ -381,7 +379,7 @@ final class DaxDialogs: NewTabDialogSpecProvider, ContextualOnboardingLogic {
         case BrowsingSpec.SpecType.afterSearch.rawValue:
             return BrowsingSpec.afterSearch
         case BrowsingSpec.SpecType.visitWebsite.rawValue:
-            return .visitWebsite
+            return nil
         case BrowsingSpec.SpecType.withoutTrackers.rawValue:
             return BrowsingSpec.withoutTrackers
         case BrowsingSpec.SpecType.siteIsMajorTracker.rawValue:
@@ -420,6 +418,14 @@ final class DaxDialogs: NewTabDialogSpecProvider, ContextualOnboardingLogic {
     func fireButtonPulseCancelled() {
         fireButtonPulseTimer?.invalidate()
         settings.fireButtonEducationShownOrExpired = true
+    }
+
+    func setTryAnonymousSearchMessageSeen() {
+        settings.tryAnonymousSearchShown = true
+    }
+
+    func setTryVisitSiteMessageSeen() {
+        settings.tryVisitASiteShown = true
     }
 
     func setSearchMessageSeen() {
@@ -544,11 +550,12 @@ final class DaxDialogs: NewTabDialogSpecProvider, ContextualOnboardingLogic {
             return .final
         }
 
-        if !settings.browsingAfterSearchShown {
+        // If try a visit hasn't been show return initial
+        if !settings.tryAnonymousSearchShown {
             return .initial
         }
 
-        if firstSearchSeenButNoSiteVisited {
+        if !settings.tryVisitASiteShown {
             return .subsequent
         }
         
@@ -654,6 +661,11 @@ final class DaxDialogs: NewTabDialogSpecProvider, ContextualOnboardingLogic {
 }
 
 extension DaxDialogs: PrivacyProPromotionCoordinating {
+    
+    var isShowingPrivacyProPromotion: Bool {
+        currentHomeSpec == .privacyProPromotion
+    }
+
     var privacyProPromotionDialogSeen: Bool {
         get {
             settings.privacyProPromotionDialogShown

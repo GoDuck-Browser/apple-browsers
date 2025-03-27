@@ -37,63 +37,131 @@ enum OnboardingAddToDockState: String, Equatable, CaseIterable, CustomStringConv
     }
 }
 
+typealias OnboardingIntroExperimentManaging = OnboardingSetAsDefaultExperimentManaging
+typealias OnboardingManaging = OnboardingSettingsURLProvider & OnboardingStepsProvider & OnboardingIntroExperimentManaging
+
 final class OnboardingManager {
-    private var appDefaults: AppDebugSettings
     private let featureFlagger: FeatureFlagger
     private let variantManager: VariantManager
     private let isIphone: Bool
 
+    private var isNewUser: Bool {
+#if DEBUG || ALPHA
+        // If debug or alpha build enable testing the experiment with cohort override.
+        // If running unit tests do not override behaviour.
+        if ProcessInfo().arguments.contains("testing") {
+            variantManager.currentVariant?.name != VariantIOS.returningUser.name
+        } else {
+            true
+        }
+#else
+        variantManager.currentVariant?.name != VariantIOS.returningUser.name
+#endif
+    }
+
     init(
-        appDefaults: AppDebugSettings = AppDependencyProvider.shared.appSettings,
         featureFlagger: FeatureFlagger = AppDependencyProvider.shared.featureFlagger,
         variantManager: VariantManager = DefaultVariantManager(),
         isIphone: Bool = UIDevice.current.userInterfaceIdiom == .phone
     ) {
-        self.appDefaults = appDefaults
         self.featureFlagger = featureFlagger
         self.variantManager = variantManager
         self.isIphone = isIphone
     }
 }
 
-// MARK: - Add to Dock
+// MARK: - Settings URL Provider
 
-protocol OnboardingAddToDockManaging: AnyObject {
-    var addToDockEnabledState: OnboardingAddToDockState { get }
+protocol OnboardingSettingsURLProvider: AnyObject {
+    var settingsURLPath: String { get }
 }
 
-protocol OnboardingAddToDockDebugging: AnyObject {
-    var addToDockLocalFlagState: OnboardingAddToDockState { get set }
-    var isAddToDockFeatureFlagEnabled: Bool { get }
+extension OnboardingSettingsURLProvider {
+
+    var settingsURLPath: String {
+        UIApplication.openSettingsURLString
+    }
+
 }
 
-extension OnboardingManager: OnboardingAddToDockManaging, OnboardingAddToDockDebugging {
+extension OnboardingManager: OnboardingSettingsURLProvider {}
 
-    var addToDockEnabledState: OnboardingAddToDockState {
-        // Check if the variant supports Add to Dock
-        if variantManager.isSupported(feature: .addToDockIntro) {
-            return .intro
-        } else if variantManager.isSupported(feature: .addToDockContextual) {
-            return .contextual
-        }
 
-        // If the variant does not support Add to Dock check if it's enabled for internal users.
-        guard isAddToDockFeatureFlagEnabled && isIphone else { return .disabled }
+// MARK: - Onboarding Steps Provider
 
-        return addToDockLocalFlagState
+enum OnboardingIntroStep {
+    case introDialog
+    case browserComparison
+    case appIconSelection
+    case addressBarPositionSelection
+    case addToDockPromo
+
+    static let defaultIPhoneFlow: [OnboardingIntroStep] = [.introDialog, .browserComparison, .addToDockPromo, .appIconSelection, .addressBarPositionSelection]
+    static let defaultIPadFlow: [OnboardingIntroStep] = [.introDialog, .browserComparison, .appIconSelection]
+}
+
+protocol OnboardingStepsProvider: AnyObject {
+    var onboardingSteps: [OnboardingIntroStep] { get }
+}
+
+extension OnboardingManager: OnboardingStepsProvider {
+
+    var onboardingSteps: [OnboardingIntroStep] {
+        isIphone ? OnboardingIntroStep.defaultIPhoneFlow : OnboardingIntroStep.defaultIPadFlow
     }
 
-    var addToDockLocalFlagState: OnboardingAddToDockState {
-        get {
-            appDefaults.onboardingAddToDockState
-        }
-        set {
-            appDefaults.onboardingAddToDockState = newValue
-        }
+    var userHasSeenAddToDockPromoDuringOnboarding: Bool {
+        onboardingSteps.contains(.addToDockPromo)
     }
 
-    var isAddToDockFeatureFlagEnabled: Bool {
-        featureFlagger.isFeatureOn(.onboardingAddToDock)
+}
+
+// MARK: - Set Default Browser Experiment
+
+protocol OnboardingSetAsDefaultExperimentManaging: AnyObject {
+    var isEnrolledInSetAsDefaultBrowserExperiment: Bool { get }
+    func resolveSetAsDefaultBrowserExperimentCohort() -> OnboardingSetAsDefaultBrowserCohort?
+}
+
+extension OnboardingManager: OnboardingSetAsDefaultExperimentManaging {
+
+    var isEnrolledInSetAsDefaultBrowserExperiment: Bool {
+        resolveSetAsDefaultBrowserExperimentCohort() != nil
+    }
+
+    func resolveSetAsDefaultBrowserExperimentCohort() -> OnboardingSetAsDefaultBrowserCohort? {
+        // The experiment runs only for users on iOS 18.3+ and for non returning users
+        guard #available(iOS 18.3, *), isNewUser else { return nil }
+
+        return featureFlagger.resolveCohort(for: FeatureFlag.onboardingSetAsDefaultBrowser) as? OnboardingSetAsDefaultBrowserCohort
+    }
+
+}
+
+// MARK: - Settings URL Provider + Set As Default Browser Experiment
+
+extension OnboardingSettingsURLProvider where Self: OnboardingSetAsDefaultExperimentManaging {
+
+    // If running iOS 18.3 check if the user should be enrolled in the SetAsDefaultBrowser experiment.
+    // If the user is enrolled in the control group or SetAsDefaultBrowser is not running, deep link to DDG custom settings in the Settings app.
+    // If the user is enrolled in the treatment group, deep link to the Settings app for default app selection.
+    var settingsURLPath: String {
+        if #available(iOS 18.3, *) {
+            switch resolveSetAsDefaultBrowserExperimentCohort() {
+            case .none:
+                Logger.onboarding.debug("SetAsDefaultBrowser experiment not running")
+                return UIApplication.openSettingsURLString
+            case .control:
+                Logger.onboarding.debug("User enrolled in the control group of the SetAsDefaultBrowser experiment")
+                return UIApplication.openSettingsURLString
+            case .treatment:
+                Logger.onboarding.debug("User enrolled in the treatment group of the SetAsDefaultBrowser experiment")
+                return UIApplication.openDefaultApplicationsSettingsURLString
+            }
+        } else {
+            Logger.onboarding.debug("User running an iOS version lower than iOS 18.3. Returning DDG’s custom settings url in the Settings app.")
+            return UIApplication.openSettingsURLString
+        }
     }
 
 }
