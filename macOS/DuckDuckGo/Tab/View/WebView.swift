@@ -41,6 +41,10 @@ protocol WebViewZoomLevelDelegate: AnyObject {
 @objc(DuckDuckGo_WebView)
 final class WebView: WKWebView {
 
+    struct KeyCode {
+        static let escape: UInt16 = 53
+    }
+
     weak var contextMenuDelegate: WebViewContextMenuDelegate?
     weak var interactionEventsDelegate: WebViewInteractionEventsDelegate?
     weak var zoomLevelDelegate: WebViewZoomLevelDelegate?
@@ -178,6 +182,19 @@ final class WebView: WKWebView {
     }
 
     override func keyDown(with event: NSEvent) {
+        if event.keyCode == KeyCode.escape,
+           let window,
+           window.styleMask.contains(.fullScreen),
+           let fullscreenController = (window.windowController as? MainWindowController)?.fullscreenController {
+            fullscreenController.setShouldPreventFullscreenExit(true)
+            self.evaluateJavaScript("document.activeElement && document.activeElement.tagName",
+                                    completionHandler: { [weak self] (result, error) in
+                guard let self = self else { return }
+                let tagName = result as? String
+                fullscreenController.handleFullscreenExitDecision(tagName: tagName, window: self.window)
+            })
+        }
+
         super.keyDown(with: event)
         interactionEventsDelegate?.webView(self, keyDown: event)
     }
