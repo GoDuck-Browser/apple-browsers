@@ -27,7 +27,7 @@ final class GeolocationProviderTests: XCTestCase {
 
     let geolocationServiceMock = GeolocationServiceMock()
     let appIsActive = CurrentValueSubject<Bool, Never>(true)
-    var windows = [NSWindow]()
+    var windows = [MockWindow]()
     var webViews = [WKWebView]()
     var webView: WKWebView!
     var shouldGrant = true
@@ -79,8 +79,10 @@ final class GeolocationProviderTests: XCTestCase {
         webView = makeWebView()
     }
 
+    var w: NSWindow!
     func makeWebView() -> WKWebView {
-        let window = NSWindow(contentRect: NSRect(x: 300, y: 300, width: 50, height: 50), styleMask: .titled, backing: .buffered, defer: false)
+        let window = MockWindow()
+        windows.append(window)
         let view = NSView(frame: NSRect(x: 0, y: 0, width: 50, height: 50))
         let webView = WKWebView(frame: view.bounds)
         view.addSubview(webView)
@@ -95,8 +97,6 @@ final class GeolocationProviderTests: XCTestCase {
         webView.uiDelegate = self
 
         window.contentView = view
-        window.orderFront(nil)
-        windows.append(window)
 
         return webView
     }
@@ -105,7 +105,8 @@ final class GeolocationProviderTests: XCTestCase {
         geolocationServiceMock.onSubscriptionReceived = nil
         geolocationServiceMock.onSubscriptionCancelled = nil
         geolocationHandler = nil
-        windows.forEach { $0.orderOut(nil) }
+        windows = []
+        webView = nil
     }
 
     func testWhenGeolocationRequestedThenGeolocationIsProvidedOnce() {
@@ -132,10 +133,8 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.getCurrentPosition, baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
-        waitForExpectations(timeout: 10.0)
+        waitForExpectations(timeout: 2)
         XCTAssertEqual(geolocationServiceMock.history, [.subscribed,
                                                         .locationPublished,
                                                         .cancelled])
@@ -161,8 +160,6 @@ final class GeolocationProviderTests: XCTestCase {
 
         webView.loadHTMLString(Self.getCurrentPosition, baseURL: .duckDuckGo)
 
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
         waitForExpectations(timeout: 10.0)
     }
 
@@ -177,8 +174,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.getCurrentPosition, baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 10.0)
 
@@ -208,8 +203,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 10.0)
 
@@ -226,8 +219,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.watchPosition(enableHighAccuracy: true), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 5.0)
 
@@ -247,8 +238,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.watchPosition(enableHighAccuracy: true), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 5.0)
 
@@ -295,9 +284,8 @@ final class GeolocationProviderTests: XCTestCase {
 
         webView.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
         webView2.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
-        webView2.window?.orderFrontRegardless()
+        windows[0].isKeyWindow = false
+        windows[1].isKeyWindow = true
 
         waitForExpectations(timeout: 10.0)
 
@@ -335,8 +323,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 10.0)
 
@@ -368,8 +354,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 10.0)
 
@@ -416,9 +400,8 @@ final class GeolocationProviderTests: XCTestCase {
 
         webView.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
         webView2.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
-        webView2.window?.orderFrontRegardless()
+        windows[0].isKeyWindow = false
+        windows[1].isKeyWindow = true
 
         waitForExpectations(timeout: 10.0)
 
@@ -463,8 +446,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 10.0)
 
@@ -496,8 +477,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 5)
 
@@ -537,8 +516,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.getCurrentPosition, baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 5)
     }
@@ -561,8 +538,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
 
         webView.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 5)
 
@@ -572,8 +547,6 @@ final class GeolocationProviderTests: XCTestCase {
             e3.fulfill()
         }
         webView.loadHTMLString(Self.watchPosition(), baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 5)
 
@@ -598,8 +571,6 @@ final class GeolocationProviderTests: XCTestCase {
         webView.configuration.processPool.geolocationProvider!.revoke()
 
         webView.loadHTMLString(Self.getCurrentPosition, baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 5)
 
@@ -618,8 +589,6 @@ final class GeolocationProviderTests: XCTestCase {
         webView.configuration.processPool.geolocationProvider!.revoke()
 
         webView.loadHTMLString(Self.getCurrentPosition, baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 5)
 
@@ -635,8 +604,6 @@ final class GeolocationProviderTests: XCTestCase {
         }
         webView.configuration.processPool.geolocationProvider!.reset()
         webView.loadHTMLString(Self.getCurrentPosition, baseURL: .duckDuckGo)
-        NSApp.activate(ignoringOtherApps: true)
-        webView.window?.orderFrontRegardless()
 
         waitForExpectations(timeout: 5)
         XCTAssertEqual(geolocationServiceMock.history, [.locationPublished, .subscribed, .cancelled])
