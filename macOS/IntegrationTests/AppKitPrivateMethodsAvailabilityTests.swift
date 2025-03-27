@@ -23,7 +23,6 @@ import AppKit
 final class AppKitPrivateMethodsAvailabilityTests: XCTestCase {
 
     func testLastLeftHit() throws {
-        throw XCTSkip()
         var window: NSWindow!
         autoreleasepool {
             window = NSWindow()

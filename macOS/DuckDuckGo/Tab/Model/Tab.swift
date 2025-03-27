@@ -330,7 +330,7 @@ protocol NewWindowPolicyDecisionMaker {
                 let knownUserContentControllers = processPool.knownUserContentControllers
                 processPool.onDeinit {
                     for controller in knownUserContentControllers {
-                        assert(controller.userContentController == nil, "\(controller) has not been deallocated")
+                        assert(controller.userContentController == nil, "\(controller.userContentController!) has not been deallocated")
                     }
                 }
             }

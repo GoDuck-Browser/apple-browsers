@@ -22,23 +22,15 @@ import Combine
 
 final class BookmarksBarViewControllerTests: XCTestCase {
 
-    var mockWindow: MockWindow!
     var vc: BookmarksBarViewController!
     var bookmarksManager: MockBookmarkManager!
     var cancellables: Set<AnyCancellable> = []
 
     @MainActor override func setUpWithError() throws {
-        mockWindow = MockWindow()
         bookmarksManager = MockBookmarkManager()
-        let mainViewController = MainViewController(bookmarkManager: bookmarksManager, autofillPopoverPresenter: DefaultAutofillPopoverPresenter())
-        let mainWindowcontroller = MainWindowController(mainViewController: mainViewController, popUp: false)
-        mainWindowcontroller.window = mockWindow
-        vc = mainViewController.bookmarksBarViewController
-        WindowControllersManager.shared.lastKeyMainWindowController = mainWindowcontroller
     }
 
     override func tearDownWithError() throws {
-        mockWindow = nil
         vc = nil
         bookmarksManager = nil
         cancellables.removeAll()
@@ -46,7 +38,14 @@ final class BookmarksBarViewControllerTests: XCTestCase {
 
     @MainActor
     func testWhenImportBookmarksClicked_ThenDataImportViewShown() throws {
-        throw XCTSkip("Unit Tests should not present UI")
+        let mockWindow = MockWindow()
+        let mainViewController = MainViewController(bookmarkManager: bookmarksManager, autofillPopoverPresenter: DefaultAutofillPopoverPresenter())
+        mockWindow.contentView = mainViewController.view
+
+        vc = mainViewController.bookmarksBarViewController
+        vc.viewWillAppear()
+        vc.viewDidAppear()
+
         // When
         vc.importBookmarksClicked(self)
 
@@ -56,13 +55,13 @@ final class BookmarksBarViewControllerTests: XCTestCase {
 
     @MainActor
     func testWhenThereAreBookmarks_ThenImportBookmarksButtonIsHidden() throws {
-        throw XCTSkip("Unit Tests should not expose UI")
-
         // Given
         let boolmarkList = BookmarkList(topLevelEntities: [Bookmark(id: "test", url: "", title: "Something", isFavorite: false), Bookmark(id: "test", url: "", title: "Impori", isFavorite: false)])
         let vc = BookmarksBarViewController.create(tabCollectionViewModel: TabCollectionViewModel(), bookmarkManager: bookmarksManager)
-        let window = NSWindow(contentViewController: vc)
-        window.makeKeyAndOrderFront(nil)
+        _=vc.view
+        vc.viewWillAppear()
+        vc.viewDidAppear()
+
         let expectation = XCTestExpectation(description: "Wait for list update")
         bookmarksManager.listPublisher
             .dropFirst()
@@ -82,11 +81,11 @@ final class BookmarksBarViewControllerTests: XCTestCase {
 
     @MainActor
     func testWhenThereAreNoBookmarks_AndbookmarkListEmpty_ThenImportBookmarksButtonIsNotShown() throws {
-        throw XCTSkip("Unit Tests should not expose UI")
         // Given
         let vc = BookmarksBarViewController.create(tabCollectionViewModel: TabCollectionViewModel(), bookmarkManager: bookmarksManager)
-        let window = NSWindow(contentViewController: vc)
-            window.makeKeyAndOrderFront(nil)
+        _=vc.view
+        vc.viewWillAppear()
+        vc.viewDidAppear()
 
         // Then
         XCTAssertTrue(vc.importBookmarksButton.isHidden)
@@ -94,12 +93,13 @@ final class BookmarksBarViewControllerTests: XCTestCase {
 
     @MainActor
     func testWhenThereAreNoBookmarks_ThenImportBookmarksButtonIsShown() throws {
-        throw XCTSkip("Unit Tests should not expose UI")
         // Given
         let boolmarkList = BookmarkList(topLevelEntities: [])
         let vc = BookmarksBarViewController.create(tabCollectionViewModel: TabCollectionViewModel(), bookmarkManager: bookmarksManager)
-        let window = NSWindow(contentViewController: vc)
-        window.makeKeyAndOrderFront(nil)
+        _=vc.view
+        vc.viewWillAppear()
+        vc.viewDidAppear()
+
         let expectation = XCTestExpectation(description: "Wait for list update")
         bookmarksManager.listPublisher
             .dropFirst()

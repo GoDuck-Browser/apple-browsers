@@ -379,9 +379,10 @@ class MaliciousSiteProtectionIntegrationTests: XCTestCase {
 class MockFeatureFlagger: FeatureFlagger {
     var internalUserDecider: InternalUserDecider = DefaultInternalUserDecider(store: MockInternalUserStoring())
     var localOverrides: FeatureFlagLocalOverriding?
+    var isFeatureOn = true
 
     func isFeatureOn<Flag: FeatureFlagDescribing>(for featureFlag: Flag, allowOverride: Bool) -> Bool {
-        return true
+        return isFeatureOn
     }
 
     func resolveCohort<Flag>(for featureFlag: Flag, allowOverride: Bool) -> (any FeatureFlagCohortDescribing)? where Flag: FeatureFlagDescribing {

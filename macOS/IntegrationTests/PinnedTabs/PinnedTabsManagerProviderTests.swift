@@ -32,10 +32,13 @@ final class PinnedTabsManagerProviderTests: XCTestCase {
         provider = PinnedTabsManagerProvider(tabsPreferences: tabsPreferences)
     }
 
+    @MainActor
     override func tearDown() {
         provider = nil
         tabsPreferences = nil
         cancellables.removeAll()
+
+        WindowControllersManager.shared.mainWindowControllers.forEach { $0.close() }
         super.tearDown()
     }
 
