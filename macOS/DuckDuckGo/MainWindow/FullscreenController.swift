@@ -16,7 +16,6 @@
 //  limitations under the License.
 //
 
-
 import Cocoa
 import WebKit
 

@@ -412,7 +412,7 @@ extension WebView /* _WKFindDelegate */ {
 extension WebView {
 
     func evaluateIfWebsiteHandlesEscape(completion: @escaping (_ handledByWebsite: Bool) -> Void) {
-        self.evaluateJavaScript("document.activeElement && document.activeElement.tagName") { result, error in
+        self.evaluateJavaScript("document.activeElement && document.activeElement.tagName") { result, _ in
             guard let tag = result as? String else {
                 // No active element = not handled
                 completion(false)
