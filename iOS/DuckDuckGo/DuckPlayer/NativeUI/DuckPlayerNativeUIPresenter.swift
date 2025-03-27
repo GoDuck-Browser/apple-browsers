@@ -340,7 +340,7 @@ final class DuckPlayerNativeUIPresenter {
             onButtonTapped: onButtonTapped
         )
     }
-    
+
     @MainActor
     func presentDismissCountToast() {
         var message = AttributedString(UserText.duckPlayerNativePillDismissCountToastMessage)
@@ -428,7 +428,7 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
         NSLayoutConstraint.activate([
             hostingController.view.leadingAnchor.constraint(equalTo: hostView.view.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: hostView.view.trailingAnchor),
-            bottomConstraint!,
+            bottomConstraint!
         ])
 
         // Store reference to the hosting controller

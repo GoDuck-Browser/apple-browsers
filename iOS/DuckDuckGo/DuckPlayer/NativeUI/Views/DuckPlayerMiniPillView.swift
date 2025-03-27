@@ -79,7 +79,7 @@ struct DuckPlayerMiniPillView: View {
         static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
         static let viewOffset: CGFloat = 20
         static let regularPadding: CGFloat = 16
-       
+
     }
 
     private var sheetContent: some View {

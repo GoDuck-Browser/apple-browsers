@@ -24,7 +24,7 @@ private enum Constants {
     static let backgroundColor: Color = .black
     static let textColor: Color = .white
     static let horizontalPadding: CGFloat = 20
-    static let bottomPadding: CGFloat = 100
+    static let verticalPadding: CGFloat = 100
     static let height: CGFloat = 50
     static let fadeAnimationDuration: TimeInterval = 0.2
     static let defaultVisibleDuration: TimeInterval = 3.0
@@ -129,7 +129,8 @@ struct DuckPlayerToastView: View {
     private var yPosition: CGFloat {
         switch position {
         case .top:
-            return offset ?? Constants.bottomPadding
+            let basePosition = Constants.bottomPadding
+            return offset.map { basePosition + $0 } ?? basePosition
         case .bottom:
             let baseOffset = -Constants.bottomPadding
             return offset.map { baseOffset + $0 } ?? baseOffset
@@ -149,7 +150,7 @@ struct DuckPlayerToastView: View {
                 HStack {
                     Text(message)
                         .lineLimit(3)
-                        .daxBodyRegular()                        
+                        .daxBodyRegular()
                         .fixedSize(horizontal: false, vertical: true)
 
                     Spacer()

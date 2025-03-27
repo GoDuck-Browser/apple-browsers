@@ -42,7 +42,7 @@ public enum DuckPlayerContainer {
         @Published var sheetAnimationCompleted = false
         @Published var isDragging = false
         @Published private(set) var isKeyboardVisible = false
-        
+
         private var originalSheetState = false // Add this to store the original state
         private var subscriptions = Set<AnyCancellable>()
         private var shouldAnimate = true
@@ -58,7 +58,7 @@ public enum DuckPlayerContainer {
                 .sink { [weak self] notification in
                     guard let self = self else { return }
                     let isVisible = notification.name == UIResponder.keyboardWillShowNotification
-                    
+
                     if isVisible {
                         self.originalSheetState = self.sheetVisible
                         self.isKeyboardVisible = true

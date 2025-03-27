@@ -229,7 +229,7 @@ final class DuckPlayerViewModel: ObservableObject {
     }
 
     // MARK: - Public Methods
-    
+
     /// Hides the auto-open toggle UI element
     func hideAutoOpenToggle() {
         showAutoOpenOnYoutubeToggle = false
