@@ -23,6 +23,7 @@ protocol AIChatUserScriptHandling {
     func openAIChatSettings(params: Any, message: UserScriptMessage) async -> Encodable?
     func getAIChatNativeConfigValues(params: Any, message: UserScriptMessage) -> Encodable?
     func closeAIChat(params: Any, message: UserScriptMessage) -> Encodable?
+    func getAIChatNativePrompt(params: Any, message: UserScriptMessage) -> Encodable?
 }
 
 struct AIChatUserScriptHandler: AIChatUserScriptHandling {
@@ -56,7 +57,8 @@ struct AIChatUserScriptHandler: AIChatUserScriptHandling {
         AIChatNativeConfigValues(isAIChatHandoffEnabled: false,
                                  platform: platform,
                                  supportsClosingAIChat: true,
-                                 supportsOpeningSettings: true)
+                                 supportsOpeningSettings: true,
+                                 supportsNativePrompt: true)
     }
 
     func closeAIChat(params: Any, message: UserScriptMessage) -> Encodable? {
@@ -65,11 +67,28 @@ struct AIChatUserScriptHandler: AIChatUserScriptHandling {
         }
         return nil
     }
+
+    func getAIChatNativePrompt(params: Any, message: UserScriptMessage) -> Encodable? {
+        AIChatNativePrompt(platform: platform,
+                           query: .init(prompt: "How many potatos are too many potatoes?",
+                                        autoSubmit: true))
+    }
 }
 
- private struct AIChatNativeConfigValues: Codable {
+private struct AIChatNativeConfigValues: Codable {
     let isAIChatHandoffEnabled: Bool
     let platform: String
     let supportsClosingAIChat: Bool
     let supportsOpeningSettings: Bool
+    let supportsNativePrompt: Bool
+}
+
+private struct AIChatNativePrompt: Codable {
+    struct Query: Codable {
+        let prompt: String
+        let autoSubmit: Bool
+    }
+
+    let platform: String
+    let query: Query?
 }

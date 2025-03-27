@@ -26,6 +26,7 @@ final class AIChatUserScript: NSObject, Subfeature {
         case getUserValues
         case getAIChatNativeConfigValues
         case closeAIChat
+        case getAIChatNativePrompt
     }
 
     private let handler: AIChatUserScriptHandling
@@ -60,6 +61,8 @@ final class AIChatUserScript: NSObject, Subfeature {
             return handler.getAIChatNativeConfigValues
         case .closeAIChat:
             return handler.closeAIChat
+        case .getAIChatNativePrompt:
+            return handler.getAIChatNativePrompt
         default:
             return nil
         }
