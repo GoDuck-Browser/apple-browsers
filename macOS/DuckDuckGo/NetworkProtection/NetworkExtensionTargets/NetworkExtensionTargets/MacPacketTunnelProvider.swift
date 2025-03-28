@@ -508,7 +508,7 @@ final class MacPacketTunnelProvider: PacketTunnelProvider {
                 do {
                     let token = try await subscriptionManager.getTokenContainer(policy: .localValid)
                     return .success(token.decodedAccessToken.hasEntitlement(.networkProtection))
-                }catch {
+                } catch {
                     return .failure(error)
                 }
             }
