@@ -84,7 +84,7 @@ enum SubscriptionTransactionStatus: String {
 }
 
 // https://app.asana.com/0/1205842942115003/1209254337758531/f
-public struct GetFeatureValue: Encodable {
+public struct GetFeatureConfigurationResponse: Encodable {
     let useUnifiedFeedback: Bool = true
     let useSubscriptionsAuthV2: Bool
 }
@@ -816,7 +816,7 @@ final class DefaultSubscriptionPagesUseSubscriptionFeatureV2: SubscriptionPagesU
     }
 
     func getFeatureConfig(params: Any, original: WKScriptMessage) async throws -> Encodable? {
-        return GetFeatureValue(useSubscriptionsAuthV2: true)
+        return GetFeatureConfigurationResponse(useSubscriptionsAuthV2: true)
     }
 
     // Auth V1 unused methods
