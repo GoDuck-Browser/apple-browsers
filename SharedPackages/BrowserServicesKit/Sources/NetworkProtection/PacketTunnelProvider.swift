@@ -276,10 +276,10 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
     @objc
     public static var isAuthV2Enabled: Bool {
         get {
-            UserDefaults().bool(forKey: #keyPath(isAuthV2Enabled))
+            UserDefaults.standard.bool(forKey: #keyPath(isAuthV2Enabled))
         }
         set {
-            UserDefaults().set(newValue, forKey: #keyPath(isAuthV2Enabled))
+            UserDefaults.standard.set(newValue, forKey: #keyPath(isAuthV2Enabled))
         }
     }
 
