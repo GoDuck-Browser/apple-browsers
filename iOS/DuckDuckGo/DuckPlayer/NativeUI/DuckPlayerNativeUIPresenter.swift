@@ -380,8 +380,7 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
         if shouldShowPrimingModal {
             appSettings.duckPlayerNativeUIPrimingModalPresentationEventCount += 1
             appSettings.duckPlayerNativeUIPrimingModalTimeSinceLastPresented = Int(Date().timeIntervalSince1970)
-            presentPrimingModal(for: videoID, in: hostViewController, timestamp: timestamp)
-            return
+            presentPrimingModal(for: videoID, in: hostViewController, timestamp: timestamp)            
         }
 
         // Determine the pill type

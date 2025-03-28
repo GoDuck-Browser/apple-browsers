@@ -269,7 +269,7 @@ private struct SheetView<Content: View>: View {
                             )
                     }
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, 12)
             }
         }
         .onWidthChange { newWidth in
