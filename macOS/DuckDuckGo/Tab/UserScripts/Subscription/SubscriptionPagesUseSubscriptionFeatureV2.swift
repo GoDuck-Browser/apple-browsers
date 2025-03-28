@@ -25,8 +25,8 @@ import Subscription
 import PixelKit
 import os.log
 import Freemium
-import DataBrokerProtection
-import DataBrokerProtectionShared
+import DataBrokerProtection_macOS
+import DataBrokerProtectionCore
 import Networking
 
 // https://app.asana.com/0/0/1209325145462549
