@@ -204,6 +204,8 @@ class MainViewController: UIViewController {
 
     let isAuthV2Enabled: Bool
 
+    private var duckPlayerEntryPointVisible = false
+
     init(
         bookmarksDatabase: CoreDataDatabase,
         bookmarksDatabaseCleaner: BookmarkDatabaseCleaner,
@@ -649,24 +651,11 @@ class MainViewController: UIViewController {
 
     @objc func refreshViewsBasedOnDuckPlayerPresentation(notification: Notification) {
         guard let isVisible = notification.userInfo?[DuckPlayerNativeUIPresenter.NotificationKeys.isVisible] as? Bool else { return }
-        refreshViewsBasedOnAddressBarPosition(appSettings.currentAddressBarPosition, duckPlayerEntryPointVisible: isVisible)
+        duckPlayerEntryPointVisible = isVisible
+        refreshViewsBasedOnAddressBarPosition(appSettings.currentAddressBarPosition)
     }
 
-    private func updateChromeForDuckPlayer(in position: AddressBarPosition, isVisible: Bool) {
-        if isVisible {
-            switch position {
-            case .top:
-                   self.viewCoordinator.hideToolbarSeparator()
-            case .bottom:
-            // Use higher delays then refreshViewsBasedOnAddressBarPosition below
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                     self.viewCoordinator.omniBar.hideSeparator()
-                }
-            }
-        }
-    }
-
-    func refreshViewsBasedOnAddressBarPosition(_ position: AddressBarPosition, duckPlayerEntryPointVisible: Bool = false) {
+    func refreshViewsBasedOnAddressBarPosition(_ position: AddressBarPosition) {
         switch position {
         case .top:
             swipeTabsCoordinator?.addressBarPositionChanged(isTop: true)
@@ -686,8 +675,31 @@ class MainViewController: UIViewController {
                 self.viewCoordinator.hideToolbarSeparator()
             }
         }
-        updateChromeForDuckPlayer(in: position, isVisible: duckPlayerEntryPointVisible)
+
         adjustNewTabPageSafeAreaInsets(for: position)
+        updateChromeForDuckPlayer()
+
+    }
+
+    private func updateChromeForDuckPlayer() {
+        let position = appSettings.currentAddressBarPosition
+        switch position {
+        case .top:
+            if duckPlayerEntryPointVisible {
+                viewCoordinator.hideToolbarSeparator()
+            } else {
+                viewCoordinator.showToolbarSeparator()
+            }
+        case .bottom:
+            // Use higher delays then refreshViewsBasedOnAddressBarPosition
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.31) {
+                if self.duckPlayerEntryPointVisible {
+                    self.viewCoordinator.omniBar.hideSeparator()
+                } else {
+                    self.viewCoordinator.omniBar.showSeparator()
+                }
+            }
+        }
     }
 
     private func adjustNewTabPageSafeAreaInsets(for addressBarPosition: AddressBarPosition) {
@@ -1191,6 +1203,7 @@ class MainViewController: UIViewController {
         refreshOmniBar()
         refreshBackForwardButtons()
         refreshBackForwardMenuItems()
+        updateChromeForDuckPlayer()
     }
 
     private func refreshTabIcon() {
@@ -1256,6 +1269,7 @@ class MainViewController: UIViewController {
         }
 
         self.showMenuHighlighterIfNeeded()
+        updateChromeForDuckPlayer()
 
         let isKeyboardShowing = omniBar.isTextFieldEditing
         coordinator.animate { _ in
