@@ -205,6 +205,14 @@ final class AddressBarButtonsViewController: NSViewController {
         setupButtons()
     }
 
+    override func viewWillDisappear() {
+        super.viewWillDisappear()
+
+        if let permissionAuthorizationPopover, permissionAuthorizationPopover.isShown {
+            permissionAuthorizationPopover.close()
+        }
+    }
+
     func showBadgeNotification(_ type: NavigationBarBadgeAnimationView.AnimationType) {
         if !isAnyShieldAnimationPlaying {
             buttonsBadgeAnimator.showNotification(withType: type,
