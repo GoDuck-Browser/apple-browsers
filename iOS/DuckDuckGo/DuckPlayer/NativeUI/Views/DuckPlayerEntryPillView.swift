@@ -43,7 +43,7 @@ struct DuckPlayerEntryPillView: View {
         static let shadowOpacity: CGFloat = 0.1
         static let shadowRadius: CGFloat = 3
         static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
-        static let regularPadding: CGFloat = 16
+        static let regularPadding: CGFloat = 12
     }
 
     private var playButton: some View {

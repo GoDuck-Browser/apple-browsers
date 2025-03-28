@@ -25,6 +25,10 @@ struct AnimatedAsyncImage: View {
     let url: URL?
     let width: CGFloat
     let height: CGFloat
+    let cornerRadius: CGFloat
+    let borderColor: Color?
+    let borderWidth: CGFloat?
+    let borderOpacity: CGFloat?
 
     struct Constants {
         static let backgroundColor: Color = .gray.opacity(0.3)
@@ -40,16 +44,20 @@ struct AnimatedAsyncImage: View {
         AsyncImage(url: url) { image in
             image
                 .resizable()
-                .aspectRatio(contentMode: .fill)
+                .scaledToFill()
                 .frame(width: width, height: height)
-                .clipped()
                 .contentShape(Rectangle())
-                .transition(.opacity.combined(with: .scale))
+                .transition(.opacity)
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .stroke(borderColor ?? Color(designSystemColor: .border), lineWidth: borderWidth ?? 0.3)
+                        .opacity(borderOpacity ?? 0.5)
+                )
         } placeholder: {
             placeholderView
         }
         .frame(width: width, height: height)
-        .animation(.easeInOut(duration: 0.3), value: url)
+        .animation(.easeInOut(duration: 0.5), value: url)
         .id(url?.absoluteString ?? "")
     }
 }
@@ -67,7 +75,7 @@ struct DuckPlayerMiniPillView: View {
         static let playImage = "play.fill"
 
         // Layout
-        static let thumbnailSize: (w: CGFloat, h: CGFloat) = (60, 33.7)
+        static let thumbnailSize: (w: CGFloat, h: CGFloat) = (80, 44)
         static let thumbnailCornerRadius: CGFloat = 8
         static let vStackSpacing: CGFloat = 4
         static let hStackSpacing: CGFloat = 10
@@ -78,7 +86,7 @@ struct DuckPlayerMiniPillView: View {
         static let shadowRadius: CGFloat = 3
         static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
         static let viewOffset: CGFloat = 20
-        static let regularPadding: CGFloat = 16
+        static let regularPadding: CGFloat = 12
 
     }
 
