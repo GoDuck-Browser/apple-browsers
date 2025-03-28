@@ -73,9 +73,9 @@ struct DuckPlayerMiniPillView: View {
         static let hStackSpacing: CGFloat = 10
         static let fontSize: CGFloat = 16
         static let playButtonFont: CGFloat = 20
-        static let cornerRadius: CGFloat = 12
-        static let shadowOpacity: CGFloat = 0.2
-        static let shadowRadius: CGFloat = 8
+         static let cornerRadius: CGFloat = 16
+        static let shadowOpacity: CGFloat = 0.1
+        static let shadowRadius: CGFloat = 3
         static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
         static let viewOffset: CGFloat = 20
         static let regularPadding: CGFloat = 16

@@ -28,7 +28,7 @@ public enum DuckPlayerContainer {
         static let springDuration: Double = 0.5
         static let springBounce: Double = 0.2
         static let initialOffsetValue: Double = 500.0
-        static let dragThreshold: CGFloat = 10
+        static let dragThreshold: CGFloat = 50
         static let dragAreaHeight: CGFloat = 44
         static let contentTopPadding: CGFloat = 24
     }
@@ -143,7 +143,7 @@ public enum DuckPlayerContainer {
 // MARK: - Private
 
 private func calculateSheetOffset(for visible: Bool, containerHeight: Double) -> Double {
-    visible ? 25 : containerHeight
+    visible ? 90 : containerHeight
 }
 
 @MainActor
@@ -275,7 +275,7 @@ private struct SheetView<Content: View>: View {
         .onWidthChange { newWidth in
             sheetWidth = newWidth
         }
-        .padding(.bottom, 44)
+        .padding(.bottom, 100)
         .background(Color(designSystemColor: .panel))
         .border(Color(designSystemColor: .border), width: 0.5)
         .frame(maxWidth: .infinity)

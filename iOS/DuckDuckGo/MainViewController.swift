@@ -630,6 +630,11 @@ class MainViewController: UIViewController {
                                                selector: #selector(onShowFullURLAddressChanged),
                                                name: AppUserDefaults.Notifications.showsFullURLAddressSettingChanged,
                                                object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(refreshViewsBasedOnDuckPlayerPresentation),
+                                               name: DuckPlayerNativeUIPresenter.Notifications.duckPlayerPillUpdated,
+                                               object: nil)
+        
     }
 
     @objc func onAddressBarPositionChanged() {
@@ -642,7 +647,26 @@ class MainViewController: UIViewController {
         refreshOmniBar()
     }
 
-    func refreshViewsBasedOnAddressBarPosition(_ position: AddressBarPosition) {
+    @objc func refreshViewsBasedOnDuckPlayerPresentation(notification: Notification) {
+        guard let isVisible = notification.userInfo?[DuckPlayerNativeUIPresenter.NotificationKeys.isVisible] as? Bool else { return }
+        refreshViewsBasedOnAddressBarPosition(appSettings.currentAddressBarPosition, duckPlayerEntryPointVisible: isVisible)
+    }
+
+    private func updateChromeForDuckPlayer(in position: AddressBarPosition, isVisible: Bool) {
+        if isVisible {
+            switch position {
+            case .top:
+                   self.viewCoordinator.hideToolbarSeparator()
+            case .bottom:
+            // Use higher delays then refreshViewsBasedOnAddressBarPosition below
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                     self.viewCoordinator.omniBar.hideSeparator()
+                }
+            }
+        }
+    }
+
+    func refreshViewsBasedOnAddressBarPosition(_ position: AddressBarPosition, duckPlayerEntryPointVisible: Bool = false) {
         switch position {
         case .top:
             swipeTabsCoordinator?.addressBarPositionChanged(isTop: true)
@@ -653,7 +677,7 @@ class MainViewController: UIViewController {
                 viewCoordinator.showToolbarSeparator()
             }
             viewCoordinator.constraints.navigationBarContainerBottom.isActive = false
-
+                    
         case .bottom:
             swipeTabsCoordinator?.addressBarPositionChanged(isTop: false)
             viewCoordinator.omniBar.moveSeparatorToTop()
@@ -662,7 +686,7 @@ class MainViewController: UIViewController {
                 self.viewCoordinator.hideToolbarSeparator()
             }
         }
-
+        updateChromeForDuckPlayer(in: position, isVisible: duckPlayerEntryPointVisible)
         adjustNewTabPageSafeAreaInsets(for: position)
     }
 
@@ -974,7 +998,7 @@ class MainViewController: UIViewController {
     func loadQueryInNewTab(_ query: String, reuseExisting: ExistingTabReusePolicy? = .none) {
         dismissOmniBar()
         guard let url = URL.makeSearchURL(query: query) else {
-            Logger.lifecycle.error("Couldn‘t form URL for query: \(query, privacy: .public)")
+            Logger.lifecycle.error("Couldn't form URL for query: \(query, privacy: .public)")
             return
         }
 
@@ -1040,7 +1064,7 @@ class MainViewController: UIViewController {
 
     fileprivate func loadQuery(_ query: String) {
         guard let url = URL.makeSearchURL(query: query, queryContext: currentTab?.url) else {
-            Logger.general.error("Couldn‘t form URL for query “\(query, privacy: .public)” with context “\(self.currentTab?.url?.absoluteString ?? "<nil>", privacy: .public)”")
+            Logger.general.error("Couldn't form URL for query \"\(query, privacy: .public)\" with context \"\(self.currentTab?.url?.absoluteString ?? "<nil>", privacy: .public)\"")
             return
         }
         // Make sure that once query is submitted, we don't trigger the non-SERP flow
@@ -2295,7 +2319,7 @@ extension MainViewController: AutocompleteViewControllerDelegate {
             if let url = URL.makeSearchURL(text: phrase) {
                 loadUrl(url)
             } else {
-                Logger.lifecycle.error("Couldn‘t form URL for suggestion: \(phrase, privacy: .public)")
+                Logger.lifecycle.error("Couldn't form URL for suggestion: \(phrase, privacy: .public)")
             }
 
         case .website(url: let url):
@@ -3178,5 +3202,18 @@ extension MainViewController: AIChatViewControllerManagerDelegate {
 
     func aiChatViewControllerManagerDidReceiveOpenSettingsRequest(_ manager: AIChatViewControllerManager) {
         segueToSettingsAIChat()
+    }
+}
+
+extension MainViewController {
+    private func updateOmniBarSeparatorForDuckPlayer(addressBarPosition: AddressBarPosition, isDuckPlayerVisible: Bool) {
+        if isDuckPlayerVisible {
+            switch addressBarPosition {
+            case .top, .bottom:
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    self.viewCoordinator.omniBar.hideSeparator()
+                }
+            }
+        }
     }
 }

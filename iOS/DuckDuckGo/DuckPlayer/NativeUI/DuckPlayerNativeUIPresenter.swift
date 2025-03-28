@@ -38,6 +38,14 @@ protocol DuckPlayerNativeUIPresenting {
 /// A presenter class responsible for managing the native UI components of DuckPlayer.
 /// This includes presenting entry pills and handling their lifecycle.
 final class DuckPlayerNativeUIPresenter {
+    public struct Notifications {
+        public static let duckPlayerPillUpdated = Notification.Name("com.duckduckgo.duckplayer.pillUpdated")
+    }
+
+    // Keys used for the notification's userInfo dictionary
+    public struct NotificationKeys {
+        public static let isVisible = "isVisible"
+    }
 
     /// The types of the pill available
     enum PillType {
@@ -360,6 +368,17 @@ final class DuckPlayerNativeUIPresenter {
         }
     }
 
+    /// Posts a notification about the pill's visibility state
+    private func postPillVisibilityNotification(isVisible: Bool) {
+        NotificationCenter.default.post(
+            name: Notifications.duckPlayerPillUpdated,
+            object: nil,
+            userInfo: [
+                NotificationKeys.isVisible: isVisible
+            ]
+        )
+    }
+
 }
 
 extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
@@ -394,6 +413,7 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
             updatePillContent(for: pillType, videoID: videoID, timestamp: timestamp, in: hostingController)
             pillHeight = Constants.webViewRequiredBottomConstraint
             existingViewModel.show()
+            postPillVisibilityNotification(isVisible: true)
             return
         }
 
@@ -455,6 +475,7 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
         // Show the container view if it's not already visible
         if !containerViewModel.sheetVisible {
             containerViewModel.show()
+            postPillVisibilityNotification(isVisible: true)
         }
     }
 
@@ -463,6 +484,8 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
     func dismissPill(reset: Bool = false, animated: Bool = true, programatic: Bool = true) {
         // First reset constraints immediately
         resetWebViewConstraint()
+        
+        postPillVisibilityNotification(isVisible: false)
 
         // If was dismissed by the user, increment the dismiss count
         if !programatic {
@@ -559,6 +582,7 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
         containerViewModel?.dismiss()
         resetWebViewConstraint()
         containerViewController?.view.isUserInteractionEnabled = false
+         postPillVisibilityNotification(isVisible: false)
     }
 
     /// Shows the bottom sheet when browser chrome is visible
@@ -566,6 +590,7 @@ extension DuckPlayerNativeUIPresenter: DuckPlayerNativeUIPresenting {
     func showBottomSheetForVisibleChrome() {
         containerViewModel?.show()
         containerViewController?.view.isUserInteractionEnabled = true
+        postPillVisibilityNotification(isVisible: true)
     }
 
 }
