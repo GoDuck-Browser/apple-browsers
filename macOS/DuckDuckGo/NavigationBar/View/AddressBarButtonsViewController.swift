@@ -67,6 +67,9 @@ final class AddressBarButtonsViewController: NSViewController {
     @IBOutlet weak var clearButton: NSButton!
     @IBOutlet private weak var buttonsContainer: NSStackView!
 
+    @IBOutlet weak var clearButtonMargin: NSView!
+    @IBOutlet weak var aiChatButtonView: NSView!
+    private var aiChatButton: ExpandableButton?
     @IBOutlet weak var animationWrapperView: NSView!
     var trackerAnimationView1: LottieAnimationView!
     var trackerAnimationView2: LottieAnimationView!
@@ -195,10 +198,44 @@ final class AddressBarButtonsViewController: NSViewController {
         updateBookmarkButtonVisibility()
         subscribeToPrivacyEntryPointIsMouseOver()
         subscribeToButtonsVisibility()
+        setupAIChatButton()
 
         bookmarkButton.sendAction(on: .leftMouseDown)
 
         privacyEntryPointButton.toolTip = UserText.privacyDashboardTooltip
+    }
+
+    func setupAIChatButton() {
+
+        //self.aiChatButtonView.wantsLayer = true
+        //self.aiChatButtonView.layer?.backgroundColor = NSColor.red.cgColor
+        let icon = "AIChat"
+        let text = "Ask Duck.ai"
+        let shortcutSymbols: [String]? = ["shift", "return"]
+        let buttonPressed: () -> Void = {
+            DispatchQueue.main.async {
+                AIChatTabOpener.openAIChatTab()
+            }
+        }
+
+        self.aiChatButton = ExpandableButton(icon: icon,
+                                                text: text,
+                                                shortcutSymbols: shortcutSymbols,
+                                                buttonPressed: buttonPressed)
+
+        
+
+        guard let aiChatButton = aiChatButton else { return }
+
+        aiChatButtonView.addSubview(aiChatButton)
+
+        aiChatButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            aiChatButton.leadingAnchor.constraint(lessThanOrEqualTo: aiChatButtonView.leadingAnchor),
+            aiChatButton.trailingAnchor.constraint(equalTo: aiChatButtonView.trailingAnchor),
+            aiChatButton.topAnchor.constraint(equalTo: aiChatButtonView.topAnchor),
+            aiChatButton.bottomAnchor.constraint(equalTo: aiChatButtonView.bottomAnchor)
+        ])
     }
 
     override func viewWillAppear() {
@@ -416,6 +453,7 @@ final class AddressBarButtonsViewController: NSViewController {
         stopAnimationsAfterFocus()
 
         clearButton.isShown = isTextFieldEditorFirstResponder && !textFieldValue.isEmpty
+        clearButtonMargin.isShown = clearButton.isShown
 
         updatePrivacyEntryPointButton()
         updateImageButton()
@@ -973,6 +1011,8 @@ final class AddressBarButtonsViewController: NSViewController {
         if isTextFieldEditorFirstResponder {
             stopAnimations()
         }
+        
+        self.aiChatButton?.state = isTextFieldEditorFirstResponder ? .expanded : .collapsed
     }
 
     private func bookmarkForCurrentUrl(setFavorite: Bool, accessPoint: GeneralPixel.AccessPoint) -> (bookmark: Bookmark?, isNew: Bool) {
