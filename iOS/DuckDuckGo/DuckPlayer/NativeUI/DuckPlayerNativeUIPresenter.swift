@@ -49,7 +49,7 @@ final class DuckPlayerNativeUIPresenter {
         // Used to update the WebView's bottom constraint
         // When pill is visible
         static let webViewRequiredBottomConstraint: CGFloat = 90
-        static let primingModalHeight: CGFloat = 360
+        static let primingModalHeight: CGFloat = 460
         static let detentIdentifier: String = "priming"
 
         // A presentation event is defined as a single instance of the priming modal being shown or duck

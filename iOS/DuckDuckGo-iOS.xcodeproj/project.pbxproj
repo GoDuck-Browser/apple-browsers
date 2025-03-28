@@ -361,6 +361,7 @@
 		652CEDE62D89B71300235B4C /* FaviconsHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 652CEDE52D89B70C00235B4C /* FaviconsHelperTests.swift */; };
 		653561022D4D2C6D0064F258 /* Logger+DuckPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 653561012D4D2C680064F258 /* Logger+DuckPlayer.swift */; };
 		654244122D6DDD030087A9EE /* mediaControl.js in Resources */ = {isa = PBXBuildFile; fileRef = 654244112D6DDD030087A9EE /* mediaControl.js */; };
+		6553AFF72D95B8EA00D64241 /* DuckPlayer-PrimingAnimation.json in Resources */ = {isa = PBXBuildFile; fileRef = 6553AFF62D95B8EA00D64241 /* DuckPlayer-PrimingAnimation.json */; };
 		6562F7792D7F9C7100205677 /* serpNotify.js in Resources */ = {isa = PBXBuildFile; fileRef = 6562F7782D7F9C7100205677 /* serpNotify.js */; };
 		6566A5D02D775D560033283C /* DuckPlayerMiniPillViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6526CA6A2D70CAAD0048819E /* DuckPlayerMiniPillViewModel.swift */; };
 		6594CCEA2D4A3E1200188B1A /* DuckPlayerSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6594CCE92D4A3E1200188B1A /* DuckPlayerSettingsTests.swift */; };
@@ -1890,6 +1891,7 @@
 		652CEDE52D89B70C00235B4C /* FaviconsHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconsHelperTests.swift; sourceTree = "<group>"; };
 		653561012D4D2C680064F258 /* Logger+DuckPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+DuckPlayer.swift"; sourceTree = "<group>"; };
 		654244112D6DDD030087A9EE /* mediaControl.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = mediaControl.js; sourceTree = "<group>"; };
+		6553AFF62D95B8EA00D64241 /* DuckPlayer-PrimingAnimation.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "DuckPlayer-PrimingAnimation.json"; sourceTree = "<group>"; };
 		6562F7782D7F9C7100205677 /* serpNotify.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = serpNotify.js; sourceTree = "<group>"; };
 		6594CCE92D4A3E1200188B1A /* DuckPlayerSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuckPlayerSettingsTests.swift; sourceTree = "<group>"; };
 		659AD5B02D76160500420D1D /* YoutubeOembedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YoutubeOembedService.swift; sourceTree = "<group>"; };
@@ -4266,6 +4268,7 @@
 		31DE43C72C2DAA7F00F8C51F /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				6553AFF62D95B8EA00D64241 /* DuckPlayer-PrimingAnimation.json */,
 				31BC5F402C2B0B540004DF37 /* DuckPlayer.xcassets */,
 				31DE43C52C2DA70A00F8C51F /* DuckPlayer-ModalAnimation.json */,
 			);
@@ -8295,6 +8298,7 @@
 				85DFEDF724CB1CAB00973FE7 /* ShareSheet.xcassets in Resources */,
 				98DA6B3322243CC3006EA9EB /* Feedback.xcassets in Resources */,
 				1EE411F728587AC50003FE64 /* PrivacyIcon.xcassets in Resources */,
+				6553AFF72D95B8EA00D64241 /* DuckPlayer-PrimingAnimation.json in Resources */,
 				8548D96825262C33005AAE49 /* view_highlight.json in Resources */,
 				85F0E97329952D7A003D5181 /* DuckDuckGo Recovery Document.pdf in Resources */,
 				9880723725FA4E450039EF4B /* menu_dark.json in Resources */,
