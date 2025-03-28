@@ -1,0 +1,166 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="DuckDuckGo/InfoPlist.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGo/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="pm.card.cardholder-name" xml:space="preserve">
+        <source>Cardholder Name</source>
+        <target state="new">Cardholder Name</target>
+        <note>Label for cardholder name title</note>
+      </trans-unit>
+      <trans-unit id="menu.add.folder" xml:space="preserve">
+        <source>Add Folder…</source>
+        <target state="new">Add Folder…</target>
+        <note>Menu item to add a folder</note>
+      </trans-unit>
+      <trans-unit id="close.other.tabs" xml:space="preserve">
+        <source>Close Other Tabs</source>
+        <target state="new">Close Other Tabs</target>
+        <note>Menu item</note>
+      </trans-unit>
+      <trans-unit id="vpn.no.exclusions.found.text" xml:space="preserve">
+        <source>None</source>
+        <target state="new">None</target>
+        <note>Text shown in VPN settings when no exclusions are configured</note>
+      </trans-unit>
+      <trans-unit id="pm.deactivate" xml:space="preserve">
+        <source>Deactivate</source>
+        <target state="new">Deactivate</target>
+        <note>Deactivate button</note>
+      </trans-unit>
+      <trans-unit id="pinned.tabs.mode.separate" xml:space="preserve">
+        <source>Separate in each window</source>
+        <target state="new">Separate in each window</target>
+        <note>Preferences &gt; Tabs &gt; Pinned tabs are different in each window</note>
+      </trans-unit>
+      <trans-unit id="preferences.off" xml:space="preserve">
+        <source>Off</source>
+        <target state="new">Off</target>
+        <note>Status indicator of a browser privacy protection feature.</note>
+      </trans-unit>
+      <trans-unit id="preferences-tabs.title" xml:space="preserve">
+        <source>Tabs</source>
+        <target state="new">Tabs</target>
+        <note>Title for tabs section in settings</note>
+      </trans-unit>
+      <trans-unit id="pm.note" xml:space="preserve">
+        <source>Note</source>
+        <target state="new">Note</target>
+        <note>Label for note title</note>
+      </trans-unit>
+      <trans-unit id="pinning.show-netp-shortcut" xml:space="preserve">
+        <source>Show VPN Shortcut</source>
+        <target state="new">Show VPN Shortcut</target>
+        <note>Menu item for showing the NetP shortcut</note>
+      </trans-unit>
+      <trans-unit id="import.csv.instructions.opera" xml:space="preserve">
+        <source>%1$d Open **%2$s**
+%3$d Use the Menu Bar to select **View → Show Password Manager**
+%4$d Select **Settings**
+%5$d Find “Export Passwords” and click **Download File**
+%6$d Save the passwords file someplace you can find it (e.g., Desktop)
+%7$d %8$@</source>
+        <target state="new">%1$d Open **%2$s**
+%3$d Use the Menu Bar to select **View → Show Password Manager**
+%4$d Select **Settings**
+%5$d Find “Export Passwords” and click **Download File**
+%6$d Save the passwords file someplace you can find it (e.g., Desktop)
+%7$d %8$@</target>
+        <note>Instructions to import Passwords as CSV from Opera browser.
+%N$d - step number
+%2$s - browser name (Opera)
+%8$@ - “Select Passwords CSV File” button
+**bold text**; _italic text_</note>
+      </trans-unit>
+      <trans-unit id="main-menu.file.close-all-windows" xml:space="preserve">
+        <source>Close All Windows</source>
+        <target state="new">Close All Windows</target>
+        <note>Main Menu File item</note>
+      </trans-unit>
+      <trans-unit id="history.view.onboarding.title" xml:space="preserve">
+        <source>Easier History Management</source>
+        <target state="new">Easier History Management</target>
+        <note>Title for the history view onboarding popover</note>
+      </trans-unit>
+      <trans-unit id="share.menu.item.qr.code" xml:space="preserve">
+        <source>Create QR Code</source>
+        <target state="new">Create QR Code</target>
+        <note>Menu item title</note>
+      </trans-unit>
+      <trans-unit id="pm.sort.parameter.date-modified" xml:space="preserve">
+        <source>Date Modified</source>
+        <target state="new">Date Modified</target>
+        <note>Label for Date Modified sort parameter</note>
+      </trans-unit>
+      <trans-unit id="pm.empty.cards.title" xml:space="preserve">
+        <source>No Cards</source>
+        <target state="new">No Cards</target>
+        <note>Label for cards empty state title</note>
+      </trans-unit>
+      <trans-unit id="bookmarks.dialog.field.url" xml:space="preserve">
+        <source>URL</source>
+        <target state="new">URL</target>
+        <note>URL field label for Bookmar</note>
+      </trans-unit>
+      <trans-unit id="newTab.setup.import.summary" xml:space="preserve">
+        <source>Import bookmarks, favorites, and passwords from your old browser.</source>
+        <target state="new">Import bookmarks, favorites, and passwords from your old browser.</target>
+        <note>Summary of the Import card of the Set Up section in the home page</note>
+      </trans-unit>
+      <trans-unit id="vpn.setting.add.excluded.domain.action.button.title" xml:space="preserve">
+        <source>Exclude Website</source>
+        <target state="new">Exclude Website</target>
+        <note>Add excluded domain button title</note>
+      </trans-unit>
+      <trans-unit id="export.logins.failed.informative" xml:space="preserve">
+        <source>Please check that no file exists at the location you selected.</source>
+        <target state="new">Please check that no file exists at the location you selected.</target>
+        <note>Alert message when exporting login data fails</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="DuckDuckGo/NetworkProtection/NetworkExtensionTargets/NetworkExtensionAndNotificationTargets/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGoVPN/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/NetworkProtectionMac/Sources/NetworkProtectionUI/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/SubscriptionUI/Sources/SubscriptionUI/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/SyncUI-macOS/Sources/SyncUI-macOS/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+</xliff>

@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="DuckDuckGo/InfoPlist.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGo/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="tooltip.find-in-page.close" xml:space="preserve">
+        <source>Close find bar</source>
+        <target state="new">Close find bar</target>
+        <note>Tooltip for the Find In Page bar's Close button</note>
+      </trans-unit>
+      <trans-unit id="main-menu.app.quit-duck-duck-go" xml:space="preserve">
+        <source>Quit DuckDuckGo</source>
+        <target state="new">Quit DuckDuckGo</target>
+        <note>Main Menu DuckDuckGo item</note>
+      </trans-unit>
+      <trans-unit id="bitwarden.is.ready.to.connect" xml:space="preserve">
+        <source>Bitwarden is ready to connect to DuckDuckGo!</source>
+        <target state="new">Bitwarden is ready to connect to DuckDuckGo!</target>
+        <note>Setup of the integration with Bitwarden app</note>
+      </trans-unit>
+      <trans-unit id="import.html.instructions.opera" xml:space="preserve">
+        <source>%1$d Open **%2$s**
+%3$d Use the Menu Bar to select **Bookmarks → Bookmarks**
+%4$d Click **Open full Bookmarks view…** in the bottom left
+%5$d Click **Import/Export…** in the bottom left and select **Export Bookmarks**
+%6$d Save the file someplace you can find it (e.g., Desktop)
+%7$d %8$@</source>
+        <target state="new">%1$d Open **%2$s**
+%3$d Use the Menu Bar to select **Bookmarks → Bookmarks**
+%4$d Click **Open full Bookmarks view…** in the bottom left
+%5$d Click **Import/Export…** in the bottom left and select **Export Bookmarks**
+%6$d Save the file someplace you can find it (e.g., Desktop)
+%7$d %8$@</target>
+        <note>Instructions to import Bookmarks exported as HTML from Opera browser.
+%N$d - step number
+%2$s - browser name (Opera)
+%8$@ - “Select Bookmarks HTML File” button
+**bold text**; _italic text_</note>
+      </trans-unit>
+      <trans-unit id="pm.address.address1" xml:space="preserve">
+        <source>Address 1</source>
+        <target state="new">Address 1</target>
+        <note>Label for address 1 title</note>
+      </trans-unit>
+      <trans-unit id="home.page.settings.header" xml:space="preserve">
+        <source>Customize</source>
+        <target state="new">Customize</target>
+        <note>Home Page Settings title</note>
+      </trans-unit>
+      <trans-unit id="send.browser.feedback.select-category" xml:space="preserve">
+        <source>Select a category</source>
+        <target state="new">Select a category</target>
+        <note>Title of the picker where the user can chose the category of the feedback they want ot send.</note>
+      </trans-unit>
+      <trans-unit id="History" xml:space="preserve">
+        <source>History</source>
+        <target state="new">History</target>
+        <note>Main Menu </note>
+      </trans-unit>
+      <trans-unit id="import.bookmarks.indefinite.progress.text" xml:space="preserve">
+        <source>Importing bookmarks…</source>
+        <target state="new">Importing bookmarks…</target>
+        <note>Operation progress info message about indefinite number of bookmarks being imported</note>
+      </trans-unit>
+      <trans-unit id="general.feedback-form.category.pir" xml:space="preserve">
+        <source>Personal Information Removal</source>
+        <target state="new">Personal Information Removal</target>
+        <note>Description for the feedback form when the issue is related to Personal Info Removal (PIR)</note>
+      </trans-unit>
+      <trans-unit id="pm.add.identity" xml:space="preserve">
+        <source>Add Identity</source>
+        <target state="new">Add Identity</target>
+        <note>Add New Identity button</note>
+      </trans-unit>
+      <trans-unit id="burner.homepage.description.1" xml:space="preserve">
+        <source>Browse without saving local history</source>
+        <target state="new">Browse without saving local history</target>
+        <note>Descriptions of features Fire page. Provides information about browsing functionalities such as browsing without saving local history, signing in to a site with a different account, and troubleshooting websites.</note>
+      </trans-unit>
+      <trans-unit id="send.browser.feedback.title" xml:space="preserve">
+        <source>Help Improve the DuckDuckGo Browser</source>
+        <target state="new">Help Improve the DuckDuckGo Browser</target>
+        <note>Title of the interface to send feedback on the browser</note>
+      </trans-unit>
+      <trans-unit id="downloads.always-ask" xml:space="preserve">
+        <source>Always ask where to save files</source>
+        <target state="new">Always ask where to save files</target>
+        <note>Downloads preferences checkbox</note>
+      </trans-unit>
+      <trans-unit id="contextual.onboarding.got-it.button" xml:space="preserve">
+        <source>Got it</source>
+        <target state="new">Got it</target>
+        <note>During onboarding steps this button is shown and takes either to the next steps or closes the onboarding.</note>
+      </trans-unit>
+      <trans-unit id="pm.add.card" xml:space="preserve">
+        <source>Add Credit Card</source>
+        <target state="new">Add Credit Card</target>
+        <note>Add New Credit Card button</note>
+      </trans-unit>
+      <trans-unit id="newTab.setup.dock.title" xml:space="preserve">
+        <source>Keep in Your Dock</source>
+        <target state="new">Keep in Your Dock</target>
+        <note>Title of the new tab page card for adding application to the Dock</note>
+      </trans-unit>
+      <trans-unit id="downloads.error.canceled" xml:space="preserve">
+        <source>Canceled</source>
+        <target state="new">Canceled</target>
+        <note>Short error description when downloaded file download was canceled</note>
+      </trans-unit>
+      <trans-unit id="preferences.always-on" xml:space="preserve">
+        <source>Always On</source>
+        <target state="new">Always On</target>
+        <note>Status indicator of a browser privacy protection feature.</note>
+      </trans-unit>
+      <trans-unit id="pm.card.expiration-date" xml:space="preserve">
+        <source>Expiration Date</source>
+        <target state="new">Expiration Date</target>
+        <note>Label for expiration date title</note>
+      </trans-unit>
+      <trans-unit id="duck-player.onboarding-choice-modal-message-body" xml:space="preserve">
+        <source>Duck Player lets you watch YouTube without targeted ads in DuckDuckGo and what you watch won't influence your recommendations.</source>
+        <target state="new">Duck Player lets you watch YouTube without targeted ads in DuckDuckGo and what you watch won't influence your recommendations.</target>
+        <note>Message for a Duck Player onboarding modal screen</note>
+      </trans-unit>
+      <trans-unit id="bookmarks.bar.context-menu.delete" xml:space="preserve">
+        <source>Delete</source>
+        <target state="new">Delete</target>
+        <note>Delete menu item for the bookmarks bar context menu</note>
+      </trans-unit>
+      <trans-unit id="fireproof.confirmation.message" xml:space="preserve">
+        <source>Fireproofing this site will keep you signed in after using the Fire Button.</source>
+        <target state="new">Fireproofing this site will keep you signed in after using the Fire Button.</target>
+        <note>Fireproof confirmation message</note>
+      </trans-unit>
+      <trans-unit id="send.browser.feedback" xml:space="preserve">
+        <source>Send Browser Feedback</source>
+        <target state="new">Send Browser Feedback</target>
+        <note>Menu with feedback commands</note>
+      </trans-unit>
+      <trans-unit id="contextual.onboarding.try-fire-button.message" xml:space="preserve">
+        <source>Give it a try! 🔥</source>
+        <target state="new">Give it a try! 🔥</target>
+        <note>Message of a popover on the browser that invites the user to try visiting the browser Fire Button.</note>
+      </trans-unit>
+      <trans-unit id="bookmarks.imported.other.folder.title" xml:space="preserve">
+        <source>Other bookmarks</source>
+        <target state="new">Other bookmarks</target>
+        <note>Name of the "Other bookmarks" folder imported from other browser</note>
+      </trans-unit>
+      <trans-unit id="disable.auto.clear.to.enable.session.restore" xml:space="preserve">
+        <source>Disable auto-clear on quit to turn on session restore.</source>
+        <target state="new">Disable auto-clear on quit to turn on session restore.</target>
+        <note>Information label in Settings. It tells user that to enable session restoration setting they have to disable burn on quit. Auto-Clear should match the string with 'auto.clear' key</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="DuckDuckGo/NetworkProtection/NetworkExtensionTargets/NetworkExtensionAndNotificationTargets/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGoVPN/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="vpn.status-view.excluded-apps.menu-item.title" xml:space="preserve">
+        <source>Excluded Apps</source>
+        <target state="new">Excluded Apps</target>
+        <note>The VPN status view's 'Excluded Apps' menu item for our status menu app.</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="LocalPackages/NetworkProtectionMac/Sources/NetworkProtectionUI/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/SubscriptionUI/Sources/SubscriptionUI/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/SyncUI-macOS/Sources/SyncUI-macOS/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="preferences.begin-sync.card-button" xml:space="preserve">
+        <source>Sync With Another Device</source>
+        <target state="new">Sync With Another Device</target>
+        <note>Button text on the Begin Syncing card in sync settings</note>
+      </trans-unit>
+      <trans-unit id="alert.unable-to-sync-to-server-description" xml:space="preserve">
+        <source>Unable to connect to the server.</source>
+        <target state="new">Unable to connect to the server.</target>
+        <note>Description for unable to sync to server error</note>
+      </trans-unit>
+      </body>
+  </file>
+</xliff>

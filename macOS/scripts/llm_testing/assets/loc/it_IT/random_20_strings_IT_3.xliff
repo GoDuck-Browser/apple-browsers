@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="DuckDuckGo/InfoPlist.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGo/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="bookmarks.bar.preferences.show" xml:space="preserve">
+        <source>Show Bookmarks Bar</source>
+        <target>Mostra barra dei segnalibri</target>
+        <note>Preference item for showing the bookmarks bar</note>
+      </trans-unit>
+      <trans-unit id="preferences.add-to-dock" xml:space="preserve">
+        <source>Add DuckDuckGo To Dock…</source>
+        <target>Aggiungi DuckDuckGo al Dock…</target>
+        <note>Action button to add the app to the Dock</note>
+      </trans-unit>
+      <trans-unit id="export.bookmarks.file.name.suffix" xml:space="preserve">
+        <source>Bookmarks</source>
+        <target>Segnalibri</target>
+        <note>The last part of the suggested file for exporting bookmarks</note>
+      </trans-unit>
+      <trans-unit id="save" xml:space="preserve">
+        <source>Save</source>
+        <target>Salva</target>
+        <note>Save button</note>
+      </trans-unit>
+      <trans-unit id="quit" xml:space="preserve">
+        <source>Quit</source>
+        <target>Esci</target>
+        <note>Quit button</note>
+      </trans-unit>
+      <trans-unit id="newTab.menu.item.show.search.bar" xml:space="preserve">
+        <source>Show Search Box</source>
+        <target>Mostra casella di ricerca</target>
+        <note>Title of the menu item in the home page to show/hide search box (search field)</note>
+      </trans-unit>
+      <trans-unit id="ppro.feedback-form.sending-confirmation.title" xml:space="preserve">
+        <source>Thank you!</source>
+        <target>Grazie!</target>
+        <note>Title for the feedback sent view title of the feedback form</note>
+      </trans-unit>
+      <trans-unit id="autofill.items.delete-all-passwords-completion-button-texy" xml:space="preserve">
+        <source>Close</source>
+        <target>Chiudi</target>
+        <note>Button text on dialog confirming deletion was completed</note>
+      </trans-unit>
+      <trans-unit id="vpn.setting.description.secure.dns" xml:space="preserve">
+        <source>DuckDuckGo routes DNS queries through our DNS servers so your internet provider can't see what websites you visit.</source>
+        <target>DuckDuckGo instrada le query DNS attraverso i nostri server DNS in modo che il tuo provider internet non possa vedere quali siti web visiti.</target>
+        <note>Secure DNS description</note>
+      </trans-unit>
+      <trans-unit id="main-menu.edit.undo" xml:space="preserve">
+        <source>Undo</source>
+        <target>Annulla</target>
+        <note>Main Menu Edit item</note>
+      </trans-unit>
+      <trans-unit id="contextual.onboarding.try-a-search.message" xml:space="preserve">
+        <source>Your DuckDuckGo searches are always private.</source>
+        <target>Le tue ricerche su DuckDuckGo sono sempre private.</target>
+        <note>Message of a popover on the browser that invites the user to try a search explaining that their searches are anonymous</note>
+      </trans-unit>
+      <trans-unit id="context.menu.home.button.mode.hide" xml:space="preserve">
+        <source>Hide</source>
+        <target>Nascondi</target>
+        <note>Preferences &gt; Home Button &gt; None item</note>
+      </trans-unit>
+      <trans-unit id="fire.dialog.details" xml:space="preserve">
+        <source>Details</source>
+        <target>Dettagli</target>
+        <note>Button to show more details</note>
+      </trans-unit>
+      <trans-unit id="Country" xml:space="preserve">
+        <source>Country</source>
+        <target>Paese</target>
+        <note>Title of the section of the Identities manager where the user can add/modify a country (US,UK, Italy etc...)</note>
+      </trans-unit>
+      <trans-unit id="import.browser.data.passwords" xml:space="preserve">
+        <source>Import Passwords…</source>
+        <target>Importa password…</target>
+        <note>Opens Import Browser Data dialog</note>
+      </trans-unit>
+      <trans-unit id="fire.dialog.tab-will-reload" xml:space="preserve">
+        <source>Pinned tab will reload</source>
+        <target>La scheda fissata verrà ricaricata</target>
+        <note>Warning label shown in an expanded view of the fire popover</note>
+      </trans-unit>
+      <trans-unit id="bitwarden.incompatible" xml:space="preserve">
+        <source>The following Bitwarden versions are incompatible with DuckDuckGo: v2024.10.0, v2024.10.1, v2024.10.2. Please downgrade to an older version by following these steps:</source>
+        <target>Le seguenti versioni di Bitwarden non sono compatibili con DuckDuckGo: v2024.10.0, v2024.10.1, v2024.10.2. Esegui il downgrade a una versione precedente seguendo questi passaggi:</target>
+        <note>Message that warns user that specific Bitwarden app vesions are not compatible with this app</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="DuckDuckGo/NetworkProtection/NetworkExtensionTargets/NetworkExtensionAndNotificationTargets/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGoVPN/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/NetworkProtectionMac/Sources/NetworkProtectionUI/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="network.protection.vpn.dns-server" xml:space="preserve">
+        <source>DNS Server</source>
+        <target>Server DNS</target>
+        <note>Title for the DNS server section in the VPN status view</note>
+      </trans-unit>
+      <trans-unit id="network.protection.onboarding.allow.extension.action" xml:space="preserve">
+        <source>Open System Settings...</source>
+        <target>Apri Impostazioni di sistema...</target>
+        <note>Action button title for the onboarding allow-extension view</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="LocalPackages/SubscriptionUI/Sources/SubscriptionUI/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/SyncUI-macOS/Sources/SyncUI-macOS/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="prefrences.sync.invalid-bookmarks-present-title" xml:space="preserve">
+        <source>Some bookmarks are not syncing due to excessively long content in certain fields.</source>
+        <target>Alcuni segnalibri non si sincronizzano a causa di contenuti eccessivamente lunghi in determinati campi.</target>
+        <note>Alert title for invalid bookmarks being filtered out of synced data</note>
+      </trans-unit>
+      </body>
+  </file>
+</xliff>

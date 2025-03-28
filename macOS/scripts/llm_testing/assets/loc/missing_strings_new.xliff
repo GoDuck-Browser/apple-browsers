@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2"><file original="DuckDuckGo/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext"><header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body><trans-unit id="pinned-tabs.discovery.popover.message" xml:space="preserve">
+        <source>You can now choose to have shared or separate pinned tabs across multiple browser windows.</source>
+        <target state="new">You can now choose to have shared or separate pinned tabs across multiple browser windows.</target>
+        <note>Info message to users about option to adjust behavior of pinned tabs</note>
+      </trans-unit>
+      <trans-unit id="preferences-pinned-tabs-warning" xml:space="preserve">
+        <source>Are you sure you want to share pinned tabs across all windows?</source>
+        <target state="new">Are you sure you want to share pinned tabs across all windows?</target>
+        <note>Content of warning before switching from per window pinned tabs to shared pinned tabs
+Title of warning before switching from per window pinned tabs to shared pinned tabs</note>
+      </trans-unit>
+      <trans-unit id="pinned.tabs.mode.separate" xml:space="preserve">
+        <source>Separate in each window</source>
+        <target state="new">Separate in each window</target>
+        <note>Preferences &gt; Tabs &gt; Pinned tabs are different in each window</note>
+      </trans-unit>
+      <trans-unit id="pinned-tabs.discovery.popover.message.2" xml:space="preserve">
+        <source>You can change this anytime in Settings.</source>
+        <target state="new">You can change this anytime in Settings.</target>
+        <note>Info message to users about option to adjust behavior of pinned tabs</note>
+      </trans-unit>
+      <trans-unit id="pinned.tabs.mode.shared" xml:space="preserve">
+        <source>Shared across all windows</source>
+        <target state="new">Shared across all windows</target>
+        <note>Preferences &gt; Tabs &gt; Pinned tabs are shared across all windows</note>
+      </trans-unit>
+      <trans-unit id="pinned-tabs.discovery.popover.separate" xml:space="preserve">
+        <source>Use Separate Pinned Tabs</source>
+        <target state="new">Use Separate Pinned Tabs</target>
+        <note>Button opening Settings</note>
+      </trans-unit>
+      <trans-unit id="pinned-tabs.discovery.popover.title" xml:space="preserve">
+        <source>New Pinned Tab Settings</source>
+        <target state="new">New Pinned Tab Settings</target>
+        <note>Title for pinned tabs discovery dialog</note>
+      </trans-unit>
+      <trans-unit id="pinning.hide-aichat-shortcut" xml:space="preserve">
+        <source>Hide AI Chat Shortcut</source>
+        <target state="new">Hide AI Chat Shortcut</target>
+        <note>Menu item for hiding the AI Chat shortcut</note>
+      </trans-unit>
+      <trans-unit id="preferences-pinned-tabs.title" xml:space="preserve">
+        <source>Pinned tabs are</source>
+        <target state="new">Pinned tabs are</target>
+        <note>Beginning of the setting for pinned tabs. It's either 'Pinned tabs are shared across all windows' or 'Pinned tabs are different in each window'</note>
+      </trans-unit>
+      <trans-unit id="phishing-detection.deprecated.enabled.checkbox" xml:space="preserve">
+        <source>Warn me on sites flagged for phishing or malware.</source>
+        <target state="new">Warn me on sites flagged for phishing or malware.</target>
+        <note>Checkbox that enables or disables the phishing and malware detection feature in the browser</note>
+      </trans-unit>
+      <trans-unit id="pinned-tabs.discovery.popover.shared" xml:space="preserve">
+        <source>Keep Shared Pinned Tabs</source>
+        <target state="new">Keep Shared Pinned Tabs</target>
+        <note>Button to close the popover</note>
+      </trans-unit>
+      <trans-unit id="history.view.onboarding.local.storage.explanation" xml:space="preserve">
+        <source>History is only stored on your device and can be deleted at any time using the Fire Button.</source>
+        <target state="new">History is only stored on your device and can be deleted at any time using the Fire Button.</target>
+        <note>Message for the history view onboarding popover explaining that history is kept locally.</note>
+      </trans-unit>
+      </body></file></xliff>

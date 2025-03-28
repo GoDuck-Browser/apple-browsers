@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="DuckDuckGo/InfoPlist.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGo/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="pm.lock-screen.prompt.export-logins" xml:space="preserve">
+        <source>export your usernames and passwords</source>
+        <target state="new">export your usernames and passwords</target>
+        <note>Label presented when exporting logins</note>
+      </trans-unit>
+      <trans-unit id="dashboard.permission.ask" xml:space="preserve">
+        <source>Ask every time</source>
+        <target state="new">Ask every time</target>
+        <note>Privacy Dashboard: Website should always Ask for permission for input media device access</note>
+      </trans-unit>
+      <trans-unit id="Left" xml:space="preserve">
+        <source>Left</source>
+        <target state="new">Left</target>
+        <note>Preference title aligning the bookmarks bar</note>
+      </trans-unit>
+      <trans-unit id="tab.bookmarks.title" xml:space="preserve">
+        <source>Bookmarks</source>
+        <target state="new">Bookmarks</target>
+        <note>Tab bookmarks title</note>
+      </trans-unit>
+      <trans-unit id="tooltip.navigation.refresh" xml:space="preserve">
+        <source>Reload this page</source>
+        <target state="new">Reload this page</target>
+        <note>Tooltip for the Refresh button</note>
+      </trans-unit>
+      <trans-unit id="preferences.autofill" xml:space="preserve">
+        <source>Passwords</source>
+        <target state="new">Passwords</target>
+        <note>Show Autofill preferences</note>
+      </trans-unit>
+      <trans-unit id="sync.promo.confirm.action" xml:space="preserve">
+        <source>Set Up Sync</source>
+        <target state="new">Set Up Sync</target>
+        <note>Title for a button in the Sync Promotion banner to set up Sync</note>
+      </trans-unit>
+      <trans-unit id="import.browser.data" xml:space="preserve">
+        <source>Import to DuckDuckGo</source>
+        <target state="new">Import to DuckDuckGo</target>
+        <note>Import Browser Data dialog title</note>
+      </trans-unit>
+      <trans-unit id="preferences.on-startup" xml:space="preserve">
+        <source>On Startup</source>
+        <target state="new">On Startup</target>
+        <note>Name of the preferences section related to app startup</note>
+      </trans-unit>
+      <trans-unit id="page.error.header" xml:space="preserve">
+        <source>DuckDuckGo can’t load this page.</source>
+        <target state="new">DuckDuckGo can’t load this page.</target>
+        <note>Error page heading text</note>
+      </trans-unit>
+      <trans-unit id="duck-player.video-autoplay-preference" xml:space="preserve">
+        <source>Autoplay videos when opened in Duck Player</source>
+        <target state="new">Autoplay videos when opened in Duck Player</target>
+        <note>Autoplay preference in settings</note>
+      </trans-unit>
+      <trans-unit id="open.settings" xml:space="preserve">
+        <source>Open System Settings…</source>
+        <target state="new">Open System Settings…</target>
+        <note>This string represents a prompt or button label prompting the user to open system settings</note>
+      </trans-unit>
+      <trans-unit id="autofill.onboarding.popover.title" xml:space="preserve">
+        <source>Add passwords shortcut?</source>
+        <target state="new">Add passwords shortcut?</target>
+        <note>Autofill onboarding popover title</note>
+      </trans-unit>
+      <trans-unit id="copy.image.address" xml:space="preserve">
+        <source>Copy Image Address</source>
+        <target state="new">Copy Image Address</target>
+        <note>Context menu item</note>
+      </trans-unit>
+      <trans-unit id="pm.address.postal-code" xml:space="preserve">
+        <source>Postal Code</source>
+        <target state="new">Postal Code</target>
+        <note>Label for postal code title</note>
+      </trans-unit>
+      <trans-unit id="prefrences.sync.limit-exceeded-title" xml:space="preserve">
+        <source>Sync Paused</source>
+        <target state="new">Sync Paused</target>
+        <note>Title for sync limits exceeded warning</note>
+      </trans-unit>
+      <trans-unit id="DuckDuckGo needs your permission to read the %@ bookmarks file. Select the %@ folder to import bookmarks." xml:space="preserve">
+        <source>DuckDuckGo needs your permission to read the %1$@ bookmarks file. Select the %2$@ folder to import bookmarks.</source>
+        <target state="new">DuckDuckGo needs your permission to read the %1$@ bookmarks file. Select the %2$@ folder to import bookmarks.</target>
+        <note>Data import warning that DuckDuckGo browser requires file reading permissions for another browser name (%1$@), and instruction to select its (same browser name - %2$@) bookmarks folder.</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="DuckDuckGo/NetworkProtection/NetworkExtensionTargets/NetworkExtensionAndNotificationTargets/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="network.protection.failure.notification.subtitle" xml:space="preserve">
+        <source>Unable to connect at this time. Please try again later.</source>
+        <target state="new">Unable to connect at this time. Please try again later.</target>
+        <note>The subtitle of the notification shown when DuckDuckGo VPN fails to reconnect</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="DuckDuckGoVPN/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="vpn.status-view.send-feedback.menu-item.title" xml:space="preserve">
+        <source>Send Feedback</source>
+        <target state="new">Send Feedback</target>
+        <note>The VPN status view's 'Send Feedback' menu item for our status menu app</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="LocalPackages/NetworkProtectionMac/Sources/NetworkProtectionUI/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/SubscriptionUI/Sources/SubscriptionUI/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="Cancel" xml:space="preserve">
+        <source>Cancel</source>
+        <target state="new">Cancel</target>
+        <note />
+      </trans-unit>
+      </body>
+  </file>
+  <file original="LocalPackages/SyncUI-macOS/Sources/SyncUI-macOS/Resources/Localizable.xcstrings" source-language="en" target-language="en" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+</xliff>

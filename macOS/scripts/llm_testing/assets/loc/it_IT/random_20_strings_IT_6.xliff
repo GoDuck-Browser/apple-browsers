@@ -1,0 +1,152 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="DuckDuckGo/InfoPlist.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGo/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="pm.sort.parameter.date-modified" xml:space="preserve">
+        <source>Date Modified</source>
+        <target>Data di modifica</target>
+        <note>Label for Date Modified sort parameter</note>
+      </trans-unit>
+      <trans-unit id="prefrences.sync.invalid-login-description" xml:space="preserve">
+        <source>Sync encountered an error. Try disabling sync on this device and then reconnect using another device or your recovery code.</source>
+        <target>Sync ha riscontrato un errore. Prova a disabilitare la sincronizzazione su questo dispositivo e poi riconnettiti utilizzando un altro dispositivo o il tuo codice di recupero.</target>
+        <note>Description invalid credentials error when syncing.</note>
+      </trans-unit>
+      <trans-unit id="history.menu.clear.this.history" xml:space="preserve">
+        <source>Clear This History…</source>
+        <target>Cancella questa cronologia…</target>
+        <note>Menu item to clear parts of history and data</note>
+      </trans-unit>
+      <trans-unit id="auth.alert.login.button" xml:space="preserve">
+        <source>Sign In</source>
+        <target>Accedi</target>
+        <note>Authentication Alert Sign In Button</note>
+      </trans-unit>
+      <trans-unit id="unmute.tab" xml:space="preserve">
+        <source>Unmute Tab</source>
+        <target>Riattiva audio scheda</target>
+        <note>Menu item. Unmute tab</note>
+      </trans-unit>
+      <trans-unit id="vpn.no.exclusions.found.text" xml:space="preserve">
+        <source>None</source>
+        <target>Nessuna</target>
+        <note>Text shown in VPN settings when no exclusions are configured</note>
+      </trans-unit>
+      <trans-unit id="duck-player.onboarding-confirmation-modal-CTA-confirm" xml:space="preserve">
+        <source>Got it</source>
+        <target>Ho capito</target>
+        <note>Button to confirm on Duck Player onboarding modal confirmation screen</note>
+      </trans-unit>
+      <trans-unit id="send.browser.feedback" xml:space="preserve">
+        <source>Send Browser Feedback</source>
+        <target>Invia feedback sul browser</target>
+        <note>Menu with feedback commands</note>
+      </trans-unit>
+      <trans-unit id="autoconsent.from.setup.modal.cta.confirm" xml:space="preserve">
+        <source>Handle Pop-ups For Me</source>
+        <target>Gestisci i pop-up per me</target>
+        <note>Confirm button for modal asking the user to auto manage cookies</note>
+      </trans-unit>
+      <trans-unit id="pm.delete" xml:space="preserve">
+        <source>Delete</source>
+        <target>Elimina</target>
+        <note>Delete button</note>
+      </trans-unit>
+      <trans-unit id="duck-player.newtab-preference" xml:space="preserve">
+        <source>Open Duck Player in a new tab whenever possible</source>
+        <target>Apri Duck Player in una nuova scheda quando possibile</target>
+        <note>New tab preference in settings</note>
+      </trans-unit>
+      <trans-unit id="onboarding.setdefault.text" xml:space="preserve">
+        <source>Next, try setting DuckDuckGo as your default️ browser, so you can open links with peace of mind, every time.</source>
+        <target>Ora, prova a impostare DuckDuckGo come browser predefinito, così potrai aprire i link in tutta tranquillità, ogni volta.</target>
+        <note>Call to action to set the browser as default</note>
+      </trans-unit>
+      <trans-unit id="bitwarden.error" xml:space="preserve">
+        <source>Unable to find or connect to Bitwarden</source>
+        <target>Impossibile trovare o connettersi a Bitwarden</target>
+        <note>This message appears when the application is unable to find or connect to Bitwarden, indicating a connection issue.</note>
+      </trans-unit>
+      <trans-unit id="add.to.bookmarks" xml:space="preserve">
+        <source>Add to Bookmarks</source>
+        <target>Aggiungi ai segnalibri</target>
+        <note>Context menu item for adding a URL to bookmarks</note>
+      </trans-unit>
+      <trans-unit id="main-menu.file.close-all-windows" xml:space="preserve">
+        <source>Close All Windows</source>
+        <target>Chiudi tutte le finestre</target>
+        <note>Main Menu File item</note>
+      </trans-unit>
+      <trans-unit id="bitwarden.connect.title" xml:space="preserve">
+        <source>Connect to Bitwarden</source>
+        <target>Connetti a Bitwarden</target>
+        <note>Title for the Bitwarden onboarding flow</note>
+      </trans-unit>
+      <trans-unit id="duck-player.off" xml:space="preserve">
+        <source>Never use Duck Player</source>
+        <target>Non usare mai Duck Player</target>
+        <note>Private YouTube Player option</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="DuckDuckGo/NetworkProtection/NetworkExtensionTargets/NetworkExtensionAndNotificationTargets/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGoVPN/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/NetworkProtectionMac/Sources/NetworkProtectionUI/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="network.protection.subscription.expired.resubscribe.button" xml:space="preserve">
+        <source>Subscribe to Privacy Pro</source>
+        <target>Abbonati a Privacy Pro</target>
+        <note>Button for the prompt that takes the user to the page to resubscribe.</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="LocalPackages/SubscriptionUI/Sources/SubscriptionUI/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="subscription.alert.subscription.not.found.title" xml:space="preserve">
+        <source>Subscription Not Found</source>
+        <target>Abbonamento non trovato</target>
+        <note>Alert title when subscription was not found</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="LocalPackages/SyncUI-macOS/Sources/SyncUI-macOS/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="alert.unable-to-remove-device-description" xml:space="preserve">
+        <source>Unable to remove this device from Sync &amp; Backup.</source>
+        <target>Impossibile rimuovere questo dispositivo da Sync &amp; Backup.</target>
+        <note>Description for unable to remove device error</note>
+      </trans-unit>
+      </body>
+  </file>
+</xliff>

@@ -1,0 +1,480 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd"><file original="DuckDuckGo/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="pm.card.cardholder-name" xml:space="preserve">
+        <source>Cardholder Name</source>
+        <target>Nome del titolare</target>
+        <note>Label for cardholder name title</note>
+      </trans-unit>
+      <trans-unit id="menu.add.folder" xml:space="preserve">
+        <source>Add Folder…</source>
+        <target>Aggiungi cartella…</target>
+        <note>Menu item to add a folder</note>
+      </trans-unit>
+      <trans-unit id="close.other.tabs" xml:space="preserve">
+        <source>Close Other Tabs</source>
+        <target>Chiudi altre schede</target>
+        <note>Menu item</note>
+      </trans-unit>
+      <trans-unit id="vpn.no.exclusions.found.text" xml:space="preserve">
+        <source>None</source>
+        <target>Nessuna</target>
+        <note>Text shown in VPN settings when no exclusions are configured</note>
+      </trans-unit>
+      <trans-unit id="pm.deactivate" xml:space="preserve">
+        <source>Deactivate</source>
+        <target>Disattiva</target>
+        <note>Deactivate button</note>
+      </trans-unit>
+      <trans-unit id="pinned.tabs.mode.separate" xml:space="preserve">
+        <source>Separate in each window</source>
+        <target>Separate in ogni finestra</target>
+        <note>Preferences &gt; Tabs &gt; Pinned tabs are different in each window</note>
+      </trans-unit>
+      <trans-unit id="preferences.off" xml:space="preserve">
+        <source>Off</source>
+        <target>Disattivato</target>
+        <note>Status indicator of a browser privacy protection feature.</note>
+      </trans-unit>
+      <trans-unit id="preferences-tabs.title" xml:space="preserve">
+        <source>Tabs</source>
+        <target>Schede</target>
+        <note>Title for tabs section in settings</note>
+      </trans-unit>
+      <trans-unit id="pm.note" xml:space="preserve">
+        <source>Note</source>
+        <target>Nota</target>
+        <note>Label for note title</note>
+      </trans-unit>
+      <trans-unit id="pinning.show-netp-shortcut" xml:space="preserve">
+        <source>Show VPN Shortcut</source>
+        <target>Mostra scorciatoia VPN</target>
+        <note>Menu item for showing the NetP shortcut</note>
+      </trans-unit>
+      <trans-unit id="import.csv.instructions.opera" xml:space="preserve">
+        <source>%1$d Open **%2$s**
+%3$d Use the Menu Bar to select **View → Show Password Manager**
+%4$d Select **Settings**
+%5$d Find "Export Passwords" and click **Download File**
+%6$d Save the passwords file someplace you can find it (e.g., Desktop)
+%7$d %8$@</source>
+        <target>%1$d Apri **%2$s**
+%3$d Usa la barra dei menu per selezionare **Visualizza → Mostra Password Manager**
+%4$d Seleziona **Impostazioni**
+%5$d Trova "Esporta password" e clicca su **Scarica file**
+%6$d Salva il file delle password in un posto dove puoi trovarlo (es. Desktop)
+%7$d %8$@</target>
+        <note>Instructions to import Passwords as CSV from Opera browser.
+%N$d - step number
+%2$s - browser name (Opera)
+%8$@ - "Select Passwords CSV File" button
+**bold text**; _italic text_</note>
+      </trans-unit>
+      <trans-unit id="main-menu.file.close-all-windows" xml:space="preserve">
+        <source>Close All Windows</source>
+        <target>Chiudi tutte le finestre</target>
+        <note>Main Menu File item</note>
+      </trans-unit>
+      <trans-unit id="history.view.onboarding.title" xml:space="preserve">
+        <source>Easier History Management</source>
+        <target>Gestione cronologia più semplice</target>
+        <note>Title for the history view onboarding popover</note>
+      </trans-unit>
+      <trans-unit id="share.menu.item.qr.code" xml:space="preserve">
+        <source>Create QR Code</source>
+        <target>Crea codice QR</target>
+        <note>Menu item title</note>
+      </trans-unit>
+      <trans-unit id="pm.sort.parameter.date-modified" xml:space="preserve">
+        <source>Date Modified</source>
+        <target>Data di modifica</target>
+        <note>Label for Date Modified sort parameter</note>
+      </trans-unit>
+      <trans-unit id="pm.empty.cards.title" xml:space="preserve">
+        <source>No Cards</source>
+        <target>Nessuna carta</target>
+        <note>Label for cards empty state title</note>
+      </trans-unit>
+      <trans-unit id="bookmarks.dialog.field.url" xml:space="preserve">
+        <source>URL</source>
+        <target>URL</target>
+        <note>URL field label for Bookmar</note>
+      </trans-unit>
+      <trans-unit id="newTab.setup.import.summary" xml:space="preserve">
+        <source>Import bookmarks, favorites, and passwords from your old browser.</source>
+        <target>Importa segnalibri, preferiti e password dal tuo vecchio browser.</target>
+        <note>Summary of the Import card of the Set Up section in the home page</note>
+      </trans-unit>
+      <trans-unit id="vpn.setting.add.excluded.domain.action.button.title" xml:space="preserve">
+        <source>Exclude Website</source>
+        <target>Escludi sito web</target>
+        <note>Add excluded domain button title</note>
+      </trans-unit>
+      <trans-unit id="export.logins.failed.informative" xml:space="preserve">
+        <source>Please check that no file exists at the location you selected.</source>
+        <target>Verifica che non esistano file nella posizione selezionata.</target>
+        <note>Alert message when exporting login data fails</note>
+      </trans-unit>
+      <trans-unit id="prefrences.sync.invalid-login-description" xml:space="preserve">
+        <source>Sync encountered an error. Try disabling sync on this device and then reconnect using another device or your recovery code.</source>
+        <target>Sync ha riscontrato un errore. Prova a disabilitare la sincronizzazione su questo dispositivo e poi riconnettiti utilizzando un altro dispositivo o il tuo codice di recupero.</target>
+        <note>Description invalid credentials error when syncing.</note>
+      </trans-unit><trans-unit id="history.menu.clear.this.history" xml:space="preserve">
+        <source>Clear This History…</source>
+        <target>Cancella questa cronologia…</target>
+        <note>Menu item to clear parts of history and data</note>
+      </trans-unit><trans-unit id="auth.alert.login.button" xml:space="preserve">
+        <source>Sign In</source>
+        <target>Accedi</target>
+        <note>Authentication Alert Sign In Button</note>
+      </trans-unit><trans-unit id="unmute.tab" xml:space="preserve">
+        <source>Unmute Tab</source>
+        <target>Riattiva audio scheda</target>
+        <note>Menu item. Unmute tab</note>
+      </trans-unit><trans-unit id="duck-player.onboarding-confirmation-modal-CTA-confirm" xml:space="preserve">
+        <source>Got it</source>
+        <target>Ho capito</target>
+        <note>Button to confirm on Duck Player onboarding modal confirmation screen</note>
+      </trans-unit><trans-unit id="send.browser.feedback" xml:space="preserve">
+        <source>Send Browser Feedback</source>
+        <target>Invia feedback sul browser</target>
+        <note>Menu with feedback commands</note>
+      </trans-unit><trans-unit id="autoconsent.from.setup.modal.cta.confirm" xml:space="preserve">
+        <source>Handle Pop-ups For Me</source>
+        <target>Gestisci i pop-up per me</target>
+        <note>Confirm button for modal asking the user to auto manage cookies</note>
+      </trans-unit><trans-unit id="pm.delete" xml:space="preserve">
+        <source>Delete</source>
+        <target>Elimina</target>
+        <note>Delete button</note>
+      </trans-unit><trans-unit id="duck-player.newtab-preference" xml:space="preserve">
+        <source>Open Duck Player in a new tab whenever possible</source>
+        <target>Apri Duck Player in una nuova scheda quando possibile</target>
+        <note>New tab preference in settings</note>
+      </trans-unit><trans-unit id="onboarding.setdefault.text" xml:space="preserve">
+        <source>Next, try setting DuckDuckGo as your default️ browser, so you can open links with peace of mind, every time.</source>
+        <target>Ora, prova a impostare DuckDuckGo come browser predefinito, così potrai aprire i link in tutta tranquillità, ogni volta.</target>
+        <note>Call to action to set the browser as default</note>
+      </trans-unit><trans-unit id="bitwarden.error" xml:space="preserve">
+        <source>Unable to find or connect to Bitwarden</source>
+        <target>Impossibile trovare o connettersi a Bitwarden</target>
+        <note>This message appears when the application is unable to find or connect to Bitwarden, indicating a connection issue.</note>
+      </trans-unit><trans-unit id="add.to.bookmarks" xml:space="preserve">
+        <source>Add to Bookmarks</source>
+        <target>Aggiungi ai segnalibri</target>
+        <note>Context menu item for adding a URL to bookmarks</note>
+      </trans-unit><trans-unit id="bitwarden.connect.title" xml:space="preserve">
+        <source>Connect to Bitwarden</source>
+        <target>Connetti a Bitwarden</target>
+        <note>Title for the Bitwarden onboarding flow</note>
+      </trans-unit><trans-unit id="duck-player.off" xml:space="preserve">
+        <source>Never use Duck Player</source>
+        <target>Non usare mai Duck Player</target>
+        <note>Private YouTube Player option</note>
+      </trans-unit><trans-unit id="main-menu.edit.select-all" xml:space="preserve">
+        <source>Select All</source>
+        <target>Seleziona tutto</target>
+        <note>Main Menu Edit item</note>
+      </trans-unit><trans-unit id="import.csv.instructions.brave" xml:space="preserve">
+        <source>%1$d Open **%2$s**
+%3$d Click %4$@ to open the application menu then click **Password Manager**
+%5$d Click %6$@ **at the top left** of the Password Manager and select **Settings**
+%7$d Find "Export Passwords" and click **Download File**
+%8$d Save the passwords file someplace you can find it (e.g., Desktop)
+%9$d %10$@</source>
+        <target>%1$d Apri **%2$s**
+%3$d Fai clic su %4$@ per aprire il menu dell'applicazione, quindi fai clic su **Gestore password**
+%5$d Fai clic su %6$@ **in alto a sinistra** del Gestore password e seleziona **Impostazioni**
+%7$d Trova "Esporta password" e fai clic su **Scarica file**
+%8$d Salva il file delle password in un posto dove puoi trovarlo (ad es. Desktop)
+%9$d %10$@</target>
+        <note>Instructions to import Passwords as CSV from Brave browser.
+%N$d - step number
+%2$s - browser name (Brave)
+%4$@, %6$@ - hamburger menu icon
+%10$@ - "Select Passwords CSV File" button
+**bold text**; _italic text_</note>
+      </trans-unit><trans-unit id="autofill.show-password" xml:space="preserve">
+        <source>Show password</source>
+        <target>Mostra password</target>
+        <note>Tooltip for the Autofill panel's Show Password button</note>
+      </trans-unit><trans-unit id="preferences.appearance.theme" xml:space="preserve">
+        <source>Theme</source>
+        <target>Tema</target>
+        <note>Theme preferences</note>
+      </trans-unit><trans-unit id="burner.tab.home.title" xml:space="preserve">
+        <source>New Fire Tab</source>
+        <target>Nuova scheda Fire</target>
+        <note>Tab title for Fire Tab</note>
+      </trans-unit><trans-unit id="fireproof.manage-sites" xml:space="preserve">
+        <source>Manage Fireproof Sites…</source>
+        <target>Gestisci siti Fireproof…</target>
+        <note>Fireproof settings button caption</note>
+      </trans-unit><trans-unit id="alert.sync-invalid-login-error-description" xml:space="preserve">
+        <source>Sync has been paused. If you want to continue syncing this device, reconnect using another device or your recovery code.</source>
+        <target>Sync è stato messo in pausa. Se vuoi continuare a sincronizzare questo dispositivo, riconnettiti utilizzando un altro dispositivo o il tuo codice di recupero.</target>
+        <note>Description for alert shown when sync error occurs because of invalid login credentials</note>
+      </trans-unit><trans-unit id="settings.manual.updates" xml:space="preserve">
+        <source>Check for updates but let you choose to install them</source>
+        <target>Verifica la disponibilità di aggiornamenti ma lascia scegliere a te se installarli</target>
+        <note>Title of the checkbox item to set up manual updates of the browser</note>
+      </trans-unit><trans-unit id="open.link.in.new.burner.tab" xml:space="preserve">
+        <source>Open Link in New Fire Tab</source>
+        <target>Apri link in nuova scheda Fire</target>
+        <note>Context menu item</note>
+      </trans-unit><trans-unit id="sad.att.set-as-default.banner.message" xml:space="preserve">
+        <source>DuckDuckGo isn't your default browser. Get more protection</source>
+        <target>DuckDuckGo non è il tuo browser predefinito. Ottieni maggiore protezione</target>
+        <note>Body of the banner view that invites users to set DuckDuckGo as their default browser</note>
+      </trans-unit><trans-unit id="fireproof.explanation" xml:space="preserve">
+        <source>When you Fireproof a site, cookies won't be erased and you'll stay signed in, even after using the Fire Button.</source>
+        <target>Quando rendi un sito Fireproof, i cookie non verranno cancellati e rimarrai connesso, anche dopo aver utilizzato il Fire Button.</target>
+        <note>Fireproofing mechanism explanation</note>
+      </trans-unit><trans-unit id="open.externally.failed" xml:space="preserve">
+        <source>The app required to open that link can't be found</source>
+        <target>L'app necessaria per aprire quel link non è stata trovata</target>
+        <note>'Link' is link on a website, it couldn't be opened due to the required app not being found</note>
+      </trans-unit><trans-unit id="about.app_name_app_store" xml:space="preserve">
+        <source>DuckDuckGo for Mac App Store</source>
+        <target>DuckDuckGo per Mac App Store</target>
+        <note>Application name to be displayed in the About dialog in App Store app</note>
+      </trans-unit><trans-unit id="pm.new.login" xml:space="preserve">
+        <source>Password</source>
+        <target>Password</target>
+        <note>Label for new login title</note>
+      </trans-unit><trans-unit id="pm.lock-screen.prompt.export-logins" xml:space="preserve">
+        <source>export your usernames and passwords</source>
+        <target>esportare i tuoi nomi utente e password</target>
+        <note>Label presented when exporting logins</note>
+      </trans-unit><trans-unit id="dashboard.permission.ask" xml:space="preserve">
+        <source>Ask every time</source>
+        <target>Chiedi ogni volta</target>
+        <note>Privacy Dashboard: Website should always Ask for permission for input media device access</note>
+      </trans-unit><trans-unit id="Left" xml:space="preserve">
+        <source>Left</source>
+        <target>Sinistra</target>
+        <note>Preference title aligning the bookmarks bar</note>
+      </trans-unit><trans-unit id="tab.bookmarks.title" xml:space="preserve">
+        <source>Bookmarks</source>
+        <target>Segnalibri</target>
+        <note>Tab bookmarks title</note>
+      </trans-unit><trans-unit id="tooltip.navigation.refresh" xml:space="preserve">
+        <source>Reload this page</source>
+        <target>Ricarica questa pagina</target>
+        <note>Tooltip for the Refresh button</note>
+      </trans-unit><trans-unit id="preferences.autofill" xml:space="preserve">
+        <source>Passwords</source>
+        <target>Password</target>
+        <note>Show Autofill preferences</note>
+      </trans-unit><trans-unit id="sync.promo.confirm.action" xml:space="preserve">
+        <source>Set Up Sync</source>
+        <target>Configura Sync</target>
+        <note>Title for a button in the Sync Promotion banner to set up Sync</note>
+      </trans-unit><trans-unit id="import.browser.data" xml:space="preserve">
+        <source>Import to DuckDuckGo</source>
+        <target>Importa in DuckDuckGo</target>
+        <note>Import Browser Data dialog title</note>
+      </trans-unit><trans-unit id="preferences.on-startup" xml:space="preserve">
+        <source>On Startup</source>
+        <target>All'avvio</target>
+        <note>Name of the preferences section related to app startup</note>
+      </trans-unit><trans-unit id="page.error.header" xml:space="preserve">
+        <source>DuckDuckGo can't load this page.</source>
+        <target>DuckDuckGo non riesce a caricare questa pagina.</target>
+        <note>Error page heading text</note>
+      </trans-unit><trans-unit id="duck-player.video-autoplay-preference" xml:space="preserve">
+        <source>Autoplay videos when opened in Duck Player</source>
+        <target>Riproduci automaticamente i video quando aperti in Duck Player</target>
+        <note>Autoplay preference in settings</note>
+      </trans-unit><trans-unit id="open.settings" xml:space="preserve">
+        <source>Open System Settings…</source>
+        <target>Apri Impostazioni di Sistema…</target>
+        <note>This string represents a prompt or button label prompting the user to open system settings</note>
+      </trans-unit><trans-unit id="autofill.onboarding.popover.title" xml:space="preserve">
+        <source>Add passwords shortcut?</source>
+        <target>Aggiungere scorciatoia per le password?</target>
+        <note>Autofill onboarding popover title</note>
+      </trans-unit><trans-unit id="copy.image.address" xml:space="preserve">
+        <source>Copy Image Address</source>
+        <target>Copia indirizzo immagine</target>
+        <note>Context menu item</note>
+      </trans-unit><trans-unit id="pm.address.postal-code" xml:space="preserve">
+        <source>Postal Code</source>
+        <target>Codice Postale</target>
+        <note>Label for postal code title</note>
+      </trans-unit><trans-unit id="prefrences.sync.limit-exceeded-title" xml:space="preserve">
+        <source>Sync Paused</source>
+        <target>Sync in pausa</target>
+        <note>Title for sync limits exceeded warning</note>
+      </trans-unit><trans-unit id="DuckDuckGo needs your permission to read the %@ bookmarks file. Select the %@ folder to import bookmarks." xml:space="preserve">
+        <source>DuckDuckGo needs your permission to read the %1$@ bookmarks file. Select the %2$@ folder to import bookmarks.</source>
+        <target>DuckDuckGo ha bisogno della tua autorizzazione per leggere il file dei segnalibri di %1$@. Seleziona la cartella %2$@ per importare i segnalibri.</target>
+        <note>Data import warning that DuckDuckGo browser requires file reading permissions for another browser name (%1$@), and instruction to select its (same browser name - %2$@) bookmarks folder.</note>
+      </trans-unit><trans-unit id="bookmarks.bar.preferences.show" xml:space="preserve">
+        <source>Show Bookmarks Bar</source>
+        <target>Mostra barra dei segnalibri</target>
+        <note>Preference item for showing the bookmarks bar</note>
+      </trans-unit><trans-unit id="preferences.add-to-dock" xml:space="preserve">
+        <source>Add DuckDuckGo To Dock…</source>
+        <target>Aggiungi DuckDuckGo al Dock…</target>
+        <note>Action button to add the app to the Dock</note>
+      </trans-unit><trans-unit id="export.bookmarks.file.name.suffix" xml:space="preserve">
+        <source>Bookmarks</source>
+        <target>Segnalibri</target>
+        <note>The last part of the suggested file for exporting bookmarks</note>
+      </trans-unit><trans-unit id="save" xml:space="preserve">
+        <source>Save</source>
+        <target>Salva</target>
+        <note>Save button</note>
+      </trans-unit><trans-unit id="quit" xml:space="preserve">
+        <source>Quit</source>
+        <target>Esci</target>
+        <note>Quit button</note>
+      </trans-unit><trans-unit id="newTab.menu.item.show.search.bar" xml:space="preserve">
+        <source>Show Search Box</source>
+        <target>Mostra casella di ricerca</target>
+        <note>Title of the menu item in the home page to show/hide search box (search field)</note>
+      </trans-unit><trans-unit id="ppro.feedback-form.sending-confirmation.title" xml:space="preserve">
+        <source>Thank you!</source>
+        <target>Grazie!</target>
+        <note>Title for the feedback sent view title of the feedback form</note>
+      </trans-unit><trans-unit id="autofill.items.delete-all-passwords-completion-button-texy" xml:space="preserve">
+        <source>Close</source>
+        <target>Chiudi</target>
+        <note>Button text on dialog confirming deletion was completed</note>
+      </trans-unit><trans-unit id="vpn.setting.description.secure.dns" xml:space="preserve">
+        <source>DuckDuckGo routes DNS queries through our DNS servers so your internet provider can't see what websites you visit.</source>
+        <target>DuckDuckGo instrada le query DNS attraverso i nostri server DNS in modo che il tuo provider internet non possa vedere quali siti web visiti.</target>
+        <note>Secure DNS description</note>
+      </trans-unit><trans-unit id="main-menu.edit.undo" xml:space="preserve">
+        <source>Undo</source>
+        <target>Annulla</target>
+        <note>Main Menu Edit item</note>
+      </trans-unit><trans-unit id="contextual.onboarding.try-a-search.message" xml:space="preserve">
+        <source>Your DuckDuckGo searches are always private.</source>
+        <target>Le tue ricerche su DuckDuckGo sono sempre private.</target>
+        <note>Message of a popover on the browser that invites the user to try a search explaining that their searches are anonymous</note>
+      </trans-unit><trans-unit id="context.menu.home.button.mode.hide" xml:space="preserve">
+        <source>Hide</source>
+        <target>Nascondi</target>
+        <note>Preferences &gt; Home Button &gt; None item</note>
+      </trans-unit><trans-unit id="fire.dialog.details" xml:space="preserve">
+        <source>Details</source>
+        <target>Dettagli</target>
+        <note>Button to show more details</note>
+      </trans-unit><trans-unit id="Country" xml:space="preserve">
+        <source>Country</source>
+        <target>Paese</target>
+        <note>Title of the section of the Identities manager where the user can add/modify a country (US,UK, Italy etc...)</note>
+      </trans-unit><trans-unit id="import.browser.data.passwords" xml:space="preserve">
+        <source>Import Passwords…</source>
+        <target>Importa password…</target>
+        <note>Opens Import Browser Data dialog</note>
+      </trans-unit><trans-unit id="fire.dialog.tab-will-reload" xml:space="preserve">
+        <source>Pinned tab will reload</source>
+        <target>La scheda fissata verrà ricaricata</target>
+        <note>Warning label shown in an expanded view of the fire popover</note>
+      </trans-unit><trans-unit id="bitwarden.incompatible" xml:space="preserve">
+        <source>The following Bitwarden versions are incompatible with DuckDuckGo: v2024.10.0, v2024.10.1, v2024.10.2. Please downgrade to an older version by following these steps:</source>
+        <target>Le seguenti versioni di Bitwarden non sono compatibili con DuckDuckGo: v2024.10.0, v2024.10.1, v2024.10.2. Esegui il downgrade a una versione precedente seguendo questi passaggi:</target>
+        <note>Message that warns user that specific Bitwarden app vesions are not compatible with this app</note>
+      </trans-unit></body>
+  </file><file original="DuckDuckGo/NetworkProtection/NetworkExtensionTargets/NetworkExtensionAndNotificationTargets/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="network.protection.entitlement.expired.notification.title" xml:space="preserve">
+        <source>VPN disconnected</source>
+        <target>VPN disconnessa</target>
+        <note>The title of the notification when Privacy Pro subscription expired</note>
+      </trans-unit>
+      <trans-unit id="network.protection.failure.notification.subtitle" xml:space="preserve">
+        <source>Unable to connect at this time. Please try again later.</source>
+        <target>Impossibile connettersi in questo momento. Riprova più tardi.</target>
+        <note>The subtitle of the notification shown when DuckDuckGo VPN fails to reconnect</note>
+      </trans-unit></body>
+  </file><file original="DuckDuckGoVPN/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="vpn.status-view.send-feedback.menu-item.title" xml:space="preserve">
+        <source>Send Feedback</source>
+        <target>Invia feedback</target>
+        <note>The VPN status view's 'Send Feedback' menu item for our status menu app</note>
+      </trans-unit>
+      </body>
+  </file><file original="LocalPackages/NetworkProtectionMac/Sources/NetworkProtectionUI/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="network.protection.subscription.expired.resubscribe.button" xml:space="preserve">
+        <source>Subscribe to Privacy Pro</source>
+        <target>Abbonati a Privacy Pro</target>
+        <note>Button for the prompt that takes the user to the page to resubscribe.</note>
+      </trans-unit>
+      <trans-unit id="network.protection.onboarding.move.to.applications.desc" xml:space="preserve">
+        <source>To use the VPN, the DuckDuckGo app needs to be in the Applications folder on your Mac. Click the button below to move the app and restart the browser.</source>
+        <target>Per utilizzare la VPN, l'app DuckDuckGo deve trovarsi nella cartella Applicazioni del tuo Mac. Fai clic sul pulsante qui sotto per spostare l'app e riavviare il browser.</target>
+        <note>Description for the onboarding move-app-to-applications step</note>
+      </trans-unit><trans-unit id="network.protection.vpn.dns-server" xml:space="preserve">
+        <source>DNS Server</source>
+        <target>Server DNS</target>
+        <note>Title for the DNS server section in the VPN status view</note>
+      </trans-unit><trans-unit id="network.protection.onboarding.allow.extension.action" xml:space="preserve">
+        <source>Open System Settings...</source>
+        <target>Apri Impostazioni di sistema...</target>
+        <note>Action button title for the onboarding allow-extension view</note>
+      </trans-unit></body>
+  </file><file original="LocalPackages/SubscriptionUI/Sources/SubscriptionUI/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="subscription.alert.subscription.not.found.title" xml:space="preserve">
+        <source>Subscription Not Found</source>
+        <target>Abbonamento non trovato</target>
+        <note>Alert title when subscription was not found</note>
+      </trans-unit>
+      <trans-unit id="Close" xml:space="preserve">
+        <source>Close</source>
+        <target>Chiudi</target>
+        <note />
+      </trans-unit><trans-unit id="subscription.preferences.subscription.activate.add.email.button" xml:space="preserve">
+        <source>Add Email</source>
+        <target>Aggiungi email</target>
+        <note>Button for adding email address to subscription</note>
+      </trans-unit><trans-unit id="subscription.preferences.feedback.title" xml:space="preserve">
+        <source>Send Feedback</source>
+        <target>Invia feedback</target>
+        <note>Title for the subscription feedback section</note>
+      </trans-unit><trans-unit id="Cancel" xml:space="preserve">
+        <source>Cancel</source>
+        <target>Annulla</target>
+        <note />
+      </trans-unit></body>
+  </file><file original="LocalPackages/SyncUI-macOS/Sources/SyncUI-macOS/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="alert.unable-to-remove-device-description" xml:space="preserve">
+        <source>Unable to remove this device from Sync &amp; Backup.</source>
+        <target>Impossibile rimuovere questo dispositivo da Sync &amp; Backup.</target>
+        <note>Description for unable to remove device error</note>
+      </trans-unit>
+      <trans-unit id="prefrences.sync.invalid-credentials-present-description-many" xml:space="preserve">
+        <source>Some passwords (n) can't sync because some of their fields exceed the character limit.</source>
+        <target>Alcune password (n) non possono essere sincronizzate perché alcuni dei loro campi superano il limite di caratteri.</target>
+        <note>Alert message for multiple invalid logins being filtered out of synced data</note>
+      </trans-unit><trans-unit id="prefrences.sync.invalid-bookmarks-present-title" xml:space="preserve">
+        <source>Some bookmarks are not syncing due to excessively long content in certain fields.</source>
+        <target>Alcuni segnalibri non si sincronizzano a causa di contenuti eccessivamente lunghi in determinati campi.</target>
+        <note>Alert title for invalid bookmarks being filtered out of synced data</note>
+      </trans-unit></body>
+  </file></xliff>

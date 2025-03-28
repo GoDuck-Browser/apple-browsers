@@ -1,0 +1,167 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd">
+  <file original="DuckDuckGo/InfoPlist.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="DuckDuckGo/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="main-menu.edit.select-all" xml:space="preserve">
+        <source>Select All</source>
+        <target>Seleziona tutto</target>
+        <note>Main Menu Edit item</note>
+      </trans-unit>
+      <trans-unit id="import.csv.instructions.brave" xml:space="preserve">
+        <source>%1$d Open **%2$s**
+%3$d Click %4$@ to open the application menu then click **Password Manager**
+%5$d Click %6$@ **at the top left** of the Password Manager and select **Settings**
+%7$d Find "Export Passwords" and click **Download File**
+%8$d Save the passwords file someplace you can find it (e.g., Desktop)
+%9$d %10$@</source>
+        <target>%1$d Apri **%2$s**
+%3$d Fai clic su %4$@ per aprire il menu dell'applicazione, quindi fai clic su **Gestore password**
+%5$d Fai clic su %6$@ **in alto a sinistra** del Gestore password e seleziona **Impostazioni**
+%7$d Trova "Esporta password" e fai clic su **Scarica file**
+%8$d Salva il file delle password in un posto dove puoi trovarlo (ad es. Desktop)
+%9$d %10$@</target>
+        <note>Instructions to import Passwords as CSV from Brave browser.
+%N$d - step number
+%2$s - browser name (Brave)
+%4$@, %6$@ - hamburger menu icon
+%10$@ - "Select Passwords CSV File" button
+**bold text**; _italic text_</note>
+      </trans-unit>
+      <trans-unit id="autofill.show-password" xml:space="preserve">
+        <source>Show password</source>
+        <target>Mostra password</target>
+        <note>Tooltip for the Autofill panel's Show Password button</note>
+      </trans-unit>
+      <trans-unit id="preferences.appearance.theme" xml:space="preserve">
+        <source>Theme</source>
+        <target>Tema</target>
+        <note>Theme preferences</note>
+      </trans-unit>
+      <trans-unit id="burner.tab.home.title" xml:space="preserve">
+        <source>New Fire Tab</source>
+        <target>Nuova scheda Fire</target>
+        <note>Tab title for Fire Tab</note>
+      </trans-unit>
+      <trans-unit id="fireproof.manage-sites" xml:space="preserve">
+        <source>Manage Fireproof Sites…</source>
+        <target>Gestisci siti Fireproof…</target>
+        <note>Fireproof settings button caption</note>
+      </trans-unit>
+      <trans-unit id="alert.sync-invalid-login-error-description" xml:space="preserve">
+        <source>Sync has been paused. If you want to continue syncing this device, reconnect using another device or your recovery code.</source>
+        <target>Sync è stato messo in pausa. Se vuoi continuare a sincronizzare questo dispositivo, riconnettiti utilizzando un altro dispositivo o il tuo codice di recupero.</target>
+        <note>Description for alert shown when sync error occurs because of invalid login credentials</note>
+      </trans-unit>
+      <trans-unit id="settings.manual.updates" xml:space="preserve">
+        <source>Check for updates but let you choose to install them</source>
+        <target>Verifica la disponibilità di aggiornamenti ma lascia scegliere a te se installarli</target>
+        <note>Title of the checkbox item to set up manual updates of the browser</note>
+      </trans-unit>
+      <trans-unit id="open.link.in.new.burner.tab" xml:space="preserve">
+        <source>Open Link in New Fire Tab</source>
+        <target>Apri link in nuova scheda Fire</target>
+        <note>Context menu item</note>
+      </trans-unit>
+      <trans-unit id="sad.att.set-as-default.banner.message" xml:space="preserve">
+        <source>DuckDuckGo isn't your default browser. Get more protection</source>
+        <target>DuckDuckGo non è il tuo browser predefinito. Ottieni maggiore protezione</target>
+        <note>Body of the banner view that invites users to set DuckDuckGo as their default browser</note>
+      </trans-unit>
+      <trans-unit id="fireproof.explanation" xml:space="preserve">
+        <source>When you Fireproof a site, cookies won't be erased and you'll stay signed in, even after using the Fire Button.</source>
+        <target>Quando rendi un sito Fireproof, i cookie non verranno cancellati e rimarrai connesso, anche dopo aver utilizzato il Fire Button.</target>
+        <note>Fireproofing mechanism explanation</note>
+      </trans-unit>
+      <trans-unit id="open.externally.failed" xml:space="preserve">
+        <source>The app required to open that link can't be found</source>
+        <target>L'app necessaria per aprire quel link non è stata trovata</target>
+        <note>'Link' is link on a website, it couldn't be opened due to the required app not being found</note>
+      </trans-unit>
+      <trans-unit id="about.app_name_app_store" xml:space="preserve">
+        <source>DuckDuckGo for Mac App Store</source>
+        <target>DuckDuckGo per Mac App Store</target>
+        <note>Application name to be displayed in the About dialog in App Store app</note>
+      </trans-unit>
+      <trans-unit id="pm.new.login" xml:space="preserve">
+        <source>Password</source>
+        <target>Password</target>
+        <note>Label for new login title</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="DuckDuckGo/NetworkProtection/NetworkExtensionTargets/NetworkExtensionAndNotificationTargets/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="network.protection.entitlement.expired.notification.title" xml:space="preserve">
+        <source>VPN disconnected</source>
+        <target>VPN disconnessa</target>
+        <note>The title of the notification when Privacy Pro subscription expired</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="DuckDuckGoVPN/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      </body>
+  </file>
+  <file original="LocalPackages/NetworkProtectionMac/Sources/NetworkProtectionUI/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="network.protection.onboarding.move.to.applications.desc" xml:space="preserve">
+        <source>To use the VPN, the DuckDuckGo app needs to be in the Applications folder on your Mac. Click the button below to move the app and restart the browser.</source>
+        <target>Per utilizzare la VPN, l'app DuckDuckGo deve trovarsi nella cartella Applicazioni del tuo Mac. Fai clic sul pulsante qui sotto per spostare l'app e riavviare il browser.</target>
+        <note>Description for the onboarding move-app-to-applications step</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="LocalPackages/SubscriptionUI/Sources/SubscriptionUI/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="Close" xml:space="preserve">
+        <source>Close</source>
+        <target>Chiudi</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="subscription.preferences.subscription.activate.add.email.button" xml:space="preserve">
+        <source>Add Email</source>
+        <target>Aggiungi email</target>
+        <note>Button for adding email address to subscription</note>
+      </trans-unit>
+      <trans-unit id="subscription.preferences.feedback.title" xml:space="preserve">
+        <source>Send Feedback</source>
+        <target>Invia feedback</target>
+        <note>Title for the subscription feedback section</note>
+      </trans-unit>
+      </body>
+  </file>
+  <file original="LocalPackages/SyncUI-macOS/Sources/SyncUI-macOS/Resources/Localizable.xcstrings" source-language="en" target-language="it_IT" datatype="plaintext">
+    <header>
+      <tool tool-id="com.apple.dt.xcode" tool-name="Xcode" tool-version="16.2" build-num="16C5032a" />
+    </header>
+    <body>
+      <trans-unit id="prefrences.sync.invalid-credentials-present-description-many" xml:space="preserve">
+        <source>Some passwords (n) can't sync because some of their fields exceed the character limit.</source>
+        <target>Alcune password (n) non possono essere sincronizzate perché alcuni dei loro campi superano il limite di caratteri.</target>
+        <note>Alert message for multiple invalid logins being filtered out of synced data</note>
+      </trans-unit>
+      </body>
+  </file>
+</xliff>

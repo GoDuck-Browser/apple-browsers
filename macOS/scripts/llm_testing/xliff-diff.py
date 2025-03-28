@@ -74,8 +74,8 @@ def main(original_file, translated_file, output_file):
     print(f"✅ Created '{output_file}' with missing trans-units.")
 
 if __name__ == "__main__":
-    original_file = './assets/loc/en.xliff'
-    translated_file = './assets/loc/it.xliff'
-    output_file = './assets/loc/missing_strings.xliff'
+    original_file = './assets/loc/it-orig.xliff'
+    translated_file = './assets/loc/random_100_strings.xliff'
+    output_file = './assets/loc/it_for_compression.xliff'
 
     main(original_file, translated_file, output_file)

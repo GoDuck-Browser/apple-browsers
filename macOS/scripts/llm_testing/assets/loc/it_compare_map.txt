@@ -1,0 +1,344 @@
+Successfully created Excel file: ./assets/loc_compare_it.xlsx
+
+Mapping of translations to columns:
+==================================================
+ID: pm.card.cardholder-name
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: menu.add.folder
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: close.other.tabs
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: vpn.no.exclusions.found.text
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: pm.deactivate
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: preferences.off
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: preferences-tabs.title
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: pm.note
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: import.csv.instructions.opera
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: main-menu.file.close-all-windows
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: history.view.onboarding.title
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: pm.sort.parameter.date-modified
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: pm.empty.cards.title
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: bookmarks.dialog.field.url
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: export.logins.failed.informative
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: prefrences.sync.invalid-login-description
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: history.menu.clear.this.history
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: auth.alert.login.button
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: unmute.tab
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: send.browser.feedback
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: autoconsent.from.setup.modal.cta.confirm
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: pm.delete
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: duck-player.newtab-preference
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: onboarding.setdefault.text
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: bitwarden.error
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: add.to.bookmarks
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: bitwarden.connect.title
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: duck-player.off
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: main-menu.edit.select-all
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: import.csv.instructions.brave
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: autofill.show-password
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: preferences.appearance.theme
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: burner.tab.home.title
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: fireproof.manage-sites
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: alert.sync-invalid-login-error-description
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: settings.manual.updates
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: open.link.in.new.burner.tab
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: sad.att.set-as-default.banner.message
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: fireproof.explanation
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: open.externally.failed
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: about.app_name_app_store
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: pm.new.login
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: pm.lock-screen.prompt.export-logins
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: dashboard.permission.ask
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: Left
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: tab.bookmarks.title
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: tooltip.navigation.refresh
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: preferences.autofill
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: sync.promo.confirm.action
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: import.browser.data
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: preferences.on-startup
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: page.error.header
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: duck-player.video-autoplay-preference
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: autofill.onboarding.popover.title
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: pm.address.postal-code
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: prefrences.sync.limit-exceeded-title
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: DuckDuckGo needs your permission to read the %@ bookmarks file. Select the %@ folder to import bookmarks.
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: preferences.add-to-dock
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: export.bookmarks.file.name.suffix
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: newTab.menu.item.show.search.bar
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: ppro.feedback-form.sending-confirmation.title
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: autofill.items.delete-all-passwords-completion-button-texy
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: vpn.setting.description.secure.dns
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: main-menu.edit.undo
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: contextual.onboarding.try-a-search.message
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: context.menu.home.button.mode.hide
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: fire.dialog.details
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: Country
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: import.browser.data.passwords
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: fire.dialog.tab-will-reload
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: bitwarden.incompatible
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: network.protection.entitlement.expired.notification.title
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: network.protection.failure.notification.subtitle
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: vpn.status-view.send-feedback.menu-item.title
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: network.protection.subscription.expired.resubscribe.button
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: network.protection.onboarding.move.to.applications.desc
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: network.protection.vpn.dns-server
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: network.protection.onboarding.allow.extension.action
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: subscription.alert.subscription.not.found.title
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: Close
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: subscription.preferences.subscription.activate.add.email.button
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: subscription.preferences.feedback.title
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: Cancel
+  First translation: smartling
+  Second translation: LLM
+--------------------------------------------------
+ID: alert.unable-to-remove-device-description
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
+ID: prefrences.sync.invalid-bookmarks-present-title
+  First translation: LLM
+  Second translation: smartling
+--------------------------------------------------
