@@ -25,7 +25,6 @@ import Foundation
 import NetworkExtension
 import UserNotifications
 import os.log
-import VPNAppState
 
 open class PacketTunnelProvider: NEPacketTunnelProvider {
 
