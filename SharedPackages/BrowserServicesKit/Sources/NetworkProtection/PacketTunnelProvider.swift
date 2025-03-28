@@ -25,6 +25,7 @@ import Foundation
 import NetworkExtension
 import UserNotifications
 import os.log
+import VPNAppState
 
 open class PacketTunnelProvider: NEPacketTunnelProvider {
 
@@ -272,7 +273,15 @@ open class PacketTunnelProvider: NEPacketTunnelProvider {
                                                                   errorEvents: debugEvents)
 
     private let tokenHandlerProvider: () -> any SubscriptionTokenHandling
-    public static var isAuthV2Enabled: Bool = false
+    @objc
+    public static var isAuthV2Enabled: Bool {
+        get {
+            UserDefaults().bool(forKey: #keyPath(isAuthV2Enabled))
+        }
+        set {
+            UserDefaults().set(newValue, forKey: #keyPath(isAuthV2Enabled))
+        }
+    }
 
     private func resetRegistrationKey() {
         Logger.networkProtectionKeyManagement.log("Resetting the current registration key")
