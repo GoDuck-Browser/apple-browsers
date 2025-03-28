@@ -213,14 +213,6 @@ extension ContentScopeUserScript: WKScriptMessageHandlerWithReply {
     @MainActor
     public func userContentController(_ userContentController: WKUserContentController,
                                       didReceive message: WKScriptMessage) async -> (Any?, String?) {
-        if isIsolated {
-            return await handleIsolatedContextMessages(message)
-        }
-        return handleNonIsolatedContextMessages(message)
-    }
-
-    @MainActor
-    private func handleIsolatedContextMessages(_ message: WKScriptMessage) async -> (Any?, String?) {
         propagateDebugFlag(message)
         let action = broker.messageHandlerFor(message)
         do {
@@ -230,12 +222,6 @@ extension ContentScopeUserScript: WKScriptMessageHandlerWithReply {
             // forward uncaught errors to the client
             return (nil, error.localizedDescription)
         }
-    }
-
-    @MainActor
-    private func handleNonIsolatedContextMessages(_ message: WKScriptMessage) -> (Any?, String?) {
-        propagateDebugFlag(message)
-        return (nil, nil)
     }
 
     @MainActor
