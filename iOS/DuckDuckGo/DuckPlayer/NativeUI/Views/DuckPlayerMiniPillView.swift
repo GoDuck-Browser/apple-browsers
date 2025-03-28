@@ -87,6 +87,9 @@ struct DuckPlayerMiniPillView: View {
         static let shadowOffset: CGSize = CGSize(width: 0, height: 4)
         static let viewOffset: CGFloat = 20
         static let regularPadding: CGFloat = 12
+        static let borderColor: Color = Color(designSystemColor: .border)
+        static let borderWidth: CGFloat = 0.5
+        static let borderOpacity: CGFloat = 0.7
 
     }
 
@@ -102,7 +105,11 @@ struct DuckPlayerMiniPillView: View {
                             AnimatedAsyncImage(
                                 url: viewModel.thumbnailURL,
                                 width: Constants.thumbnailSize.w,
-                                height: Constants.thumbnailSize.h
+                                height: Constants.thumbnailSize.h,
+                                cornerRadius: Constants.thumbnailCornerRadius,
+                                borderColor: Constants.borderColor,
+                                borderWidth: Constants.borderWidth,
+                                borderOpacity: Constants.borderOpacity
                             )
                         }
                         .frame(width: Constants.thumbnailSize.w, height: Constants.thumbnailSize.h)
