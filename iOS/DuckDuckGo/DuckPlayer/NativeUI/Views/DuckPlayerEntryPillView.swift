@@ -73,6 +73,7 @@ struct DuckPlayerEntryPillView: View {
                                 .multilineTextAlignment(.leading)
                                 .lineLimit(2)
                                 .frame(maxWidth: .infinity, alignment: .leading)
+                                .layoutPriority(1)
 
                             Text(UserText.duckPlayerTapToWatchWithoutAds)
                                 .daxFootnoteRegular()
